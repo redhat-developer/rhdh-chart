@@ -93,7 +93,6 @@ jobs:
         with:
           commit_message: Bump version to ${{ steps.semver.outputs.new_version }}
           commit_options: '-s'
-          commit_user_name: Janus IDP
-          commit_user_email: 139477802+janus-idp[bot]@users.noreply.github.com
-          commit_author: Janus IDP <139477802+janus-idp[bot]@users.noreply.github.com>
-
+          commit_user_name: RHDH Bot
+          commit_user_email: 146280956+rhdh-bot@users.noreply.github.com 
+          commit_author: RHDH Bot <146280956+rhdh-bot@users.noreply.github.com >

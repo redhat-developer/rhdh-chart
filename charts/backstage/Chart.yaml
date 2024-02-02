@@ -9,7 +9,7 @@ annotations:
     - name: Default Image Source
       url: https://github.com/janus-idp/backstage-showcase
   charts.openshift.io/name: Backstage
-  charts.openshift.io/provider: Janus-IDP
+  charts.openshift.io/provider: Red Hat Developer Hub Team
   charts.openshift.io/supportURL: https://github.com/redhat-developer/rhdh-chart/issues
 apiVersion: v2
 description: A Helm chart for deploying RHDH (a Backstage application)
@@ -23,7 +23,7 @@ dependencies:
     repository: https://backstage.github.io/charts
     version: "1.8.2"
     alias: upstream
-home: https://janus-idp.io
+home: https://redhat-developer.github.io/rhdh-chart/
 icon: https://avatars.githubusercontent.com/u/117844786
 keywords:
   - backstage
@@ -41,4 +41,4 @@ sources:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.13.0
+version: 2.13.1
