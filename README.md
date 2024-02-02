@@ -61,7 +61,7 @@ Once the chart has been added, install this chart. However before doing so, plea
    ```
 
 ```console
-helm upgrade -i <release_name> janus-idp/backstage
+helm upgrade -i <release_name> redhat-developer/backstage
 ```
 
 ### Installing from an OCI Registry
