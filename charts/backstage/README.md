@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janus-idp&style=flat-square)](https://artifacthub.io/packages/search?repo=janus-idp)
-![Version: 2.13.2](https://img.shields.io/badge/Version-2.13.2-informational?style=flat-square)
+![Version: 2.13.3](https://img.shields.io/badge/Version-2.13.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying RHDH (a Backstage application)
@@ -37,9 +37,9 @@ This chart extends all the features in the upstream chart in addition to includi
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
-helm repo add redhat-developer https://janus-idp.github.io/helm-backstage
+helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-release janus-idp/backstage
+helm install my-release redhat-developer/backstage
 ```
 
 ## Introduction
@@ -67,7 +67,7 @@ The following command can be used to add the chart repository:
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
-helm repo add redhat-developer https://janus-idp.github.io/helm-backstage
+helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 ```
 
 Once the chart has been added, install this chart. However before doing so, please review the default `values.yaml` and adjust as needed.
