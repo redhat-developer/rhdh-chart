@@ -116,7 +116,7 @@ Kubernetes: `>= 1.19.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://backstage.github.io/charts | upstream(backstage) | 1.8.2 |
+| https://backstage.github.io/charts | upstream(backstage) | 1.9.1 |
 | https://charts.bitnami.com/bitnami | common | 2.14.1 |
 
 ## Values
