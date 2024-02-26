@@ -43,8 +43,8 @@ jobs:
         id: generate_token
         uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
         with:
-          app_id: ${{ vars.JANUS_IDP_GITHUB_APP_ID }}
-          private_key: ${{ secrets.JANUS_IDP_GITHUB_APP_PRIVATE_KEY }}
+          app_id: ${{ vars.RHDH_GITHUB_APP_ID }}
+          private_key: ${{ secrets.RHDH_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Checkout Repository
         if: steps.command.outputs.command-name
@@ -93,7 +93,6 @@ jobs:
         with:
           commit_message: Bump version to ${{ steps.semver.outputs.new_version }}
           commit_options: '-s'
-          commit_user_name: Janus IDP
-          commit_user_email: 139477802+janus-idp[bot]@users.noreply.github.com
-          commit_author: Janus IDP <139477802+janus-idp[bot]@users.noreply.github.com>
-
+          commit_user_name: RHDH Bot
+          commit_user_email: 146280956+rhdh-bot@users.noreply.github.com 
+          commit_author: RHDH Bot <146280956+rhdh-bot@users.noreply.github.com >
