@@ -113,7 +113,7 @@ upstream:
               resources:
                 requests:
                   # -- Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins.
-                  storage: 1Gi
+                  storage: 2Gi
 
       # Volume that will expose the `dynamic-plugins.yaml` file from the `dynamic-plugins` config map.
       # The `dynamic-plugins` config map is created by the helm chart from the content of the `global.dynamic` field.
