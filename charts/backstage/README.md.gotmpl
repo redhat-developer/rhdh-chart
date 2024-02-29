@@ -33,7 +33,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-release redhat-developer/backstage
+helm install my-backstage redhat-developer/backstage
 ```
 
 ## Introduction
@@ -42,8 +42,8 @@ This chart bootstraps a [Backstage](https://backstage.io/docs/deployment/docker)
 
 ## Prerequisites
 
-- Kubernetes 1.19+
-- Helm 3.2.0+
+- Kubernetes 1.25+ (OpenShift 4.12+)
+- Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
 - PV provisioner support in the underlying infrastructure
 - [Backstage container image](https://backstage.io/docs/deployment/docker)
 

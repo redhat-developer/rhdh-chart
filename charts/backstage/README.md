@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 2.14.0](https://img.shields.io/badge/Version-2.14.0-informational?style=flat-square)
+![Version: 2.14.1](https://img.shields.io/badge/Version-2.14.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying RHDH (a Backstage application)
@@ -39,7 +39,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-release redhat-developer/backstage
+helm install my-backstage redhat-developer/backstage
 ```
 
 ## Introduction
@@ -48,8 +48,8 @@ This chart bootstraps a [Backstage](https://backstage.io/docs/deployment/docker)
 
 ## Prerequisites
 
-- Kubernetes 1.19+
-- Helm 3.2.0+
+- Kubernetes 1.25+ (OpenShift 4.12+)
+- Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
 - PV provisioner support in the underlying infrastructure
 - [Backstage container image](https://backstage.io/docs/deployment/docker)
 
@@ -102,10 +102,10 @@ helm upgrade -i <release_name> oci://ghcr.io/redhat-developer/rhdh-chart/backsta
 
 ### Uninstalling the Chart
 
-To uninstall/delete the `my-backstage-release` deployment:
+To uninstall/delete the `my-backstage` deployment:
 
 ```console
-helm uninstall my-backstage-release
+helm uninstall my-backstage
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
