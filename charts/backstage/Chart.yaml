@@ -29,7 +29,7 @@ keywords:
   - backstage
   - idp
   - janus-idp
-kubeVersion: ">= 1.19.0-0"
+kubeVersion: ">= 1.25.0-0"
 maintainers:
   - name: Red Hat Developer Hub Team
     url: https://github.com/redhat-developer/rhdh-chart
@@ -41,4 +41,4 @@ sources:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.14.1
+version: 2.15.0
