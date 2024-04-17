@@ -18,7 +18,7 @@ Returns a secret name for service to service auth
     {{- if .Values.global.auth.backend.existingSecret -}}
         {{- .Values.global.auth.backend.existingSecret -}}
     {{- else -}}
-        {{- include "common.names.fullname" . -}}-auth
+        {{- printf "%s-auth" .Release.Name -}}
     {{- end -}}
 {{- end -}}
 
