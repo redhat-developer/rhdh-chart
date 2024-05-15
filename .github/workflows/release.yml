@@ -49,9 +49,6 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
 
-      - name: Install Oras
-        uses: oras-project/setup-oras@ee7dbe1144cb00080a89497f937dae78f85fce29 # v1.1.0
-
       - name: Publish and Sign OCI Charts
         run: |
           for chart in `find .cr-release-packages -name '*.tgz' -print`; do
