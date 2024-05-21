@@ -24,8 +24,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Add dependencies
         run: |
@@ -37,7 +37,7 @@ jobs:
         with:
           config: cr.yaml
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
