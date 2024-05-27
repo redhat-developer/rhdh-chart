@@ -2367,6 +2367,10 @@
                                             "name": "{{- include \"janus-idp.postgresql.secretName\" . }}"
                                         }
                                     }
+                                },
+                                {
+                                    "name": "NODE_OPTIONS",
+                                    "value": "--no-node-snapshot"
                                 }
                             ],
                             "examples": [

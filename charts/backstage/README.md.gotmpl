@@ -117,6 +117,8 @@ The command removes all the Kubernetes components associated with the chart and 
 
 {{ template "chart.valuesSection" . }}
 
+**Note**: The `NODE_OPTIONS=--no-node-snapshot` environmental is set by default to enable the usage of the scaffolder for backstage instances running on NodeJS 20.x or later.
+
 ## Opinionated Backstage deployment
 
 This chart defaults to an opinionated deployment of Backstage that provides user with a usable Backstage instance out of the box.
