@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 2.16.0](https://img.shields.io/badge/Version-2.16.0-informational?style=flat-square)
+![Version: 2.16.1](https://img.shields.io/badge/Version-2.16.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying RHDH (a Backstage application)
@@ -11,9 +11,9 @@ A Helm chart for deploying RHDH (a Backstage application)
 
 ## Maintainers
 
-| Name | Email | Url |
-| ---- | ------ | --- |
-| Red Hat Developer Hub Team |  | <https://github.com/redhat-developer/rhdh-chart> |
+| Name | Url |
+| ---- | --- |
+| Red Hat Developer Hub Team | <https://github.com/redhat-developer/rhdh-chart> |
 
 ## Source Code
 
@@ -127,6 +127,10 @@ Kubernetes: `>= 1.25.0-0`
 |------------|------|---------|
 | https://backstage.github.io/charts | upstream(backstage) | 1.9.1 |
 | https://charts.bitnami.com/bitnami | common | 2.14.1 |
+
+## Telemetry data collection
+
+The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://access.redhat.com/documentation/en-us/red_hat_developer_hub/1.2/html-single/administration_guide_for_red_hat_developer_hub/index#assembly-rhdh-telemetry_admin-rhdh
 
 ## Values
 
