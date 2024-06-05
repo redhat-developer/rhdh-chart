@@ -105,7 +105,7 @@ upstream:
          defaultMode: 420
          optional: true
          secretName: dynamic-plugins-npmrc
-     - name: postgres-crt 
+     - name: postgres-crt
        secret:
          secretName: <crt-secret> 
 ````
