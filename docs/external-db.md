@@ -1,7 +1,7 @@
 # External DB integration
 
 Backstage hosts the data in a [PostgreSQL database](https://backstage.io/docs/getting-started/config/database/).
-By default, the Operator creates and manages a local instance of PostgreSQL in the same namespace as the Backstage deployment but it also allows to switch this off and configure an external database server instead.
+By default, the Helm Chart creates and manages a local instance of PostgreSQL in the same namespace as the Backstage deployment but it also allows to switch this off and configure an external database server instead.
 Usually, external connection requires more security, so, this instruction includes steps to configure SSL/TLS.
 
 ### Configure your external PostgreSQL instance
