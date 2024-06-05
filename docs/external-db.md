@@ -67,7 +67,7 @@ upstream:
      backend:
        database:
          connection:  # configure Backstage DB connection parameters
-           host: ${POSTGRES_HOST} 
+           host: ${POSTGRES_HOST}
            port: ${POSTGRES_PORT}
            user: ${POSTGRES_USER}
            password: ${POSTGRES_PASSWORD}
