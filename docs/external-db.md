@@ -113,6 +113,6 @@ upstream:
 ### Apply Helm Chart:
 
 ````
-helm install -n <your-namespace> <your_deploy_name> openshift-helm-charts/redhat-developer-hub -f values.yaml 
+helm install -n <your-namespace> <your_release_name> redhat-developer/backstage -f values.yaml 
 ````
 
