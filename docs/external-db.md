@@ -31,7 +31,7 @@ metadata:
 type: Opaque
 stringData:
  POSTGRES_PASSWORD: <password>
- POSTGRES_PORT: <db-port>
+ POSTGRES_PORT: "<db-port>"
  POSTGRES_USER: <username>
  POSTGRES_HOST: <db-host>
  PGSSLMODE: require #  for TLS connection
