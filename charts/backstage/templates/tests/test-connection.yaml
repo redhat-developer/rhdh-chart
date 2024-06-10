@@ -12,7 +12,26 @@ metadata:
 spec:
   containers:
     - name: curl
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+        runAsNonRoot: false
+      resources:
+        requests:
+          cpu: 10m
+          memory: 20Mi
+        limits:
+          cpu: 10m
+          memory: 20Mi
+      livenessProbe:
+        exec:
+          command:
+          - ls
+          - /usr/bin/curl
       image: quay.io/curl/curl:latest
+      imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
       args:
         - |

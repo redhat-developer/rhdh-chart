@@ -61,6 +61,22 @@ upstream:
         auth:
           keys:
             - secret: ${BACKEND_SECRET}
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      runAsNonRoot: true
+      readOnlyRootFilesystem: true
+      seccompProfile:
+        type: "RuntimeDefault"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2.5Gi
+        ephemeral-storage: 5Gi
     readinessProbe:
       failureThreshold: 3
       httpGet:
@@ -101,6 +117,8 @@ upstream:
       # The initContainer below will install dynamic plugins in this volume mount.
       - name: dynamic-plugins-root
         mountPath: /opt/app-root/src/dynamic-plugins-root
+      - name: diststatic
+        mountPath: /opt/app-root/src/packages/app/dist/static
     extraVolumes:
       # -- Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start.
       - name: dynamic-plugins-root
@@ -128,8 +146,28 @@ upstream:
           defaultMode: 420
           optional: true
           secretName: dynamic-plugins-npmrc
+      - name: npmcacache
+        emptyDir: {}
+      - name: diststatic
+        emptyDir: {}
     initContainers:
       - name: install-dynamic-plugins
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 2.5Gi
+            ephemeral-storage: 5Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          seccompProfile:
+            type: "RuntimeDefault"
         # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
         # It could be replaced by a custom image based on this one.
         # @default -- `quay.io/janus-idp/backstage-showcase:latest`
@@ -152,6 +190,8 @@ upstream:
             name: dynamic-plugins-npmrc
             readOnly: true
             subPath: .npmrc
+          - mountPath: /opt/app-root/src/.npm/_cacache
+            name: npmcacache
         workingDir: /opt/app-root/src
     installDir: /opt/app-root/src
     podAnnotations:
@@ -170,10 +210,19 @@ upstream:
         adminPasswordKey: postgres-password
         userPasswordKey: password
     primary:
+      # TODO: https://issues.redhat.com/browse/RHIDP-2645
       podSecurityContext:
         enabled: false
       containerSecurityContext:
         enabled: false
+      resources:
+        requests:
+          cpu: 250m
+          memory: 256Mi
+        limits:
+          cpu: 250m
+          memory: 1024Mi
+          ephemeral-storage: 20Mi
       persistence:
         enabled: true
         size: 1Gi

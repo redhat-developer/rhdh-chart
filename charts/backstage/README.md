@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 2.16.1](https://img.shields.io/badge/Version-2.16.1-informational?style=flat-square)
+![Version: 2.16.2](https://img.shields.io/badge/Version-2.16.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying RHDH (a Backstage application)
