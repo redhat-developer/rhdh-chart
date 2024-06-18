@@ -2,7 +2,7 @@
 #
 #  Copyright (c) 2024 Red Hat, Inc.
 #  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
+#  You may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
@@ -16,7 +16,6 @@
 # Script to handle CLI helm installation for k8s and OCP
 #
 # Requires: oc or kubectl
-
 
 # Function to check if a command exists
 command_exists() {
@@ -42,9 +41,9 @@ fi
 # Function to detect cluster router base
 detect_cluster_router_base() {
     if [ "$CLI" == "oc" ]; then
-        ROUTER_BASE=$($CLI get route -n default | grep -m1 'console' | awk '{print $2}')
+        ROUTER_BASE=$($CLI get route -n openshift-console -o=jsonpath='{.items[0].spec.host}')
     else
-        ROUTER_BASE=$($CLI get ingress -A | grep -m1 'default' | awk '{print $4}')
+        ROUTER_BASE=$($CLI get ingress -n default -o=jsonpath='{.items[0].spec.rules[0].host}')
     fi
 }
 
@@ -68,10 +67,22 @@ done
 
 # Update Helm chart with the detected or provided router base
 echo "Using router base: $ROUTER_BASE"
-# Assuming you have a values.yaml or similar configuration for the Helm chart
-sed -i "s|routerBase:.*|routerBase: $ROUTER_BASE|" path/to/helm/values.yaml
+# Define the path to values.yaml
+VALUES_FILE="../charts/backstage/values.yaml"
+if [ ! -f "$VALUES_FILE" ]; then
+    echo "Error: values.yaml file not found at $VALUES_FILE"
+    exit 1
+fi
+sed -i "s|routerBase:.*|routerBase: $ROUTER_BASE|" "$VALUES_FILE"
+
+# Define the path to the Helm chart directory
+HELM_CHART_DIR="../charts/backstage"
+if [ ! -d "$HELM_CHART_DIR" ]; then
+    echo "Error: Helm chart directory not found at $HELM_CHART_DIR"
+    exit 1
+fi
 
 # Proceed with Helm installation
-helm install my-release path/to/helm/chart --values path/to/helm/values.yaml
+helm install my-release "$HELM_CHART_DIR" --values "$VALUES_FILE"
 
 echo "Helm installation completed successfully."
