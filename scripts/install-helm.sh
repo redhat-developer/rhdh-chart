@@ -17,6 +17,25 @@
 #
 # Requires: oc or kubectl
 
+usage() {
+echo "
+This script simplifies and automates the installation process of Helm charts on Kubernetes (K8s) and OpenShift Container Platform (OCP) clusters.
+It detects whether 'oc' or 'kubectl' is installed and ensures that the user is logged into a cluster.
+The script also attempts to detect the cluster router base and updates the Helm chart configuration accordingly.
+
+Usage:
+  $0 [OPTIONS]
+
+Options:
+  --router-base <router-base>  : Manually provide the cluster router base if auto-detection fails.
+  --help                       : Show this help message and exit.
+
+Examples:
+  $0                               # Auto-detects router base and installs the Helm chart
+  $0 --router-base example.com     # Manually specifies the router base and installs the Helm chart
+"
+}
+
 # Function to check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
