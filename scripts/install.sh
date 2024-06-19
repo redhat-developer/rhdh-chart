@@ -27,11 +27,13 @@ Usage:
   $0 [OPTIONS]
 
 Options:
-  --router-base <router-base>  : Manually provide the cluster router base if auto-detection fails.
-  --help                       : Show this help message and exit.
+  --cli <oc|kubectl>          : Specify the CLI tool to use (overrides auto-detection).
+  --router-base <router-base> : Manually provide the cluster router base if auto-detection fails.
+  --help                      : Show this help message and exit.
 
 Examples:
   $0                               # Auto-detects router base and installs the Helm chart
+  $0 --cli kubectl                 # Uses kubectl even if oc is installed
   $0 --router-base example.com     # Manually specifies the router base and installs the Helm chart
 "
 }
@@ -41,14 +43,52 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Check if either oc or kubectl is installed
-if command_exists oc; then
-    CLI="oc"
-elif command_exists kubectl; then
-    CLI="kubectl"
-else
-    echo "Error: Neither 'oc' nor 'kubectl' is installed. Please install one of them to proceed."
-    exit 1
+# Default CLI detection
+detect_cli() {
+    if command_exists oc; then
+        CLI="oc"
+    elif command_exists kubectl; then
+        CLI="kubectl"
+    else
+        echo "Error: Neither 'oc' nor 'kubectl' is installed. Please install one of them to proceed."
+        exit 1
+    fi
+}
+
+# Parse command-line arguments for CLI tool and optional router base
+CLI=""
+ROUTER_BASE=""
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --cli)
+            CLI="$2"
+            if [[ "$CLI" != "oc" && "$CLI" != "kubectl" ]]; then
+                echo "Error: Invalid value for --cli. Use 'oc' or 'kubectl'."
+                exit 1
+            fi
+            shift
+            ;;
+        --router-base)
+            ROUTER_BASE="$2"
+            shift
+            ;;
+        --help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown parameter passed: $1"
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# If CLI is not specified, detect automatically
+if [[ -z "$CLI" ]]; then
+    detect_cli
 fi
 
 # Check if the user is logged into a cluster
@@ -66,24 +106,16 @@ detect_cluster_router_base() {
     fi
 }
 
-# Detect cluster router base
-detect_cluster_router_base
+# Detect cluster router base if not provided
+if [[ -z "$ROUTER_BASE" ]]; then
+    detect_cluster_router_base
+fi
 
 # If detection fails, prompt user for input
-if [ -z "$ROUTER_BASE" ]; then
+if [[ -z "$ROUTER_BASE" ]]; then
     echo "Error: Cluster router base could not be detected. Please provide it using the --router-base flag."
     exit 1
 fi
-
-# Parse command-line arguments for optional router base
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --router-base) ROUTER_BASE="$2"; shift ;;
-        --help) usage; exit 0 ;;
-        *) echo "Unknown parameter passed: $1"; exit 1 ;;
-    esac
-    shift
-done
 
 # Update Helm chart with the detected or provided router base
 echo "Using router base: $ROUTER_BASE"
