@@ -18,7 +18,7 @@
 # Requires: oc or kubectl
 
 usage() {
-echo "
+    echo "
 This script simplifies and automates the installation process of Helm charts on Kubernetes (K8s) and OpenShift Container Platform (OCP) clusters.
 It detects whether 'oc' or 'kubectl' is installed and ensures that the user is logged into a cluster.
 The script also attempts to detect the cluster router base and updates the Helm chart configuration accordingly.
@@ -42,6 +42,20 @@ Examples:
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
+
+# Check if required files and directories exist
+HELM_CHART_DIR="../charts/backstage"
+VALUES_FILE="$HELM_CHART_DIR/values.yaml"
+
+if [ ! -d "$HELM_CHART_DIR" ]; then
+    echo "Error: Helm chart directory not found at $HELM_CHART_DIR"
+    exit 1
+fi
+
+if [ ! -f "$VALUES_FILE" ]; then
+    echo "Error: values.yaml file not found at $VALUES_FILE"
+    exit 1
+fi
 
 # Default CLI detection
 detect_cli() {
@@ -119,20 +133,7 @@ fi
 
 # Update Helm chart with the detected or provided router base
 echo "Using router base: $ROUTER_BASE"
-# Define the path to values.yaml
-VALUES_FILE="../charts/backstage/values.yaml"
-if [ ! -f "$VALUES_FILE" ]; then
-    echo "Error: values.yaml file not found at $VALUES_FILE"
-    exit 1
-fi
 sed -i "s|routerBase:.*|routerBase: $ROUTER_BASE|" "$VALUES_FILE"
-
-# Define the path to the Helm chart directory
-HELM_CHART_DIR="../charts/backstage"
-if [ ! -d "$HELM_CHART_DIR" ]; then
-    echo "Error: Helm chart directory not found at $HELM_CHART_DIR"
-    exit 1
-fi
 
 # Proceed with Helm installation
 helm install my-release "$HELM_CHART_DIR" --values "$VALUES_FILE"
