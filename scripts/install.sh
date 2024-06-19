@@ -18,7 +18,7 @@
 # Requires: oc or kubectl
 
 usage() {
-    echo "
+echo "
 This script simplifies and automates the installation process of Helm charts on Kubernetes (K8s) and OpenShift Container Platform (OCP) clusters.
 It detects whether 'oc' or 'kubectl' is installed and ensures that the user is logged into a cluster.
 The script also attempts to detect the cluster router base and updates the Helm chart configuration accordingly.
@@ -29,12 +29,17 @@ Usage:
 Options:
   --cli <oc|kubectl>          : Specify the CLI tool to use (overrides auto-detection).
   --router-base <router-base> : Manually provide the cluster router base if auto-detection fails.
+  --release-name <name>       : Specify a custom release name for the Helm chart.
+  --generate-name             : Generate a name for the Helm release (overrides --release-name).
+  --namespace <namespace>     : Specify the namespace for the Helm release (autodetects if not provided).
   --help                      : Show this help message and exit.
 
 Examples:
   $0                               # Auto-detects router base and installs the Helm chart
   $0 --cli kubectl                 # Uses kubectl even if oc is installed
   $0 --router-base example.com     # Manually specifies the router base and installs the Helm chart
+  $0 --release-name myrelease      # Installs the Helm chart with the specified release name
+  $0 --generate-name               # Generates a name for the Helm release
 "
 }
 
@@ -69,9 +74,12 @@ detect_cli() {
     fi
 }
 
-# Parse command-line arguments for CLI tool and optional router base
+# Parse command-line arguments
 CLI=""
 ROUTER_BASE=""
+RELEASE_NAME=""
+GENERATE_NAME=false
+NAMESPACE=""
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -85,6 +93,17 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --router-base)
             ROUTER_BASE="$2"
+            shift
+            ;;
+        --release-name)
+            RELEASE_NAME="$2"
+            shift
+            ;;
+        --generate-name)
+            GENERATE_NAME=true
+            ;;
+        --namespace)
+            NAMESPACE="$2"
             shift
             ;;
         --help)
@@ -131,11 +150,34 @@ if [[ -z "$ROUTER_BASE" ]]; then
     exit 1
 fi
 
+# Detect namespace if not provided
+if [[ -z "$NAMESPACE" ]]; then
+    NAMESPACE=$($CLI config view --minify --output 'jsonpath={..namespace}')
+    if [[ -z "$NAMESPACE" ]]; then
+        echo "Error: Namespace could not be detected. Please provide it using the --namespace flag."
+        exit 1
+    fi
+fi
+
 # Update Helm chart with the detected or provided router base
 echo "Using router base: $ROUTER_BASE"
 sed -i "s|routerBase:.*|routerBase: $ROUTER_BASE|" "$VALUES_FILE"
 
-# Proceed with Helm installation
-helm install my-release "$HELM_CHART_DIR" --values "$VALUES_FILE"
+# Construct Helm install command
+HELM_CMD="helm install"
+if $GENERATE_NAME; then
+    HELM_CMD+=" --generate-name"
+else
+    if [[ -z "$RELEASE_NAME" ]]; then
+        echo "Error: Either --release-name must be specified or --generate-name must be used."
+        exit 1
+    fi
+    HELM_CMD+=" $RELEASE_NAME"
+fi
+
+HELM_CMD+=" $HELM_CHART_DIR --values $VALUES_FILE --namespace $NAMESPACE"
+
+# Execute Helm install command
+eval $HELM_CMD
 
 echo "Helm installation completed successfully."
