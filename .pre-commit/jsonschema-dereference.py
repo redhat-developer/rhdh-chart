@@ -23,7 +23,7 @@ def read_yaml(file_path: Path):
 def template_schema(chart_dir: Path, lock: Dict[str, Any]):
     """Load values.schema.tmpl.json and template it via Jinja2."""
     with open(chart_dir / JSONSCHEMA_TEMPLATE_NAME, "r") as f:
-        schema_template = Template(f.read())
+        schema_template = Template(f.read(), autoescape=True)
 
     return json.loads(schema_template.render(lock))
 
