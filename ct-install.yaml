@@ -3,3 +3,4 @@ chart-dirs:
 validate-maintainers: false
 remote: origin
 target-branch: main
+helm-extra-args: --timeout 500s
