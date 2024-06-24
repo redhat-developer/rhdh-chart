@@ -125,12 +125,6 @@ if [[ -z "$CLI" ]]; then
     detect_cli
 fi
 
-# Check if the user is logged into a cluster
-if ! $CLI whoami >/dev/null 2>&1; then
-    echo "Error: You are not logged into a cluster. Please log in using '$CLI login' or '$CLI config set-context'."
-    exit 1
-fi
-
 # Function to detect cluster router base
 detect_cluster_router_base() {
     if [ "$CLI" == "oc" ]; then
