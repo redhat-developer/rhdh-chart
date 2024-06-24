@@ -2,18 +2,20 @@
 # RHDH Backstage Helm Chart for OpenShift
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 2.16.3(https://img.shields.io/badge/Version-2.16.3-informational?style=flat-square)
+![Version: 2.16.3](https://img.shields.io/badge/Version-2.16.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart for deploying RHDH (a Backstage application)
+A Helm chart for deploying Red Hat Developer Hub.
+
+The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://access.redhat.com/documentation/en-us/red_hat_developer_hub/1.2/html-single/administration_guide_for_red_hat_developer_hub/index#assembly-rhdh-telemetry_admin-rhdh
 
 **Homepage:** <https://redhat-developer.github.io/rhdh-chart/>
 
 ## Maintainers
 
-| Name | Url |
-| ---- | --- |
-| Red Hat Developer Hub Team | <https://github.com/redhat-developer/rhdh-chart> |
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Red Hat Developer Hub Team |  | <https://github.com/redhat-developer/rhdh-chart> |
 
 ## Source Code
 
@@ -111,10 +113,10 @@ helm upgrade -i <release_name> oci://ghcr.io/redhat-developer/rhdh-chart/backsta
 
 ### Uninstalling the Chart
 
-To uninstall/delete the `my-backstage` deployment:
+To uninstall/delete the `my-backstage-release` deployment:
 
 ```console
-helm uninstall my-backstage
+helm uninstall my-backstage-release
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -127,10 +129,6 @@ Kubernetes: `>= 1.25.0-0`
 |------------|------|---------|
 | https://backstage.github.io/charts | upstream(backstage) | 1.9.1 |
 | https://charts.bitnami.com/bitnami | common | 2.14.1 |
-
-## Telemetry data collection
-
-The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://access.redhat.com/documentation/en-us/red_hat_developer_hub/1.2/html-single/administration_guide_for_red_hat_developer_hub/index#assembly-rhdh-telemetry_admin-rhdh
 
 ## Values
 
@@ -145,7 +143,7 @@ The telemetry data collection feature is enabled by default. Red Hat Developer H
 | global.dynamic.includes | Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field. Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
 | global.dynamic.includes[0] | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. | string | `"dynamic-plugins.default.yaml"` |
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
-| global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`.  | string | `""` |
+| global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
 | route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
 | route.annotations | Route specific annotations | object | `{}` |
 | route.enabled | Enable the creation of the route resource | bool | `true` |
