@@ -128,7 +128,7 @@ fi
 # Function to detect cluster router base
 detect_cluster_router_base() {
     if [ "$CLI" == "oc" ]; then
-        ROUTER_BASE=$($CLI get route -n openshift-console -o=jsonpath='{.items[0].spec.host}')
+        ROUTER_BASE=$($CLI get ingress.config.openshift.io/cluster -o=jsonpath='{.spec.domain}')
     else
         ROUTER_BASE=$($CLI get ingress -n default -o=jsonpath='{.items[0].spec.rules[0].host}')
     fi
