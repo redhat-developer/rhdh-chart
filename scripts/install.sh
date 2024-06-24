@@ -15,7 +15,7 @@
 #
 # Script to handle CLI helm installation for k8s and OCP
 #
-# Requires: oc or kubectl
+# Requires: oc or kubectl and an active login session to a cluster.
 
 usage() {
 echo "
@@ -32,6 +32,7 @@ Options:
   --release-name <name>       : Specify a custom release name for the Helm chart.
   --generate-name             : Generate a name for the Helm release (overrides --release-name).
   --namespace <namespace>     : Specify the namespace for the Helm release (autodetects if not provided).
+  --values <file>             : Specify your own values file for the Helm chart.
   --help                      : Show this help message and exit.
 
 Examples:
@@ -40,6 +41,7 @@ Examples:
   $0 --router-base example.com     # Manually specifies the router base and installs the Helm chart
   $0 --release-name myrelease      # Installs the Helm chart with the specified release name
   $0 --generate-name               # Generates a name for the Helm release
+  $0 --values /path/to/values.yaml # Installs the Helm chart using the specified values file
 "
 }
 
@@ -49,16 +51,11 @@ command_exists() {
 }
 
 # Check if required files and directories exist
-HELM_CHART_DIR="../charts/backstage"
-VALUES_FILE="$HELM_CHART_DIR/values.yaml"
+HELM_CHART_DIR="$(dirname "$0")/../charts/backstage"
+DEFAULT_VALUES_FILE="$HELM_CHART_DIR/values.yaml"
 
 if [ ! -d "$HELM_CHART_DIR" ]; then
     echo "Error: Helm chart directory not found at $HELM_CHART_DIR"
-    exit 1
-fi
-
-if [ ! -f "$VALUES_FILE" ]; then
-    echo "Error: values.yaml file not found at $VALUES_FILE"
     exit 1
 fi
 
@@ -80,6 +77,8 @@ ROUTER_BASE=""
 RELEASE_NAME=""
 GENERATE_NAME=false
 NAMESPACE=""
+VALUES_FILE="$DEFAULT_VALUES_FILE"
+EXTRA_HELM_ARGS=""
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -106,14 +105,16 @@ while [[ "$#" -gt 0 ]]; do
             NAMESPACE="$2"
             shift
             ;;
+        --values)
+            VALUES_FILE="$2"
+            shift
+            ;;
         --help)
             usage
             exit 0
             ;;
         *)
-            echo "Unknown parameter passed: $1"
-            usage
-            exit 1
+            EXTRA_HELM_ARGS+=" $1"
             ;;
     esac
     shift
@@ -159,9 +160,11 @@ if [[ -z "$NAMESPACE" ]]; then
     fi
 fi
 
-# Update Helm chart with the detected or provided router base
-echo "Using router base: $ROUTER_BASE"
-sed -i "s|routerBase:.*|routerBase: $ROUTER_BASE|" "$VALUES_FILE"
+# Update Helm chart with the detected or provided router base if using default values file
+if [[ "$VALUES_FILE" == "$DEFAULT_VALUES_FILE" ]]; then
+    echo "Using router base: $ROUTER_BASE"
+    sed -i "s|routerBase:.*|routerBase: $ROUTER_BASE|" "$VALUES_FILE"
+fi
 
 # Construct Helm install command
 HELM_CMD="helm install"
@@ -175,7 +178,7 @@ else
     HELM_CMD+=" $RELEASE_NAME"
 fi
 
-HELM_CMD+=" $HELM_CHART_DIR --values $VALUES_FILE --namespace $NAMESPACE"
+HELM_CMD+=" $HELM_CHART_DIR --values $VALUES_FILE --namespace $NAMESPACE $EXTRA_HELM_ARGS"
 
 # Execute Helm install command
 eval $HELM_CMD
