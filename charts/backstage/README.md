@@ -1,4 +1,3 @@
-
 # RHDH Backstage Helm Chart for OpenShift
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
@@ -132,36 +131,36 @@ Kubernetes: `>= 1.25.0-0`
 
 ## Values
 
-| Key | Description | Type | Default |
-|-----|-------------|------|---------|
-| global.auth | Enable service authentication within Backstage instance | object | `{"backend":{"enabled":true,"existingSecret":"","value":""}}` |
-| global.auth.backend | Backend service to service authentication <br /> Ref: https://backstage.io/docs/auth/service-to-service-auth/ | object | `{"enabled":true,"existingSecret":"","value":""}` |
-| global.auth.backend.enabled | Enable backend service to service authentication, unless configured otherwise it generates a secret value | bool | `true` |
-| global.auth.backend.existingSecret | Instead of generating a secret value, refer to existing secret | string | `""` |
-| global.auth.backend.value | Instead of generating a secret value, use the following value | string | `""` |
-| global.clusterRouterBase | Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled. | string | `"apps.example.com"` |
-| global.dynamic.includes | Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field. Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
-| global.dynamic.includes[0] | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. | string | `"dynamic-plugins.default.yaml"` |
-| global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
-| global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
-| route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
-| route.annotations | Route specific annotations | object | `{}` |
-| route.enabled | Enable the creation of the route resource | bool | `true` |
-| route.host | Set the host attribute to a custom value. If not set, OpenShift will generate it, please make sure to match your baseUrl | string | `"{{ .Values.global.host }}"` |
-| route.path | Path that the router watches for, to route traffic for to the service. | string | `"/"` |
-| route.tls | Route TLS parameters <br /> Ref: https://docs.openshift.com/container-platform/4.9/networking/routes/secured-routes.html | object | `{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"}` |
-| route.tls.caCertificate | Cert authority certificate contents. Optional | string | `""` |
-| route.tls.certificate | Certificate contents | string | `""` |
-| route.tls.destinationCACertificate | Contents of the ca certificate of the final destination. <br /> When using reencrypt termination this file should be provided in order to have routers use it for health checks on the secure connection. If this field is not specified, the router may provide its own destination CA and perform hostname validation using the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically verify. | string | `""` |
-| route.tls.enabled | Enable TLS configuration for the host defined at `route.host` parameter | bool | `true` |
-| route.tls.insecureEdgeTerminationPolicy | Indicates the desired behavior for insecure connections to a route. <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled. | string | `"Redirect"` |
-| route.tls.key | Key file contents | string | `""` |
-| route.tls.termination | Specify TLS termination. | string | `"edge"` |
-| route.wildcardPolicy | Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed. | string | `"None"` |
-| upstream | Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml) | object | Use Openshift compatible settings |
-| upstream.backstage.extraVolumes[0] | Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start. | object | `{"ephemeral":{"volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}}}}},"name":"dynamic-plugins-root"}` |
-| upstream.backstage.extraVolumes[0].ephemeral.volumeClaimTemplate.spec.resources.requests.storage | Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins. | string | `"2Gi"` |
-| upstream.backstage.initContainers[0].image | Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount. It could be replaced by a custom image based on this one. | string | `quay.io/janus-idp/backstage-showcase:latest` |
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| global.auth | object | `{"backend":{"enabled":true,"existingSecret":"","value":""}}` | Enable service authentication within Backstage instance |
+| global.auth.backend | object | `{"enabled":true,"existingSecret":"","value":""}` | Backend service to service authentication <br /> Ref: https://backstage.io/docs/auth/service-to-service-auth/ |
+| global.auth.backend.enabled | bool | `true` | Enable backend service to service authentication, unless configured otherwise it generates a secret value |
+| global.auth.backend.existingSecret | string | `""` | Instead of generating a secret value, refer to existing secret |
+| global.auth.backend.value | string | `""` | Instead of generating a secret value, use the following value |
+| global.clusterRouterBase | string | `"apps.example.com"` | Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled. |
+| global.dynamic.includes | list | `["dynamic-plugins.default.yaml"]` | Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field. Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`). |
+| global.dynamic.includes[0] | string | `"dynamic-plugins.default.yaml"` | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. |
+| global.dynamic.plugins | list | `[]` | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). |
+| global.host | string | `""` | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. |
+| route | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` | OpenShift Route parameters |
+| route.annotations | object | `{}` | Route specific annotations |
+| route.enabled | bool | `true` | Enable the creation of the route resource |
+| route.host | string | `"{{ .Values.global.host }}"` | Set the host attribute to a custom value. If not set, OpenShift will generate it, please make sure to match your baseUrl |
+| route.path | string | `"/"` | Path that the router watches for, to route traffic for to the service. |
+| route.tls | object | `{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"}` | Route TLS parameters <br /> Ref: https://docs.openshift.com/container-platform/4.9/networking/routes/secured-routes.html |
+| route.tls.caCertificate | string | `""` | Cert authority certificate contents. Optional |
+| route.tls.certificate | string | `""` | Certificate contents |
+| route.tls.destinationCACertificate | string | `""` | Contents of the ca certificate of the final destination. <br /> When using reencrypt termination this file should be provided in order to have routers use it for health checks on the secure connection. If this field is not specified, the router may provide its own destination CA and perform hostname validation using the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically verify. |
+| route.tls.enabled | bool | `true` | Enable TLS configuration for the host defined at `route.host` parameter |
+| route.tls.insecureEdgeTerminationPolicy | string | `"Redirect"` | Indicates the desired behavior for insecure connections to a route. <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled. |
+| route.tls.key | string | `""` | Key file contents |
+| route.tls.termination | string | `"edge"` | Specify TLS termination. |
+| route.wildcardPolicy | string | `"None"` | Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed. |
+| upstream | object | Use Openshift compatible settings | Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml) |
+| upstream.backstage.extraVolumes[0] | object | `{"ephemeral":{"volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}}}}},"name":"dynamic-plugins-root"}` | Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start. |
+| upstream.backstage.extraVolumes[0].ephemeral.volumeClaimTemplate.spec.resources.requests.storage | string | `"2Gi"` | Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins. |
+| upstream.backstage.initContainers[0].image | string | `quay.io/janus-idp/backstage-showcase:latest` | Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount. It could be replaced by a custom image based on this one. |
 
 ## Opinionated Backstage deployment
 
