@@ -1,6 +1,8 @@
 name: Bump
 
-on: issue_comment
+on:
+  issue_comment:
+    types: [created]
 
 jobs:
   chart-version:
@@ -16,30 +18,48 @@ jobs:
       - name: Check for command
         id: command
         continue-on-error: true
-        uses: xt0rted/slash-command-action@bf51f8f5f4ea3d58abc7eca58f77104182b23e88 # v2
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          command: bump
-          reaction: "true"
-          reaction-type: "eyes"
-          allow-edits: "false"
-          permission-level: write
+          script: |
+            const commentBody = context.payload.comment.body;
+            const commandPrefix = "/bump ";
+            let commandName = "";
+            let commandArgs = "";
+
+            if (commentBody.startsWith(commandPrefix)) {
+              commandName = "bump";
+              const args = commentBody.slice(commandPrefix.length).trim().split(" ");
+              commandArgs = args[0] || "patch";
+            }
+
+            core.setOutput("command-name", commandName);
+            core.setOutput("command-arguments", commandArgs);
+
+      - name: Add eyes reaction
+        if: steps.command.outputs.command-name == 'bump'
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          comment-id: ${{ github.event.comment.id }}
+          reaction-type: eyes
 
       - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         with:
           python-version: 3.7
 
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         with:
           go-version: ^1
 
       - name: Setup helm-docs
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 
       - name: Generate token
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         id: generate_token
         uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
         with:
@@ -47,48 +67,48 @@ jobs:
           private_key: ${{ secrets.RHDH_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Checkout Repository
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Checkout Pull Request
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         run: gh pr checkout ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
 
       - name: Get version
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         id: get_version
         uses: mikefarah/yq@dd648994340a5d03225d97abf19c9bf1086c3f07 # v4.40.5
         with:
           cmd: yq ".version" charts/backstage/Chart.yaml
 
       - uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5  # v1
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         id: semver
         with:
           current_version: ${{ steps.get_version.outputs.result }}
           level: ${{ steps.command.outputs.command-arguments }}
 
       - name: Bump the version
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         uses: mikefarah/yq@dd648994340a5d03225d97abf19c9bf1086c3f07 # v4.40.5
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/backstage/Chart.yaml
 
       - name: Run pre-commit
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # renovate: tag=v3.0.0
         continue-on-error: true
 
       - name: Setup Gitsign
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         uses: chainguard-dev/actions/setup-gitsign@main
 
       - name: Commit pre-commit changes
-        if: steps.command.outputs.command-name
+        if: steps.command.outputs.command-name == 'bump'
         uses: stefanzweifel/git-auto-commit-action@8756aa072ef5b4a080af5dc8fef36c5d586e521d # v5
         with:
           commit_message: Bump version to ${{ steps.semver.outputs.new_version }}
