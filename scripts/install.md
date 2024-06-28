@@ -24,14 +24,14 @@ The purpose of the `install-helm.sh` script is to simplify and automate the inst
 
 ## **Installation Steps**
 
-**Download the Script \
-**Clone the repository and navigate to the `scripts` directory:
+Download the Script \
+Clone the repository and navigate to the `scripts` directory:
 
-**Make the Script Executable \
-**Before running the script, make sure it has executable permissions:
+Make the Script Executable \
+Before running the script, make sure it has executable permissions:
 
-**Run the Script \
-**Execute the script to install the Helm chart. The script will automatically detect that you are using `oc` and ensure you are logged into your cluster.
+Run the Script \
+Execute the script to install the Helm chart. The script will automatically detect that you are using `oc` and ensure you are logged into your cluster.
 
 **Specify Router Base**
 
