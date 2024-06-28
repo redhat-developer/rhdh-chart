@@ -956,9 +956,13 @@
                                 },
                                 "backend": {
                                     "auth": {
-                                        "keys": [
+                                        "externalAccess": [
                                             {
-                                                "secret": "${BACKEND_SECRET}"
+                                                "options": {
+                                                    "secret": "${BACKEND_SECRET}",
+                                                    "subject": "legacy-default-config"
+                                                },
+                                                "type": "legacy"
                                             }
                                         ]
                                     },

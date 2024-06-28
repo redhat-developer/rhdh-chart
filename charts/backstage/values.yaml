@@ -62,7 +62,7 @@ upstream:
           externalAccess:
             - type: legacy
               options:
-                subject: legacy-default-cofig
+                subject: legacy-default-config
                 secret: ${BACKEND_SECRET}
     containerSecurityContext:
       allowPrivilegeEscalation: false
