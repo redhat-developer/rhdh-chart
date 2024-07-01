@@ -66,7 +66,6 @@ upstream:
       capabilities:
         drop: ["ALL"]
       runAsNonRoot: true
-      readOnlyRootFilesystem: true
       seccompProfile:
         type: "RuntimeDefault"
     resources:
@@ -165,7 +164,6 @@ upstream:
           capabilities:
             drop: ["ALL"]
           runAsNonRoot: true
-          readOnlyRootFilesystem: true
           seccompProfile:
             type: "RuntimeDefault"
         # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
