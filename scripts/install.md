@@ -4,7 +4,7 @@
 
 The purpose of the [`install.sh` script](./install.sh) is to simplify and automate the installation process of this Helm Chart on OpenShift Container Platform (OCP) clusters. Instead of requiring users to follow a lengthy and potentially error-prone series of manual steps, this script consolidates the process into a single, reusable command that can:
 
-* Detect if the OpenShit Client ([`oc`](https://docs.openshift.com/container-platform/4.16/cli_reference/openshift_cli/getting-started-cli.html)) is installed; fail if not found and report the error to the user with a call to action (installing it).
+* Detect if the OpenShift Client ([`oc`](https://docs.openshift.com/container-platform/4.16/cli_reference/openshift_cli/getting-started-cli.html)) is installed; fail if not found and report the error to the user with a call to action (installing it).
 
 * If cluster router base can be detected, use that value to update the helm chart installation; if not, fail and request user pass in command line flag as cluster router base could not be detected (can test this failure case with dev sandbox; can test passing case with clusterbot).
 
@@ -17,34 +17,34 @@ The purpose of the [`install.sh` script](./install.sh) is to simplify and automa
 
 ## **Installation Steps**
 
-1. **Download the Script** - Clone the repository and navigate to the `scripts` directory: \
+1. **Download the Script** - Clone the repository and navigate to the `scripts` directory: 
 
-  ```shell
-git clone --depth 1 https://github.com/redhat-developer/rhdh-chart.git
-cd rhdh-charts/scripts
-```
+     ```shell
+      git clone --depth 1 https://github.com/redhat-developer/rhdh-chart.git
+      cd rhdh-charts/scripts
+    ```
 
-1. **Run the Script** - Execute the script to install the Helm chart. The script will automatically detect that you are using `oc` and ensure you are logged into your cluster. \
+2. **Run the Script** - Execute the script to install the Helm chart. The script will automatically detect that you are using `oc` and ensure you are logged into your cluster. \
 `./install.sh`
 
-   **Specify Router Base** - If the script cannot automatically detect the cluster router base, you can provide it manually using the `--router-base` flag, example:\
+3. **Specify Router Base** - If the script cannot automatically detect the cluster router base, you can provide it manually using the `--router-base` flag, example:\
       `./install.sh --router-base <your-router-base>`
 
-   **Specify Release Name** - To install the Helm chart with a custom release name: \
+4. **Specify Release Name** - To install the Helm chart with a custom release name: \
    `./install.sh --release-name myrelease`
 
-    **Generate a Release Name** - To generate a name for the Helm release: \
+5. **Generate a Release Name** - To generate a name for the Helm release: \
     `./install.sh --generate-name`
 
-1. **Specify Namespace** - To specify the namespace for the Helm release: \
+6. **Specify Namespace** - To specify the namespace for the Helm release: \
 `./install.sh --namespace mynamespace`
 
-    **Specify Custom Values File** - To use a custom values file for the Helm chart: \
+7. **Specify Custom Values File** - To use a custom values file for the Helm chart: \
    `./install.sh --values /path/to/values.yaml`
 
 ## **Troubleshooting**
 
-* Missing <code>oc</code> - </strong> If the script outputs an error indicating that neither <code>oc</code> nor <code>kubectl</code> is installed, please install the appropriate CLI tool for your cluster:
+* Missing <code>oc</code> - </strong> If the script outputs an error indicating <code>oc</code> is not installed, please install the CLI tool for your cluster:
     * For OpenShift: Install <code>oc</code>
 
 * <strong>Not Logged Into Cluster: </strong> If you are not logged into a cluster, follow these steps to log in:
