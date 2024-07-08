@@ -112,27 +112,28 @@ detect_cluster_router_base() {
 # Detect cluster router base if not provided
 if [[ -z "$ROUTER_BASE" ]]; then
     detect_cluster_router_base
-else
-    echo "Error: Cluster router base could not be detected. Please provide it using the --router-base flag."
-    exit 1
+    if [[ -z "$ROUTER_BASE" ]]; then
+        echo "Error: Cluster router base could not be detected. Please provide it using the --router-base flag."
+        exit 1
+    fi
 fi
 
 # Detect namespace if not provided
 if [[ -z "$NAMESPACE" ]]; then
     NAMESPACE=$(oc config view --minify --output 'jsonpath={..namespace}')
-else
-    echo "Error: Namespace could not be detected. Please provide it using the --namespace flag."
-    exit 1
+    if [[ -z $NAMESPACE ]]; then
+        echo "Error: Namespace could not be detected. Please provide it using the --namespace flag."
+        exit 1
+    fi
 fi
 
 # Update Helm chart with the detected or provided router base if using default values file
 if [[ "$VALUES_FILE" == "$DEFAULT_VALUES_FILE" ]]; then
-    echo "Using router base: $ROUTER_BASE"
-    sed -i "s|routerBase:.*|routerBase: $ROUTER_BASE|" "$VALUES_FILE"
+    EXTRA_HELM_ARGS+="--set global.clusterRouterBase=$ROUTER_BASE"
 fi
 
 # Construct Helm install command
-HELM_CMD="helm upgrade --install"
+HELM_CMD="helm install"
 if [[ $GENERATE_NAME == true ]]; then
     HELM_CMD+=" --generate-name"
 elif [[ -z "$RELEASE_NAME" ]]; then
@@ -141,7 +142,6 @@ elif [[ -z "$RELEASE_NAME" ]]; then
 else
     HELM_CMD+=" $RELEASE_NAME"
 fi
-
 
 HELM_CMD+=" $HELM_CHART_DIR --values $VALUES_FILE --namespace $NAMESPACE $EXTRA_HELM_ARGS"
 
