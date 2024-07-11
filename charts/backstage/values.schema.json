@@ -2587,7 +2587,7 @@
                                 {
                                     "configMap": {
                                         "defaultMode": 420,
-                                        "name": "dynamic-plugins",
+                                        "name": "{{ printf \"%s-dynamic-plugins\" .Release.Name }}",
                                         "optional": true
                                     },
                                     "name": "dynamic-plugins"
