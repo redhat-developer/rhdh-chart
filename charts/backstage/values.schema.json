@@ -4158,7 +4158,7 @@
                                     "type": "string"
                                 },
                                 "repository": {
-                                    "default": "janus-idp/backstage-showcase",
+                                    "default": "rhdh/rhdh-hub-rhel9",
                                     "title": "Backstage image repository",
                                     "type": "string"
                                 },
