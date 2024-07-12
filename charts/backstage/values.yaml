@@ -36,7 +36,7 @@ upstream:
   backstage:
     image:
       registry: quay.io
-      repository: janus-idp/backstage-showcase
+      repository: rhdh/rhdh-hub-rhel9
       tag: latest
     command: []
     # FIXME (tumido): USE POSTGRES_PASSWORD and POSTGRES_USER instead of POSTGRES_ADMIN_PASSWORD
