@@ -15,7 +15,7 @@
 #
 # Script to handle CLI helm installation for OCP
 #
-# Requires: oc and an active login session to a cluster.
+# Requires: oc, helm and an active login session to a cluster.
 
 set -e
 
@@ -50,8 +50,12 @@ command_exists() {
 }
 
 # Check for required commands
-if ! command_exists helm || ! command_exists oc; then
-    echo "Error: Required commands 'helm' and 'oc' are not available."
+if ! command_exists helm; then
+    echo "Error: 'helm' is required. Install it from https://docs.openshift.com/container-platform/4.16/applications/working_with_helm_charts/installing-helm.html to continue."
+    exit 1
+fi
+if ! command_exists oc; then
+    echo "Error: 'oc' is required. Install it from https://docs.openshift.com/container-platform/4.16/cli_reference/openshift_cli/getting-started-cli.html to continue."
     exit 1
 fi
 
