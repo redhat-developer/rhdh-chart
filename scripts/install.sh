@@ -89,10 +89,6 @@ while [[ "$#" -gt 0 ]]; do
             NAMESPACE="$2"
             shift
             ;;
-        --values)
-            VALUES_FILE="$2"
-            shift
-            ;;
         --help)
             usage
             exit 0
