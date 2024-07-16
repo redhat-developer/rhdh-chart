@@ -111,11 +111,7 @@ detect_cluster_router_base() {
 
 # Detect cluster router base if not provided
 if [[ -z "$ROUTER_BASE" ]]; then
-    detect_cluster_router_base
-    if [[ -z "$ROUTER_BASE" ]]; then
-        echo "Error: Cluster router base could not be detected. Please provide it using the --router-base flag."
-        exit 1
-    fi
+    detect_cluster_router_base || (echo "Error: Cluster router base could not be detected. Please provide it using the --router-base flag." && exit 1)
 fi
 
 # Detect namespace if not provided
