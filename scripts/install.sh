@@ -120,7 +120,7 @@ if [[ -z "$NAMESPACE" ]]; then
 fi
 
 # Always include the router base in Helm arguments
-EXTRA_HELM_ARGS+="--set global.clusterRouterBase=$ROUTER_BASE"
+EXTRA_HELM_ARGS+=" --set global.clusterRouterBase=$ROUTER_BASE"
 
 # Construct Helm install command
 HELM_CMD="helm install"
