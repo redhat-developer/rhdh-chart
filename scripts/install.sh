@@ -123,10 +123,8 @@ if [[ -z "$NAMESPACE" ]]; then
     fi
 fi
 
-# Update Helm chart with the detected or provided router base if using default values file
-if [[ "$VALUES_FILE" == "$DEFAULT_VALUES_FILE" ]]; then
-    EXTRA_HELM_ARGS+="--set global.clusterRouterBase=$ROUTER_BASE"
-fi
+# Always include the router base in Helm arguments
+EXTRA_HELM_ARGS+="--set global.clusterRouterBase=$ROUTER_BASE"
 
 # Construct Helm install command
 HELM_CMD="helm install"
