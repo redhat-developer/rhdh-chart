@@ -133,7 +133,7 @@ else
     HELM_CMD+=" $RELEASE_NAME"
 fi
 
-HELM_CMD+=" $HELM_CHART_DIR --values $VALUES_FILE --namespace $NAMESPACE $EXTRA_HELM_ARGS"
+HELM_CMD+=" $HELM_CHART_DIR --namespace $NAMESPACE $EXTRA_HELM_ARGS"
 
 # Execute Helm install command
 echo "Executing: $HELM_CMD"
