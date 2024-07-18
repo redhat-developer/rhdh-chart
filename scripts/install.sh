@@ -146,5 +146,6 @@ if eval "$HELM_CMD"; then
     echo "Helm installation completed successfully."
 else
     echo "Something went wrong with Helm installation!"
+    helm list --namespace $NAMESPACE
     exit 1
 fi
