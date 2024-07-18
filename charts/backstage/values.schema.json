@@ -2530,6 +2530,10 @@
                                 {
                                     "mountPath": "/opt/app-root/src/dynamic-plugins-root",
                                     "name": "dynamic-plugins-root"
+                                },
+                                {
+                                    "mountPath": "/var/log/audit",
+                                    "name": "audit-log-data"
                                 }
                             ],
                             "items": {
@@ -2587,6 +2591,12 @@
                                         }
                                     },
                                     "name": "dynamic-plugins-root"
+                                },
+                                {
+                                    "name": "audit-log-data",
+                                    "persistentVolumeClaim": {
+                                        "claimName": "{{ printf \"%s-audit-log\" .Release.Name }}"
+                                    }
                                 },
                                 {
                                     "configMap": {
