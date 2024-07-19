@@ -127,7 +127,7 @@ fi
 EXTRA_HELM_ARGS+=" --set global.clusterRouterBase=$ROUTER_BASE"
 
 # Construct Helm install command
-HELM_CMD="helm install"
+HELM_CMD="helm upgrade -i"
 if [[ $GENERATE_NAME == true ]]; then
     HELM_CMD+=" --generate-name"
 elif [[ -z "$RELEASE_NAME" ]]; then
@@ -146,6 +146,6 @@ if eval "$HELM_CMD"; then
     echo "Helm installation completed successfully."
 else
     echo "Something went wrong with Helm installation!"
-    helm list --namespace $NAMESPACE
+    helm list --namespace "$NAMESPACE"
     exit 1
 fi
