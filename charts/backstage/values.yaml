@@ -149,7 +149,7 @@ upstream:
         secret:
           defaultMode: 420
           optional: true
-          secretName: dynamic-plugins-npmrc
+          secretName: '{{ printf "%s-dynamic-plugins-npmrc" .Release.Name }}'
       - name: npmcacache
         emptyDir: {}
     initContainers:
