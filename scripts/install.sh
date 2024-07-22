@@ -93,6 +93,10 @@ while [[ "$#" -gt 0 ]]; do
             NAMESPACE="$2"
             shift
             ;;
+        --values)
+            VALUES_FILE="$2"
+            shift
+            ;;
         --help)
             usage
             exit 0
@@ -118,28 +122,28 @@ fi
 if [[ -z "$NAMESPACE" ]]; then
     NAMESPACE=$(oc config view --minify --output 'jsonpath={..namespace}')
     if [[ -z $NAMESPACE ]]; then
-        echo "Error: Namespace could not be detected. Please provide it using the --namespace flag."
-        exit 1
+        NAMESPACE="default"
     fi
 fi
 
 # Always include the router base in Helm arguments
 EXTRA_HELM_ARGS+=" --set global.clusterRouterBase=$ROUTER_BASE"
 
-# Construct Helm install command
-HELM_CMD="helm upgrade -i"
+# Construct Helm install or upgrade command
 if [[ $GENERATE_NAME == true ]]; then
-    HELM_CMD+=" --generate-name"
-elif [[ -z "$RELEASE_NAME" ]]; then
-    echo "Error: Either --release-name must be specified or --generate-name must be used."
-    exit 1
+    HELM_CMD="helm install --generate-name"
 else
-    HELM_CMD+=" $RELEASE_NAME"
+    if [[ -z "$RELEASE_NAME" ]]; then
+        echo "Error: Either --release-name must be specified or --generate-name must be used."
+        exit 1
+    else
+        HELM_CMD="helm upgrade -i $RELEASE_NAME"
+    fi
 fi
 
-HELM_CMD+=" $HELM_CHART_DIR --namespace $NAMESPACE $EXTRA_HELM_ARGS"
+HELM_CMD+=" $HELM_CHART_DIR --namespace $NAMESPACE --values $VALUES_FILE $EXTRA_HELM_ARGS"
 
-# Execute Helm install command
+# Execute Helm install or upgrade command
 echo "Executing: $HELM_CMD"
 
 if eval "$HELM_CMD"; then
