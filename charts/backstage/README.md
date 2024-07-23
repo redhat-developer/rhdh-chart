@@ -5,7 +5,7 @@
 ![Version: 2.16.8](https://img.shields.io/badge/Version-2.16.8-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart for deploying the **community version** of Red Hat Developer Hub.
+A Helm chart for deploying Red Hat Developer Hub.
 
 The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://access.redhat.com/documentation/en-us/red_hat_developer_hub/1.2/html-single/administration_guide_for_red_hat_developer_hub/index#assembly-rhdh-telemetry_admin-rhdh
 
