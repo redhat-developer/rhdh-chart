@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 2.16.9](https://img.shields.io/badge/Version-2.16.9-informational?style=flat-square)
+![Version: 2.16.10](https://img.shields.io/badge/Version-2.16.10-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -11,7 +11,7 @@ The telemetry data collection feature is enabled by default. Red Hat Developer H
 
 **Homepage:** <https://redhat-developer.github.io/rhdh-chart/>
 
-## Productized RHDH 
+## Productized RHDH
 
 For the **PRODUCTIZED** version of this chart, see:
 
