@@ -956,9 +956,13 @@
                                 },
                                 "backend": {
                                     "auth": {
-                                        "keys": [
+                                        "externalAccess": [
                                             {
-                                                "secret": "${BACKEND_SECRET}"
+                                                "options": {
+                                                    "secret": "${BACKEND_SECRET}",
+                                                    "subject": "legacy-default-config"
+                                                },
+                                                "type": "legacy"
                                             }
                                         ]
                                     },
@@ -2526,6 +2530,10 @@
                                 {
                                     "mountPath": "/opt/app-root/src/dynamic-plugins-root",
                                     "name": "dynamic-plugins-root"
+                                },
+                                {
+                                    "mountPath": "/var/log/audit",
+                                    "name": "audit-log-data"
                                 }
                             ],
                             "items": {
@@ -2585,9 +2593,15 @@
                                     "name": "dynamic-plugins-root"
                                 },
                                 {
+                                    "name": "audit-log-data",
+                                    "persistentVolumeClaim": {
+                                        "claimName": "{{ printf \"%s-audit-log\" .Release.Name }}"
+                                    }
+                                },
+                                {
                                     "configMap": {
                                         "defaultMode": 420,
-                                        "name": "dynamic-plugins",
+                                        "name": "{{ printf \"%s-dynamic-plugins\" .Release.Name }}",
                                         "optional": true
                                     },
                                     "name": "dynamic-plugins"
@@ -2597,8 +2611,12 @@
                                     "secret": {
                                         "defaultMode": 420,
                                         "optional": true,
-                                        "secretName": "dynamic-plugins-npmrc"
+                                        "secretName": "{{ printf \"%s-dynamic-plugins-npmrc\" .Release.Name }}"
                                     }
+                                },
+                                {
+                                    "emptyDir": {},
+                                    "name": "npmcacache"
                                 }
                             ],
                             "items": {
@@ -4150,7 +4168,7 @@
                                     "type": "string"
                                 },
                                 "repository": {
-                                    "default": "janus-idp/backstage-showcase",
+                                    "default": "rhdh/rhdh-hub-rhel9",
                                     "title": "Backstage image repository",
                                     "type": "string"
                                 },
@@ -4180,6 +4198,29 @@
                                     "image": "{{ include \"backstage.image\" . }}",
                                     "imagePullPolicy": "Always",
                                     "name": "install-dynamic-plugins",
+                                    "resources": {
+                                        "limits": {
+                                            "cpu": "1000m",
+                                            "ephemeral-storage": "5Gi",
+                                            "memory": "2.5Gi"
+                                        },
+                                        "requests": {
+                                            "cpu": "250m",
+                                            "memory": "256Mi"
+                                        }
+                                    },
+                                    "securityContext": {
+                                        "allowPrivilegeEscalation": false,
+                                        "capabilities": {
+                                            "drop": [
+                                                "ALL"
+                                            ]
+                                        },
+                                        "runAsNonRoot": true,
+                                        "seccompProfile": {
+                                            "type": "RuntimeDefault"
+                                        }
+                                    },
                                     "volumeMounts": [
                                         {
                                             "mountPath": "/dynamic-plugins-root",
@@ -4196,6 +4237,10 @@
                                             "name": "dynamic-plugins-npmrc",
                                             "readOnly": true,
                                             "subPath": ".npmrc"
+                                        },
+                                        {
+                                            "mountPath": "/opt/app-root/src/.npm/_cacache",
+                                            "name": "npmcacache"
                                         }
                                     ],
                                     "workingDir": "/opt/app-root/src"
