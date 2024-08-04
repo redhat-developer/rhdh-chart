@@ -126,6 +126,12 @@ if [[ -z "$NAMESPACE" ]]; then
     fi
 fi
 
+# Create namespace if it doesn't exist
+if ! oc get namespace "$NAMESPACE" >/dev/null 2>&1; then
+    echo "Namespace '$NAMESPACE' does not exist. Creating it..."
+    oc create namespace "$NAMESPACE"
+fi
+
 # Always include the router base in Helm arguments
 EXTRA_HELM_ARGS+=" --set global.clusterRouterBase=$ROUTER_BASE"
 
