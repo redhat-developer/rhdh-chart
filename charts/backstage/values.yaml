@@ -122,17 +122,9 @@ upstream:
       - name: audit-log-data
         mountPath: /var/log/audit
     extraVolumes:
-      # -- Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start.
       - name: dynamic-plugins-root
-        ephemeral:
-          volumeClaimTemplate:
-            spec:
-              accessModes:
-                - ReadWriteOnce
-              resources:
-                requests:
-                  # -- Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins.
-                  storage: 2Gi
+        persistentVolumeClaim:
+          claimName: '{{ printf "%s-dynamic-plugins-root" .Release.Name }}'
       - name: audit-log-data
         persistentVolumeClaim:
           claimName: '{{ printf "%s-audit-log" .Release.Name }}'

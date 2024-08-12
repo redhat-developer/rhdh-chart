@@ -2576,21 +2576,10 @@
                         "extraVolumes": {
                             "default": [
                                 {
-                                    "ephemeral": {
-                                        "volumeClaimTemplate": {
-                                            "spec": {
-                                                "accessModes": [
-                                                    "ReadWriteOnce"
-                                                ],
-                                                "resources": {
-                                                    "requests": {
-                                                        "storage": "2Gi"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "name": "dynamic-plugins-root"
+                                    "name": "dynamic-plugins-root",
+                                    "persistentVolumeClaim": {
+                                        "claimName": "{{ printf \"%s-dynamic-plugins-root\" .Release.Name }}"
+                                    }
                                 },
                                 {
                                     "name": "audit-log-data",
