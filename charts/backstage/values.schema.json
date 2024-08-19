@@ -2604,6 +2604,14 @@
                                     }
                                 },
                                 {
+                                    "name": "dynamic-plugins-registry-auth",
+                                    "secret": {
+                                        "defaultMode": 416,
+                                        "optional": true,
+                                        "secretName": "{{ printf \"%s-dynamic-plugins-registry-auth\" .Release.Name }}"
+                                    }
+                                },
+                                {
                                     "emptyDir": {},
                                     "name": "npmcacache"
                                 }
@@ -4226,6 +4234,11 @@
                                             "name": "dynamic-plugins-npmrc",
                                             "readOnly": true,
                                             "subPath": ".npmrc"
+                                        },
+                                        {
+                                            "mountPath": "/opt/app-root/src/.config/containers",
+                                            "name": "dynamic-plugins-registry-auth",
+                                            "readOnly": true
                                         },
                                         {
                                             "mountPath": "/opt/app-root/src/.npm/_cacache",
