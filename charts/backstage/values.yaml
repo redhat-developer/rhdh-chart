@@ -37,7 +37,7 @@ upstream:
     image:
       registry: quay.io
       repository: rhdh/rhdh-hub-rhel9
-      tag: latest
+      tag: next
     command: []
     # FIXME (tumido): USE POSTGRES_PASSWORD and POSTGRES_USER instead of POSTGRES_ADMIN_PASSWORD
     # This is a hack. In {fedora,rhel}/postgresql images, regular user is forbidden
@@ -163,7 +163,7 @@ upstream:
             type: "RuntimeDefault"
         # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
         # It could be replaced by a custom image based on this one.
-        # @default -- `quay.io/janus-idp/backstage-showcase:latest`
+        # @default -- `quay.io/janus-idp/backstage-showcase:next`
         image: '{{ include "backstage.image" . }}'
         command:
           - ./install-dynamic-plugins.sh

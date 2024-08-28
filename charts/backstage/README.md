@@ -166,7 +166,7 @@ Kubernetes: `>= 1.25.0-0`
 | route.tls.termination | Specify TLS termination. | string | `"edge"` |
 | route.wildcardPolicy | Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed. | string | `"None"` |
 | upstream | Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml) | object | Use Openshift compatible settings |
-| upstream.backstage.initContainers[0].image | Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount. It could be replaced by a custom image based on this one. | string | `quay.io/janus-idp/backstage-showcase:latest` |
+| upstream.backstage.initContainers[0].image | Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount. It could be replaced by a custom image based on this one. | string | `quay.io/janus-idp/backstage-showcase:next` |
 
 ## Opinionated Backstage deployment
 
@@ -193,10 +193,10 @@ upstream:
 
 ## Features
 
-This charts defaults to using the [latest Janus-IDP Backstage Showcase image](https://quay.io/janus-idp/backstage-showcase:latest) that is OpenShift compatible:
+This charts defaults to using the [next Janus-IDP Backstage Showcase image](https://quay.io/janus-idp/backstage-showcase:next) that is OpenShift compatible:
 
 ```console
-quay.io/janus-idp/backstage-showcase:latest
+quay.io/janus-idp/backstage-showcase:next
 ```
 
 Additionally this chart enhances the upstream Backstage chart with following OpenShift-specific features:
