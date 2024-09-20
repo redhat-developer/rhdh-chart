@@ -2367,8 +2367,8 @@
                                     "name": "POSTGRESQL_ADMIN_PASSWORD",
                                     "valueFrom": {
                                         "secretKeyRef": {
-                                            "key": "postgres-password",
-                                            "name": "{{- include \"janus-idp.postgresql.secretName\" . }}"
+                                            "key": "{{- include \"postgresql.adminPasswordKey\" . }}",
+                                            "name": "{{- include \"postgresql.v1.secretName\" . }}"
                                         }
                                     }
                                 }
