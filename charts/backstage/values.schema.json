@@ -426,7 +426,7 @@
                                                                 "x-kubernetes-map-type": "atomic"
                                                             },
                                                             "matchLabelKeys": {
-                                                                "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                                "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                                 "items": {
                                                                     "type": "string"
                                                                 },
@@ -434,7 +434,7 @@
                                                                 "x-kubernetes-list-type": "atomic"
                                                             },
                                                             "mismatchLabelKeys": {
-                                                                "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                                "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                                 "items": {
                                                                     "type": "string"
                                                                 },
@@ -569,7 +569,7 @@
                                                         "x-kubernetes-map-type": "atomic"
                                                     },
                                                     "matchLabelKeys": {
-                                                        "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                        "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                         "items": {
                                                             "type": "string"
                                                         },
@@ -577,7 +577,7 @@
                                                         "x-kubernetes-list-type": "atomic"
                                                     },
                                                     "mismatchLabelKeys": {
-                                                        "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                        "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                         "items": {
                                                             "type": "string"
                                                         },
@@ -710,7 +710,7 @@
                                                                 "x-kubernetes-map-type": "atomic"
                                                             },
                                                             "matchLabelKeys": {
-                                                                "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                                "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                                 "items": {
                                                                     "type": "string"
                                                                 },
@@ -718,7 +718,7 @@
                                                                 "x-kubernetes-list-type": "atomic"
                                                             },
                                                             "mismatchLabelKeys": {
-                                                                "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                                "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                                 "items": {
                                                                     "type": "string"
                                                                 },
@@ -853,7 +853,7 @@
                                                         "x-kubernetes-map-type": "atomic"
                                                     },
                                                     "matchLabelKeys": {
-                                                        "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                        "description": "MatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both matchLabelKeys and labelSelector. Also, matchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                         "items": {
                                                             "type": "string"
                                                         },
@@ -861,7 +861,7 @@
                                                         "x-kubernetes-list-type": "atomic"
                                                     },
                                                     "mismatchLabelKeys": {
-                                                        "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.",
+                                                        "description": "MismatchLabelKeys is a set of pod label keys to select which pods will be taken into consideration. The keys are used to lookup values from the incoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)` to select the group of existing pods which pods will be taken into consideration for the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming pod labels will be ignored. The default value is empty. The same key is forbidden to exist in both mismatchLabelKeys and labelSelector. Also, mismatchLabelKeys cannot be set when labelSelector isn't set. This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).",
                                                         "items": {
                                                             "type": "string"
                                                         },
@@ -959,6 +959,9 @@
                                         "enabled": true
                                     }
                                 },
+                                "auth": {
+                                    "providers": {}
+                                },
                                 "backend": {
                                     "auth": {
                                         "externalAccess": [
@@ -1034,6 +1037,31 @@
                                     "description": "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when spec.os.name is windows.",
                                     "type": "boolean"
                                 },
+                                "appArmorProfile": {
+                                    "description": "AppArmorProfile defines a pod or container's AppArmor settings.",
+                                    "properties": {
+                                        "localhostProfile": {
+                                            "description": "localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is \"Localhost\".",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "type indicates which kind of AppArmor profile will be applied. Valid options are:\n  Localhost - a profile pre-loaded on the node.\n  RuntimeDefault - the container runtime's default profile.\n  Unconfined - no AppArmor enforcement.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ],
+                                    "type": "object",
+                                    "x-kubernetes-unions": [
+                                        {
+                                            "discriminator": "type",
+                                            "fields-to-discriminateBy": {
+                                                "localhostProfile": "LocalhostProfile"
+                                            }
+                                        }
+                                    ]
+                                },
                                 "capabilities": {
                                     "description": "Adds and removes POSIX capabilities from running containers.",
                                     "properties": {
@@ -1061,7 +1089,7 @@
                                     "type": "boolean"
                                 },
                                 "procMount": {
-                                    "description": "procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
+                                    "description": "procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
                                     "type": "string"
                                 },
                                 "readOnlyRootFilesystem": {
@@ -1214,7 +1242,7 @@
                                                                     "type": "string"
                                                                 },
                                                                 "name": {
-                                                                    "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                                    "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                                     "type": "string"
                                                                 },
                                                                 "optional": {
@@ -1282,7 +1310,7 @@
                                                                     "type": "string"
                                                                 },
                                                                 "name": {
-                                                                    "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                                    "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                                     "type": "string"
                                                                 },
                                                                 "optional": {
@@ -1322,7 +1350,7 @@
                                                     "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with.\n\nThe contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.",
                                                     "properties": {
                                                         "name": {
-                                                            "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                            "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                             "type": "string"
                                                         },
                                                         "optional": {
@@ -1340,7 +1368,7 @@
                                                     "description": "SecretEnvSource selects a Secret to populate the environment variables with.\n\nThe contents of the target Secret's Data field will represent the key-value pairs as environment variables.",
                                                     "properties": {
                                                         "name": {
-                                                            "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                            "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                             "type": "string"
                                                         },
                                                         "optional": {
@@ -1942,6 +1970,10 @@
                                                         "name": {
                                                             "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
                                                             "type": "string"
+                                                        },
+                                                        "request": {
+                                                            "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
+                                                            "type": "string"
                                                         }
                                                     },
                                                     "required": [
@@ -1997,6 +2029,31 @@
                                                 "description": "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when spec.os.name is windows.",
                                                 "type": "boolean"
                                             },
+                                            "appArmorProfile": {
+                                                "description": "AppArmorProfile defines a pod or container's AppArmor settings.",
+                                                "properties": {
+                                                    "localhostProfile": {
+                                                        "description": "localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is \"Localhost\".",
+                                                        "type": "string"
+                                                    },
+                                                    "type": {
+                                                        "description": "type indicates which kind of AppArmor profile will be applied. Valid options are:\n  Localhost - a profile pre-loaded on the node.\n  RuntimeDefault - the container runtime's default profile.\n  Unconfined - no AppArmor enforcement.",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "type"
+                                                ],
+                                                "type": "object",
+                                                "x-kubernetes-unions": [
+                                                    {
+                                                        "discriminator": "type",
+                                                        "fields-to-discriminateBy": {
+                                                            "localhostProfile": "LocalhostProfile"
+                                                        }
+                                                    }
+                                                ]
+                                            },
                                             "capabilities": {
                                                 "description": "Adds and removes POSIX capabilities from running containers.",
                                                 "properties": {
@@ -2024,7 +2081,7 @@
                                                 "type": "boolean"
                                             },
                                             "procMount": {
-                                                "description": "procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
+                                                "description": "procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
                                                 "type": "string"
                                             },
                                             "readOnlyRootFilesystem": {
@@ -2310,7 +2367,7 @@
                                                     "type": "string"
                                                 },
                                                 "mountPropagation": {
-                                                    "description": "mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10.",
+                                                    "description": "mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10. When RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified (which defaults to None).",
                                                     "type": "string"
                                                 },
                                                 "name": {
@@ -2320,6 +2377,10 @@
                                                 "readOnly": {
                                                     "description": "Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false.",
                                                     "type": "boolean"
+                                                },
+                                                "recursiveReadOnly": {
+                                                    "description": "RecursiveReadOnly specifies whether read-only mounts should be handled recursively.\n\nIf ReadOnly is false, this field has no meaning and must be unspecified.\n\nIf ReadOnly is true, and this field is set to Disabled, the mount is not made recursively read-only.  If this field is set to IfPossible, the mount is made recursively read-only, if it is supported by the container runtime.  If this field is set to Enabled, the mount is made recursively read-only if it is supported by the container runtime, otherwise the pod will not be started and an error will be generated to indicate the reason.\n\nIf this field is set to IfPossible or Enabled, MountPropagation must be set to None (or be unspecified, which defaults to None).\n\nIf this field is not specified, it is treated as an equivalent of Disabled.",
+                                                    "type": "string"
                                                 },
                                                 "subPath": {
                                                     "description": "Path within the volume from which the container's volume should be mounted. Defaults to \"\" (volume's root).",
@@ -2408,7 +2469,7 @@
                                                         "type": "string"
                                                     },
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     },
                                                     "optional": {
@@ -2476,7 +2537,7 @@
                                                         "type": "string"
                                                     },
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     },
                                                     "optional": {
@@ -2549,7 +2610,7 @@
                                         "type": "string"
                                     },
                                     "mountPropagation": {
-                                        "description": "mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10.",
+                                        "description": "mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10. When RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified (which defaults to None).",
                                         "type": "string"
                                     },
                                     "name": {
@@ -2559,6 +2620,10 @@
                                     "readOnly": {
                                         "description": "Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false.",
                                         "type": "boolean"
+                                    },
+                                    "recursiveReadOnly": {
+                                        "description": "RecursiveReadOnly specifies whether read-only mounts should be handled recursively.\n\nIf ReadOnly is false, this field has no meaning and must be unspecified.\n\nIf ReadOnly is true, and this field is set to Disabled, the mount is not made recursively read-only.  If this field is set to IfPossible, the mount is made recursively read-only, if it is supported by the container runtime.  If this field is set to Enabled, the mount is made recursively read-only if it is supported by the container runtime, otherwise the pod will not be started and an error will be generated to indicate the reason.\n\nIf this field is set to IfPossible or Enabled, MountPropagation must be set to None (or be unspecified, which defaults to None).\n\nIf this field is not specified, it is treated as an equivalent of Disabled.",
+                                        "type": "string"
                                     },
                                     "subPath": {
                                         "description": "Path within the volume from which the container's volume should be mounted. Defaults to \"\" (volume's root).",
@@ -2732,7 +2797,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -2764,7 +2829,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -2816,7 +2881,7 @@
                                                 "x-kubernetes-list-type": "atomic"
                                             },
                                             "name": {
-                                                "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                 "type": "string"
                                             },
                                             "optional": {
@@ -2841,7 +2906,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -3267,7 +3332,7 @@
                                                                 "type": "string"
                                                             },
                                                             "volumeAttributesClassName": {
-                                                                "description": "volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim. If specified, the CSI driver will create or update the volume with the attributes defined in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName, it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass will be applied to the claim but it's not allowed to reset this field to empty string once it is set. If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass will be set by the persistentvolume controller if it exists. If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#volumeattributesclass (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.",
+                                                                "description": "volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim. If specified, the CSI driver will create or update the volume with the attributes defined in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName, it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass will be applied to the claim but it's not allowed to reset this field to empty string once it is set. If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass will be set by the persistentvolume controller if it exists. If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/ (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).",
                                                                 "type": "string"
                                                             },
                                                             "volumeMode": {
@@ -3350,7 +3415,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -3462,6 +3527,20 @@
                                         ],
                                         "type": "object"
                                     },
+                                    "image": {
+                                        "description": "ImageVolumeSource represents a image volume resource.",
+                                        "properties": {
+                                            "pullPolicy": {
+                                                "description": "Policy for pulling OCI objects. Possible values are: Always: the kubelet always attempts to pull the reference. Container creation will fail If the pull fails. Never: the kubelet never pulls the reference and only uses a local image or artifact. Container creation will fail if the reference isn't present. IfNotPresent: the kubelet pulls if the reference isn't already present on disk. Container creation will fail if the reference isn't present and the pull fails. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.",
+                                                "type": "string"
+                                            },
+                                            "reference": {
+                                                "description": "Required: Image or artifact reference to be used. Behaves in the same way as pod.spec.containers[*].image. Pull secrets will be assembled in the same way as for the container image by looking up node credentials, SA image pull secrets, and pod spec image pull secrets. More info: https://kubernetes.io/docs/concepts/containers/images This field is optional to allow higher level config management to default or override container images in workload controllers like Deployments and StatefulSets.",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
                                     "iscsi": {
                                         "description": "Represents an ISCSI disk. ISCSI volumes can only be mounted as read/write once. ISCSI volumes support ownership management and SELinux relabeling.",
                                         "properties": {
@@ -3509,7 +3588,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -3617,9 +3696,9 @@
                                                 "type": "integer"
                                             },
                                             "sources": {
-                                                "description": "sources is the list of volume projections",
+                                                "description": "sources is the list of volume projections. Each entry in this list handles one source.",
                                                 "items": {
-                                                    "description": "Projection that may be projected along with other supported volume types",
+                                                    "description": "Projection that may be projected along with other supported volume types. Exactly one of these fields must be set.",
                                                     "properties": {
                                                         "clusterTrustBundle": {
                                                             "description": "ClusterTrustBundleProjection describes how to select a set of ClusterTrustBundle objects and project their contents into the pod filesystem.",
@@ -3722,7 +3801,7 @@
                                                                     "x-kubernetes-list-type": "atomic"
                                                                 },
                                                                 "name": {
-                                                                    "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                                    "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                                     "type": "string"
                                                                 },
                                                                 "optional": {
@@ -3837,7 +3916,7 @@
                                                                     "x-kubernetes-list-type": "atomic"
                                                                 },
                                                                 "name": {
-                                                                    "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                                    "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                                     "type": "string"
                                                                 },
                                                                 "optional": {
@@ -3946,7 +4025,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -3987,7 +4066,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -4082,7 +4161,7 @@
                                                 "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
                                                 "properties": {
                                                     "name": {
-                                                        "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                         "type": "string"
                                                     }
                                                 },
@@ -4137,6 +4216,12 @@
                         "image": {
                             "additionalProperties": false,
                             "properties": {
+                                "digest": {
+                                    "default": "",
+                                    "description": "digest takes precedence over image tag",
+                                    "title": "Backstage image digest",
+                                    "type": "string"
+                                },
                                 "pullPolicy": {
                                     "default": "Always",
                                     "description": "Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
@@ -4296,7 +4381,7 @@
                                                                     "type": "string"
                                                                 },
                                                                 "name": {
-                                                                    "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                                    "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                                     "type": "string"
                                                                 },
                                                                 "optional": {
@@ -4364,7 +4449,7 @@
                                                                     "type": "string"
                                                                 },
                                                                 "name": {
-                                                                    "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                                    "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                                     "type": "string"
                                                                 },
                                                                 "optional": {
@@ -4404,7 +4489,7 @@
                                                     "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with.\n\nThe contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.",
                                                     "properties": {
                                                         "name": {
-                                                            "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                            "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                             "type": "string"
                                                         },
                                                         "optional": {
@@ -4422,7 +4507,7 @@
                                                     "description": "SecretEnvSource selects a Secret to populate the environment variables with.\n\nThe contents of the target Secret's Data field will represent the key-value pairs as environment variables.",
                                                     "properties": {
                                                         "name": {
-                                                            "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                            "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                                                             "type": "string"
                                                         },
                                                         "optional": {
@@ -5024,6 +5109,10 @@
                                                         "name": {
                                                             "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
                                                             "type": "string"
+                                                        },
+                                                        "request": {
+                                                            "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
+                                                            "type": "string"
                                                         }
                                                     },
                                                     "required": [
@@ -5079,6 +5168,31 @@
                                                 "description": "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when spec.os.name is windows.",
                                                 "type": "boolean"
                                             },
+                                            "appArmorProfile": {
+                                                "description": "AppArmorProfile defines a pod or container's AppArmor settings.",
+                                                "properties": {
+                                                    "localhostProfile": {
+                                                        "description": "localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is \"Localhost\".",
+                                                        "type": "string"
+                                                    },
+                                                    "type": {
+                                                        "description": "type indicates which kind of AppArmor profile will be applied. Valid options are:\n  Localhost - a profile pre-loaded on the node.\n  RuntimeDefault - the container runtime's default profile.\n  Unconfined - no AppArmor enforcement.",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "type"
+                                                ],
+                                                "type": "object",
+                                                "x-kubernetes-unions": [
+                                                    {
+                                                        "discriminator": "type",
+                                                        "fields-to-discriminateBy": {
+                                                            "localhostProfile": "LocalhostProfile"
+                                                        }
+                                                    }
+                                                ]
+                                            },
                                             "capabilities": {
                                                 "description": "Adds and removes POSIX capabilities from running containers.",
                                                 "properties": {
@@ -5106,7 +5220,7 @@
                                                 "type": "boolean"
                                             },
                                             "procMount": {
-                                                "description": "procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
+                                                "description": "procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
                                                 "type": "string"
                                             },
                                             "readOnlyRootFilesystem": {
@@ -5392,7 +5506,7 @@
                                                     "type": "string"
                                                 },
                                                 "mountPropagation": {
-                                                    "description": "mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10.",
+                                                    "description": "mountPropagation determines how mounts are propagated from the host to container and the other way around. When not set, MountPropagationNone is used. This field is beta in 1.10. When RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified (which defaults to None).",
                                                     "type": "string"
                                                 },
                                                 "name": {
@@ -5402,6 +5516,10 @@
                                                 "readOnly": {
                                                     "description": "Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false.",
                                                     "type": "boolean"
+                                                },
+                                                "recursiveReadOnly": {
+                                                    "description": "RecursiveReadOnly specifies whether read-only mounts should be handled recursively.\n\nIf ReadOnly is false, this field has no meaning and must be unspecified.\n\nIf ReadOnly is true, and this field is set to Disabled, the mount is not made recursively read-only.  If this field is set to IfPossible, the mount is made recursively read-only, if it is supported by the container runtime.  If this field is set to Enabled, the mount is made recursively read-only if it is supported by the container runtime, otherwise the pod will not be started and an error will be generated to indicate the reason.\n\nIf this field is set to IfPossible or Enabled, MountPropagation must be set to None (or be unspecified, which defaults to None).\n\nIf this field is not specified, it is treated as an equivalent of Disabled.",
+                                                    "type": "string"
                                                 },
                                                 "subPath": {
                                                     "description": "Path within the volume from which the container's volume should be mounted. Defaults to \"\" (volume's root).",
@@ -5615,6 +5733,31 @@
                                     "description": "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when spec.os.name is windows.",
                                     "type": "boolean"
                                 },
+                                "appArmorProfile": {
+                                    "description": "AppArmorProfile defines a pod or container's AppArmor settings.",
+                                    "properties": {
+                                        "localhostProfile": {
+                                            "description": "localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is \"Localhost\".",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "type indicates which kind of AppArmor profile will be applied. Valid options are:\n  Localhost - a profile pre-loaded on the node.\n  RuntimeDefault - the container runtime's default profile.\n  Unconfined - no AppArmor enforcement.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ],
+                                    "type": "object",
+                                    "x-kubernetes-unions": [
+                                        {
+                                            "discriminator": "type",
+                                            "fields-to-discriminateBy": {
+                                                "localhostProfile": "LocalhostProfile"
+                                            }
+                                        }
+                                    ]
+                                },
                                 "capabilities": {
                                     "description": "Adds and removes POSIX capabilities from running containers.",
                                     "properties": {
@@ -5642,7 +5785,7 @@
                                     "type": "boolean"
                                 },
                                 "procMount": {
-                                    "description": "procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
+                                    "description": "procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
                                     "type": "string"
                                 },
                                 "readOnlyRootFilesystem": {
@@ -5887,6 +6030,10 @@
                                             "name": {
                                                 "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
                                                 "type": "string"
+                                            },
+                                            "request": {
+                                                "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
+                                                "type": "string"
                                             }
                                         },
                                         "required": [
@@ -6105,6 +6252,100 @@
                             },
                             "title": "Node tolerations for server scheduling to nodes with taints",
                             "type": "array"
+                        },
+                        "topologySpreadConstraints": {
+                            "default": [],
+                            "description": "Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
+                            "items": {
+                                "description": "TopologySpreadConstraint specifies how to spread matching pods among the given topology.",
+                                "properties": {
+                                    "labelSelector": {
+                                        "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.",
+                                        "properties": {
+                                            "matchExpressions": {
+                                                "description": "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
+                                                "items": {
+                                                    "description": "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+                                                    "properties": {
+                                                        "key": {
+                                                            "description": "key is the label key that the selector applies to.",
+                                                            "type": "string"
+                                                        },
+                                                        "operator": {
+                                                            "description": "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
+                                                            "type": "string"
+                                                        },
+                                                        "values": {
+                                                            "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "type": "array",
+                                                            "x-kubernetes-list-type": "atomic"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "operator"
+                                                    ],
+                                                    "type": "object"
+                                                },
+                                                "type": "array",
+                                                "x-kubernetes-list-type": "atomic"
+                                            },
+                                            "matchLabels": {
+                                                "additionalProperties": {
+                                                    "type": "string"
+                                                },
+                                                "description": "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object",
+                                        "x-kubernetes-map-type": "atomic"
+                                    },
+                                    "matchLabelKeys": {
+                                        "description": "MatchLabelKeys is a set of pod label keys to select the pods over which spreading will be calculated. The keys are used to lookup values from the incoming pod labels, those key-value labels are ANDed with labelSelector to select the group of existing pods over which spreading will be calculated for the incoming pod. The same key is forbidden to exist in both MatchLabelKeys and LabelSelector. MatchLabelKeys cannot be set when LabelSelector isn't set. Keys that don't exist in the incoming pod labels will be ignored. A null or empty list means only match against labelSelector.\n\nThis is a beta field and requires the MatchLabelKeysInPodTopologySpread feature gate to be enabled (enabled by default).",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "x-kubernetes-list-type": "atomic"
+                                    },
+                                    "maxSkew": {
+                                        "description": "MaxSkew describes the degree to which pods may be unevenly distributed. When `whenUnsatisfiable=DoNotSchedule`, it is the maximum permitted difference between the number of matching pods in the target topology and the global minimum. The global minimum is the minimum number of matching pods in an eligible domain or zero if the number of eligible domains is less than MinDomains. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 2/2/1: In this case, the global minimum is 1. | zone1 | zone2 | zone3 | |  P P  |  P P  |   P   | - if MaxSkew is 1, incoming pod can only be scheduled to zone3 to become 2/2/2; scheduling it onto zone1(zone2) would make the ActualSkew(3-1) on zone1(zone2) violate MaxSkew(1). - if MaxSkew is 2, incoming pod can be scheduled onto any zone. When `whenUnsatisfiable=ScheduleAnyway`, it is used to give higher precedence to topologies that satisfy it. It's a required field. Default value is 1 and 0 is not allowed.",
+                                        "type": "integer"
+                                    },
+                                    "minDomains": {
+                                        "description": "MinDomains indicates a minimum number of eligible domains. When the number of eligible domains with matching topology keys is less than minDomains, Pod Topology Spread treats \"global minimum\" as 0, and then the calculation of Skew is performed. And when the number of eligible domains with matching topology keys equals or greater than minDomains, this value has no effect on scheduling. As a result, when the number of eligible domains is less than minDomains, scheduler won't schedule more than maxSkew Pods to those domains. If value is nil, the constraint behaves as if MinDomains is equal to 1. Valid values are integers greater than 0. When value is not nil, WhenUnsatisfiable must be DoNotSchedule.\n\nFor example, in a 3-zone cluster, MaxSkew is set to 2, MinDomains is set to 5 and pods with the same labelSelector spread as 2/2/2: | zone1 | zone2 | zone3 | |  P P  |  P P  |  P P  | The number of domains is less than 5(MinDomains), so \"global minimum\" is treated as 0. In this situation, new pod with the same labelSelector cannot be scheduled, because computed skew will be 3(3 - 0) if new Pod is scheduled to any of the three zones, it will violate MaxSkew.",
+                                        "type": "integer"
+                                    },
+                                    "nodeAffinityPolicy": {
+                                        "description": "NodeAffinityPolicy indicates how we will treat Pod's nodeAffinity/nodeSelector when calculating pod topology spread skew. Options are: - Honor: only nodes matching nodeAffinity/nodeSelector are included in the calculations. - Ignore: nodeAffinity/nodeSelector are ignored. All nodes are included in the calculations.\n\nIf this value is nil, the behavior is equivalent to the Honor policy. This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.",
+                                        "type": "string"
+                                    },
+                                    "nodeTaintsPolicy": {
+                                        "description": "NodeTaintsPolicy indicates how we will treat node taints when calculating pod topology spread skew. Options are: - Honor: nodes without taints, along with tainted nodes for which the incoming pod has a toleration, are included. - Ignore: node taints are ignored. All nodes are included.\n\nIf this value is nil, the behavior is equivalent to the Ignore policy. This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.",
+                                        "type": "string"
+                                    },
+                                    "topologyKey": {
+                                        "description": "TopologyKey is the key of node labels. Nodes that have a label with this key and identical values are considered to be in the same topology. We consider each <key, value> as a \"bucket\", and try to put balanced number of pods into each bucket. We define a domain as a particular instance of a topology. Also, we define an eligible domain as a domain whose nodes meet the requirements of nodeAffinityPolicy and nodeTaintsPolicy. e.g. If TopologyKey is \"kubernetes.io/hostname\", each Node is a domain of that topology. And, if TopologyKey is \"topology.kubernetes.io/zone\", each zone is a domain of that topology. It's a required field.",
+                                        "type": "string"
+                                    },
+                                    "whenUnsatisfiable": {
+                                        "description": "WhenUnsatisfiable indicates how to deal with a pod if it doesn't satisfy the spread constraint. - DoNotSchedule (default) tells the scheduler not to schedule it. - ScheduleAnyway tells the scheduler to schedule the pod in any location,\n  but giving higher precedence to topologies that would help reduce the\n  skew.\nA constraint is considered \"Unsatisfiable\" for an incoming pod if and only if every possible node assignment for that pod would violate \"MaxSkew\" on some topology. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 3/1/1: | zone1 | zone2 | zone3 | | P P P |   P   |   P   | If WhenUnsatisfiable is set to DoNotSchedule, incoming pod can only be scheduled to zone2(zone3) to become 3/2/1(3/1/2) as ActualSkew(2-1) on zone2(zone3) satisfies MaxSkew(1). In other words, the cluster can still be imbalanced, but scheduler won't make it *more* imbalanced. It's a required field.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "maxSkew",
+                                    "topologyKey",
+                                    "whenUnsatisfiable"
+                                ],
+                                "type": "object"
+                            },
+                            "title": "Topology Spread Constraint for pod assignment",
+                            "type": "array"
                         }
                     },
                     "title": "Backstage parameters",
@@ -6230,12 +6471,66 @@
                             "title": "Enable the creation of the ingress resource",
                             "type": "boolean"
                         },
+                        "extraHosts": {
+                            "default": [],
+                            "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "path": {
+                                        "type": "string"
+                                    },
+                                    "pathType": {
+                                        "type": "string"
+                                    },
+                                    "port": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "title": "List of additional hostnames to be covered with this ingress record",
+                            "type": "array"
+                        },
+                        "extraTls": {
+                            "default": [],
+                            "items": {
+                                "description": "IngressTLS describes the transport layer security associated with an ingress.",
+                                "properties": {
+                                    "hosts": {
+                                        "description": "hosts is a list of hosts included in the TLS certificate. The values in this list must match the name/s used in the tlsSecret. Defaults to the wildcard host setting for the loadbalancer controller fulfilling this Ingress, if left unspecified.",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "x-kubernetes-list-type": "atomic"
+                                    },
+                                    "secretName": {
+                                        "description": "secretName is the name of the secret used to terminate TLS traffic on port 443. Field is left optional to allow TLS routing based on SNI hostname alone. If the SNI host in a listener conflicts with the \"Host\" header field used by an IngressRule, the SNI host is used for termination and value of the \"Host\" header is used for routing.",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "title": "The TLS configuration for additional hostnames to be covered with this ingress record.",
+                            "type": "array"
+                        },
                         "host": {
                             "default": "{{ .Values.global.host }}",
                             "examples": [
                                 "backstage.10.0.0.1.nip.io"
                             ],
                             "title": "Hostname to be used to expose the route to access the backstage application.",
+                            "type": "string"
+                        },
+                        "path": {
+                            "default": "/",
+                            "examples": [
+                                "/backstage"
+                            ],
+                            "title": "Path to be used to expose the full route to access the backstage application.",
                             "type": "string"
                         },
                         "tls": {
@@ -6308,6 +6603,19 @@
                                     "description": "ote that the /metrics endpoint is NOT present in a freshly scaffolded Backstage app. To setup, follow the Prometheus metrics tutorial. https://github.com/backstage/backstage/blob/master/contrib/docs/tutorials/prometheus-metrics.md",
                                     "title": "ServiceMonitor endpoint path",
                                     "type": "string"
+                                },
+                                "port": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        }
+                                    ],
+                                    "default": "http-backend",
+                                    "description": "The port where the metrics are exposed. If using OpenTelemetry as [documented here](https://backstage.io/docs/tutorials/setup-opentelemetry/), then the port needs to be explicitely specificed. OpenTelemetry's default port is 9464.",
+                                    "title": "ServiceMonitor endpoint port"
                                 }
                             },
                             "title": "ServiceMonitor configuration",
