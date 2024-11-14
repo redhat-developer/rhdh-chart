@@ -206,6 +206,13 @@ upstream:
       checksum/dynamic-plugins: >-
         {{- include "common.tplvalues.render" ( dict "value"
         .Values.global.dynamic "context" $) | sha256sum }}
+  ingress:
+    host: "{{ .Values.global.host }}"
+  metrics:
+    serviceMonitor:
+      enabled: false
+      path: /metrics
+      port: http-metrics
   postgresql:
     enabled: true
     postgresqlDataDir: /var/lib/pgsql/data/userdata
@@ -241,8 +248,11 @@ upstream:
             secretKeyRef:
               key: postgres-password
               name: '{{- include "postgresql.v1.secretName" . }}'
-  ingress:
-    host: "{{ .Values.global.host }}"
+  service:
+    extraPorts:
+      - name: http-metrics
+        port: 9464
+        targetPort: 9464
 
 # -- OpenShift Route parameters
 route:
