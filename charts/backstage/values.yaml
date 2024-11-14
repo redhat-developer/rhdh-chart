@@ -47,9 +47,6 @@ upstream:
     # create multiple DBs. Since Backstage requires by default 5 different DBs, we
     # can't accommodate that properly.
     appConfig:
-      auditLog:
-        rotateFile:
-          enabled: true
       auth:
         providers: {}
       app:
@@ -123,16 +120,10 @@ upstream:
       # The initContainer below will install dynamic plugins in this volume mount.
       - name: dynamic-plugins-root
         mountPath: /opt/app-root/src/dynamic-plugins-root
-      # Audit Log data will be stored in this volume mount.
-      - name: audit-log-data
-        mountPath: /var/log/redhat-developer-hub/audit
     extraVolumes:
       - name: dynamic-plugins-root
         persistentVolumeClaim:
           claimName: '{{ printf "%s-dynamic-plugins-root" .Release.Name }}'
-      - name: audit-log-data
-        persistentVolumeClaim:
-          claimName: '{{ printf "%s-audit-log" .Release.Name }}'
       # Volume that will expose the `dynamic-plugins.yaml` file from the `dynamic-plugins` config map.
       # The `dynamic-plugins` config map is created by the helm chart from the content of the `global.dynamic` field.
       - name: dynamic-plugins
