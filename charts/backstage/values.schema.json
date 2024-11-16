@@ -954,11 +954,6 @@
                                 "app": {
                                     "baseUrl": "https://{{- include \"janus-idp.hostname\" . }}"
                                 },
-                                "auditLog": {
-                                    "rotateFile": {
-                                        "enabled": true
-                                    }
-                                },
                                 "auth": {
                                     "providers": {}
                                 },
@@ -2596,10 +2591,6 @@
                                 {
                                     "mountPath": "/opt/app-root/src/dynamic-plugins-root",
                                     "name": "dynamic-plugins-root"
-                                },
-                                {
-                                    "mountPath": "/var/log/redhat-developer-hub/audit",
-                                    "name": "audit-log-data"
                                 }
                             ],
                             "items": {
@@ -2649,12 +2640,6 @@
                                     "name": "dynamic-plugins-root",
                                     "persistentVolumeClaim": {
                                         "claimName": "{{ printf \"%s-dynamic-plugins-root\" .Release.Name }}"
-                                    }
-                                },
-                                {
-                                    "name": "audit-log-data",
-                                    "persistentVolumeClaim": {
-                                        "claimName": "{{ printf \"%s-audit-log\" .Release.Name }}"
                                     }
                                 },
                                 {
