@@ -30,10 +30,11 @@ spec:
           command:
           - ls
           - /usr/bin/curl
-      image: quay.io/curl/curl:latest
+      image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
       args:
         - |
           curl --connect-timeout 5 --max-time 20 --retry 20 --retry-delay 10 --retry-max-time 60 --retry-all-errors {{ include "common.names.fullname" . }}:{{ .Values.upstream.service.ports.backend }}
   restartPolicy: Never
+{{- end }}
