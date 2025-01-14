@@ -1,3 +1,4 @@
+{{- if .Values.test.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -8,7 +9,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.upstream.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   annotations:
-      helm.sh/hook: test
+    helm.sh/hook: test
 spec:
   containers:
     - name: curl
