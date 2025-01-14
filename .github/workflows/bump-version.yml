@@ -44,7 +44,7 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           reaction-type: eyes
 
-      - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         if: steps.command.outputs.command-name == 'bump'
         with:
           python-version: 3.13
