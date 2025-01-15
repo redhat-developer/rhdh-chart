@@ -16,7 +16,6 @@ description: |
   A Helm chart for deploying Red Hat Developer Hub.
 
   The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.5/html-single/telemetry_data_collection/index
-
 dependencies:
   - name: common
     repository: https://charts.bitnami.com/bitnami
@@ -45,4 +44,4 @@ sources:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.25.0
+version: 2.26.0
