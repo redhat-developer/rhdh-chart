@@ -253,6 +253,7 @@ upstream:
         enabled: true
         size: 1Gi
         mountPath: /var/lib/pgsql/data
+        storageClass: null
       extraEnvVars:
         - name: POSTGRESQL_ADMIN_PASSWORD
           valueFrom:
@@ -307,3 +308,15 @@ route:
     # --  Indicates the desired behavior for insecure connections to a route.
     # <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled.
     insecureEdgeTerminationPolicy: "Redirect"
+
+dynamicPlugins:
+  cache:
+    # -- Spec of the dynamic plugins root volume claim.
+    # <br/> Note that, by default, this is set to use the default storage class, if available in the cluster.
+    volumeClaimSpec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: null

@@ -1,0 +1,18 @@
+# Workaround for kind cluster in CI which has no Routes
+route:
+  enabled: false
+upstream:
+  postgresql:
+    primary:
+      persistence:
+        # This custom-sc storage class is created in the test GH Workflow
+        storageClass: custom-sc
+
+dynamicPlugins:
+  cache:
+    volumeClaimSpec:
+      resources:
+        requests:
+          storage: 3Gi
+      # This custom-sc storage class is created in the test GH Workflow
+      storageClassName: custom-sc
