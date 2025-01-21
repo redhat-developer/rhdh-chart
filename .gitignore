@@ -7,3 +7,4 @@
 # helm chart dependencies
 charts/*/charts/
 **/charts/*.tgz
+output

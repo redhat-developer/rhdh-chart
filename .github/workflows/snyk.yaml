@@ -1,0 +1,38 @@
+name: SNYK
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  scan-iac:
+    name: Scan Rendered Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: v3.17.0
+
+      - name: Render Templates
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add backstage https://backstage.github.io/charts
+          helm repo update    
+          helm dependency build ./charts/backstage
+          helm template ./charts/backstage/ --output-dir ./output
+
+      - name: Run SNYK IaC Scan
+        continue-on-error: true
+        uses: snyk/actions/iac@0.4.0
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
+        with:
+          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart"
+          file: ./output/
