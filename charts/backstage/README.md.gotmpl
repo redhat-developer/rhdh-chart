@@ -110,6 +110,46 @@ helm upgrade -i <release_name> oci://ghcr.io/redhat-developer/rhdh-chart/backsta
 
 > **Tip**: List all releases using `helm list`
 
+### Testing a Release
+
+Once an Helm Release has been deployed, you can test it using the [`helm test`](https://helm.sh/docs/helm/helm_test/) command:
+
+```sh
+helm test <release_name>
+```
+
+This will run a simple Pod in the cluster to check that the application deployed is up and running.
+
+You can control whether to disable this test pod or you can also customize the image it leverages.
+See the `test.enabled` and `test.image` parameters in the [`values.yaml`](./values.yaml) file.
+
+> **Tip**: Disabling the test pod will not prevent the `helm test` command from passing later on. It will simply report that no test suite is available.
+
+Below are a few examples:
+
+<details>
+
+<summary>Disabling the test pod</summary>
+
+```sh
+helm install <release_name> <repo_or_oci_registry> \
+  --set test.enabled=false
+```
+
+</details>
+
+<details>
+
+<summary>Customizing the test pod image</summary>
+
+```sh
+helm install <release_name> <repo_or_oci_registry> \
+  --set test.image.repository=curl/curl-base \
+  --set test.image.tag=8.11.1
+```
+
+</details>
+
 ### Uninstalling the Chart
 
 To uninstall/delete the `my-backstage-release` deployment:
