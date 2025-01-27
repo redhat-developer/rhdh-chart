@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 2.24.3](https://img.shields.io/badge/Version-2.24.3-informational?style=flat-square)
+![Version: 2.24.4](https://img.shields.io/badge/Version-2.24.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -118,6 +118,46 @@ helm upgrade -i <release_name> oci://ghcr.io/redhat-developer/rhdh-chart/backsta
 
 > **Tip**: List all releases using `helm list`
 
+### Testing a Release
+
+Once an Helm Release has been deployed, you can test it using the [`helm test`](https://helm.sh/docs/helm/helm_test/) command:
+
+```sh
+helm test <release_name>
+```
+
+This will run a simple Pod in the cluster to check that the application deployed is up and running.
+
+You can control whether to disable this test pod or you can also customize the image it leverages.
+See the `test.enabled` and `test.image` parameters in the [`values.yaml`](./values.yaml) file.
+
+> **Tip**: Disabling the test pod will not prevent the `helm test` command from passing later on. It will simply report that no test suite is available.
+
+Below are a few examples:
+
+<details>
+
+<summary>Disabling the test pod</summary>
+
+```sh
+helm install <release_name> <repo_or_oci_registry> \
+  --set test.enabled=false
+```
+
+</details>
+
+<details>
+
+<summary>Customizing the test pod image</summary>
+
+```sh
+helm install <release_name> <repo_or_oci_registry> \
+  --set test.image.repository=curl/curl-base \
+  --set test.image.tag=8.11.1
+```
+
+</details>
+
 ### Uninstalling the Chart
 
 To uninstall/delete the `my-backstage-release` deployment:
@@ -166,6 +206,11 @@ Kubernetes: `>= 1.25.0-0`
 | route.tls.key | Key file contents | string | `""` |
 | route.tls.termination | Specify TLS termination. | string | `"edge"` |
 | route.wildcardPolicy | Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed. | string | `"None"` |
+| test | Test pod parameters | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"curl/curl","tag":"latest"}}` |
+| test.enabled | Whether to enable the test-connection pod used for testing the Release using `helm test`. | bool | `true` |
+| test.image.registry | Test connection pod image registry | string | `"quay.io"` |
+| test.image.repository | Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"curl/curl"` |
+| test.image.tag | Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"latest"` |
 | upstream | Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml) | object | Use Openshift compatible settings |
 | upstream.backstage.initContainers[0].image | Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount. It could be replaced by a custom image based on this one. | string | `quay.io/janus-idp/backstage-showcase:latest` |
 
