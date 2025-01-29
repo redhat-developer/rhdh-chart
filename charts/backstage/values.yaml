@@ -313,6 +313,7 @@ dynamicPlugins:
   cache:
     # -- Spec of the dynamic plugins root volume claim.
     # <br/> Note that, by default, this is set to use the default storage class, if available in the cluster.
+    ephemeral: true  # Set to false to enable the PVC
     volumeClaimSpec:
       accessModes:
         - ReadWriteOnce

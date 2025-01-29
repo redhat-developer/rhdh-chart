@@ -1,6 +1,8 @@
-kind: PersistentVolumeClaim
+{{- if not .Values.dynamicPlugins.cache.ephemeral }}
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: {{ printf "%s-dynamic-plugins-root" .Release.Name }}
+  name: '{{ printf "%s-dynamic-plugins-root" .Release.Name }}'
 spec:
   {{- toYaml .Values.dynamicPlugins.cache.volumeClaimSpec | nindent 2 }}
+{{- end }}
