@@ -954,6 +954,9 @@
                                 "app": {
                                     "baseUrl": "https://{{- include \"janus-idp.hostname\" . }}"
                                 },
+                                "auth": {
+                                    "providers": {}
+                                },
                                 "backend": {
                                     "auth": {
                                         "externalAccess": [

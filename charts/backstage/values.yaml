@@ -47,6 +47,8 @@ upstream:
     # create multiple DBs. Since Backstage requires by default 5 different DBs, we
     # can't accommodate that properly.
     appConfig:
+      auth:
+        providers: {}
       app:
         # Please update to match host in case you don't want to configure hostname via `global.clusterRouterBase` or `global.host` if not deploying on an openshift cluster.
         baseUrl: 'https://{{- include "janus-idp.hostname" . }}'
