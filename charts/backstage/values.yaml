@@ -285,6 +285,17 @@ route:
     # <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled.
     insecureEdgeTerminationPolicy: "Redirect"
 
+auditLog:
+  # -- Spec of the audit log volume claim.
+  # <br/> Note that, by default, this is set to use the default storage class, if available in the cluster.
+  volumeClaimSpec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+    storageClassName: null
+
 dynamicPlugins:
   cache:
     # -- Spec of the dynamic plugins root volume claim.

@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 2.19.3](https://img.shields.io/badge/Version-2.19.3-informational?style=flat-square)
+![Version: 2.19.4](https://img.shields.io/badge/Version-2.19.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -181,6 +181,7 @@ Kubernetes: `>= 1.25.0-0`
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
+| auditLog.volumeClaimSpec | Spec of the audit log volume claim. <br/> Note that, by default, this is set to use the default storage class, if available in the cluster. | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"1Gi"}},"storageClassName":null}` |
 | dynamicPlugins.cache.volumeClaimSpec | Spec of the dynamic plugins root volume claim. <br/> Note that, by default, this is set to use the default storage class, if available in the cluster. | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":null}` |
 | global.auth | Enable service authentication within Backstage instance | object | `{"backend":{"enabled":true,"existingSecret":"","value":""}}` |
 | global.auth.backend | Backend service to service authentication <br /> Ref: https://backstage.io/docs/auth/service-to-service-auth/ | object | `{"enabled":true,"existingSecret":"","value":""}` |
