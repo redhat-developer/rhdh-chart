@@ -143,6 +143,7 @@ upstream:
       - name: temp
         mountPath: /tmp
     extraVolumes:
+      # -- Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start.
       - name: dynamic-plugins-root
         ephemeral:
           volumeClaimTemplate:
