@@ -144,8 +144,15 @@ upstream:
         mountPath: /tmp
     extraVolumes:
       - name: dynamic-plugins-root
-        persistentVolumeClaim:
-          claimName: '{{ printf "%s-dynamic-plugins-root" .Release.Name }}'
+        ephemeral:
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  # -- Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins.
+                  storage: 5Gi
       # Volume that will expose the `dynamic-plugins.yaml` file from the `dynamic-plugins` config map.
       # The `dynamic-plugins` config map is created by the helm chart from the content of the `global.dynamic` field.
       - name: dynamic-plugins

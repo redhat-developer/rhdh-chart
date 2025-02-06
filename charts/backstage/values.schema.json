@@ -2678,10 +2678,21 @@
                         "extraVolumes": {
                             "default": [
                                 {
-                                    "name": "dynamic-plugins-root",
-                                    "persistentVolumeClaim": {
-                                        "claimName": "{{ printf \"%s-dynamic-plugins-root\" .Release.Name }}"
-                                    }
+                                    "ephemeral": {
+                                        "volumeClaimTemplate": {
+                                            "spec": {
+                                                "accessModes": [
+                                                    "ReadWriteOnce"
+                                                ],
+                                                "resources": {
+                                                    "requests": {
+                                                        "storage": "5Gi"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "name": "dynamic-plugins-root"
                                 },
                                 {
                                     "configMap": {
