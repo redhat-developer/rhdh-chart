@@ -44,12 +44,12 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           reaction-type: eyes
 
-      - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5
+      - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5
         if: steps.command.outputs.command-name == 'bump'
         with:
-          python-version: 3.7
+          python-version: 3.13
 
-      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5
+      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
         if: steps.command.outputs.command-name == 'bump'
         with:
           go-version: ^1
@@ -68,7 +68,7 @@ jobs:
 
       - name: Checkout Repository
         if: steps.command.outputs.command-name == 'bump'
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           token: ${{ steps.generate_token.outputs.token }}
 
@@ -81,7 +81,7 @@ jobs:
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
         id: get_version
-        uses: mikefarah/yq@dd648994340a5d03225d97abf19c9bf1086c3f07 # v4.40.5
+        uses: mikefarah/yq@8bf425b4d1344db7cd469a8d10a390876e0c77fd # v4.45.1
         with:
           cmd: yq ".version" charts/backstage/Chart.yaml
 
@@ -94,13 +94,13 @@ jobs:
 
       - name: Bump the version
         if: steps.command.outputs.command-name == 'bump'
-        uses: mikefarah/yq@dd648994340a5d03225d97abf19c9bf1086c3f07 # v4.40.5
+        uses: mikefarah/yq@8bf425b4d1344db7cd469a8d10a390876e0c77fd # v4.45.1
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/backstage/Chart.yaml
 
       - name: Run pre-commit
         if: steps.command.outputs.command-name == 'bump'
-        uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # renovate: tag=v3.0.0
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         continue-on-error: true
 
       - name: Setup Gitsign
@@ -109,7 +109,7 @@ jobs:
 
       - name: Commit pre-commit changes
         if: steps.command.outputs.command-name == 'bump'
-        uses: stefanzweifel/git-auto-commit-action@8756aa072ef5b4a080af5dc8fef36c5d586e521d # v5
+        uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5
         with:
           commit_message: Bump version to ${{ steps.semver.outputs.new_version }}
           commit_options: '-s'
