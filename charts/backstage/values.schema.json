@@ -4372,6 +4372,7 @@
                                                 "ALL"
                                             ]
                                         },
+                                        "readOnlyRootFilesystem": true,
                                         "runAsNonRoot": true,
                                         "seccompProfile": {
                                             "type": "RuntimeDefault"
