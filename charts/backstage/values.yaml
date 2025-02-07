@@ -182,6 +182,7 @@ upstream:
             memory: 2.5Gi
             ephemeral-storage: 5Gi
         securityContext:
+          readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
