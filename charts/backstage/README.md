@@ -181,7 +181,6 @@ Kubernetes: `>= 1.25.0-0`
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
-| dynamicPlugins.cache.volumeClaimSpec | Spec of the dynamic plugins root volume claim. <br/> Note that, by default, this is set to use the default storage class, if available in the cluster. | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":null}` |
 | global.auth | Enable service authentication within Backstage instance | object | `{"backend":{"enabled":true,"existingSecret":"","value":""}}` |
 | global.auth.backend | Backend service to service authentication <br /> Ref: https://backstage.io/docs/auth/service-to-service-auth/ | object | `{"enabled":true,"existingSecret":"","value":""}` |
 | global.auth.backend.enabled | Enable backend service to service authentication, unless configured otherwise it generates a secret value | bool | `true` |
