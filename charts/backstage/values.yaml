@@ -253,7 +253,6 @@ upstream:
         enabled: true
         size: 1Gi
         mountPath: /var/lib/pgsql/data
-        storageClass: null
       extraEnvVars:
         - name: POSTGRESQL_ADMIN_PASSWORD
           valueFrom:
@@ -319,7 +318,6 @@ dynamicPlugins:
       resources:
         requests:
           storage: 5Gi
-      storageClassName: null
 
 # -- Test pod parameters
 test:
