@@ -83,7 +83,7 @@ jobs:
 
       - name: Run chart-testing (latest)
         # test with latest stable backstage-showcase release
-        run: ct install --config ct-install.yaml --target-branch ${{ github.event.pull_request.base.ref }} --helm-extra-set-args="--set=upstream.backstage.image.tag=latest --set=global.clusterRouterBase=app.example.com"
+        run: ct install --config ct-install.yaml --upgrade --target-branch ${{ github.event.pull_request.base.ref }} --helm-extra-set-args="--set=upstream.backstage.image.tag=latest --set=global.clusterRouterBase=app.example.com"
   test-next:
     name: Test Next Release
     runs-on: ubuntu-latest
@@ -136,4 +136,4 @@ jobs:
 
       - name: Run chart-testing (next)
         # test with the next backstage-showcase version (main branch)
-        run: ct install --config ct-install.yaml --target-branch ${{ github.event.pull_request.base.ref }} --helm-extra-set-args="--set=upstream.backstage.image.tag=next --set=global.clusterRouterBase=app.example.com"
+        run: ct install --config ct-install.yaml --upgrade --target-branch ${{ github.event.pull_request.base.ref }} --helm-extra-set-args="--set=upstream.backstage.image.tag=next --set=global.clusterRouterBase=app.example.com"
