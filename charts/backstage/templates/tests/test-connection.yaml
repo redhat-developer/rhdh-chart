@@ -18,7 +18,9 @@ spec:
         readOnlyRootFilesystem: true
         capabilities:
           drop: ["ALL"]
-        runAsNonRoot: false
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       resources:
         requests:
           cpu: 10m

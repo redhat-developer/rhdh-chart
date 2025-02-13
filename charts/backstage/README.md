@@ -2,7 +2,11 @@
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
+<<<<<<< HEAD
 ![Version: 4.0.1](https://img.shields.io/badge/Version-4.0.1-informational?style=flat-square)
+=======
+![Version: 3.1.1](https://img.shields.io/badge/Version-3.1.1-informational?style=flat-square)
+>>>>>>> b8d50e3 (chore: Update curl container securityContext settings)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -219,10 +223,10 @@ Kubernetes: `>= 1.25.0-0`
 | route.tls.key | Key file contents | string | `""` |
 | route.tls.termination | Specify TLS termination. | string | `"edge"` |
 | route.wildcardPolicy | Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed. | string | `"None"` |
-| test | Test pod parameters | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"curl/curl","tag":"latest"}}` |
+| test | Test pod parameters | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"fedora/fedora-minimal","tag":"latest"}}` |
 | test.enabled | Whether to enable the test-connection pod used for testing the Release using `helm test`. | bool | `true` |
 | test.image.registry | Test connection pod image registry | string | `"quay.io"` |
-| test.image.repository | Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"curl/curl"` |
+| test.image.repository | Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"fedora/fedora-minimal"` |
 | test.image.tag | Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"latest"` |
 | upstream | Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml) | object | Use Openshift compatible settings |
 | upstream.backstage.extraVolumes[0] | Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start. | object | `{"ephemeral":{"volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}}}}},"name":"dynamic-plugins-root"}` |
