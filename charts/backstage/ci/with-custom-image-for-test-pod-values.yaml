@@ -10,5 +10,5 @@ upstream:
 test:
   image:
     registry: quay.io
-    repository: curl/curl-base
-    tag: 8.11.1
+    repository: rhdh-community/curl
+    tag: latest
