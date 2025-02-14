@@ -67,6 +67,7 @@ upstream:
                 subject: legacy-default-config
                 secret: ${BACKEND_SECRET}
     containerSecurityContext:
+      readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
         drop: ["ALL"]
