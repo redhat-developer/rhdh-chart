@@ -40,8 +40,8 @@ name: backstage
 type: application
 sources:
   - https://github.com/redhat-developer/rhdh-chart
-  - https://github.com/janus-idp/backstage-showcase
+  - https://github.com/redhat-developer/rhdh
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 3.1.0
+version: 3.1.1
