@@ -56,6 +56,10 @@ upstream:
         baseUrl: 'https://{{- include "janus-idp.hostname" . }}'
         cors:
           origin: 'https://{{- include "janus-idp.hostname" . }}'
+        csp:
+          script-src: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
+          script-src-elem: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
+          connect-src: ["'self'", 'http:', 'https:', 'data:']
         database:
           connection:
             password: ${POSTGRESQL_ADMIN_PASSWORD}
@@ -341,7 +345,6 @@ test:
 orchestrator:
   enabled: true
   rhdhOperator:
-    isReleaseCandidate: false # Indicates RC builds should be used by the chart to install RHDH
     enabled: true # whether the operator should be deployed by the chart
     enableGuestProvider: false # whether to enable guest provider
     catalogBranch: v1.4.x # The branch for https://github.com/rhdhorchestrator/workflow-software-templates used to import software templates resources
@@ -349,25 +352,9 @@ orchestrator:
       name: backstage-backend-auth-secret # name of the secret that contains the credentials for the plugin to establish a communication channel with the Kubernetes API, ArgoCD, GitHub servers and SMTP mail server.
       backstage:
         backendSecret: "{{ .Values.global.auth.value }}" # Key in the secret with name defined in the 'name' field that contains the value of the Backstage backend secret. Defaults to 'BACKEND_SECRET'. It's required.
-      github: #GitHub specific configuration fields that are injected to the backstage instance to allow the plugin to communicate with GitHub.
-        token: GITHUB_TOKEN # Key in the secret with name defined in the 'name' field that contains the value of the authentication token as expected by GitHub. Required for importing resource to the catalog, launching software templates and more. Defaults to 'GITHUB_TOKEN', empty for not available.
-        clientId: GITHUB_CLIENT_ID # Key in the secret with name defined in the 'name' field that contains the value of the client ID that you generated on GitHub, for GitHub authentication (requires GitHub App). Defaults to 'GITHUB_CLIENT_ID', empty for not available.
-        clientSecret: GITHUB_CLIENT_SECRET # Key in the secret with name defined in the 'name' field that contains the value of the client secret tied to the generated client ID. Defaults to 'GITHUB_CLIENT_SECRET', empty for not available.
-      gitlab: #Gitlab specific configuration fields that are injected to the backstage instance to allow the plugin to communicate with Gitlab.
-        host: GITLAB_HOST # Key in the secret with name defined in the 'name' field that contains the value of Gitlab Host's name. Defaults to 'GITHUB_HOST', empty for not available.
-        token: GITLAB_TOKEN # Key in the secret with name defined in the 'name' field that contains the value of the authentication token as expected by Gitlab. Required for importing resource to the catalog, launching software templates and more. Defaults to 'GITLAB_TOKEN', empty for not available.
       k8s: # Kubernetes specific configuration fields that are injected to the backstage instance to allow the plugin to communicate with the Kubernetes API Server.
         clusterToken: K8S_CLUSTER_TOKEN # Key in the secret with name defined in the 'name' field that contains the value of the Kubernetes API bearer token used for authentication. Defaults to 'K8S_CLUSTER_TOKEN', empty for not available.
         clusterUrl: K8S_CLUSTER_URL # Key in the secret with name defined in the 'name' field that contains the value of the API URL of the kubernetes cluster. Defaults to 'K8S_CLUSTER_URL', empty for not available.
-      argocd: # ArgoCD specific configuration fields that are injected to the backstage instance to allow the plugin to communicate with ArgoCD. Note that ArgoCD must be deployed beforehand and the argocd.enabled field must be set to true as well.
-        url: ARGOCD_URL # Key in the secret with name defined in the 'name' field that contains the value of the URL of the ArgoCD API server. Defaults to 'ARGOCD_URL', empty for not available.
-        username: ARGOCD_USERNAME # Key in the secret with name defined in the 'name' field that contains the value of the username to login to ArgoCD. Defaults to 'ARGOCD_USERNAME', empty for not available.
-        password: ARGOCD_PASSWORD # Key in the secret with name  defined in the 'name' field that contains the value of the password to authenticate to ArgoCD. Defaults to 'ARGOCD_PASSWORD', empty for not available.
-      notificationsEmail:
-        hostname: NOTIFICATIONS_EMAIL_HOSTNAME # Key in the secret with name defined in the 'name' field that contains the value of the hostname of the SMTP server for the notifications plugin. Defaults to 'NOTIFICATIONS_EMAIL_HOSTNAME', empty for not available.
-        username: NOTIFICATIONS_EMAIL_USERNAME # Key in the secret with name defined in the 'name' field that contains the value of the username of the SMTP server for the notifications plugin. Defaults to 'NOTIFICATIONS_EMAIL_USERNAME', empty for not available.
-        password: NOTIFICATIONS_EMAIL_PASSWORD # Key in the secret with name defined in the 'name' field that contains the value of the password of the SMTP server for the notifications plugin. Defaults to 'NOTIFICATIONS_EMAIL_PASSWORD', empty for not available.
-
   rhdhPlugins: # RHDH plugins required for the Orchestrator
     npmRegistry: "" # NPM registry is defined already in the container, but sometimes the registry need to be modified to use different versions of the plugin, for example: staging(https://npm.stage.registry.redhat.com) or development repositories
     scope: "https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/1.4.0"

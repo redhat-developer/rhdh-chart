@@ -59,7 +59,9 @@
                                         "default": false
                                     }
                                 },
-                                "required": ["package"]
+                                "required": [
+                                    "package"
+                                ]
                             }
                         },
                         "includes": {
@@ -110,7 +112,7 @@
             "properties": {
                 "annotations": {
                     "title": "Route specific annotations.",
-                    "type":  "object",
+                    "type": "object",
                     "default": {}
                 },
                 "enabled": {
@@ -251,45 +253,6 @@
                                         }
                                     }
                                 },
-                                "github": {
-                                    "title": "github configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "token": {
-                                            "title": "token value",
-                                            "type": "string",
-                                            "default": "GITHUB_TOKEN"
-                                        },
-                                        "clientId": {
-                                            "title": "clientId value",
-                                            "type": "string",
-                                            "default": "GITHUB_CLIENT_ID"
-                                        },
-                                        "clientSecret": {
-                                            "title": "clientSecret value",
-                                            "type": "string",
-                                            "default": "GITHUB_CLIENT_SECRET"
-                                        }
-                                    }
-                                },
-                                "gitlab": {
-                                    "title": "gitlab configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "host": {
-                                            "title": "host value",
-                                            "type": "string",
-                                            "default": "GITLAB_HOST"
-                                        },
-                                        "token": {
-                                            "title": "token value",
-                                            "type": "string",
-                                            "default": "GITLAB_TOKEN"
-                                        }
-                                    }
-                                },
                                 "k8s": {
                                     "title": "k8s configuration",
                                     "type": "object",
@@ -304,50 +267,6 @@
                                             "title": "clusterUrl value",
                                             "type": "string",
                                             "default": "K8S_CLUSTER_URL"
-                                        }
-                                    }
-                                },
-                                "argocd": {
-                                    "title": "argocd configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "url": {
-                                            "title": "url value",
-                                            "type": "string",
-                                            "default": "ARGOCD_URL"
-                                        },
-                                        "username": {
-                                            "title": "username value",
-                                            "type": "string",
-                                            "default": "ARGOCD_USERNAME"
-                                        },
-                                        "password": {
-                                            "title": "password value",
-                                            "type": "string",
-                                            "default": "ARGOCD_PASSWORD"
-                                        }
-                                    }
-                                },
-                                "notificationsEmail": {
-                                    "title": "notificationsEmail configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "hostname": {
-                                            "title": "hostname value",
-                                            "type": "string",
-                                            "default": "NOTIFICATIONS_EMAIL_HOSTNAME"
-                                        },
-                                        "username": {
-                                            "title": "username value",
-                                            "type": "string",
-                                            "default": "NOTIFICATIONS_EMAIL_USERNAME"
-                                        },
-                                        "password": {
-                                            "title": "password value",
-                                            "type": "string",
-                                            "default": "NOTIFICATIONS_EMAIL_PASSWORD"
                                         }
                                     }
                                 }

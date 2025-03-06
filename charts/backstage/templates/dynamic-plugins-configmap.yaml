@@ -3,6 +3,169 @@ kind: ConfigMap
 metadata:
   name: {{ printf "%s-dynamic-plugins" .Release.Name }}
 data:
+  {{- $dynamic := .Values.global.dynamic }}
+  {{- $plugins := .Values.global.dynamic.plugins }}
   dynamic-plugins.yaml: |
-    {{- include "common.tplvalues.render" ( dict "value"
-    .Values.global.dynamic "context" $) | nindent 4 }}
+    {{- if .Values.orchestrator.enabled }}
+      {{- $orchestratorPlugins := include "orchestrator.plugins" . | fromYaml }} 
+      {{- range $orchestratorPlugins.plugins }} 
+        {{- $plugins = append $plugins . }} 
+      {{- end }}
+    {{- $dynamic = merge $dynamic (dict "plugins" $plugins) }}
+    {{- end }}
+  {{- include "common.tplvalues.render" (dict "value" $dynamic "context" $) | nindent 4 }}
+  
+{{- if .Values.orchestrator.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dynamic-plugins-npmrc
+  namespace: {{ .Release.Namespace | quote }}
+type: Opaque
+stringData:
+  .npmrc: |
+    registry={{ .Values.orchestrator.rhdhPlugins.npmRegistry }}
+{{- end }}
+---
+{{- define "orchestrator.plugins" }}
+{{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.orchestrator.rhdhOperator.secretRef.name }}
+plugins:
+{{- if and 
+  (and .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterToken 
+    (dig "data" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterToken "" $secret ) )
+  (and .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterUrl   
+    (dig "data" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterUrl "" $secret ) ) 
+}}
+- package: ./dynamic-plugins/dist/backstage-plugin-kubernetes-backend-dynamic
+  disabled: false
+  pluginConfig:
+    kubernetes:
+      customResources:
+        - group: 'tekton.dev'
+          apiVersion: 'v1'
+          plural: 'pipelines'
+        - group: 'tekton.dev'
+          apiVersion: 'v1'
+          plural: 'pipelineruns'
+        - group: 'tekton.dev'
+          apiVersion: 'v1'
+          plural: 'taskruns'
+        - group: 'route.openshift.io'
+          apiVersion: 'v1'
+          plural: 'routes'
+      serviceLocatorMethod:
+        type: 'multiTenant'
+      clusterLocatorMethods:
+        - type: 'config'
+          clusters:
+            - name: 'Default Cluster'
+              url: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterUrl }}
+              authProvider: 'serviceAccount'
+              skipTLSVerify: true
+              serviceAccountToken: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterToken }}
+- package: ./dynamic-plugins/dist/backstage-plugin-kubernetes
+  disabled: false
+  {{- if .Values.orchestrator.tekton.enabled }}
+- package: ./dynamic-plugins/dist/backstage-community-plugin-tekton
+  disabled: false
+  {{- end }}
+{{- end }}
+{{- if and .Values.orchestrator.argocd.enabled
+  ( and
+      (and (.Values.orchestrator.rhdhOperator.secretRef.argocd.url) (dig "data" .Values.orchestrator.rhdhOperator.secretRef.argocd.url "" $secret ) )
+      (and (.Values.orchestrator.rhdhOperator.secretRef.argocd.username) (dig "data" .Values.orchestrator.rhdhOperator.secretRef.argocd.password "" $secret) )
+  )
+}}
+- disabled: false
+  package: ./dynamic-plugins/dist/backstage-community-plugin-redhat-argocd
+- disabled: false
+  package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-argo-cd-backend-dynamic
+- disabled: false
+  package: ./dynamic-plugins/dist/roadiehq-scaffolder-backend-argocd-dynamic
+{{- end }}
+- disabled: false
+  package: "{{ .Values.orchestrator.rhdhPlugins.scope }}/{{ .Values.orchestrator.rhdhPlugins.orchestratorBackend.package }}"
+  integrity: {{ .Values.orchestrator.rhdhPlugins.orchestratorBackend.integrity }}
+  pluginConfig:
+    orchestrator:
+      dataIndexService:
+        url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
+- disabled: false
+  package: "{{ .Values.orchestrator.rhdhPlugins.scope }}/{{ .Values.orchestrator.rhdhPlugins.orchestrator.package }}"
+  integrity: {{ .Values.orchestrator.rhdhPlugins.orchestrator.integrity }}
+  pluginConfig:
+    dynamicPlugins:
+      frontend:
+        red-hat-developer-hub.backstage-plugin-orchestrator:
+          appIcons:
+            - importName: OrchestratorIcon
+              module: OrchestratorPlugin
+              name: orchestratorIcon
+          dynamicRoutes:
+            - importName: OrchestratorPage
+              menuItem:
+                icon: orchestratorIcon
+                text: Orchestrator
+              module: OrchestratorPlugin
+              path: /orchestrator
+- disabled: false
+  package: ./dynamic-plugins/dist/backstage-plugin-notifications
+  pluginConfig:
+    dynamicPlugins:
+      frontend:
+        backstage.plugin-notifications:
+          dynamicRoutes:
+            - importName: NotificationsPage
+              menuItem:
+                config:
+                  props:
+                    titleCounterEnabled: true
+                    webNotificationsEnabled: false
+                importName: NotificationsSidebarItem
+              path: /notifications
+- disabled: false
+  package: ./dynamic-plugins/dist/backstage-plugin-signals
+  pluginConfig:
+    dynamicPlugins:
+      frontend:
+        backstage.plugin-signals: {}
+- disabled: false
+  package: ./dynamic-plugins/dist/backstage-plugin-notifications-backend-dynamic
+- disabled: false
+  package: ./dynamic-plugins/dist/backstage-plugin-signals-backend-dynamic
+- disabled: false
+  package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-github-dynamic
+{{- if and .Values.orchestrator.rhdhPlugins.notificationsEmail.enabled
+  ( and (.Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.hostname) (dig "data" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.hostname "" $secret ) )
+}}
+- disabled: false
+  package: ./dynamic-plugins/dist/backstage-plugin-notifications-backend-module-email-dynamic
+  pluginConfig:
+    notifications:
+      processors:
+        email:
+          transportConfig:
+            transport: smtp
+            hostname: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.hostname }}
+            port: {{ .Values.orchestrator.rhdhPlugins.notificationsEmail.port }}
+            secure: false
+          {{- if .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.username }}
+            username: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.username }}
+          {{- end}}
+          {{- if .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.password }}
+            password: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.password }}
+          {{- end}}
+          sender: {{ .Values.orchestrator.rhdhPlugins.notificationsEmail.sender }}
+          {{- if .Values.orchestrator.rhdhPlugins.notificationsEmail.replyTo }}
+          replyTo: {{ .Values.orchestrator.rhdhPlugins.notificationsEmail.replyTo }}
+          {{- end}}
+          broadcastConfig:
+            receiver: "none"
+          concurrencyLimit: 10
+          cache:
+            ttl:
+              days: 1
+  {{- end }}
+{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "rhdh.redhat.com/v1alpha1" "Backstage" .Release.Namespace "backstage" .Release.Name .Capabilities.APIVersions ) }}
+{{- end }}

@@ -973,6 +973,49 @@
                                     "cors": {
                                         "origin": "https://{{- include \"janus-idp.hostname\" . }}"
                                     },
+                                    "csp": {
+                                        "type": "object",
+                                        "properties": {
+                                            "script-src": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "'self'",
+                                                        "'unsafe-inline'",
+                                                        "'unsafe-eval'"
+                                                    ]
+                                                },
+                                                "title": "Defines valid sources for script elements."
+                                            },
+                                            "script-src-elem": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "'self'",
+                                                        "'unsafe-inline'",
+                                                        "'unsafe-eval'"
+                                                    ]
+                                                },
+                                                "title": "Defines valid sources for script elements (specifically for <script> tags)."
+                                            },
+                                            "connect-src": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "'self'",
+                                                        "http:",
+                                                        "https:",
+                                                        "data:"
+                                                    ]
+                                                },
+                                                "title": "Defines valid sources for XMLHttpRequest (AJAX) connections."
+                                            }
+                                        },
+                                        "title": "Content Security Policy (CSP) settings for the application."
+                                    },
                                     "database": {
                                         "connection": {
                                             "password": "${POSTGRESQL_ADMIN_PASSWORD}",
@@ -7479,11 +7522,6 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "isReleaseCandidate": {
-                            "title": "isReleaseCandidate flag",
-                            "type": "boolean",
-                            "default": false
-                        },
                         "enabled": {
                             "title": "enabled flag",
                             "type": "boolean",
@@ -7521,45 +7559,6 @@
                                         }
                                     }
                                 },
-                                "github": {
-                                    "title": "github configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "token": {
-                                            "title": "token value",
-                                            "type": "string",
-                                            "default": "GITHUB_TOKEN"
-                                        },
-                                        "clientId": {
-                                            "title": "clientId value",
-                                            "type": "string",
-                                            "default": "GITHUB_CLIENT_ID"
-                                        },
-                                        "clientSecret": {
-                                            "title": "clientSecret value",
-                                            "type": "string",
-                                            "default": "GITHUB_CLIENT_SECRET"
-                                        }
-                                    }
-                                },
-                                "gitlab": {
-                                    "title": "gitlab configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "host": {
-                                            "title": "host value",
-                                            "type": "string",
-                                            "default": "GITLAB_HOST"
-                                        },
-                                        "token": {
-                                            "title": "token value",
-                                            "type": "string",
-                                            "default": "GITLAB_TOKEN"
-                                        }
-                                    }
-                                },
                                 "k8s": {
                                     "title": "k8s configuration",
                                     "type": "object",
@@ -7574,50 +7573,6 @@
                                             "title": "clusterUrl value",
                                             "type": "string",
                                             "default": "K8S_CLUSTER_URL"
-                                        }
-                                    }
-                                },
-                                "argocd": {
-                                    "title": "argocd configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "url": {
-                                            "title": "url value",
-                                            "type": "string",
-                                            "default": "ARGOCD_URL"
-                                        },
-                                        "username": {
-                                            "title": "username value",
-                                            "type": "string",
-                                            "default": "ARGOCD_USERNAME"
-                                        },
-                                        "password": {
-                                            "title": "password value",
-                                            "type": "string",
-                                            "default": "ARGOCD_PASSWORD"
-                                        }
-                                    }
-                                },
-                                "notificationsEmail": {
-                                    "title": "notificationsEmail configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "hostname": {
-                                            "title": "hostname value",
-                                            "type": "string",
-                                            "default": "NOTIFICATIONS_EMAIL_HOSTNAME"
-                                        },
-                                        "username": {
-                                            "title": "username value",
-                                            "type": "string",
-                                            "default": "NOTIFICATIONS_EMAIL_USERNAME"
-                                        },
-                                        "password": {
-                                            "title": "password value",
-                                            "type": "string",
-                                            "default": "NOTIFICATIONS_EMAIL_PASSWORD"
                                         }
                                     }
                                 }

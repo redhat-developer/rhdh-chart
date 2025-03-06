@@ -1,0 +1,25 @@
+{{- if .Values.orchestrator.enabled }}
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+spec:
+  controller-custom-certs:
+    name: ""
+    type: ""
+  registry: {}
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+spec:
+  Registry:
+{{- end }}
