@@ -91,6 +91,363 @@
             },
             "type": "object"
         },
+        "orchestrator": {
+            "additionalProperties": false,
+            "properties": {
+                "argocd": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": false,
+                            "title": "enabled flag",
+                            "type": "boolean"
+                        },
+                        "namespace": {
+                            "default": "",
+                            "title": "namespace value",
+                            "type": "string"
+                        }
+                    },
+                    "title": "argocd configuration",
+                    "type": "object"
+                },
+                "enabled": {
+                    "default": true,
+                    "title": "enabled flag",
+                    "type": "boolean"
+                },
+                "networkPolicy": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "rhdhNamespace": {
+                            "default": "",
+                            "title": "rhdhNamespace value",
+                            "type": "string"
+                        }
+                    },
+                    "title": "networkPolicy configuration",
+                    "type": "object"
+                },
+                "orchestrator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "namespace": {
+                            "default": "",
+                            "title": "namespace value",
+                            "type": "string"
+                        },
+                        "sonataflowPlatform": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "eventing": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "broker": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "name": {
+                                                    "default": "",
+                                                    "title": "name value",
+                                                    "type": "string"
+                                                },
+                                                "namespace": {
+                                                    "default": "",
+                                                    "title": "namespace value",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "title": "broker configuration",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "title": "eventing configuration",
+                                    "type": "object"
+                                },
+                                "monitoring": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "default": true,
+                                            "title": "enabled flag",
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "title": "monitoring configuration",
+                                    "type": "object"
+                                },
+                                "resources": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "limits": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "cpu": {
+                                                    "default": "500m",
+                                                    "title": "cpu value",
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "default": "1Gi",
+                                                    "title": "memory value",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "title": "limits configuration",
+                                            "type": "object"
+                                        },
+                                        "requests": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "cpu": {
+                                                    "default": "250m",
+                                                    "title": "cpu value",
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "default": "64Mi",
+                                                    "title": "memory value",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "title": "requests configuration",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "title": "resources configuration",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "sonataflowPlatform configuration",
+                            "type": "object"
+                        }
+                    },
+                    "title": "orchestrator configuration",
+                    "type": "object"
+                },
+                "postgres": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "authSecret": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "default": "sonataflow-psql-postgresql",
+                                    "title": "name value",
+                                    "type": "string"
+                                },
+                                "passwordKey": {
+                                    "default": "postgres-password",
+                                    "title": "passwordKey value",
+                                    "type": "string"
+                                },
+                                "userKey": {
+                                    "default": "postgres-username",
+                                    "title": "userKey value",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "authSecret configuration",
+                            "type": "object"
+                        },
+                        "database": {
+                            "default": "sonataflow",
+                            "title": "database value",
+                            "type": "string"
+                        },
+                        "serviceName": {
+                            "default": "sonataflow-psql-postgresql",
+                            "title": "serviceName value",
+                            "type": "string"
+                        },
+                        "serviceNamespace": {
+                            "default": "",
+                            "title": "serviceNamespace value",
+                            "type": "string"
+                        }
+                    },
+                    "title": "postgres configuration",
+                    "type": "object"
+                },
+                "rhdhOperator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "catalogBranch": {
+                            "default": "v1.4.x",
+                            "title": "catalogBranch value",
+                            "type": "string"
+                        },
+                        "enableGuestProvider": {
+                            "default": false,
+                            "title": "enableGuestProvider flag",
+                            "type": "boolean"
+                        },
+                        "enabled": {
+                            "default": true,
+                            "title": "enabled flag",
+                            "type": "boolean"
+                        },
+                        "secretRef": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "backstage": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "backendSecret": {
+                                            "title": "backendSecret value",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "backstage configuration",
+                                    "type": "object"
+                                },
+                                "k8s": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "clusterToken": {
+                                            "default": "K8S_CLUSTER_TOKEN",
+                                            "title": "clusterToken value",
+                                            "type": "string"
+                                        },
+                                        "clusterUrl": {
+                                            "default": "K8S_CLUSTER_URL",
+                                            "title": "clusterUrl value",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "k8s configuration",
+                                    "type": "object"
+                                },
+                                "name": {
+                                    "default": "backstage-backend-auth-secret",
+                                    "title": "name value",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "secretRef configuration",
+                            "type": "object"
+                        }
+                    },
+                    "title": "rhdhOperator configuration",
+                    "type": "object"
+                },
+                "rhdhPlugins": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "notificationsEmail": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": false,
+                                    "title": "enabled flag",
+                                    "type": "boolean"
+                                },
+                                "port": {
+                                    "default": 587,
+                                    "title": "port number",
+                                    "type": "integer"
+                                },
+                                "replyTo": {
+                                    "default": "",
+                                    "title": "replyTo value",
+                                    "type": "string"
+                                },
+                                "sender": {
+                                    "default": "",
+                                    "title": "sender value",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "notificationsEmail configuration",
+                            "type": "object"
+                        },
+                        "npmRegistry": {
+                            "default": "",
+                            "title": "npmRegistry value",
+                            "type": "string"
+                        },
+                        "orchestrator": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "integrity": {
+                                    "default": "sha512-Vclb+TIL8cEtf9G2nx0UJ+kMJnCGZuYG/Xcw0Otdo/fZGuynnoCaAZ6rHnt4PR6LerekHYWNUbzM3X+AVj5cwg==",
+                                    "title": "integrity value",
+                                    "type": "string"
+                                },
+                                "package": {
+                                    "default": "backstage-plugin-orchestrator-1.4.0-rc.7.tgz",
+                                    "title": "package value",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "orchestrator configuration",
+                            "type": "object"
+                        },
+                        "orchestratorBackend": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "integrity": {
+                                    "default": "sha512-bxD0Au2V9BeUMcZBfNYrPSQ161vmZyKwm6Yik5keZZ09tenkc8fNjipwJsWVFQCDcAOOxdBAE0ibgHtddl3NKw==",
+                                    "title": "integrity value",
+                                    "type": "string"
+                                },
+                                "package": {
+                                    "default": "backstage-plugin-orchestrator-backend-dynamic-1.4.0-rc.7.tgz",
+                                    "title": "package value",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "orchestratorBackend configuration",
+                            "type": "object"
+                        },
+                        "scope": {
+                            "default": "https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/1.4.0",
+                            "title": "scope value",
+                            "type": "string"
+                        }
+                    },
+                    "title": "rhdhPlugins configuration",
+                    "type": "object"
+                },
+                "serverlessLogicOperator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "enabled flag",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "serverlessLogicOperator configuration",
+                    "type": "object"
+                },
+                "serverlessOperator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "enabled flag",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "serverlessOperator configuration",
+                    "type": "object"
+                },
+                "tekton": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": false,
+                            "title": "enabled flag",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "tekton configuration",
+                    "type": "object"
+                }
+            },
+            "title": "orchestrator configuration",
+            "type": "object"
+        },
         "route": {
             "additionalProperties": false,
             "properties": {
@@ -974,47 +1331,22 @@
                                         "origin": "https://{{- include \"janus-idp.hostname\" . }}"
                                     },
                                     "csp": {
-                                        "type": "object",
-                                        "properties": {
-                                            "script-src": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "'self'",
-                                                        "'unsafe-inline'",
-                                                        "'unsafe-eval'"
-                                                    ]
-                                                },
-                                                "title": "Defines valid sources for script elements."
-                                            },
-                                            "script-src-elem": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "'self'",
-                                                        "'unsafe-inline'",
-                                                        "'unsafe-eval'"
-                                                    ]
-                                                },
-                                                "title": "Defines valid sources for script elements (specifically for <script> tags)."
-                                            },
-                                            "connect-src": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "'self'",
-                                                        "http:",
-                                                        "https:",
-                                                        "data:"
-                                                    ]
-                                                },
-                                                "title": "Defines valid sources for XMLHttpRequest (AJAX) connections."
-                                            }
-                                        },
-                                        "title": "Content Security Policy (CSP) settings for the application."
+                                        "connect-src": [
+                                            "'self'",
+                                            "http:",
+                                            "https:",
+                                            "data:"
+                                        ],
+                                        "script-src": [
+                                            "'self'",
+                                            "'unsafe-inline'",
+                                            "'unsafe-eval'"
+                                        ],
+                                        "script-src-elem": [
+                                            "'self'",
+                                            "'unsafe-inline'",
+                                            "'unsafe-eval'"
+                                        ]
                                     },
                                     "database": {
                                         "connection": {
@@ -7506,364 +7838,6 @@
             },
             "title": "Backstage chart schema",
             "type": "object"
-        },
-        "orchestrator": {
-            "title": "orchestrator configuration",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "enabled": {
-                    "title": "enabled flag",
-                    "type": "boolean",
-                    "default": true
-                },
-                "rhdhOperator": {
-                    "title": "rhdhOperator configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": true
-                        },
-                        "enableGuestProvider": {
-                            "title": "enableGuestProvider flag",
-                            "type": "boolean",
-                            "default": false
-                        },
-                        "catalogBranch": {
-                            "title": "catalogBranch value",
-                            "type": "string",
-                            "default": "v1.4.x"
-                        },
-                        "secretRef": {
-                            "title": "secretRef configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "name": {
-                                    "title": "name value",
-                                    "type": "string",
-                                    "default": "backstage-backend-auth-secret"
-                                },
-                                "backstage": {
-                                    "title": "backstage configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "backendSecret": {
-                                            "title": "backendSecret value",
-                                            "type": "string",
-                                            "default": "{{ .Values.global.auth.value }}"
-                                        }
-                                    }
-                                },
-                                "k8s": {
-                                    "title": "k8s configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "clusterToken": {
-                                            "title": "clusterToken value",
-                                            "type": "string",
-                                            "default": "K8S_CLUSTER_TOKEN"
-                                        },
-                                        "clusterUrl": {
-                                            "title": "clusterUrl value",
-                                            "type": "string",
-                                            "default": "K8S_CLUSTER_URL"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "rhdhPlugins": {
-                    "title": "rhdhPlugins configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "npmRegistry": {
-                            "title": "npmRegistry value",
-                            "type": "string",
-                            "default": ""
-                        },
-                        "scope": {
-                            "title": "scope value",
-                            "type": "string",
-                            "default": "https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/1.4.0"
-                        },
-                        "orchestrator": {
-                            "title": "orchestrator configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "package": {
-                                    "title": "package value",
-                                    "type": "string",
-                                    "default": "backstage-plugin-orchestrator-1.4.0-rc.7.tgz"
-                                },
-                                "integrity": {
-                                    "title": "integrity value",
-                                    "type": "string",
-                                    "default": "sha512-Vclb+TIL8cEtf9G2nx0UJ+kMJnCGZuYG/Xcw0Otdo/fZGuynnoCaAZ6rHnt4PR6LerekHYWNUbzM3X+AVj5cwg=="
-                                }
-                            }
-                        },
-                        "orchestratorBackend": {
-                            "title": "orchestratorBackend configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "package": {
-                                    "title": "package value",
-                                    "type": "string",
-                                    "default": "backstage-plugin-orchestrator-backend-dynamic-1.4.0-rc.7.tgz"
-                                },
-                                "integrity": {
-                                    "title": "integrity value",
-                                    "type": "string",
-                                    "default": "sha512-bxD0Au2V9BeUMcZBfNYrPSQ161vmZyKwm6Yik5keZZ09tenkc8fNjipwJsWVFQCDcAOOxdBAE0ibgHtddl3NKw=="
-                                }
-                            }
-                        },
-                        "notificationsEmail": {
-                            "title": "notificationsEmail configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "enabled": {
-                                    "title": "enabled flag",
-                                    "type": "boolean",
-                                    "default": false
-                                },
-                                "port": {
-                                    "title": "port number",
-                                    "type": "integer",
-                                    "default": 587
-                                },
-                                "sender": {
-                                    "title": "sender value",
-                                    "type": "string",
-                                    "default": ""
-                                },
-                                "replyTo": {
-                                    "title": "replyTo value",
-                                    "type": "string",
-                                    "default": ""
-                                }
-                            }
-                        }
-                    }
-                },
-                "sonataFlowOperator": {
-                    "title": "sonataFlowOperator configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": true
-                        }
-                    }
-                },
-                "serverlessOperator": {
-                    "title": "serverlessOperator configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": true
-                        }
-                    }
-                },
-                "postgres": {
-                    "title": "postgres configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "serviceName": {
-                            "title": "serviceName value",
-                            "type": "string",
-                            "default": "sonataflow-psql-postgresql"
-                        },
-                        "serviceNamespace": {
-                            "title": "serviceNamespace value",
-                            "type": "string",
-                            "default": "sonataflow-infra"
-                        },
-                        "authSecret": {
-                            "title": "authSecret configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "name": {
-                                    "title": "name value",
-                                    "type": "string",
-                                    "default": "sonataflow-psql-postgresql"
-                                },
-                                "userKey": {
-                                    "title": "userKey value",
-                                    "type": "string",
-                                    "default": "postgres-username"
-                                },
-                                "passwordKey": {
-                                    "title": "passwordKey value",
-                                    "type": "string",
-                                    "default": "postgres-password"
-                                }
-                            }
-                        },
-                        "database": {
-                            "title": "database value",
-                            "type": "string",
-                            "default": "sonataflow"
-                        }
-                    }
-                },
-                "orchestrator": {
-                    "title": "orchestrator configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "namespace": {
-                            "title": "namespace value",
-                            "type": "string",
-                            "default": "sonataflow-infra"
-                        },
-                        "sonataflowPlatform": {
-                            "title": "sonataflowPlatform configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "monitoring": {
-                                    "title": "monitoring configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "enabled": {
-                                            "title": "enabled flag",
-                                            "type": "boolean",
-                                            "default": true
-                                        }
-                                    }
-                                },
-                                "eventing": {
-                                    "title": "eventing configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "broker": {
-                                            "title": "broker configuration",
-                                            "type": "object",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "name": {
-                                                    "title": "name value",
-                                                    "type": "string",
-                                                    "default": ""
-                                                },
-                                                "namespace": {
-                                                    "title": "namespace value",
-                                                    "type": "string",
-                                                    "default": ""
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "resources": {
-                                    "title": "resources configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "requests": {
-                                            "title": "requests configuration",
-                                            "type": "object",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "memory": {
-                                                    "title": "memory value",
-                                                    "type": "string",
-                                                    "default": "64Mi"
-                                                },
-                                                "cpu": {
-                                                    "title": "cpu value",
-                                                    "type": "string",
-                                                    "default": "250m"
-                                                }
-                                            }
-                                        },
-                                        "limits": {
-                                            "title": "limits configuration",
-                                            "type": "object",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "memory": {
-                                                    "title": "memory value",
-                                                    "type": "string",
-                                                    "default": "1Gi"
-                                                },
-                                                "cpu": {
-                                                    "title": "cpu value",
-                                                    "type": "string",
-                                                    "default": "500m"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "tekton": {
-                    "title": "tekton configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": false
-                        }
-                    }
-                },
-                "argocd": {
-                    "title": "argocd configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": false
-                        },
-                        "namespace": {
-                            "title": "namespace value",
-                            "type": "string",
-                            "default": ""
-                        }
-                    }
-                },
-                "networkPolicy": {
-                    "title": "networkPolicy configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "rhdhNamespace": {
-                            "title": "rhdhNamespace value",
-                            "type": "string",
-                            "default": ""
-                        }
-                    }
-                }
-            }
         }
     },
     "title": "Root Schema",

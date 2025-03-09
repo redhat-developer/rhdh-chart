@@ -212,7 +212,7 @@ Kubernetes: `>= 1.25.0-0`
 | orchestrator.rhdhOperator.catalogBranch |  | string | `"v1.4.x"` |
 | orchestrator.rhdhOperator.enableGuestProvider |  | bool | `false` |
 | orchestrator.rhdhOperator.enabled |  | bool | `true` |
-| orchestrator.rhdhOperator.secretRef.backstage.backendSecret |  | string | `"{{ .Values.global.auth.value }}"` |
+| orchestrator.rhdhOperator.secretRef.backstage.backendSecret |  | string | `""` |
 | orchestrator.rhdhOperator.secretRef.k8s.clusterToken |  | string | `"K8S_CLUSTER_TOKEN"` |
 | orchestrator.rhdhOperator.secretRef.k8s.clusterUrl |  | string | `"K8S_CLUSTER_URL"` |
 | orchestrator.rhdhOperator.secretRef.name |  | string | `"backstage-backend-auth-secret"` |
@@ -226,8 +226,8 @@ Kubernetes: `>= 1.25.0-0`
 | orchestrator.rhdhPlugins.orchestratorBackend.integrity |  | string | `"sha512-bxD0Au2V9BeUMcZBfNYrPSQ161vmZyKwm6Yik5keZZ09tenkc8fNjipwJsWVFQCDcAOOxdBAE0ibgHtddl3NKw=="` |
 | orchestrator.rhdhPlugins.orchestratorBackend.package |  | string | `"backstage-plugin-orchestrator-backend-dynamic-1.4.0-rc.7.tgz"` |
 | orchestrator.rhdhPlugins.scope |  | string | `"https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/1.4.0"` |
+| orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
 | orchestrator.serverlessOperator.enabled |  | bool | `true` |
-| orchestrator.sonataFlowOperator.enabled |  | bool | `true` |
 | orchestrator.tekton.enabled |  | bool | `false` |
 | route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
 | route.annotations | Route specific annotations | object | `{}` |

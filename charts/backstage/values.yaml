@@ -351,7 +351,7 @@ orchestrator:
     secretRef:
       name: backstage-backend-auth-secret # name of the secret that contains the credentials for the plugin to establish a communication channel with the Kubernetes API, ArgoCD, GitHub servers and SMTP mail server.
       backstage:
-        backendSecret: "{{ .Values.global.auth.value }}" # Key in the secret with name defined in the 'name' field that contains the value of the Backstage backend secret. Defaults to 'BACKEND_SECRET'. It's required.
+        backendSecret: "" # Key in the secret with name defined in the 'name' field that contains the value of the Backstage backend secret. It's required.
       k8s: # Kubernetes specific configuration fields that are injected to the backstage instance to allow the plugin to communicate with the Kubernetes API Server.
         clusterToken: K8S_CLUSTER_TOKEN # Key in the secret with name defined in the 'name' field that contains the value of the Kubernetes API bearer token used for authentication. Defaults to 'K8S_CLUSTER_TOKEN', empty for not available.
         clusterUrl: K8S_CLUSTER_URL # Key in the secret with name defined in the 'name' field that contains the value of the API URL of the kubernetes cluster. Defaults to 'K8S_CLUSTER_URL', empty for not available.
@@ -370,7 +370,7 @@ orchestrator:
       sender: "" # the email sender address
       replyTo: "" # reply-to address
 
-  sonataFlowOperator:
+  serverlessLogicOperator:
     enabled: true # whether the operator resources are deployed
   
   serverlessOperator:
