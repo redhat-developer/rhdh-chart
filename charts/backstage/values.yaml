@@ -344,31 +344,8 @@ test:
 
 orchestrator:
   enabled: true
-  rhdhOperator:
-    enabled: true # whether the operator should be deployed by the chart
-    enableGuestProvider: false # whether to enable guest provider
-    catalogBranch: v1.4.x # The branch for https://github.com/rhdhorchestrator/workflow-software-templates used to import software templates resources
-    secretRef:
-      name: backstage-backend-auth-secret # name of the secret that contains the credentials for the plugin to establish a communication channel with the Kubernetes API, ArgoCD, GitHub servers and SMTP mail server.
-      backstage:
-        backendSecret: "" # Key in the secret with name defined in the 'name' field that contains the value of the Backstage backend secret. It's required.
-      k8s: # Kubernetes specific configuration fields that are injected to the backstage instance to allow the plugin to communicate with the Kubernetes API Server.
-        clusterToken: K8S_CLUSTER_TOKEN # Key in the secret with name defined in the 'name' field that contains the value of the Kubernetes API bearer token used for authentication. Defaults to 'K8S_CLUSTER_TOKEN', empty for not available.
-        clusterUrl: K8S_CLUSTER_URL # Key in the secret with name defined in the 'name' field that contains the value of the API URL of the kubernetes cluster. Defaults to 'K8S_CLUSTER_URL', empty for not available.
   rhdhPlugins: # RHDH plugins required for the Orchestrator
     npmRegistry: "" # NPM registry is defined already in the container, but sometimes the registry need to be modified to use different versions of the plugin, for example: staging(https://npm.stage.registry.redhat.com) or development repositories
-    scope: "https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/1.4.0"
-    orchestrator:
-      package: "backstage-plugin-orchestrator-1.4.0-rc.7.tgz"
-      integrity: sha512-Vclb+TIL8cEtf9G2nx0UJ+kMJnCGZuYG/Xcw0Otdo/fZGuynnoCaAZ6rHnt4PR6LerekHYWNUbzM3X+AVj5cwg==
-    orchestratorBackend:
-      package: "backstage-plugin-orchestrator-backend-dynamic-1.4.0-rc.7.tgz"
-      integrity: sha512-bxD0Au2V9BeUMcZBfNYrPSQ161vmZyKwm6Yik5keZZ09tenkc8fNjipwJsWVFQCDcAOOxdBAE0ibgHtddl3NKw==
-    notificationsEmail:
-      enabled: false # whether to install the notifications email plugin. requires setting of hostname and credentials in backstage secret to enable. See value backstage-backend-auth-secret. See plugin configuration at https://github.com/backstage/backstage/blob/master/plugins/notifications-backend-module-email/config.d.ts
-      port: 587 # SMTP server port
-      sender: "" # the email sender address
-      replyTo: "" # reply-to address
 
   serverlessLogicOperator:
     enabled: true # whether the operator resources are deployed
@@ -386,7 +363,6 @@ orchestrator:
     database: sonataflow # existing database instance used by data index and job service
 
   orchestrator:
-    namespace: "" 
     sonataflowPlatform:
       monitoring:
         enabled: true
@@ -401,13 +377,3 @@ orchestrator:
         limits:
           memory: "1Gi"
           cpu: "500m"
-
-  tekton:
-    enabled: false # whether to create the Tekton pipeline resources
-
-  argocd:
-    enabled: false # whether to install the ArgoCD plugin and create the orchestrator AppProject
-    namespace: "" # Defines the namespace where the orchestrator's instance of ArgoCD is deployed. The value is captured when running setup.sh script and stored as a label in the selected namespace. User can override the value by populating this field. Defaults to `orchestrator-gitops` in the setup.sh script.
-
-  networkPolicy:
-    rhdhNamespace: "" # Namespace of existing RHDH instance

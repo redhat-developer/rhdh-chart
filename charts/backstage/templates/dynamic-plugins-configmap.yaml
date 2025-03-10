@@ -29,71 +29,17 @@ stringData:
 {{- end }}
 ---
 {{- define "orchestrator.plugins" }}
-{{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.orchestrator.rhdhOperator.secretRef.name }}
 plugins:
-{{- if and 
-  (and .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterToken 
-    (dig "data" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterToken "" $secret ) )
-  (and .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterUrl   
-    (dig "data" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterUrl "" $secret ) ) 
-}}
-- package: ./dynamic-plugins/dist/backstage-plugin-kubernetes-backend-dynamic
-  disabled: false
-  pluginConfig:
-    kubernetes:
-      customResources:
-        - group: 'tekton.dev'
-          apiVersion: 'v1'
-          plural: 'pipelines'
-        - group: 'tekton.dev'
-          apiVersion: 'v1'
-          plural: 'pipelineruns'
-        - group: 'tekton.dev'
-          apiVersion: 'v1'
-          plural: 'taskruns'
-        - group: 'route.openshift.io'
-          apiVersion: 'v1'
-          plural: 'routes'
-      serviceLocatorMethod:
-        type: 'multiTenant'
-      clusterLocatorMethods:
-        - type: 'config'
-          clusters:
-            - name: 'Default Cluster'
-              url: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterUrl }}
-              authProvider: 'serviceAccount'
-              skipTLSVerify: true
-              serviceAccountToken: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.k8s.clusterToken }}
-- package: ./dynamic-plugins/dist/backstage-plugin-kubernetes
-  disabled: false
-  {{- if .Values.orchestrator.tekton.enabled }}
-- package: ./dynamic-plugins/dist/backstage-community-plugin-tekton
-  disabled: false
-  {{- end }}
-{{- end }}
-{{- if and .Values.orchestrator.argocd.enabled
-  ( and
-      (and (.Values.orchestrator.rhdhOperator.secretRef.argocd.url) (dig "data" .Values.orchestrator.rhdhOperator.secretRef.argocd.url "" $secret ) )
-      (and (.Values.orchestrator.rhdhOperator.secretRef.argocd.username) (dig "data" .Values.orchestrator.rhdhOperator.secretRef.argocd.password "" $secret) )
-  )
-}}
 - disabled: false
-  package: ./dynamic-plugins/dist/backstage-community-plugin-redhat-argocd
-- disabled: false
-  package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-argo-cd-backend-dynamic
-- disabled: false
-  package: ./dynamic-plugins/dist/roadiehq-scaffolder-backend-argocd-dynamic
-{{- end }}
-- disabled: false
-  package: "{{ .Values.orchestrator.rhdhPlugins.scope }}/{{ .Values.orchestrator.rhdhPlugins.orchestratorBackend.package }}"
-  integrity: {{ .Values.orchestrator.rhdhPlugins.orchestratorBackend.integrity }}
+  package: "{{ include "orchestrator.plugins.config" . | fromYaml | dig "orchestratorPlugins" "scope" }}/{{ include "orchestrator.plugins.config" . | fromYaml | dig "orchestratorPlugins" "orchestratorBackend" "package" }}"
+  integrity: "{{ include "orchestrator.plugins.config" . | fromYaml | dig "orchestratorPlugins" "orchestratorBackend" "integrity" }}"
   pluginConfig:
     orchestrator:
       dataIndexService:
         url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
 - disabled: false
-  package: "{{ .Values.orchestrator.rhdhPlugins.scope }}/{{ .Values.orchestrator.rhdhPlugins.orchestrator.package }}"
-  integrity: {{ .Values.orchestrator.rhdhPlugins.orchestrator.integrity }}
+  package: "{{ include "orchestrator.plugins.config" . | fromYaml | dig "orchestratorPlugins" "scope" }}/{{ include "orchestrator.plugins.config" . | fromYaml | dig "orchestratorPlugins" "orchestrator" "package" }}"
+  integrity: "{{ include "orchestrator.plugins.config" . | fromYaml | dig "orchestratorPlugins" "orchestrator" "integrity" }}"
   pluginConfig:
     dynamicPlugins:
       frontend:
@@ -109,7 +55,7 @@ plugins:
                 text: Orchestrator
               module: OrchestratorPlugin
               path: /orchestrator
-- disabled: false
+- disabled: true
   package: ./dynamic-plugins/dist/backstage-plugin-notifications
   pluginConfig:
     dynamicPlugins:
@@ -124,48 +70,25 @@ plugins:
                     webNotificationsEnabled: false
                 importName: NotificationsSidebarItem
               path: /notifications
-- disabled: false
+- disabled: true
   package: ./dynamic-plugins/dist/backstage-plugin-signals
   pluginConfig:
     dynamicPlugins:
       frontend:
         backstage.plugin-signals: {}
-- disabled: false
+- disabled: true
   package: ./dynamic-plugins/dist/backstage-plugin-notifications-backend-dynamic
-- disabled: false
+- disabled: true
   package: ./dynamic-plugins/dist/backstage-plugin-signals-backend-dynamic
-- disabled: false
-  package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-github-dynamic
-{{- if and .Values.orchestrator.rhdhPlugins.notificationsEmail.enabled
-  ( and (.Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.hostname) (dig "data" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.hostname "" $secret ) )
-}}
-- disabled: false
-  package: ./dynamic-plugins/dist/backstage-plugin-notifications-backend-module-email-dynamic
-  pluginConfig:
-    notifications:
-      processors:
-        email:
-          transportConfig:
-            transport: smtp
-            hostname: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.hostname }}
-            port: {{ .Values.orchestrator.rhdhPlugins.notificationsEmail.port }}
-            secure: false
-          {{- if .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.username }}
-            username: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.username }}
-          {{- end}}
-          {{- if .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.password }}
-            password: {{ printf "${%s}" .Values.orchestrator.rhdhOperator.secretRef.notificationsEmail.password }}
-          {{- end}}
-          sender: {{ .Values.orchestrator.rhdhPlugins.notificationsEmail.sender }}
-          {{- if .Values.orchestrator.rhdhPlugins.notificationsEmail.replyTo }}
-          replyTo: {{ .Values.orchestrator.rhdhPlugins.notificationsEmail.replyTo }}
-          {{- end}}
-          broadcastConfig:
-            receiver: "none"
-          concurrencyLimit: 10
-          cache:
-            ttl:
-              days: 1
-  {{- end }}
-{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "rhdh.redhat.com/v1alpha1" "Backstage" .Release.Namespace "backstage" .Release.Name .Capabilities.APIVersions ) }}
 {{- end }}
+---
+{{- define "orchestrator.plugins.config" }}
+orchestratorPlugins: 
+    scope: "https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/1.4.0"
+    orchestrator:
+      package: "backstage-plugin-orchestrator-1.4.0.tgz"
+      integrity: sha512-2yasbfBZ3iKntArIfK+hk9tvv4b/dy9+WKXOcWIotqkI1gv+Nhvy+m55KAUWi2vmfM0rj3EoG6YP+3Zajn1KyA==
+    orchestratorBackend:
+      package: "backstage-plugin-orchestrator-backend-dynamic-1.4.0.tgz"
+      integrity: sha512-2aOHDLFrGMAtyHFiyGZwVBZ9Op+TmKYUwfZxwoaGJ1s6JSy/0qgqineEEE0K3dn/f17XBUj+H1dwa5Al598Ugw==
+{{- end }

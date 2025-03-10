@@ -206,68 +206,6 @@
                     "type": "boolean",
                     "default": true
                 },
-                "rhdhOperator": {
-                    "title": "rhdhOperator configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": true
-                        },
-                        "enableGuestProvider": {
-                            "title": "enableGuestProvider flag",
-                            "type": "boolean",
-                            "default": false
-                        },
-                        "catalogBranch": {
-                            "title": "catalogBranch value",
-                            "type": "string",
-                            "default": "v1.4.x"
-                        },
-                        "secretRef": {
-                            "title": "secretRef configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "name": {
-                                    "title": "name value",
-                                    "type": "string",
-                                    "default": "backstage-backend-auth-secret"
-                                },
-                                "backstage": {
-                                    "title": "backstage configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "backendSecret": {
-                                            "title": "backendSecret value",
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "k8s": {
-                                    "title": "k8s configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "clusterToken": {
-                                            "title": "clusterToken value",
-                                            "type": "string",
-                                            "default": "K8S_CLUSTER_TOKEN"
-                                        },
-                                        "clusterUrl": {
-                                            "title": "clusterUrl value",
-                                            "type": "string",
-                                            "default": "K8S_CLUSTER_URL"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
                 "rhdhPlugins": {
                     "title": "rhdhPlugins configuration",
                     "type": "object",
@@ -277,72 +215,6 @@
                             "title": "npmRegistry value",
                             "type": "string",
                             "default": ""
-                        },
-                        "scope": {
-                            "title": "scope value",
-                            "type": "string",
-                            "default": "https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/1.4.0"
-                        },
-                        "orchestrator": {
-                            "title": "orchestrator configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "package": {
-                                    "title": "package value",
-                                    "type": "string",
-                                    "default": "backstage-plugin-orchestrator-1.4.0-rc.7.tgz"
-                                },
-                                "integrity": {
-                                    "title": "integrity value",
-                                    "type": "string",
-                                    "default": "sha512-Vclb+TIL8cEtf9G2nx0UJ+kMJnCGZuYG/Xcw0Otdo/fZGuynnoCaAZ6rHnt4PR6LerekHYWNUbzM3X+AVj5cwg=="
-                                }
-                            }
-                        },
-                        "orchestratorBackend": {
-                            "title": "orchestratorBackend configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "package": {
-                                    "title": "package value",
-                                    "type": "string",
-                                    "default": "backstage-plugin-orchestrator-backend-dynamic-1.4.0-rc.7.tgz"
-                                },
-                                "integrity": {
-                                    "title": "integrity value",
-                                    "type": "string",
-                                    "default": "sha512-bxD0Au2V9BeUMcZBfNYrPSQ161vmZyKwm6Yik5keZZ09tenkc8fNjipwJsWVFQCDcAOOxdBAE0ibgHtddl3NKw=="
-                                }
-                            }
-                        },
-                        "notificationsEmail": {
-                            "title": "notificationsEmail configuration",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "enabled": {
-                                    "title": "enabled flag",
-                                    "type": "boolean",
-                                    "default": false
-                                },
-                                "port": {
-                                    "title": "port number",
-                                    "type": "integer",
-                                    "default": 587
-                                },
-                                "sender": {
-                                    "title": "sender value",
-                                    "type": "string",
-                                    "default": ""
-                                },
-                                "replyTo": {
-                                    "title": "replyTo value",
-                                    "type": "string",
-                                    "default": ""
-                                }
-                            }
                         }
                     }
                 },
@@ -507,47 +379,6 @@
                                     }
                                 }
                             }
-                        }
-                    }
-                },
-                "tekton": {
-                    "title": "tekton configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": false
-                        }
-                    }
-                },
-                "argocd": {
-                    "title": "argocd configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "enabled": {
-                            "title": "enabled flag",
-                            "type": "boolean",
-                            "default": false
-                        },
-                        "namespace": {
-                            "title": "namespace value",
-                            "type": "string",
-                            "default": ""
-                        }
-                    }
-                },
-                "networkPolicy": {
-                    "title": "networkPolicy configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "rhdhNamespace": {
-                            "title": "rhdhNamespace value",
-                            "type": "string",
-                            "default": ""
                         }
                     }
                 }

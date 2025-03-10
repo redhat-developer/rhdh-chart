@@ -1,4 +1,6 @@
-{{- if .Values.orchestrator.enabled }}
+{{- if and .Values.orchestrator.enabled .Values.orchestrator.serverlessOperator.enabled }}
+  {{- $knativeServing := lookup "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" }}
+  {{- if not $knativeServing }}
 ---
 apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
@@ -12,6 +14,10 @@ spec:
     name: ""
     type: ""
   registry: {}
+  {{- end }}
+
+  {{- $knativeEventing := lookup "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" }}
+  {{- if not $knativeEventing }}
 ---
 apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
@@ -21,5 +27,6 @@ metadata:
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}
 spec:
-  Registry:
+  Registry: {}
+  {{- end }}
 {{- end }}

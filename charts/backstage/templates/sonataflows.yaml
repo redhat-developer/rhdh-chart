@@ -1,4 +1,4 @@
-{{- if .Values.orchestrator.enabled }}
+{{- if and .Values.orchestrator.enabled .Values.orchestrator.serverlessLogicOperator.enabled }}
 {{- $workflowNamespace := .Release.Namespace }}
 ---
 apiVersion: sonataflow.org/v1alpha08
