@@ -1,0 +1,32 @@
+{{- if .Values.serverlessLogicOperator.enabled }}
+  {{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" .Values.serverlessLogicOperator.subscription.namespace .Release.Name .Capabilities.APIVersions) }}
+  {{- if and (eq $unmanagedNamespaceExists "false") .Values.serverlessLogicOperator.enabled }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+---
+{{- end }}
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: openshift-serverless-logic
+  namespace: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+spec: {}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: {{ .Values.serverlessLogicOperator.subscription.name }}
+  namespace: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+spec:
+  channel: {{ .Values.serverlessLogicOperator.subscription.channel }}
+  installPlanApproval: Automatic
+  name: {{ .Values.serverlessLogicOperator.subscription.name }}
+  source: {{ .Values.serverlessLogicOperator.subscription.sourceName }}
+  sourceNamespace: openshift-marketplace
+  {{- if ne .Values.serverlessLogicOperator.subscription.startingCSV "" }}
+  startingCSV: {{ .Values.serverlessLogicOperator.subscription.startingCSV }}
+  {{- end }}
+{{- end }}
