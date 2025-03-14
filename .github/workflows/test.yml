@@ -95,8 +95,26 @@ jobs:
             --target-branch "${{ github.event.pull_request.base.ref }}" \
             --helm-extra-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.ingress.enabled=true"
 
+      - name: Generate KinD Config
+        run: |
+          cat <<EOF > /tmp/kind-config.yaml
+          apiVersion: kind.x-k8s.io/v1alpha4
+          kind: Cluster
+          nodes:
+            - role: control-plane
+              extraPortMappings:
+                - containerPort: 80
+                  hostPort: 80
+                  protocol: TCP
+                - containerPort: 443
+                  hostPort: 443
+                  protocol: TCP
+          EOF
+
       - name: Create KIND Cluster
         uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+        with:
+          config: /tmp/kind-config.yaml
 
       - name: Create custom storage class
         run: |
@@ -135,17 +153,11 @@ jobs:
           chmod +x install-olm.sh
           ./install-olm.sh "${OLM_VERSION}"
 
-      - name: Build Ingress Domain
-        run: |
-          echo "K8S_INGRESS_DOMAIN=$(minikube ip).sslip.io" >> $GITHUB_ENV
-
       - name: Run chart-testing
-        env:
-          INGRESS_HOST: "rhdh.${{ env.K8S_INGRESS_DOMAIN }}"
         run: |
           ct install \
             --debug \
             --config ct-install.yaml \
             --upgrade \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-set-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.ingress.enabled=true --set global.host=${INGRESS_HOST}"
+            --helm-extra-set-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.ingress.enabled=true --set global.host=rhdh.127.0.0.1.sslip.io"
