@@ -115,6 +115,15 @@ jobs:
             --set controller.service.type='NodePort' \
             --set controller.admissionWebhooks.enabled=false
 
+      - name: Install Operator Lifecycle Manager (OLM)
+        # In case we need to install additional Operators
+        env:
+          OLM_VERSION: "v0.31.0"
+        run: |
+          curl -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
+          chmod +x install-olm.sh
+          ./install-olm.sh "${OLM_VERSION}"
+
       - name: Run chart-testing
         run: |
           ct install \
