@@ -88,6 +88,7 @@ jobs:
       - name: Lint chart
         run: |
           ct lint \
+            --debug \
             --config ct.yaml \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
             --helm-extra-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set ingress.enabled=true"
@@ -128,6 +129,7 @@ jobs:
           INGRESS_HOST: "rhdh.${{ env.K8S_INGRESS_DOMAIN }}"
         run: |
           ct install \
+            --debug \
             --config ct-install.yaml \
             --upgrade \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
