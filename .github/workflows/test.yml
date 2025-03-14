@@ -105,8 +105,8 @@ jobs:
           kind: StorageClass
           metadata:
             name: custom-sc
-          # same provisioner as the one used by the default storage class on KinD
-          provisioner: rancher.io/local-path
+          # same provisioner as the one used by the default storage class on the cluster
+          provisioner: k8s.io/minikube-hostpath
           reclaimPolicy: Delete
           volumeBindingMode: WaitForFirstConsumer
           EOF
