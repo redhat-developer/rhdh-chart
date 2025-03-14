@@ -57,7 +57,8 @@ jobs:
           - version: next
             experimental: true
 
-    name: Test ${{ matrix.version }} release
+    # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
+    name: Test ${{ matrix.version == 'latest' && 'Latest' || matrix.version }} Release
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
 
