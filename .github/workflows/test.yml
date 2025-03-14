@@ -79,9 +79,8 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
 
-      - name: "Add NGINX Ingress and Bitnami Repository"
+      - name: "Add required Helm repositories"
         run: |
-          helm repo add ingress-nginx "https://kubernetes.github.io/ingress-nginx"
           helm repo add bitnami "https://charts.bitnami.com/bitnami"
           helm repo add backstage https://backstage.github.io/charts
           helm repo update
@@ -91,10 +90,12 @@ jobs:
           ct lint \
             --config ct.yaml \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set global.clusterRouterBase=app.example.com"
+            --helm-extra-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set ingress.enabled=true"
 
-      - name: Create KIND Cluster
-        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+      - name: Start Minikube
+        uses: medyagh/setup-minikube@cea33675329b799adccc9526aa5daccc26cd5052 # v0.0.19
+        with:
+          addons: ingress
 
       - name: Create custom storage class
         run: |
@@ -109,12 +110,6 @@ jobs:
           volumeBindingMode: WaitForFirstConsumer
           EOF
 
-      - name: Install Ingress Controller
-        run: |
-          helm install ingress-nginx/ingress-nginx --generate-name \
-            --set controller.service.type='NodePort' \
-            --set controller.admissionWebhooks.enabled=false
-
       - name: Install Operator Lifecycle Manager (OLM)
         # In case we need to install additional Operators
         env:
@@ -124,10 +119,16 @@ jobs:
           chmod +x install-olm.sh
           ./install-olm.sh "${OLM_VERSION}"
 
+      - name: Build Ingress Domain
+        run: |
+          echo "K8S_INGRESS_DOMAIN=$(minikube ip).sslip.io" >> $GITHUB_ENV
+
       - name: Run chart-testing
+        env:
+          INGRESS_HOST: "rhdh.${{ env.K8S_INGRESS_DOMAIN }}"
         run: |
           ct install \
             --config ct-install.yaml \
             --upgrade \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-set-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set global.clusterRouterBase=app.example.com"
+            --helm-extra-set-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set ingress.enabled=true --set global.host=${INGRESS_HOST}"
