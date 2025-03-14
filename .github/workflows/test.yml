@@ -57,7 +57,7 @@ jobs:
           - version: next
             experimental: true
 
-    name: Test ${{ matrix.version }} release (experimental=${{ matrix.experimental }})
+    name: Test ${{ matrix.version }} release
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
 
