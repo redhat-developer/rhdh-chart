@@ -1,0 +1,74 @@
+{{- if .Values.orchestrator.serverlessLogicOperator.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-knative-to-sonataflow-and-workflows
+  # Sonataflow and Workflows are using the RHDH target namespace.
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            # Allow knative events to be delivered to workflows.
+            kubernetes.io/metadata.name: knative-eventing
+      - namespaceSelector:
+          matchLabels:
+            # Allow auxiliary knative function for workflow (such as m2k-save-transformation)
+            kubernetes.io/metadata.name: knative-serving
+---
+# NetworkPolicy to unblock incoming traffic to the namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-communication
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            # Allow knative events to be delivered to workflows.
+            kubernetes.io/metadata.name: openshift-ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-intra-network
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  # Apply this policy to all pods in the namespace
+  podSelector: {}
+  # Specify policy type as 'Ingress' to control incoming traffic rules
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      # Allow ingress from any pod within the same namespace
+      - podSelector: {}
+
+
+{{- end }}
+---
+{{- if .Values.orchestrator.orchestrator.sonataflowPlatform.monitoring.enabled }}
+# NetworkPolicy to allow openshift-user-workload-monitoring pods to access all pods within the workflow's namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-to-sonataflow-and-workflows
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  # Apply this policy to all pods in the namespace
+  podSelector: {}
+  # Specify policy type as 'Ingress' to control incoming traffic rules
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            # Allow openshift-user-workload-monitoring pods to access the workflow.
+            kubernetes.io/metadata.name: openshift-user-workload-monitoring
+{{- end }}
