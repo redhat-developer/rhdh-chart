@@ -100,13 +100,18 @@ jobs:
 
       - name: Create custom storage class
         run: |
+          export defaultScProvisioner=$(kubectl get storageclass -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].provisioner}')
+          if [[ -z "$defaultScProvisioner" ]]; then
+            echo "No default storage class found or it has no provisioner. Exiting early because the test using the custom Storage Class will likely fail. Use a cluster that has a default storage class."
+            exit 1
+          fi
           cat <<EOF | kubectl apply -f -
           apiVersion: storage.k8s.io/v1
           kind: StorageClass
           metadata:
             name: custom-sc
           # same provisioner as the one used by the default storage class on the cluster
-          provisioner: k8s.io/minikube-hostpath
+          provisioner: "$defaultScProvisioner"
           reclaimPolicy: Delete
           volumeBindingMode: WaitForFirstConsumer
           EOF
