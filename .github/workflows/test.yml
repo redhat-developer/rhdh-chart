@@ -91,7 +91,7 @@ jobs:
             --debug \
             --config ct.yaml \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.backstage.ingress.enabled=true"
+            --helm-extra-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.ingress.enabled=true"
 
       - name: Start Minikube
         uses: medyagh/setup-minikube@cea33675329b799adccc9526aa5daccc26cd5052 # v0.0.19
@@ -138,4 +138,4 @@ jobs:
             --config ct-install.yaml \
             --upgrade \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-set-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.backstage.ingress.enabled=true --set global.host=${INGRESS_HOST}"
+            --helm-extra-set-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.ingress.enabled=true --set global.host=${INGRESS_HOST}"
