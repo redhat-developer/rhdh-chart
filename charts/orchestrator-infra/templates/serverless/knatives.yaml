@@ -1,0 +1,19 @@
+{{- if .Values.serverlessOperator.enabled }}
+{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-serving" .Release.Name .Capabilities.APIVersions) }}
+{{- if eq $unmanagedNamespaceExists "false" }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-serving
+{{- end }}
+
+{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-eventing" .Release.Name .Capabilities.APIVersions) }}
+{{- if eq $unmanagedNamespaceExists "false" }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-eventing
+{{- end }}
+{{- end }}

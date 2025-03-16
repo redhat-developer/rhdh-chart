@@ -1,0 +1,95 @@
+{{- if .Values.tests.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-service-account
+  namespace: default
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-cluster-role
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+rules:
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["subscriptions"]
+    verbs: ["list", "get"]
+  - apiGroups: ["subscriptions.operators.coreos.com"]
+    resources: ["subscriptions"]
+    verbs: ["list", "get"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["list", "get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: test-cluster-role-binding
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+subjects:
+  - kind: ServiceAccount
+    name: test-service-account
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: test-cluster-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "test"
+  namespace: default
+  labels:
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+spec:
+  serviceAccountName: test-service-account
+  containers:
+    - name: oc-client
+      image: {{ .Values.tests.image }} 
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          set -e
+          
+          kubectl get subscription -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
+          kubectl get subscription -n  {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
+          kubectl get namespace knative-eventing || exit 1
+          kubectl get namespace knative-serving || exit 1
+
+          echo "Test passed!"
+  restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cleanup-resources
+  annotations:
+    helm.sh/hook: test-success
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+spec:
+  template:
+    spec:
+      containers:
+        - name: cleanup
+          image: busybox
+          command:
+            - /bin/sh
+            - -c
+            - |
+              kubectl delete serviceaccount test-service-account -n {{ .Release.Namespace }} || true
+              kubectl delete clusterrole test-cluster-role || true
+              kubectl delete clusterrolebinding test-cluster-role-binding || true
+      restartPolicy: Never 
+  {{- end }}

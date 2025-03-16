@@ -1,0 +1,8 @@
+{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" .Values.serverlessLogicOperator.subscription.namespace .Release.Name .Capabilities.APIVersions) }}
+{{- if and (eq $unmanagedNamespaceExists "false") .Values.serverlessLogicOperator.enabled }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+{{- end }}
