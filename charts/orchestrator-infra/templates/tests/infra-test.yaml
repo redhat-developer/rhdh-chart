@@ -53,8 +53,10 @@ metadata:
     app.kubernetes.io/component: test
   annotations:
     helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
 spec:
   serviceAccountName: test-service-account
+  automountServiceAccountToken: false
   containers:
     - name: oc-client
       image: {{ .Values.tests.image }} 
@@ -69,6 +71,10 @@ spec:
           kubectl get namespace knative-serving || exit 1
 
           echo "Test passed!"
+      requests:
+        memory: "128Mi"
+      limits:
+        memory: "256Mi"
   restartPolicy: Never
 ---
 apiVersion: batch/v1
@@ -79,6 +85,7 @@ metadata:
     helm.sh/hook: test-success
     helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
 spec:
+  automountServiceAccountToken: false
   template:
     spec:
       containers:
@@ -91,5 +98,10 @@ spec:
               kubectl delete serviceaccount test-service-account -n {{ .Release.Namespace }} || true
               kubectl delete clusterrole test-cluster-role || true
               kubectl delete clusterrolebinding test-cluster-role-binding || true
+                  resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
       restartPolicy: Never 
   {{- end }}
