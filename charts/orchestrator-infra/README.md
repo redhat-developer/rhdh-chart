@@ -24,20 +24,20 @@ Kubernetes: `>= 1.25.0-0`
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | serverlessLogicOperator.enabled |  | bool | `true` |
-| serverlessLogicOperator.subscription.channel |  | string | `"alpha"` |
-| serverlessLogicOperator.subscription.installPlanApproval |  | string | `"Manual"` |
-| serverlessLogicOperator.subscription.name |  | string | `"logic-operator-rhel8"` |
-| serverlessLogicOperator.subscription.namespace |  | string | `"openshift-serverless-logic"` |
-| serverlessLogicOperator.subscription.source |  | string | `"redhat-operators"` |
-| serverlessLogicOperator.subscription.sourceNamespace |  | string | `"openshift-marketplace"` |
-| serverlessLogicOperator.subscription.startingCSV |  | string | `"logic-operator-rhel8.v1.35.0"` |
+| serverlessLogicOperator.subscription.spec.channel |  | string | `"alpha"` |
+| serverlessLogicOperator.subscription.spec.installPlanApproval |  | string | `"Manual"` |
+| serverlessLogicOperator.subscription.spec.name |  | string | `"logic-operator-rhel8"` |
+| serverlessLogicOperator.subscription.spec.namespace |  | string | `"openshift-serverless-logic"` |
+| serverlessLogicOperator.subscription.spec.source |  | string | `"redhat-operators"` |
+| serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
+| serverlessLogicOperator.subscription.spec.startingCSV |  | string | `"logic-operator-rhel8.v1.35.0"` |
 | serverlessOperator.enabled |  | bool | `true` |
-| serverlessOperator.subscription.channel |  | string | `"stable"` |
-| serverlessOperator.subscription.installPlanApproval |  | string | `"Manual"` |
-| serverlessOperator.subscription.name |  | string | `"serverless-operator"` |
-| serverlessOperator.subscription.namespace |  | string | `"openshift-serverless"` |
-| serverlessOperator.subscription.source |  | string | `"redhat-operators"` |
-| serverlessOperator.subscription.sourceNamespace |  | string | `"openshift-marketplace"` |
+| serverlessOperator.subscription.spec.channel |  | string | `"stable"` |
+| serverlessOperator.subscription.spec.installPlanApproval |  | string | `"Manual"` |
+| serverlessOperator.subscription.spec.name |  | string | `"serverless-operator"` |
+| serverlessOperator.subscription.spec.namespace |  | string | `"openshift-serverless"` |
+| serverlessOperator.subscription.spec.source |  | string | `"redhat-operators"` |
+| serverlessOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
 | tests.enabled |  | bool | `true` |
 | tests.image |  | string | `"bitnami/kubectl:latest"` |
 

@@ -11,7 +11,7 @@ Helm Release {{ .Release.Name }} installed in namespace {{ .Release.Namespace }}
 {{- $timeout := "--timeout=5m" }}
 
 {{- if .Values.serverlessOperator.enabled }}
-{{- $unmanagedSubscriptionExists := include "unmanaged-resource-exists" (list "operators.coreos.com/v1alpha1" "Subscription" .Values.serverlessOperator.subscription.namespace "serverless-operator" .Release.Name .Capabilities.APIVersions ) }}
+{{- $unmanagedSubscriptionExists := include "unmanaged-resource-exists" (list "operators.coreos.com/v1alpha1" "Subscription" .Values.serverlessOperator.subscription.spec.namespace "serverless-operator" .Release.Name .Capabilities.APIVersions ) }}
 {{- if eq $unmanagedSubscriptionExists "false" }}
 {{- $serverlessOperatorInstalled = $yes }}
 {{- end }}
@@ -24,15 +24,23 @@ Helm Release {{ .Release.Name }} installed in namespace {{ .Release.Namespace }}
 
 Components                         Installed   Namespace
 ====================================================================
-Red Hat Serverless Operator         {{ $serverlessOperatorInstalled }}      {{ .Values.serverlessOperator.subscription.namespace }}
-Red Hat Serverless Logic Operator   {{ $serverlessLogicOperatorInstalled }}     {{ .Values.serverlessLogicOperator.subscription.namespace }}
+Red Hat Serverless Operator         {{ $serverlessOperatorInstalled }}      {{ .Values.serverlessOperator.subscription.spec.namespace }}
+Red Hat Serverless Logic Operator   {{ $serverlessLogicOperatorInstalled }}     {{ .Values.serverlessLogicOperator.subscription.spec.namespace }}
 ====================================================================
 {{/* Empty line */}}
 
-To manually approve the InstalPlans:
+{{- if eq .Values.serverlessOperator.subscription.spec.installPlanApproval "Manual" }}
+
+To manually approve the openshift-serverless InstalPlans:
 
 OS_InstallPlan=$(oc get installplan -n openshift-serverless)
 oc patch installplan $OS_InstallPlan -n openshift-serverless --type merge --patch '{"spec":{"approved":true}}'
+{{- end }}
+
+{{- if eq .Values.serverlessLogicOperator.subscription.spec.installPlanApproval "Manual" }}
+
+To manually approve the openshift-serverless-logic InstalPlans:
 
 OSL_InstallPlan=$(oc get installplan -n openshift-serverless)
 oc patch installplan $OSL_InstallPlan -n openshift-serverless --type merge --patch '{"spec":{"approved":true}}'
+{{- end }}

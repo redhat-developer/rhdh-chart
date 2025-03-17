@@ -1,6 +1,7 @@
-charts.openshift.io/name: Orchestrator-Infra
-charts.openshift.io/provider: Red Hat Developer Hub Team
-charts.openshift.io/supportURL: https://github.com/redhat-developer/rhdh-chart/issues
+annotations:
+  charts.openshift.io/name: Orchestrator-Infra
+  charts.openshift.io/provider: Red Hat Developer Hub Team
+  charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
 apiVersion: v2
 name: orchestrator-infra
 description: >

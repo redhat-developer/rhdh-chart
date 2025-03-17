@@ -73,8 +73,8 @@ spec:
         - |
           set -e
           
-          kubectl get subscription -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
-          kubectl get subscription -n  {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
+          kubectl get subscription -n {{ .Values.serverlessOperator.subscription.spec.namespace }} || exit 1
+          kubectl get subscription -n  {{ .Values.serverlessLogicOperator.subscription.spec.namespace }} || exit 1
           kubectl get namespace knative-eventing || exit 1
           kubectl get namespace knative-serving || exit 1
 
