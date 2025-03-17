@@ -3,14 +3,14 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
     - name: support
-      url: https://github.com/redhat-developer/rhdh-chart/issues
+      url: https://issues.redhat.com/browse/RHIDP
     - name: Chart Source
       url: https://github.com/redhat-developer/rhdh-chart
     - name: Default Image Source
       url: https://github.com/janus-idp/backstage-showcase
   charts.openshift.io/name: Backstage
   charts.openshift.io/provider: Red Hat Developer Hub Team
-  charts.openshift.io/supportURL: https://github.com/redhat-developer/rhdh-chart/issues
+  charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
 apiVersion: v2
 description: |
   A Helm chart for deploying Red Hat Developer Hub.
@@ -44,4 +44,4 @@ sources:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 3.2.0
+version: 3.2.1
