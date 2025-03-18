@@ -55,13 +55,18 @@ jobs:
       - name: Publish and Sign OCI Charts
         run: |
           for chart in `find .cr-release-packages -name '*.tgz' -print`; do
+            echo "[INFO] Handling chart at ${chart}..."
             helm push ${chart} oci://ghcr.io/${GITHUB_REPOSITORY} |& tee helm-push-output.log
             file_name=${chart##*/}
             chart_name=${file_name%-*}
             digest=$(awk -F "[, ]+" '/Digest/{print $NF}' < helm-push-output.log)
             cosign sign -y "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}@${digest}"
 
-            oras push "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}:artifacthub.io" "./charts/${chart_name}/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml"
+            if test -f "./charts/${chart_name}/artifacthub-repo.yml"; then
+              oras push "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}:artifacthub.io" \
+                "./charts/${chart_name}/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml"
+            fi
+            echo "[INFO] ... Done with chart at ${chart}."
           done
         env:
           COSIGN_EXPERIMENTAL: 1
