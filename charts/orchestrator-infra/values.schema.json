@@ -12,14 +12,14 @@
         "subscription": {
           "additionalProperties": false,
           "properties": {
+            "namespace": {
+              "default": "openshift-serverless-logic",
+              "title": "Namespace where the operator should be deployed",
+              "type": "string"
+            },
             "spec": {
               "additionalProperties": false,
               "properties": {
-                "namespace": {
-                  "default": "openshift-serverless-logic",
-                  "title": "Namespace where the operator should be deployed",
-                  "type": "string"
-                },
                 "channel": {
                   "default": "alpha",
                   "title": "Channel of an operator package to subscribe to",
@@ -69,14 +69,14 @@
         "subscription": {
           "additionalProperties": false,
           "properties": {
+            "namespace": {
+              "default": "openshift-serverless",
+              "title": "Namespace where the operator should be deployed",
+              "type": "string"
+            },
             "spec": {
               "additionalProperties": false,
               "properties": {
-                "namespace": {
-                  "default": "openshift-serverless",
-                  "title": "Namespace where the operator should be deployed",
-                  "type": "string"
-                },
                 "channel": {
                   "default": "stable",
                   "title": "Channel of an operator package to subscribe to",
@@ -120,7 +120,7 @@
           "type": "boolean"
         },
         "image": {
-          "default": "registry.access.redhat.com/ubi8/ubi-minimal",
+          "default": "bitnami/kubectl:latest",
           "type": "string",
           "title": "The base image for the testing pod"
         }

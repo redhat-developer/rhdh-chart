@@ -3,6 +3,6 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: serverless-operator-group
-  namespace: {{ .Values.serverlessOperator.subscription.spec.namespace }}
+  namespace: {{ .Values.serverlessOperator.subscription.namespace }}
 spec: {}
 {{- end }}

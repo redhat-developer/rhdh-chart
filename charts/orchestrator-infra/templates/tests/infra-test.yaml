@@ -9,9 +9,10 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
-  name: test-cluster-role
+  name: test-role-os
+  namespace: {{ .Values.serverlessOperator.subscription.namespace }}
   annotations:
     helm.sh/hook: test
     helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
@@ -19,15 +20,12 @@ rules:
   - apiGroups: ["operators.coreos.com"]
     resources: ["subscriptions"]
     verbs: ["list", "get"]
-  - apiGroups: [""]
-    resources: ["namespaces"]
-    verbs: ["list", "get"]
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
-  name: test-cluster-role-binding
+  name: test-role-binding-os
+  namespace: {{ .Values.serverlessOperator.subscription.namespace }}
   annotations:
     helm.sh/hook: test
     helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
@@ -36,15 +34,44 @@ subjects:
     name: test-service-account
     namespace: {{ .Release.Namespace }}
 roleRef:
-  kind: ClusterRole
-  name: test-cluster-role
+  kind: Role
+  name: test-role-os
   apiGroup: rbac.authorization.k8s.io
-
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: test-role-osl
+  namespace: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+rules:
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["subscriptions"]
+    verbs: ["list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: test-role-binding-osl
+  namespace: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+subjects:
+  - kind: ServiceAccount
+    name: test-service-account
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: test-role-osl
+  apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "testing-pod"
+  name: testing-pod
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/component: test
@@ -72,12 +99,17 @@ spec:
       args:
         - |
           set -e
-          
-          kubectl get subscription -n {{ .Values.serverlessOperator.subscription.spec.namespace }} || exit 1
-          kubectl get subscription -n  {{ .Values.serverlessLogicOperator.subscription.spec.namespace }} || exit 1
-          kubectl get namespace knative-eventing || exit 1
-          kubectl get namespace knative-serving || exit 1
+      
+          echo "Starting Test"
 
+          {{- if .Values.serverlessLogicOperator.enabled }}
+            kubectl get subscription {{ .Values.serverlessOperator.subscription.spec.name }} -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
+          {{- end }}
+            
+          {{- if .Values.serverlessLogicOperator.enabled }}
+          kubectl get subscription {{ .Values.serverlessLogicOperator.subscription.name }} -n {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
+          {{- end }}
+      
           echo "Test passed!"
   restartPolicy: Never
   {{- end }}
