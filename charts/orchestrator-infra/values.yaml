@@ -2,7 +2,7 @@ serverlessLogicOperator:
   enabled: true  # whether the operator should be deployed by the chart
   subscription:
     namespace: openshift-serverless-logic  #  namespace where the operator should be deployed
-    spec:  
+    spec:
       channel: alpha  #  channel of an operator package to subscribe to
       installPlanApproval: Manual  #  whether the update should be installed automatically
       name: logic-operator-rhel8  #  name of the operator package
@@ -14,7 +14,7 @@ serverlessOperator:
   enabled: true  #  whether the operator should be deployed by the chart
   subscription:
     namespace: openshift-serverless  # namespace where the operator should be deployed
-    spec: 
+    spec:
       channel: stable  #  channel of an operator package to subscribe to
       installPlanApproval: Manual  #  whether the update should be installed automatically
       name: serverless-operator  #  name of the operator package
