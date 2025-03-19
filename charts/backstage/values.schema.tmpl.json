@@ -59,7 +59,9 @@
                                         "default": false
                                     }
                                 },
-                                "required": ["package"]
+                                "required": [
+                                    "package"
+                                ]
                             }
                         },
                         "includes": {
@@ -110,7 +112,7 @@
             "properties": {
                 "annotations": {
                     "title": "Route specific annotations.",
-                    "type":  "object",
+                    "type": "object",
                     "default": {}
                 },
                 "enabled": {
@@ -189,6 +191,194 @@
                                 "None",
                                 ""
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "orchestrator": {
+            "title": "orchestrator configuration",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "title": "enabled flag",
+                    "type": "boolean",
+                    "default": true
+                },
+                "rhdhPlugins": {
+                    "title": "rhdhPlugins configuration",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "npmRegistry": {
+                            "title": "npmRegistry value",
+                            "type": "string",
+                            "default": ""
+                        }
+                    }
+                },
+                "serverlessLogicOperator": {
+                    "title": "serverlessLogicOperator configuration",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "title": "enabled flag",
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                },
+                "serverlessOperator": {
+                    "title": "serverlessOperator configuration",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "title": "enabled flag",
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                },
+                "postgres": {
+                    "title": "postgres configuration",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "serviceName": {
+                            "title": "serviceName value",
+                            "type": "string",
+                            "default": "sonataflow-psql-postgresql"
+                        },
+                        "serviceNamespace": {
+                            "title": "serviceNamespace value",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "authSecret": {
+                            "title": "authSecret configuration",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "title": "name value",
+                                    "type": "string",
+                                    "default": "sonataflow-psql-postgresql"
+                                },
+                                "userKey": {
+                                    "title": "userKey value",
+                                    "type": "string",
+                                    "default": "postgres-username"
+                                },
+                                "passwordKey": {
+                                    "title": "passwordKey value",
+                                    "type": "string",
+                                    "default": "postgres-password"
+                                }
+                            }
+                        },
+                        "database": {
+                            "title": "database value",
+                            "type": "string",
+                            "default": "sonataflow"
+                        }
+                    }
+                },
+                "orchestrator": {
+                    "title": "orchestrator configuration",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "namespace": {
+                            "title": "namespace value",
+                            "type": "string",
+                            "default": "sonataflow-infra"
+                        },
+                        "sonataflowPlatform": {
+                            "title": "sonataflowPlatform configuration",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "monitoring": {
+                                    "title": "monitoring configuration",
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "title": "enabled flag",
+                                            "type": "boolean",
+                                            "default": true
+                                        }
+                                    }
+                                },
+                                "eventing": {
+                                    "title": "eventing configuration",
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "broker": {
+                                            "title": "broker configuration",
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "name": {
+                                                    "title": "name value",
+                                                    "type": "string",
+                                                    "default": ""
+                                                },
+                                                "namespace": {
+                                                    "title": "namespace value",
+                                                    "type": "string",
+                                                    "default": ""
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "resources": {
+                                    "title": "resources configuration",
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "requests": {
+                                            "title": "requests configuration",
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "memory": {
+                                                    "title": "memory value",
+                                                    "type": "string",
+                                                    "default": "64Mi"
+                                                },
+                                                "cpu": {
+                                                    "title": "cpu value",
+                                                    "type": "string",
+                                                    "default": "250m"
+                                                }
+                                            }
+                                        },
+                                        "limits": {
+                                            "title": "limits configuration",
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "memory": {
+                                                    "title": "memory value",
+                                                    "type": "string",
+                                                    "default": "1Gi"
+                                                },
+                                                "cpu": {
+                                                    "title": "cpu value",
+                                                    "type": "string",
+                                                    "default": "500m"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
