@@ -91,6 +91,194 @@
             },
             "type": "object"
         },
+        "orchestrator": {
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "title": "enabled flag",
+                    "type": "boolean"
+                },
+                "orchestrator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "namespace": {
+                            "default": "sonataflow-infra",
+                            "title": "namespace value",
+                            "type": "string"
+                        },
+                        "sonataflowPlatform": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "eventing": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "broker": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "name": {
+                                                    "default": "",
+                                                    "title": "name value",
+                                                    "type": "string"
+                                                },
+                                                "namespace": {
+                                                    "default": "",
+                                                    "title": "namespace value",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "title": "broker configuration",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "title": "eventing configuration",
+                                    "type": "object"
+                                },
+                                "monitoring": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "default": true,
+                                            "title": "enabled flag",
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "title": "monitoring configuration",
+                                    "type": "object"
+                                },
+                                "resources": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "limits": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "cpu": {
+                                                    "default": "500m",
+                                                    "title": "cpu value",
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "default": "1Gi",
+                                                    "title": "memory value",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "title": "limits configuration",
+                                            "type": "object"
+                                        },
+                                        "requests": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "cpu": {
+                                                    "default": "250m",
+                                                    "title": "cpu value",
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "default": "64Mi",
+                                                    "title": "memory value",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "title": "requests configuration",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "title": "resources configuration",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "sonataflowPlatform configuration",
+                            "type": "object"
+                        }
+                    },
+                    "title": "orchestrator configuration",
+                    "type": "object"
+                },
+                "postgres": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "authSecret": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "default": "sonataflow-psql-postgresql",
+                                    "title": "name value",
+                                    "type": "string"
+                                },
+                                "passwordKey": {
+                                    "default": "postgres-password",
+                                    "title": "passwordKey value",
+                                    "type": "string"
+                                },
+                                "userKey": {
+                                    "default": "postgres-username",
+                                    "title": "userKey value",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "authSecret configuration",
+                            "type": "object"
+                        },
+                        "database": {
+                            "default": "sonataflow",
+                            "title": "database value",
+                            "type": "string"
+                        },
+                        "serviceName": {
+                            "default": "sonataflow-psql-postgresql",
+                            "title": "serviceName value",
+                            "type": "string"
+                        },
+                        "serviceNamespace": {
+                            "default": "",
+                            "title": "serviceNamespace value",
+                            "type": "string"
+                        }
+                    },
+                    "title": "postgres configuration",
+                    "type": "object"
+                },
+                "rhdhPlugins": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "npmRegistry": {
+                            "default": "",
+                            "title": "npmRegistry value",
+                            "type": "string"
+                        }
+                    },
+                    "title": "rhdhPlugins configuration",
+                    "type": "object"
+                },
+                "serverlessLogicOperator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "enabled flag",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "serverlessLogicOperator configuration",
+                    "type": "object"
+                },
+                "serverlessOperator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "enabled flag",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "serverlessOperator configuration",
+                    "type": "object"
+                }
+            },
+            "title": "orchestrator configuration",
+            "type": "object"
+        },
         "route": {
             "additionalProperties": false,
             "properties": {
@@ -972,6 +1160,24 @@
                                     "baseUrl": "https://{{- include \"janus-idp.hostname\" . }}",
                                     "cors": {
                                         "origin": "https://{{- include \"janus-idp.hostname\" . }}"
+                                    },
+                                    "csp": {
+                                        "connect-src": [
+                                            "'self'",
+                                            "http:",
+                                            "https:",
+                                            "data:"
+                                        ],
+                                        "script-src": [
+                                            "'self'",
+                                            "'unsafe-inline'",
+                                            "'unsafe-eval'"
+                                        ],
+                                        "script-src-elem": [
+                                            "'self'",
+                                            "'unsafe-inline'",
+                                            "'unsafe-eval'"
+                                        ]
                                     },
                                     "database": {
                                         "connection": {

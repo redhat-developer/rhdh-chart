@@ -1,0 +1,65 @@
+{{- if and .Values.orchestrator.enabled .Values.orchestrator.serverlessLogicOperator.enabled }}
+{{- $workflowNamespace := .Release.Namespace }}
+---
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlowPlatform
+metadata:
+  name: sonataflow-platform
+  namespace: {{ $workflowNamespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name}}
+spec:
+  monitoring:
+    enabled: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.monitoring.enabled }}
+  build:
+    template:
+      resources:
+        requests:
+          memory: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.requests.memory }}
+          cpu: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.requests.cpu }}
+        limits:
+          memory: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.limits.memory }}
+          cpu: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.limits.cpu }}
+  {{- if (and (.Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.name) (.Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.namespace)) }}
+  eventing:
+    broker:
+      ref:
+        apiVersion: eventing.knative.dev/v1
+        kind: Broker
+        name: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.name }}
+        namespace: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.namespace }}
+  {{- end }}
+  services:
+    dataIndex:
+      enabled: true
+      persistence:
+        postgresql:
+          secretRef:
+            name: {{ .Values.orchestrator.postgres.authSecret.name }}
+            userKey: {{ .Values.orchestrator.postgres.authSecret.userKey }}
+            passwordKey: {{ .Values.orchestrator.postgres.authSecret.passwordKey }}
+          serviceRef:
+            name: {{ .Values.orchestrator.postgres.serviceName }}
+            namespace: {{ .Values.orchestrator.postgres.serviceNamespace }}
+      {{- if .Values.orchestrator.orchestrator.sonataflowPlatform.dataIndexImage }}
+      podTemplate:
+        container:
+          image: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.dataIndexImage }}
+      {{- end }}
+    jobService:
+      enabled: true
+      persistence:
+        postgresql:
+          secretRef:
+            name: {{ .Values.orchestrator.postgres.authSecret.name }}
+            userKey: {{ .Values.orchestrator.postgres.authSecret.userKey }}
+            passwordKey: {{ .Values.orchestrator.postgres.authSecret.passwordKey }}
+          serviceRef:
+            name: {{ .Values.orchestrator.postgres.serviceName }}
+            namespace: {{ .Values.orchestrator.postgres.serviceNamespace }}
+      {{- if .Values.orchestrator.orchestrator.sonataflowPlatform.jobServiceImage }}
+      podTemplate:
+        container:
+          image: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.jobServiceImage }}
+      {{- end }}
+{{- end }}
