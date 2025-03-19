@@ -1,0 +1,8 @@
+{{- if .Values.serverlessOperator.enabled }}
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: serverless-operator-group
+  namespace: {{ .Values.serverlessOperator.subscription.namespace }}
+spec: {}
+{{- end }}

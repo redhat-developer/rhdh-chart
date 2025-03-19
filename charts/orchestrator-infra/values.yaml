@@ -1,0 +1,26 @@
+serverlessLogicOperator:
+  enabled: true  # whether the operator should be deployed by the chart
+  subscription:
+    namespace: openshift-serverless-logic  #  namespace where the operator should be deployed
+    spec:
+      channel: alpha  #  channel of an operator package to subscribe to
+      installPlanApproval: Manual  #  whether the update should be installed automatically
+      name: logic-operator-rhel8  #  name of the operator package
+      source: redhat-operators  #  name of the catalog source
+      sourceNamespace: openshift-marketplace
+      startingCSV: logic-operator-rhel8.v1.35.0  # The initial version of the operator
+
+serverlessOperator:
+  enabled: true  #  whether the operator should be deployed by the chart
+  subscription:
+    namespace: openshift-serverless  # namespace where the operator should be deployed
+    spec:
+      channel: stable  #  channel of an operator package to subscribe to
+      installPlanApproval: Manual  #  whether the update should be installed automatically
+      name: serverless-operator  #  name of the operator package
+      source: redhat-operators  #  name of the catalog source
+      sourceNamespace: openshift-marketplace
+
+tests:
+  enabled: true
+  image: bitnami/kubectl:latest
