@@ -16,4 +16,36 @@ kind: Namespace
 metadata:
   name: knative-eventing
 {{- end }}
+
+{{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Capabilities.APIVersions) }}
+{{- if eq $unmanagedKnativeEventingExists "false" }}
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+spec:
+  Registry:
+{{- end }}
+
+{{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Capabilities.APIVersions) }}
+{{- if eq $unmanagedKnativeServingExists "false" }}
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+spec:
+  controller-custom-certs:
+    name: ""
+    type: ""
+  registry: {}
+
+{{- end }}
 {{- end }}
