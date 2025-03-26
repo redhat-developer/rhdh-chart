@@ -46,6 +46,7 @@ jobs:
 
   test-chart:
     strategy:
+      fail-fast: false
       matrix:
         version:
           # 'latest' is the latest RC or stable release of RHDH (built from a release branch)
