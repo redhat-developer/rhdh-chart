@@ -34,7 +34,6 @@ serverlessOperator:
       source: redhat-operators
       sourceNamespace: openshift-marketplace
 
-# -- Test pod parameters
 tests:
   # -- Whether to create the test pod used for testing the Release using `helm test`.
   enabled: true
