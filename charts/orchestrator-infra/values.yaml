@@ -1,26 +1,42 @@
 serverlessLogicOperator:
-  enabled: true  # whether the operator should be deployed by the chart
+  # -- whether the operator should be deployed by the chart
+  enabled: true
   subscription:
-    namespace: openshift-serverless-logic  #  namespace where the operator should be deployed
+    # -- namespace where the operator should be deployed
+    namespace: openshift-serverless-logic
     spec:
-      channel: alpha  #  channel of an operator package to subscribe to
-      installPlanApproval: Manual  #  whether the update should be installed automatically
-      name: logic-operator-rhel8  #  name of the operator package
-      source: redhat-operators  #  name of the catalog source
+      # -- channel of an operator package to subscribe to
+      channel: alpha
+      # --  whether the update should be installed automatically
+      installPlanApproval: Manual
+      # -- name of the operator package
+      name: logic-operator-rhel8
+      # --  name of the catalog source
+      source: redhat-operators
       sourceNamespace: openshift-marketplace
-      startingCSV: logic-operator-rhel8.v1.35.0  # The initial version of the operator
+      # -- The initial version of the operator
+      startingCSV: logic-operator-rhel8.v1.35.0
 
 serverlessOperator:
-  enabled: true  #  whether the operator should be deployed by the chart
+  # -- whether the operator should be deployed by the chart
+  enabled: true
   subscription:
-    namespace: openshift-serverless  # namespace where the operator should be deployed
+    # -- namespace where the operator should be deployed
+    namespace: openshift-serverless
     spec:
-      channel: stable  #  channel of an operator package to subscribe to
-      installPlanApproval: Manual  #  whether the update should be installed automatically
-      name: serverless-operator  #  name of the operator package
-      source: redhat-operators  #  name of the catalog source
+      # -- channel of an operator package to subscribe to
+      channel: stable
+      # -- whether the update should be installed automatically
+      installPlanApproval: Manual
+      # -- name of the operator package
+      name: serverless-operator
+      # -- name of the catalog source
+      source: redhat-operators
       sourceNamespace: openshift-marketplace
 
+# -- Test pod parameters
 tests:
+  # -- Whether to create the test pod used for testing the Release using `helm test`.
   enabled: true
+  # -- Test pod image
   image: bitnami/kubectl:latest
