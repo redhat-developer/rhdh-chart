@@ -1,7 +1,8 @@
 
 # Orchestrator Infra Chart for OpenShift (Community Version)
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square)
+![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Logic Operator and OpenShift Serverless Operator.
 
@@ -89,7 +90,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.name | name of the operator package | string | `"logic-operator-rhel8"` |
 | serverlessLogicOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
 | serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
-| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator | string | `"logic-operator-rhel8.v1.35.0"` |
+| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator-rhel8.v1.35.0"` |
 | serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
 | serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
@@ -99,7 +100,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
 | tests.enabled | Whether to create the test pod used for testing the Release using `helm test`. | bool | `true` |
 | tests.image | Test pod image | string | `"bitnami/kubectl:latest"` |
-
 
 ### Installing Knative Serving CRDs
 
@@ -121,3 +121,5 @@ curl -L https://github.com/knative/eventing/releases/download/knative-v1.17.3/ev
 # To install the latest version
 curl -L https://github.com/knative/eventing/releases/latest/download/eventing-crds.yaml -o eventing-crds.yaml
 ```
+
+In the case for an upgrade to Openshift Serverless CSV version, The CRDs that are present under crd/ must be updated to the corresponding version.
