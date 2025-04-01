@@ -101,25 +101,18 @@ The command removes all the Kubernetes components associated with the chart and 
 | tests.enabled | Whether to create the test pod used for testing the Release using `helm test`. | bool | `true` |
 | tests.image | Test pod image | string | `"bitnami/kubectl:latest"` |
 
-### Installing Knative Serving CRDs
 
-The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving. These CRDs will be applied prior to installing the chart, ensuring that Knative CRs can be created as part of the chart’s deployment process. This approach eliminates the need to wait for the OpenShift Serverless Operator’s subscription to install them beforehand.
 
-```bash
-# To install a specific version, change to an existing release version
-curl -L https://github.com/knative/serving/releases/download/knative-v1.17.0/serving-crds.yaml -o eserving-crds.yaml
+### Installing Knative Eventing and Knative Serving CRDs
 
-# To install the latest version
-curl -L https://github.com/knative/serving/releases/latest/download/serving-crds.yaml -o serving-crds.yaml
-```
+The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving. These CRDs will be applied prior to installing the chart, ensuring that Knative CRs can be created as part of the chart's deployment process. This approach eliminates the need to wait for the OpenShift Serverless Operator's subscription to install them beforehand.
 
-### Installing Knative Eventing CRDs
-```bash
-# To install a specific version, change to an existing release version
-curl -L https://github.com/knative/eventing/releases/download/knative-v1.17.3/eventing-crds.yaml -o eventing-crds.yaml
+The KnativeEventing and KnativeServing CRDs are required fr this chart to run. These CRDs need to be present under the crds/ directory before running `helm install`. 
+After installing the openshift-serverless subscription, more Knative CRDs will be installed on the cluster. 
 
-# To install the latest version
-curl -L https://github.com/knative/eventing/releases/latest/download/eventing-crds.yaml -o eventing-crds.yaml
-```
+The versions of the CRDs present in the chart and the ones in teh subscrtiprion must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
-In the case for an upgrade to Openshift Serverless CSV version, The CRDs that are present under crd/ must be updated to the corresponding version.
+```bash 
+podman run --rm --entrypoint bash registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0  -c "cat /manifests/operator_v1beta1_knativeeventing_crd.yaml" | yq > knative-eventing-crd.yaml
+
+podman run --rm --entrypoint bash registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0  -c "cat /manifests/operator_v1beta1_knativeserving_crd.yaml" | yq > knative-serving-crd.yaml
