@@ -1,7 +1,7 @@
 
 # Orchestrator Infra Chart for OpenShift (Community Version)
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square)
+![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Logic Operator and OpenShift Serverless Operator.
@@ -100,8 +100,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
 | tests.enabled | Whether to create the test pod used for testing the Release using `helm test`. | bool | `true` |
 | tests.image | Test pod image | string | `"bitnami/kubectl:latest"` |
-
-
 
 ### Installing Knative Eventing and Knative Serving CRDs
 
