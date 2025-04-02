@@ -111,6 +111,7 @@ After installing the openshift-serverless subscription, more Knative CRDs will b
 The versions of the CRDs present in the chart and the ones in the subscrtiprion must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
 ```bash
-podman run --rm --entrypoint bash registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0  -c "cat /manifests/operator_v1beta1_knativeeventing_crd.yaml" | yq > knative-eventing-crd.yaml
+docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0 /manifests/operator_v1beta1_knativeeventing_crd.yaml > knative-eventing-crd.yaml
 
-podman run --rm --entrypoint bash registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0  -c "cat /manifests/operator_v1beta1_knativeserving_crd.yaml" | yq > knative-serving-crd.yaml
+docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0 /manifests/operator_v1beta1_knativeserving_crd.yaml > knative-serving-crd.yaml
+```
