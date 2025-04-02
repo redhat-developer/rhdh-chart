@@ -105,12 +105,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving. These CRDs will be applied prior to installing the chart, ensuring that Knative CRs can be created as part of the chart's deployment process. This approach eliminates the need to wait for the OpenShift Serverless Operator's subscription to install them beforehand.
 
-The KnativeEventing and KnativeServing CRDs are required fr this chart to run. These CRDs need to be present under the crds/ directory before running `helm install`. 
-After installing the openshift-serverless subscription, more Knative CRDs will be installed on the cluster. 
+The KnativeEventing and KnativeServing CRDs are required for this chart to run. These CRDs need to be present under the crds/ directory before running `helm install`.
+After installing the openshift-serverless subscription, more Knative CRDs will be installed on the cluster.
 
-The versions of the CRDs present in the chart and the ones in teh subscrtiprion must match. In order to verify the correct CRD, use this following command to extract the CRD:
+The versions of the CRDs present in the chart and the ones in the subscrtiprion must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
-```bash 
+```bash
 podman run --rm --entrypoint bash registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0  -c "cat /manifests/operator_v1beta1_knativeeventing_crd.yaml" | yq > knative-eventing-crd.yaml
 
 podman run --rm --entrypoint bash registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0  -c "cat /manifests/operator_v1beta1_knativeserving_crd.yaml" | yq > knative-serving-crd.yaml
