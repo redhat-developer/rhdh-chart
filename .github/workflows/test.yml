@@ -156,11 +156,10 @@ jobs:
 
       - name: Run chart-testing
         run: |
-          docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0 /manifests/operator_v1beta1_knativeeventing_crd.yaml > knative-eventing-crd.yaml
-          docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0 /manifests/operator_v1beta1_knativeserving_crd.yaml > knative-serving-crd.yaml
-          kubectl apply -f knative-eventing-crd.yaml
-          kubectl apply -f knative-serving-crd.yaml
           
+          kubectl apply -f charts/orchestrator-infra/crds/knative-eventing/knative-eventing-crd.yaml
+          kubectl apply -f charts/orchestrator-infra/crds/knative-serving/knative-serving-crd.yaml
+
           ct install \
             --debug \
             --config ct-install.yaml \
