@@ -51,7 +51,16 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
 
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --target-branch "${{ github.event.pull_request.base.ref }}")
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: "Add NGINX Ingress and Bitnami Repository"
+        if: steps.list-changed.outputs.changed == 'true'
         run: |
           helm repo add ingress-nginx "https://kubernetes.github.io/ingress-nginx"
           helm repo add bitnami "https://charts.bitnami.com/bitnami"
@@ -59,6 +68,7 @@ jobs:
           helm repo update
 
       - name: Generate KinD Config
+        if: steps.list-changed.outputs.changed == 'true'
         run: |
           cat <<EOF > /tmp/kind-config.yaml
           apiVersion: kind.x-k8s.io/v1alpha4
@@ -75,11 +85,13 @@ jobs:
           EOF
 
       - name: Create KIND Cluster
+        if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
         with:
           config: /tmp/kind-config.yaml
 
       - name: Create custom storage class
+        if: steps.list-changed.outputs.changed == 'true'
         run: |
           export defaultScProvisioner=$(kubectl get storageclass -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].provisioner}')
           if [[ -z "$defaultScProvisioner" ]]; then
@@ -102,12 +114,14 @@ jobs:
           kubectl get storageclass custom-sc -o yaml
 
       - name: Install Ingress Controller
+        if: steps.list-changed.outputs.changed == 'true'
         run: |
           helm install ingress-nginx/ingress-nginx --generate-name \
             --set controller.service.type='NodePort' \
             --set controller.admissionWebhooks.enabled=false
 
       - name: Install Operator Lifecycle Manager (OLM)
+        if: steps.list-changed.outputs.changed == 'true'
         # In case we need to install additional Operators
         env:
           OLM_VERSION: "v0.31.0"
@@ -116,7 +130,8 @@ jobs:
           chmod +x install-olm.sh
           ./install-olm.sh "${OLM_VERSION}"
 
-      - name: Run chart-testing
+      - name: Run chart-testing (install)
+        if: steps.list-changed.outputs.changed == 'true'
         run: |
           ct install \
             --debug \
