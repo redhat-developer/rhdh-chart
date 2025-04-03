@@ -33,7 +33,7 @@ Red Hat Serverless Logic Operator   {{ $serverlessLogicOperatorInstalled }}     
 
 To manually approve the openshift-serverless InstallPlan:
 
-OS_PLAN=$(oc get installplan -n openshift-serverless)
+OS_PLAN=$(oc get installplan -n openshift-serverless --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1].metadata.name}')
 oc patch installplan $OS_PLAN -n openshift-serverless --type merge --patch '{"spec":{"approved":true}}'
 {{- end }}
 
@@ -41,6 +41,6 @@ oc patch installplan $OS_PLAN -n openshift-serverless --type merge --patch '{"sp
 
 To manually approve the openshift-serverless-logic InstallPlan:
 
-OSL_PLAN=$(oc get installplan -n openshift-serverless)
-oc patch installplan $OSL_PLAN -n openshift-serverless --type merge --patch '{"spec":{"approved":true}}'
+OSL_PLAN=$(oc get installplan -n openshift-serverless-logic --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1].metadata.name}')
+oc patch installplan $OSL_PLAN -n openshift-serverless-logic --type merge --patch '{"spec":{"approved":true}}'
 {{- end }}

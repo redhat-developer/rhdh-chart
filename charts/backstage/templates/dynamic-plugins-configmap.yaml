@@ -3,6 +3,29 @@ kind: ConfigMap
 metadata:
   name: {{ printf "%s-dynamic-plugins" .Release.Name }}
 data:
+  {{- $dynamic := .Values.global.dynamic }}
+  {{- $plugins := .Values.global.dynamic.plugins }}
   dynamic-plugins.yaml: |
-    {{- include "common.tplvalues.render" ( dict "value"
-    .Values.global.dynamic "context" $) | nindent 4 }}
+
+    {{- if .Values.orchestrator.enabled }}
+      {{- $orchestratorPlugins := include "orchestrator.plugins" . | fromYaml }} 
+      {{- range $orchestratorPlugins.plugins }} 
+        {{- $plugins = append $plugins . }} 
+      {{- end }}
+    {{- $dynamic = merge $dynamic (dict "plugins" $plugins) }}
+    {{- end }}
+
+  {{- include "common.tplvalues.render" (dict "value" $dynamic "context" $) | nindent 4 }}
+  
+{{- if .Values.orchestrator.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ printf "%s-dynamic-plugins-npmrc" .Release.Name }}
+  namespace: {{ .Release.Namespace | quote }}
+type: Opaque
+stringData:
+  .npmrc: |
+    registry={{ .Values.orchestrator.rhdhPlugins.npmRegistry }}
+{{- end }}

@@ -13,4 +13,4 @@ maintainers:
 type: application
 sources:
   - https://github.com/redhat-developer/rhdh-chart
-version: 0.0.3
+version: 0.0.4
