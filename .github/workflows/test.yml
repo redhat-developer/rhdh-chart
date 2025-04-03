@@ -156,10 +156,6 @@ jobs:
 
       - name: Run chart-testing
         run: |
-          
-          kubectl apply -f charts/orchestrator-infra/crds/knative-eventing/knative-eventing-crd.yaml
-          kubectl apply -f charts/orchestrator-infra/crds/knative-serving/knative-serving-crd.yaml
-
           ct install \
             --debug \
             --config ct-install.yaml \
