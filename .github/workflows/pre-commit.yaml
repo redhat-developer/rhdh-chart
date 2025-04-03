@@ -7,11 +7,6 @@ on:
       - rhdh-1.[0-9]+
       - 1.[0-9]+.x
       - release-1.[0-9]+
-    paths:
-      - "charts/**"
-      - ".github/workflows/pre-commit.yaml"
-      - ".pre-commit/**"
-      - ".pre-commit-config.yaml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
