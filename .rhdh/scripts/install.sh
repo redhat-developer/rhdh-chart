@@ -25,8 +25,11 @@ Examples:
 Options:
   -n, --namespace   Project or namespace into which to install specified chart; default: $namespace
       --github-repo If set will use the deprecated github repository to install the helm chart instead of the OCI registry.
-  -r, --chartrepo   If set, a Helm Chart Repo will be applied to the cluster, based on the chart version.
+      --chartrepo   If set, a Helm Chart Repo will be applied to the cluster, based on the chart version.
                     If CHART_VERSION ends in CI and --github-repo is set, this is done by default.
+      --router      If set, the cluster router base is manually set. 
+                    Required for non-admin users
+                    Redundant for admin users
 "
   exit
 }
@@ -35,10 +38,11 @@ if [[ $# -lt 1 ]]; then usage; fi
 
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    '-r'|'--chartrepo') chartrepo=1;;
+    '--chartrepo') chartrepo=1;;
     '-n'|'--namespace') namespace="$2"; shift 1;;
     '-h') usage;;
     '--github-repo') github=1;;
+    '--router') CLUSTER_ROUTER_BASE="$2"; shift 1;;
     *) CV="$1";;
   esac
   shift 1
@@ -46,8 +50,6 @@ done
 
 if [[ ! $CV ]]; then usage; fi
 
-
-tmpfile=/tmp/redhat-developer-hub.chart.values.yml
 CHART_URL="oci://quay.io/rhdh/chart"
 
 if ! helm show chart $CHART_URL --version $CV &> /dev/null; then github=1; fi
@@ -71,15 +73,19 @@ helm upgrade redhat-developer-hub -i "${CHART_URL}" --version $CV
 
 # 2. collect values
 PASSWORD=$(kubectl get secret redhat-developer-hub-postgresql -o jsonpath="{.data.password}" | base64 -d)
-CLUSTER_ROUTER_BASE=$(oc get route console -n openshift-console -o=jsonpath='{.spec.host}' | sed 's/^[^.]*\.//')
+if [[ $(oc auth can-i get route/openshift-console) == "yes" ]]; then
+  CLUSTER_ROUTER_BASE=$(oc get route console -n openshift-console -o=jsonpath='{.spec.host}' | sed 's/^[^.]*\.//')
+else
+  echo "Error: openshift-console routes cannot be accessed with user permissions"
+  echo "Rerun command installation script with --router <cluster router base>"
+  echo
+  usage
+fi
 
 # 3. change values
 helm upgrade redhat-developer-hub -i "${CHART_URL}" --version $CV \
     --set global.clusterRouterBase="${CLUSTER_ROUTER_BASE}" \
     --set global.postgresql.auth.password="$PASSWORD"
-
-# 4. cleanup
-rm -f "$tmpfile"
 
 echo "
 Once deployed, Developer Hub $CV will be available at
