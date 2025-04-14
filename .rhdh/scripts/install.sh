@@ -75,7 +75,7 @@ helm upgrade redhat-developer-hub -i "${CHART_URL}" --version "$CV"
 PASSWORD=$(kubectl get secret redhat-developer-hub-postgresql -o jsonpath="{.data.password}" | base64 -d)
 if [[ $(oc auth can-i get route/openshift-console) == "yes" ]]; then
   CLUSTER_ROUTER_BASE=$(oc get route console -n openshift-console -o=jsonpath='{.spec.host}' | sed 's/^[^.]*\.//')
-else
+elif [[ -z $CLUSTER_ROUTER_BASE ]]; then
   echo "Error: openshift-console routes cannot be accessed with user permissions"
   echo "Rerun command installation script with --router <cluster router base>"
   echo
