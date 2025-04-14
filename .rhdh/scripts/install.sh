@@ -48,14 +48,14 @@ while [[ "$#" -gt 0 ]]; do
   shift 1
 done
 
-if [[ ! $CV ]]; then usage; fi
+if [[ ! "$CV" ]]; then usage; fi
 
 CHART_URL="oci://quay.io/rhdh/chart"
 
-if ! helm show chart $CHART_URL --version $CV &> /dev/null; then github=1; fi
+if ! helm show chart $CHART_URL --version "$CV" &> /dev/null; then github=1; fi
 if [[ $github -eq 1 ]]; then
   # If a Github CI chart, create a chart repo
-  if [[ $CV == *"-CI" ]]; then chartrepo=1; fi
+  if [[ "$CV" == *"-CI" ]]; then chartrepo=1; fi
   CHART_URL="https://github.com/rhdh-bot/openshift-helm-charts/raw/redhat-developer-hub-${CV}/charts/redhat/redhat/redhat-developer-hub/${CV}/redhat-developer-hub-${CV}.tgz"
 fi
 
@@ -65,11 +65,11 @@ echo "Using ${CHART_URL} to install Helm chart"
 oc new-project "$namespace" || oc project "$namespace"
 
 if [[ $chartrepo -eq 1 ]]; then
-    oc apply -f https://github.com/rhdh-bot/openshift-helm-charts/raw/redhat-developer-hub-${CV}/installation/rhdh-next-ci-repo.yaml
+    oc apply -f https://github.com/rhdh-bot/openshift-helm-charts/raw/redhat-developer-hub-"${CV}"/installation/rhdh-next-ci-repo.yaml
 fi
 
 # 1. install (or upgrade)
-helm upgrade redhat-developer-hub -i "${CHART_URL}" --version $CV
+helm upgrade redhat-developer-hub -i "${CHART_URL}" --version "$CV"
 
 # 2. collect values
 PASSWORD=$(kubectl get secret redhat-developer-hub-postgresql -o jsonpath="{.data.password}" | base64 -d)
@@ -83,7 +83,7 @@ else
 fi
 
 # 3. change values
-helm upgrade redhat-developer-hub -i "${CHART_URL}" --version $CV \
+helm upgrade redhat-developer-hub -i "${CHART_URL}" --version "$CV" \
     --set global.clusterRouterBase="${CLUSTER_ROUTER_BASE}" \
     --set global.postgresql.auth.password="$PASSWORD"
 
