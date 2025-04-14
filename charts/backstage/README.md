@@ -1,45 +1,27 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 4.0.1](https://img.shields.io/badge/Version-4.0.1-informational?style=flat-square)
+![Version: 4.1.0](https://img.shields.io/badge/Version-4.1.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
 
 The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.5/html-single/telemetry_data_collection/index
 
-**Homepage:** <https://redhat-developer.github.io/rhdh-chart/>
+**Homepage:** <https://red.ht/rhdh>
 
 ## Productized RHDH
 
-For the **PRODUCTIZED** version of this chart, see:
+This repository now provides the productized RHDH chart.
+For the **GENERALLY AVAILABLE** version of this chart, see:
 
-* https://github.com/rhdh-bot/openshift-helm-charts - CI builds for testing purposes only
 * https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
 
 ## Maintainers
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Red Hat Developer Hub Team |  | <https://github.com/redhat-developer/rhdh-chart> |
-
-## Source Code
-
-* <https://github.com/redhat-developer/rhdh-chart>
-* <https://github.com/redhat-developer/rhdh>
-
----
-
-RHDH Backstage chart is an opinionated flavor of the upstream chart located at [backstage/charts](https://github.com/backstage/charts). It extends the upstream chart with additional OpenShift specific functionality and provides opinionated values.
-
-[Backstage](https://backstage.io) is an open platform for building developer portals. Powered by a centralized software catalog, Backstage restores order to your microservices and infrastructure and enables your product teams to ship high-quality code quickly — without compromising autonomy.
-
-Backstage unifies all your infrastructure tooling, services, and documentation to create a streamlined development environment from end to end.
-
-**This chart offers an opinionated OpenShift-specific experience.** It is based on and directly depends on an upstream canonical [Backstage Helm chart](https://github.com/backstage/charts/tree/main/charts/backstage). For less opinionated experience, please consider using the upstream chart directly.
-
-This chart extends all the features in the upstream chart in addition to including OpenShift only features. It is not recommended to use this chart on other platforms.
+| Red Hat |  | <https://redhat.com> |
 
 ## TL;DR
 
@@ -68,6 +50,10 @@ Charts are available in the following formats:
 
 - [Chart Repository](https://helm.sh/docs/topics/chart_repository/)
 - [OCI Artifacts](https://helm.sh/docs/topics/registries/)
+
+### Note
+
+Up-to-date instructions on installing RHDH through the chart can be found in the [installation docs](https://github.com/redhat-developer/rhdh-chart/tree/main/.rhdh/docs/installation-ci-charts.adoc).
 
 ### Installing from the Chart Repository
 
@@ -108,12 +94,12 @@ helm upgrade -i <release_name> redhat-developer/backstage
 
 Note: this repo replaces https://github.com/janus-idp/helm-backstage, which has been deprecated in Feb 2024.
 
-Charts are also available in OCI format. The list of available releases can be found [here](https://github.com/orgs/redhat-developer/packages/container/package/rhdh-chart%2Fbackstage).
+Charts are also available in OCI format. The list of available releases can be found [here](https://quay.io/repository/rhdh/chart?tab=tags).
 
 Install one of the available versions:
 
 ```shell
-helm upgrade -i <release_name> oci://ghcr.io/redhat-developer/rhdh-chart/backstage --version=<version>
+helm upgrade -i <release_name> oci://quay.io/rhdh/chart --version=<version>
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -170,7 +156,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Requirements
 
-Kubernetes: `>= 1.25.0-0`
+Kubernetes: `>= 1.19.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
@@ -191,6 +177,7 @@ Kubernetes: `>= 1.25.0-0`
 | global.dynamic.includes[0] | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. | string | `"dynamic-plugins.default.yaml"` |
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
+| nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `false` |
 | orchestrator.serverlessOperator.enabled |  | bool | `false` |

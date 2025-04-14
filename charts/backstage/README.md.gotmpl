@@ -2,7 +2,6 @@
 
 {{ template "chart.deprecationWarning" . }}
 
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
 {{ template "chart.versionBadge" . }}
 {{ template "chart.typeBadge" . }}
 
@@ -12,26 +11,15 @@
 
 ## Productized RHDH 
 
-For the **PRODUCTIZED** version of this chart, see:
+This repository now provides the productized RHDH chart.
+For the **GENERALLY AVAILABLE** version of this chart, see:
 
-* https://github.com/rhdh-bot/openshift-helm-charts - CI builds for testing purposes only
 * https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
 
 {{ template "chart.maintainersSection" . }}
 
 {{ template "chart.sourcesSection" . }}
 
----
-
-RHDH Backstage chart is an opinionated flavor of the upstream chart located at [backstage/charts](https://github.com/backstage/charts). It extends the upstream chart with additional OpenShift specific functionality and provides opinionated values.
-
-[Backstage](https://backstage.io) is an open platform for building developer portals. Powered by a centralized software catalog, Backstage restores order to your microservices and infrastructure and enables your product teams to ship high-quality code quickly — without compromising autonomy.
-
-Backstage unifies all your infrastructure tooling, services, and documentation to create a streamlined development environment from end to end.
-
-**This chart offers an opinionated OpenShift-specific experience.** It is based on and directly depends on an upstream canonical [Backstage Helm chart](https://github.com/backstage/charts/tree/main/charts/backstage). For less opinionated experience, please consider using the upstream chart directly.
-
-This chart extends all the features in the upstream chart in addition to including OpenShift only features. It is not recommended to use this chart on other platforms.
 
 ## TL;DR
 
@@ -60,6 +48,10 @@ Charts are available in the following formats:
 
 - [Chart Repository](https://helm.sh/docs/topics/chart_repository/)
 - [OCI Artifacts](https://helm.sh/docs/topics/registries/)
+
+### Note
+
+Up-to-date instructions on installing RHDH through the chart can be found in the [installation docs](https://github.com/redhat-developer/rhdh-chart/tree/main/.rhdh/docs/installation-ci-charts.adoc).
 
 ### Installing from the Chart Repository
 
@@ -100,12 +92,12 @@ helm upgrade -i <release_name> redhat-developer/backstage
 
 Note: this repo replaces https://github.com/janus-idp/helm-backstage, which has been deprecated in Feb 2024.
 
-Charts are also available in OCI format. The list of available releases can be found [here](https://github.com/orgs/redhat-developer/packages/container/package/rhdh-chart%2Fbackstage).
+Charts are also available in OCI format. The list of available releases can be found [here](https://quay.io/repository/rhdh/chart?tab=tags).
 
 Install one of the available versions:
 
 ```shell
-helm upgrade -i <release_name> oci://ghcr.io/redhat-developer/rhdh-chart/backstage --version=<version>
+helm upgrade -i <release_name> oci://quay.io/rhdh/chart --version=<version>
 ```
 
 > **Tip**: List all releases using `helm list`

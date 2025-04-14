@@ -1,0 +1,20 @@
+== Installing CI builds of RHDH through the chart
+
+=== Script install prerequisites
+* Openshift CLI
+* Helm CLI
+
+=== Scripted installation
+
+To link:../scripts/install.sh[install] from a Helm Chart Registry, run the following commands:
+
+```
+cd /tmp
+# Create or select a namespace
+# Install the chart repo
+# Install the chart, then update the clusterRouterBase
+curl -sSLO https://raw.githubusercontent.com/redhat-developer/rhdh-chart/refs/heads/main/.rhdh/scripts/install.sh && chmod +x install.sh
+./install.sh 1.7-20-CI --namespace rhdh-1-7-20-ci
+```
+
+That's it! 

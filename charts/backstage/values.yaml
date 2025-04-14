@@ -1,3 +1,4 @@
+nameOverride: developer-hub
 global:
   dynamic:
     # -- Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field.
@@ -32,7 +33,7 @@ global:
 # -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
 # @default -- Use Openshift compatible settings
 upstream:
-  nameOverride: backstage
+  nameOverride: developer-hub
   backstage:
     image:
       registry: quay.io
