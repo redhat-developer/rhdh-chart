@@ -1,13 +1,17 @@
 
-# RHDH Backstage Helm Chart for OpenShift
+# UPDATE
+
+This repository now houses the only RHDH CI Helm chart after merging with the now deprecated repository: https://github.com/rhdh-bot/openshift-helm-charts/. 
+
+See:  https://issues.redhat.com/browse/RHIDP-1477
+
+# RHDH Helm Chart for OpenShift
 
 See [charts/backstage/README.md](charts/backstage/README.md).
 
-## Why this chart?
+# RHDH orchestrator infra Helm chart for Openshift
 
-This is the "upstream" chart for RHDH, formerly the janus-idp chart.
-
-To alleviate the confusion of having charts in this repo and [artifacthub](https://artifacthub.io/packages/helm/rhdh-chart/backstage), AND the official charts in the [Openshift Helm Charts](https://github.com/openshift-helm-charts/charts) repo @ https://charts.openshift.io/ we intend to merge this content into the downstream chart via this issue: https://issues.redhat.com/browse/RHIDP-1477
+See [charts/orchestrator-infra/README.md](charts/orchestrator-infra/README.md)
 
 ## Contributing and reporting issues
 
