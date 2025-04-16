@@ -201,7 +201,7 @@ upstream:
         # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
         # It could be replaced by a custom image based on this one.
         # @default -- `quay.io/janus-idp/backstage-showcase:latest`
-        image: '{{ include "backstage.image" . }}'
+        image: quay.io/rhdh/rhdh-hub-rhel9:latest #'{{ include "backstage.image" . }}'
         command:
           - ./install-dynamic-plugins.sh
           - /dynamic-plugins-root
@@ -243,6 +243,8 @@ upstream:
   postgresql:
     enabled: true
     postgresqlDataDir: /var/lib/pgsql/data/userdata
+    serviceBindings:
+      enabled: false
     image:
       registry: quay.io
       repository: fedora/postgresql-15
@@ -338,3 +340,25 @@ test:
 
     # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
     tag: latest
+
+orchestrator:
+  enabled: false
+  serverlessLogicOperator:
+    enabled: false
+  serverlessOperator:
+    enabled: false
+  orchestrator:
+    sonataflowPlatform:
+      monitoring:
+        enabled: true
+      eventing:
+        broker:
+          name: ""
+          namespace: ""
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "500m"
