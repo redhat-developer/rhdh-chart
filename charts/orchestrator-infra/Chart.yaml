@@ -1,5 +1,5 @@
 annotations:
-  charts.openshift.io/name: Orchestrator Infrastructure for Red Hat Developer Hub (CI Build)
+  charts.openshift.io/name: Orchestrator Infrastructure for Red Hat Developer Hub
   charts.openshift.io/provider: Red Hat Developer Hub Team
   charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
 apiVersion: v2
