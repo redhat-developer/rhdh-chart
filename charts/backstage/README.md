@@ -336,7 +336,7 @@ upstream:
 Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, on boarding developers ,and user-made workflows of Backstage actions or external systems.
 Orchestrator is a flavor of RHDH, and can be installed alongside the RHDH in the same namespace and in the folloing way:
 
-1. Install the orchestrator-infra helm chart, which will install the pre-requisites required to install RHDH flavored Orchestrator.
+1. Have an admin install the orchestrator-infra helm chart, which will install the pre-requisites required to install RHDH flavored Orchestrator. This proccess will include installing cluster-wide resources, so should be done with admin privileges
 ```
 helm install <release_name> charts/orchestrator-infra
 ```
