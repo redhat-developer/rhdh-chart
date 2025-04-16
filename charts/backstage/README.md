@@ -191,6 +191,16 @@ Kubernetes: `>= 1.25.0-0`
 | global.dynamic.includes[0] | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. | string | `"dynamic-plugins.default.yaml"` |
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
+| orchestrator.enabled |  | bool | `false` |
+| orchestrator.orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
+| orchestrator.orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
+| orchestrator.orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
+| orchestrator.orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
+| orchestrator.orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
+| orchestrator.orchestrator.sonataflowPlatform.resources.requests.cpu |  | string | `"250m"` |
+| orchestrator.orchestrator.sonataflowPlatform.resources.requests.memory |  | string | `"64Mi"` |
+| orchestrator.serverlessLogicOperator.enabled |  | bool | `false` |
+| orchestrator.serverlessOperator.enabled |  | bool | `false` |
 | route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
 | route.annotations | Route specific annotations | object | `{}` |
 | route.enabled | Enable the creation of the route resource | bool | `true` |
@@ -319,4 +329,23 @@ upstream:
         runAsUser: 26
     volumePermissions:
       enabled: true
+```
+
+## Installing RHDH with Orchestrator
+
+Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, on boarding developers ,and user-made workflows of Backstage actions or external systems.
+Orchestrator is a flavor of RHDH, and can be installed alongside the RHDH in the same namespace and in the folloing way:
+
+1. Install the orchestrator-infra helm chart, which will install the pre-requisites required to install RHDH flavored Orchestrator.
+```
+helm install <release_name> charts/orchestrator-infra
+```
+2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed.
+3. Install backstage chart with helm, setting orchestrator to be enabled.
+4. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
+5. In order to correctly set up the postgres persistance for any workflows run with orchestrator,
+  another secret needs to be create by leveraging the bitnami/postgres chart.
+  Please the add the following to the Values: serviceBindings.enabled=true
+```
+helm install <release_name> charts/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true --set serviceBindings.enabled=true
 ```
