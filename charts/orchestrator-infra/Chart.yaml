@@ -1,11 +1,12 @@
 annotations:
-  charts.openshift.io/name: Orchestrator-Infra
+  charts.openshift.io/name: Orchestrator Infrastructure for Red Hat Developer Hub (CI Build)
   charts.openshift.io/provider: Red Hat Developer Hub Team
   charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
 apiVersion: v2
-name: orchestrator-infra
+name: redhat-developer-hub-orchestrator-infra
 description: >
-  Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Logic Operator and OpenShift Serverless Operator.
+  Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including
+  OpenShift Serverless Operator and OpenShift Serverless Logic Operator, used by the RHDH Orchestrator flavor.
 kubeVersion: ">= 1.25.0-0"
 maintainers:
   - name: Red Hat Developer Hub Team
