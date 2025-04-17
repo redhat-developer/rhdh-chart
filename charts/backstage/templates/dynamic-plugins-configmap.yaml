@@ -4,5 +4,21 @@ metadata:
   name: {{ printf "%s-dynamic-plugins" .Release.Name }}
 data:
   dynamic-plugins.yaml: |
-    {{- include "common.tplvalues.render" ( dict "value"
-    .Values.global.dynamic "context" $) | nindent 4 }}
+    {{- $dynamic := deepCopy .Values.global.dynamic }}
+    {{- $plugins := list }}
+
+    {{- range .Values.global.dynamic.plugins }}
+      {{- $plugins = append $plugins . }}
+    {{- end }}
+
+    {{- if .Values.orchestrator.enabled }}
+      {{- $orchestratorPlugins := include "orchestrator.plugins" . | fromYaml }}
+      {{- range $orchestratorPlugins.plugins }}
+        {{- $plugins = append $plugins . }}
+      {{- end }}
+    {{- end }}
+
+    {{- $_ := set $dynamic "plugins" $plugins }}
+
+    {{- include "common.tplvalues.render" (dict "value" $dynamic "context" $) | nindent 4 }}
+  
