@@ -341,12 +341,11 @@ Orchestrator is a flavor of RHDH, and can be installed alongside the RHDH in the
 helm install <release_name> charts/orchestrator-infra
 ```
 2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed.
-3. Install the Backstage chart with helm, setting Orchestrator to be enabled.
-4. Enable serverlessLogicOperator and serverlessOperator in the Backstage chart values.
-5. In order to correctly set up the postgres persistence for any workflows run with Orchestrator,
-  another secret needs to be created by leveraging the bitnami/postgres chart.
-  Please the add the following to the Values: 
-  ```serviceBindings.enabled=true```
+3. Install backstage chart with helm, setting orchestrator to be enabled.
+4. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
+5. In order to correctly set up the postgres persistance for any workflows run with orchestrator,
+  another secret needs to be create by leveraging the bitnami/postgres chart.
+  Please the add the following to the Values: serviceBindings.enabled=true
 ```
 helm install <release_name> charts/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true --set serviceBindings.enabled=true
 ```
