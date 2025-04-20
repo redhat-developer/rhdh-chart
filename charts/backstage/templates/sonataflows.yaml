@@ -1,12 +1,10 @@
-{{- if and .Values.orchestrator.enabled .Values.orchestrator.serverlessLogicOperator.enabled }}
+{{- if and (default false .Values.orchestrator.enabled) (default false .Values.orchestrator.serverlessLogicOperator.enabled) }}
 
 apiVersion: sonataflow.org/v1alpha08
 kind: SonataFlowPlatform
 metadata:
   name: sonataflow-platform
   namespace: {{ .Release.Namespace }}
-  annotations:
-    "meta.helm.sh/release-name": {{ .Release.Name }}
 spec:
   monitoring:
     enabled: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.monitoring.enabled }}
