@@ -29,17 +29,21 @@ plugins:
   - disabled: true
     package: "{{ $config.orchestratorPlugins.scope }}/{{ $config.orchestratorPlugins.scaffolderBackendOrchestrator.package }}"
     integrity: "{{ $config.orchestratorPlugins.scaffolderBackendOrchestrator.integrity }}"{{- end }}
+    pluginConfig:
+      orchestrator:
+        dataIndexService:
+          url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
 
 {{- define "orchestrator.plugins.config" }}
 orchestratorPlugins: 
-    scope: "@redhat"
+    scope: "https://github.com/rhdhorchestrator/orchestrator-plugins-internal-release/releases/download/v1.5.1"
     orchestrator:
-      package: "backstage-plugin-orchestrator@1.5.1"
+      package: "backstage-plugin-orchestrator-1.5.1.tgz"
       integrity: sha512-7VOe+XGTUzrdO/av0DNHbydOjB3Lo+XdCs6fj3JVODLP7Ypd3GXHf/nssYxG5ZYC9F1t9MNeguE2bZOB6ckqTA==
     orchestratorBackend:
-      package: "backstage-plugin-orchestrator-backend-dynamic@1.5.1"
+      package: "backstage-plugin-orchestrator-backend-dynamic-1.5.1.tgz"
       integrity: sha512-VIenFStdq9QvvmgmEMG8O7b2wqIebvEcqNeJ9SWZ8jen9t+efTK6D3Rde74LQ1no1QaHLx8RoxNCOuTUEF8O/g==
     scaffolderBackendOrchestrator:
-      package: "backstage-plugin-scaffolder-backend-module-orchestrator-dynamic@1.5.1"
+      package: "backstage-plugin-scaffolder-backend-module-orchestrator-dynamic-1.5.1.tgz"
       integrity: sha512-bnVQjVsUZ470Vgm2kd5Lo/bVa2fF0q4GufBDc/8oTQsnP3zZJQqKFvFElBTCjY76RqkECydlvZ1UFybSzvockQ==
 {{- end }}
