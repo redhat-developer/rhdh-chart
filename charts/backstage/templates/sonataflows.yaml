@@ -7,24 +7,24 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   monitoring:
-    enabled: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.monitoring.enabled }}
+    enabled: {{ .Values.orchestrator.sonataflowPlatform.monitoring.enabled }}
   build:
     template:
       resources:
         requests:
-          memory: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.requests.memory }}
-          cpu: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.requests.cpu }}
+          memory: {{ .Values.orchestrator.sonataflowPlatform.resources.requests.memory }}
+          cpu: {{ .Values.orchestrator.sonataflowPlatform.resources.requests.cpu }}
         limits:
-          memory: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.limits.memory }}
-          cpu: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.resources.limits.cpu }}
-  {{- if (and (.Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.name) (.Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.namespace)) }}
+          memory: {{ .Values.orchestrator.sonataflowPlatform.resources.limits.memory }}
+          cpu: {{ .Values.orchestrator.sonataflowPlatform.resources.limits.cpu }}
+  {{- if (and (.Values.orchestrator.sonataflowPlatform.eventing.broker.name) (.Values.orchestrator.sonataflowPlatform.eventing.broker.namespace)) }}
   eventing:
     broker:
       ref:
         apiVersion: eventing.knative.dev/v1
         kind: Broker
-        name: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.name }}
-        namespace: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.eventing.broker.namespace }}
+        name: {{ .Values.orchestrator.sonataflowPlatform.eventing.broker.name }}
+        namespace: {{ .Values.orchestrator.sonataflowPlatform.eventing.broker.namespace }}
   {{- end }}
   services:
     dataIndex:
@@ -39,10 +39,10 @@ spec:
             name: {{ .Release.Name }}-postgresql
             namespace: {{ .Release.Namespace }}
             databaseName: postgres
-      {{- if .Values.orchestrator.orchestrator.sonataflowPlatform.dataIndexImage }}
+      {{- if .Values.orchestrator.sonataflowPlatform.dataIndexImage }}
       podTemplate:
         container:
-          image: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.dataIndexImage }}
+          image: {{ .Values.orchestrator.sonataflowPlatform.dataIndexImage }}
       {{- end }}
     jobService:
       enabled: true
@@ -56,9 +56,9 @@ spec:
             name: {{ .Release.Name }}-postgresql
             namespace: {{ .Release.Namespace }}
             databaseName: postgres
-      {{- if .Values.orchestrator.orchestrator.sonataflowPlatform.jobServiceImage }}
+      {{- if .Values.orchestrator.sonataflowPlatform.jobServiceImage }}
       podTemplate:
         container:
-          image: {{ .Values.orchestrator.orchestrator.sonataflowPlatform.jobServiceImage }}
+          image: {{ .Values.orchestrator.sonataflowPlatform.jobServiceImage }}
       {{- end }}
 {{- end }}

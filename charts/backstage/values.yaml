@@ -347,18 +347,17 @@ orchestrator:
     enabled: false
   serverlessOperator:
     enabled: false
-  orchestrator:
-    sonataflowPlatform:
-      monitoring:
-        enabled: true
-      eventing:
-        broker:
-          name: ""
-          namespace: ""
-      resources:
-        requests:
-          memory: "64Mi"
-          cpu: "250m"
-        limits:
-          memory: "1Gi"
-          cpu: "500m"
+  sonataflowPlatform:
+    monitoring:
+      enabled: true
+    eventing:
+      broker:
+        name: ""
+        namespace: ""
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"

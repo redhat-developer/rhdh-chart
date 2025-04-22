@@ -192,15 +192,15 @@ Kubernetes: `>= 1.25.0-0`
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
 | orchestrator.enabled |  | bool | `false` |
-| orchestrator.orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
-| orchestrator.orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
-| orchestrator.orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
-| orchestrator.orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
-| orchestrator.orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
-| orchestrator.orchestrator.sonataflowPlatform.resources.requests.cpu |  | string | `"250m"` |
-| orchestrator.orchestrator.sonataflowPlatform.resources.requests.memory |  | string | `"64Mi"` |
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `false` |
 | orchestrator.serverlessOperator.enabled |  | bool | `false` |
+| orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
+| orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
+| orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
+| orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
+| orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
+| orchestrator.sonataflowPlatform.resources.requests.cpu |  | string | `"250m"` |
+| orchestrator.sonataflowPlatform.resources.requests.memory |  | string | `"64Mi"` |
 | route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
 | route.annotations | Route specific annotations | object | `{}` |
 | route.enabled | Enable the creation of the route resource | bool | `true` |
