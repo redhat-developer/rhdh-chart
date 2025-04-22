@@ -242,95 +242,83 @@
                         }
                     }
                 },
-                "orchestrator": {
-                    "title": "orchestrator configuration",
+                "sonataflowPlatform": {
+                    "title": "sonataflowPlatform configuration",
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "namespace": {
-                            "title": "namespace value",
-                            "type": "string",
-                            "default": "sonataflow-infra"
-                        },
-                        "sonataflowPlatform": {
-                            "title": "sonataflowPlatform configuration",
+                        "monitoring": {
+                            "title": "monitoring configuration",
                             "type": "object",
                             "additionalProperties": false,
                             "properties": {
-                                "monitoring": {
-                                    "title": "monitoring configuration",
+                                "enabled": {
+                                    "title": "enabled flag",
+                                    "type": "boolean",
+                                    "default": true
+                                }
+                            }
+                        },
+                        "eventing": {
+                            "title": "eventing configuration",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "broker": {
+                                    "title": "broker configuration",
                                     "type": "object",
                                     "additionalProperties": false,
                                     "properties": {
-                                        "enabled": {
-                                            "title": "enabled flag",
-                                            "type": "boolean",
-                                            "default": true
-                                        }
-                                    }
-                                },
-                                "eventing": {
-                                    "title": "eventing configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "broker": {
-                                            "title": "broker configuration",
-                                            "type": "object",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "name": {
-                                                    "title": "name value",
-                                                    "type": "string",
-                                                    "default": ""
-                                                },
-                                                "namespace": {
-                                                    "title": "namespace value",
-                                                    "type": "string",
-                                                    "default": ""
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "resources": {
-                                    "title": "resources configuration",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "requests": {
-                                            "title": "requests configuration",
-                                            "type": "object",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "memory": {
-                                                    "title": "memory value",
-                                                    "type": "string",
-                                                    "default": "64Mi"
-                                                },
-                                                "cpu": {
-                                                    "title": "cpu value",
-                                                    "type": "string",
-                                                    "default": "250m"
-                                                }
-                                            }
+                                        "name": {
+                                            "title": "name value",
+                                            "type": "string",
+                                            "default": ""
                                         },
-                                        "limits": {
-                                            "title": "limits configuration",
-                                            "type": "object",
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "memory": {
-                                                    "title": "memory value",
-                                                    "type": "string",
-                                                    "default": "1Gi"
-                                                },
-                                                "cpu": {
-                                                    "title": "cpu value",
-                                                    "type": "string",
-                                                    "default": "500m"
-                                                }
-                                            }
+                                        "namespace": {
+                                            "title": "namespace value",
+                                            "type": "string",
+                                            "default": ""
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "resources": {
+                            "title": "resources configuration",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "requests": {
+                                    "title": "requests configuration",
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "memory": {
+                                            "title": "memory value",
+                                            "type": "string",
+                                            "default": "64Mi"
+                                        },
+                                        "cpu": {
+                                            "title": "cpu value",
+                                            "type": "string",
+                                            "default": "250m"
+                                        }
+                                    }
+                                },
+                                "limits": {
+                                    "title": "limits configuration",
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "memory": {
+                                            "title": "memory value",
+                                            "type": "string",
+                                            "default": "1Gi"
+                                        },
+                                        "cpu": {
+                                            "title": "cpu value",
+                                            "type": "string",
+                                            "default": "500m"
                                         }
                                     }
                                 }

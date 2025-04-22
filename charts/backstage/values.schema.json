@@ -99,102 +99,6 @@
                     "title": "enabled flag",
                     "type": "boolean"
                 },
-                "orchestrator": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "namespace": {
-                            "default": "sonataflow-infra",
-                            "title": "namespace value",
-                            "type": "string"
-                        },
-                        "sonataflowPlatform": {
-                            "additionalProperties": false,
-                            "properties": {
-                                "eventing": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "broker": {
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "name": {
-                                                    "default": "",
-                                                    "title": "name value",
-                                                    "type": "string"
-                                                },
-                                                "namespace": {
-                                                    "default": "",
-                                                    "title": "namespace value",
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "title": "broker configuration",
-                                            "type": "object"
-                                        }
-                                    },
-                                    "title": "eventing configuration",
-                                    "type": "object"
-                                },
-                                "monitoring": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "enabled": {
-                                            "default": true,
-                                            "title": "enabled flag",
-                                            "type": "boolean"
-                                        }
-                                    },
-                                    "title": "monitoring configuration",
-                                    "type": "object"
-                                },
-                                "resources": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "limits": {
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "cpu": {
-                                                    "default": "500m",
-                                                    "title": "cpu value",
-                                                    "type": "string"
-                                                },
-                                                "memory": {
-                                                    "default": "1Gi",
-                                                    "title": "memory value",
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "title": "limits configuration",
-                                            "type": "object"
-                                        },
-                                        "requests": {
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "cpu": {
-                                                    "default": "250m",
-                                                    "title": "cpu value",
-                                                    "type": "string"
-                                                },
-                                                "memory": {
-                                                    "default": "64Mi",
-                                                    "title": "memory value",
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "title": "requests configuration",
-                                            "type": "object"
-                                        }
-                                    },
-                                    "title": "resources configuration",
-                                    "type": "object"
-                                }
-                            },
-                            "title": "sonataflowPlatform configuration",
-                            "type": "object"
-                        }
-                    },
-                    "title": "orchestrator configuration",
-                    "type": "object"
-                },
                 "rhdhPlugins": {
                     "additionalProperties": false,
                     "properties": {
@@ -229,6 +133,90 @@
                         }
                     },
                     "title": "serverlessOperator configuration",
+                    "type": "object"
+                },
+                "sonataflowPlatform": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "eventing": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "broker": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "name": {
+                                            "default": "",
+                                            "title": "name value",
+                                            "type": "string"
+                                        },
+                                        "namespace": {
+                                            "default": "",
+                                            "title": "namespace value",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "broker configuration",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "eventing configuration",
+                            "type": "object"
+                        },
+                        "monitoring": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": true,
+                                    "title": "enabled flag",
+                                    "type": "boolean"
+                                }
+                            },
+                            "title": "monitoring configuration",
+                            "type": "object"
+                        },
+                        "resources": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "limits": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "default": "500m",
+                                            "title": "cpu value",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "default": "1Gi",
+                                            "title": "memory value",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "limits configuration",
+                                    "type": "object"
+                                },
+                                "requests": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "default": "250m",
+                                            "title": "cpu value",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "default": "64Mi",
+                                            "title": "memory value",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "requests configuration",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "resources configuration",
+                            "type": "object"
+                        }
+                    },
+                    "title": "sonataflowPlatform configuration",
                     "type": "object"
                 }
             },
