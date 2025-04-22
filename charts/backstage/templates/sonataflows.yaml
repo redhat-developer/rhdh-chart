@@ -1,4 +1,6 @@
 {{- if and (default false .Values.orchestrator.enabled) (default false .Values.orchestrator.serverlessLogicOperator.enabled) }}
+{{- $sonataflowplatformExists := lookup "sonataflow.org/v1alpha08" "SonataFlowPlatform" .Release.Namespace "sonataflow-platform" }}
+{{- if not $sonataflowplatformExists }}
 
 apiVersion: sonataflow.org/v1alpha08
 kind: SonataFlowPlatform
@@ -61,4 +63,5 @@ spec:
         container:
           image: {{ .Values.orchestrator.sonataflowPlatform.jobServiceImage }}
       {{- end }}
+{{- end }}
 {{- end }}
