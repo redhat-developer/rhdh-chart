@@ -201,7 +201,7 @@ upstream:
         # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
         # It could be replaced by a custom image based on this one.
         # @default -- `quay.io/janus-idp/backstage-showcase:latest`
-        image: quay.io/rhdh/rhdh-hub-rhel9:latest  # '{{ include "backstage.image" . }}'
+        image: '{{ include "backstage.image" . }}'
         command:
           - ./install-dynamic-plugins.sh
           - /dynamic-plugins-root
@@ -244,7 +244,7 @@ upstream:
     enabled: true
     postgresqlDataDir: /var/lib/pgsql/data/userdata
     serviceBindings:
-      enabled: false
+      enabled: true
     image:
       registry: quay.io
       repository: fedora/postgresql-15

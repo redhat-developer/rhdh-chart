@@ -38,7 +38,7 @@ spec:
           serviceRef:
             name: {{ .Release.Name }}-postgresql
             namespace: {{ .Release.Namespace }}
-            databaseName: sonataflow
+            databaseName: postgres
       {{- if .Values.orchestrator.orchestrator.sonataflowPlatform.dataIndexImage }}
       podTemplate:
         container:
@@ -55,7 +55,7 @@ spec:
           serviceRef:
             name: {{ .Release.Name }}-postgresql
             namespace: {{ .Release.Namespace }}
-            databaseName: sonataflow
+            databaseName: postgres
       {{- if .Values.orchestrator.orchestrator.sonataflowPlatform.jobServiceImage }}
       podTemplate:
         container:

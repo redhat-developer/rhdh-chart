@@ -6,7 +6,9 @@ metadata:
   # Sonataflow and Workflows are using the RHDH target namespace.
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
   ingress:
     - from:
       - namespaceSelector:
@@ -25,7 +27,9 @@ metadata:
   name: {{ .Release.Name }}-allow-external-communication
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
   ingress:
     - from:
       - namespaceSelector:
@@ -40,14 +44,18 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 spec:
   # Apply this policy to all pods in the namespace
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
   # Specify policy type as 'Ingress' to control incoming traffic rules
   policyTypes:
     - Ingress
   ingress:
     - from:
       # Allow ingress from any pod within the same namespace
-      - podSelector: {}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/instance: {{ .Release.Name }}
 
 
 {{- end }}
@@ -61,7 +69,9 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
 spec:
   # Apply this policy to all pods in the namespace
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
   # Specify policy type as 'Ingress' to control incoming traffic rules
   policyTypes:
     - Ingress
