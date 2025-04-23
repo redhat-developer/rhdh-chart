@@ -196,6 +196,7 @@ Kubernetes: `>= 1.25.0-0`
 | orchestrator.serverlessOperator.enabled |  | bool | `false` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBsecretRef |  | string | `""` |
 | orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
 | orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |

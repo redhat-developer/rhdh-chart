@@ -361,3 +361,4 @@ orchestrator:
       limits:
         memory: "1Gi"
         cpu: "500m"
+    externalDBsecretRef: ""

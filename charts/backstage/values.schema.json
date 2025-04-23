@@ -99,18 +99,6 @@
                     "title": "enabled flag",
                     "type": "boolean"
                 },
-                "rhdhPlugins": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "npmRegistry": {
-                            "default": "",
-                            "title": "npmRegistry value",
-                            "type": "string"
-                        }
-                    },
-                    "title": "rhdhPlugins configuration",
-                    "type": "object"
-                },
                 "serverlessLogicOperator": {
                     "additionalProperties": false,
                     "properties": {
@@ -161,6 +149,11 @@
                             },
                             "title": "eventing configuration",
                             "type": "object"
+                        },
+                        "externalDBsecretRef": {
+                            "additionalProperties": false,
+                            "title": "externalDB secretRef name",
+                            "type": "string"
                         },
                         "monitoring": {
                             "additionalProperties": false,

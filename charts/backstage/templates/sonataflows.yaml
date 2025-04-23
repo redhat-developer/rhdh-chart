@@ -1,6 +1,8 @@
 {{- if and (default false .Values.orchestrator.enabled) (default false .Values.orchestrator.serverlessLogicOperator.enabled) }}
 {{- $sonataflowplatformExists := lookup "sonataflow.org/v1alpha08" "SonataFlowPlatform" .Release.Namespace "sonataflow-platform" }}
-{{- if not $sonataflowplatformExists }}
+{{- if $sonataflowplatformExists }}
+{{- fail "Cannot create multiple sonataflowplatform in the same namespace, one already exists." }}
+{{- end }}
 
 apiVersion: sonataflow.org/v1alpha08
 kind: SonataFlowPlatform
@@ -33,6 +35,7 @@ spec:
       enabled: true
       persistence:
         postgresql:
+          {{- if .Values.upstream.postgresql.enabled }}
           secretRef:
             name: {{ .Release.Name }}-postgresql-svcbind-postgres
             userKey: username
@@ -40,7 +43,14 @@ spec:
           serviceRef:
             name: {{ .Release.Name }}-postgresql
             namespace: {{ .Release.Namespace }}
-            databaseName: postgres
+            databaseName: sonataflow
+          {{- else }}
+          secretRef:
+            name: {{ .Values.orchestator.sonataflowPlatform.externalDBsecretRef}}
+            userKey: POSTGRES_USER
+            passwordKey: POSTGRES_PASSWORD
+          jdbcUrl: jdbc:postgresql://{{ .Values.upstream.backstage.appConfig.backend.database.connection.host}}:{{ .Values.upstream.backstage.appConfig.backend.database.connection.port}}/sonataflow?currentSchema=data-index-service
+          {{- end }}
       {{- if .Values.orchestrator.sonataflowPlatform.dataIndexImage }}
       podTemplate:
         container:
@@ -50,6 +60,7 @@ spec:
       enabled: true
       persistence:
         postgresql:
+          {{- if .Values.upstream.postgresql.enabled }}
           secretRef:
             name: {{ .Release.Name }}-postgresql-svcbind-postgres
             userKey: username
@@ -57,11 +68,50 @@ spec:
           serviceRef:
             name: {{ .Release.Name }}-postgresql
             namespace: {{ .Release.Namespace }}
-            databaseName: postgres
+            databaseName: sonataflow
+          {{- else }}
+          secretRef:
+            name: {{ .Values.orchestator.sonataflowPlatform.externalDBsecretRef}}
+            userKey: POSTGRES_USER
+            passwordKey: POSTGRES_PASSWORD
+          jdbcUrl: jdbc:postgresql://{{ .Values.upstream.backstage.appConfig.backend.database.connection.host}}:{{ .Values.upstream.backstage.appConfig.backend.database.connection.port}}/sonataflow?currentSchema=jobs-service
+          {{- end }}
       {{- if .Values.orchestrator.sonataflowPlatform.jobServiceImage }}
       podTemplate:
         container:
           image: {{ .Values.orchestrator.sonataflowPlatform.jobServiceImage }}
       {{- end }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-create-sonataflow-database
+  namespace: {{ .Release.Namespace }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: psql
+        image: postgres:15
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+{{- if .Values.upstream.postgresql.enabled }}
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgresql-svcbind-postgres
+              key: password
+        command: [ "sh", "-c" ]
+        args:
+          - "sleep 30 && psql -h {{ .Release.Name }}-postgresql -U postgres -c 'CREATE DATABASE sonataflow;'"
+{{- else }}
+            secretKeyRef:
+              name: {{ .Values.orchestator.sonataflowPlatform.externalDBsecretRef}}
+              key: POSTGRES_PASSWORD
+        command: [ "sh", "-c" ]
+        args:
+          - "sleep 30 && psql -h {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} -U {{ .Values.upstream.backstage.appConfig.backend.database.connection.user }} -c 'CREATE DATABASE sonataflow;'"
 {{- end }}
+      restartPolicy: Never
+  backoffLimit: 2
 {{- end }}
+

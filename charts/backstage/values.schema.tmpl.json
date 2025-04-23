@@ -206,18 +206,6 @@
                     "type": "boolean",
                     "default": false
                 },
-                "rhdhPlugins": {
-                    "title": "rhdhPlugins configuration",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "npmRegistry": {
-                            "title": "npmRegistry value",
-                            "type": "string",
-                            "default": ""
-                        }
-                    }
-                },
                 "serverlessLogicOperator": {
                     "title": "serverlessLogicOperator configuration",
                     "type": "object",
@@ -323,6 +311,11 @@
                                     }
                                 }
                             }
+                        },
+                        "externalDBsecretRef": {
+                            "title": "externalDB secretRef name",
+                            "type": "string",
+                            "additionalProperties": false
                         }
                     }
                 }
