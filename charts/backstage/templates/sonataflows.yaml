@@ -46,7 +46,7 @@ spec:
             databaseName: sonataflow
           {{- else }}
           secretRef:
-            name: {{ .Values.orchestator.sonataflowPlatform.externalDBsecretRef}}
+            name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
             userKey: POSTGRES_USER
             passwordKey: POSTGRES_PASSWORD
           jdbcUrl: jdbc:postgresql://{{ .Values.upstream.backstage.appConfig.backend.database.connection.host}}:{{ .Values.upstream.backstage.appConfig.backend.database.connection.port}}/sonataflow?currentSchema=data-index-service
@@ -71,7 +71,7 @@ spec:
             databaseName: sonataflow
           {{- else }}
           secretRef:
-            name: {{ .Values.orchestator.sonataflowPlatform.externalDBsecretRef}}
+            name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
             userKey: POSTGRES_USER
             passwordKey: POSTGRES_PASSWORD
           jdbcUrl: jdbc:postgresql://{{ .Values.upstream.backstage.appConfig.backend.database.connection.host}}:{{ .Values.upstream.backstage.appConfig.backend.database.connection.port}}/sonataflow?currentSchema=jobs-service
@@ -105,13 +105,18 @@ spec:
           - "sleep 30 && psql -h {{ .Release.Name }}-postgresql -U postgres -c 'CREATE DATABASE sonataflow;'"
 {{- else }}
             secretKeyRef:
-              name: {{ .Values.orchestator.sonataflowPlatform.externalDBsecretRef}}
+              name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
               key: POSTGRES_PASSWORD
         command: [ "sh", "-c" ]
         args:
-          - "sleep 30 && psql -h {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} -U {{ .Values.upstream.backstage.appConfig.backend.database.connection.user }} -c 'CREATE DATABASE sonataflow;'"
+          - "sleep 30 && psql -h {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} -U {{ .Values.upstream.backstage.appConfig.backend.database.connection.user }} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;'"
 {{- end }}
       restartPolicy: Never
   backoffLimit: 2
 {{- end }}
+
+
+
+
+
 

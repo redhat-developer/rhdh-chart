@@ -196,6 +196,7 @@ Kubernetes: `>= 1.25.0-0`
 | orchestrator.serverlessOperator.enabled |  | bool | `false` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBName |  | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBsecretRef |  | string | `""` |
 | orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
@@ -344,6 +345,16 @@ helm install <release_name> charts/orchestrator-infra
 2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed.
 3. Install backstage chart with helm, setting orchestrator to be enabled.
 4. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
+
+To use orchestrator with an external DB, please follow the instructions in [our documentation](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)
+and populate the following values in the values.yaml:
+```bash
+    externalDBsecretRef: <cred-secret>
+    externalDBName: ""
 ```
-helm install <release_name> charts/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true
+
+Finally, install the helm chart:
+```
+helm install <release_name> charts/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true \
+--set externalDBsecretRef=<cred-secret> --set externalDBName=example
 ```

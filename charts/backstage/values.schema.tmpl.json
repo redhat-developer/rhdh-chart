@@ -316,6 +316,11 @@
                             "title": "externalDB secretRef name",
                             "type": "string",
                             "additionalProperties": false
+                        }, 
+                        "externalDBName": {
+                            "title": "externalDB name",
+                            "type": "string",
+                            "additionalProperties": false
                         }
                     }
                 }

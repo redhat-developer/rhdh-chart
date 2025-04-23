@@ -150,6 +150,11 @@
                             "title": "eventing configuration",
                             "type": "object"
                         },
+                        "externalDBName": {
+                            "additionalProperties": false,
+                            "title": "externalDB name",
+                            "type": "string"
+                        },
                         "externalDBsecretRef": {
                             "additionalProperties": false,
                             "title": "externalDB secretRef name",
