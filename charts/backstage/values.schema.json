@@ -128,7 +128,7 @@
                     "properties": {
                         "createDBJobImage": {
                             "additionalProperties": false,
-                            "title": "Container Image name for job",
+                            "title": "Image for the container used by the create-db job",
                             "type": "string"
                         },
                         "eventing": {
@@ -157,12 +157,17 @@
                         },
                         "externalDBName": {
                             "additionalProperties": false,
-                            "title": "externalDB name",
+                            "title": "Name for the user-configured external Database",
                             "type": "string"
                         },
                         "externalDBsecretRef": {
                             "additionalProperties": false,
-                            "title": "externalDB secretRef name",
+                            "title": "Secret name for the user-created secret to connect an external DB",
+                            "type": "string"
+                        },
+                        "initContainerImage": {
+                            "additionalProperties": false,
+                            "title": "Image for the init container used by the create-db job",
                             "type": "string"
                         },
                         "monitoring": {

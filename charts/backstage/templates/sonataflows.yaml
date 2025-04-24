@@ -92,7 +92,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-db
-          image: busybox
+          image: {{ .Values.orchestrator.sonataflowPlatform.initContainerImage }}
           command:
             - sh
             - -c

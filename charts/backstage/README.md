@@ -194,11 +194,12 @@ Kubernetes: `>= 1.25.0-0`
 | orchestrator.enabled |  | bool | `false` |
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `false` |
 | orchestrator.serverlessOperator.enabled |  | bool | `false` |
-| orchestrator.sonataflowPlatform.createDBJobImage |  | string | `"postgres:15"` |
+| orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"postgres:15"` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
-| orchestrator.sonataflowPlatform.externalDBName |  | string | `""` |
-| orchestrator.sonataflowPlatform.externalDBsecretRef |  | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBName | Name for the user-configured external Database | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBsecretRef | Secret name for the user-created secret to connect an external DB | string | `""` |
+| orchestrator.sonataflowPlatform.initContainerImage | Image for the init container used by the create-db job | string | `"busybox"` |
 | orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
 | orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
@@ -353,6 +354,7 @@ and populate the following values in the values.yaml:
     externalDBsecretRef: <cred-secret>
     externalDBName: ""
 ```
+Please note that externalDBName is the name of the user-configured existing database, not the database that orchestrator and sonataflow resources will use.
 
 Finally, install the helm chart:
 ```

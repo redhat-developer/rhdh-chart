@@ -313,17 +313,22 @@
                             }
                         },
                         "externalDBsecretRef": {
-                            "title": "externalDB secretRef name",
+                            "title": "Secret name for the user-created secret to connect an external DB",
                             "type": "string",
                             "additionalProperties": false
-                        }, 
+                        },
                         "externalDBName": {
-                            "title": "externalDB name",
+                            "title": "Name for the user-configured external Database",
+                            "type": "string",
+                            "additionalProperties": false
+                        },
+                        "initContainerImage": {
+                            "title": "Image for the init container used by the create-db job",
                             "type": "string",
                             "additionalProperties": false
                         },
                         "createDBJobImage": {
-                            "title": "Container Image name for job",
+                            "title": "Image for the container used by the create-db job",
                             "type": "string",
                             "additionalProperties": false
                         }
