@@ -25,14 +25,26 @@ jobs:
           helm repo add backstage https://backstage.github.io/charts
           helm repo update    
           helm dependency build ./charts/backstage
-          helm template ./charts/backstage/ --output-dir ./output
+          helm dependency build ./charts/orchestrator-infra
+          helm template ./charts/backstage --output-dir ./output/backstage
+          helm template ./charts/orchestrator-infra --output-dir ./output/orchestrator-infra
 
-      - name: Run SNYK IaC Scan
+      - name: Run SNYK IaC Scan for Backstage
         continue-on-error: true
-        uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
+        uses: snyk/actions/iac@0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
         with:
-          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart"
-          file: ./output/
+          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/backstage"
+          file: ./output/backstage
+
+      - name: Run Snyk IaC Scan for Orchestrator Infra
+        continue-on-error: true
+        uses: snyk/actions/iac@0.4.0
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
+        with:
+          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/orchestrator-infra"
+          file: ./output/orchestrator-infra
