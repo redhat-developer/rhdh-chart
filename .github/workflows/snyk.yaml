@@ -1,12 +1,9 @@
 name: SNYK
 
 on:
-  workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-  # schedule:
-  #   - cron: "0 0 * * 0"  # Re-enable after validation
+  workflow_dispatch:  # allow manual runs from UI
+  schedule:
+    - cron: "0 0 * * 0"  # weekly scan (every Sunday at 00:00 UTC)
 
 jobs:
   scan-iac:
@@ -16,12 +13,8 @@ jobs:
     strategy:
       matrix:
         chart:
-          - name: backstage
-            path: ./charts/backstage
-            output: ./output/backstage
-          - name: orchestrator-infra
-            path: ./charts/orchestrator-infra
-            output: ./output/orchestrator-infra
+          - backstage
+          - orchestrator-infra
 
     steps:
       - name: Checkout
@@ -34,20 +27,20 @@ jobs:
         with:
           version: v3.17.0
 
-      - name: Render Templates
+      - name: Render Templates for ${{ matrix.chart }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add backstage https://backstage.github.io/charts
           helm repo update
-          helm dependency build ${{ matrix.chart.path }}
-          helm template ${{ matrix.chart.path }} --output-dir ${{ matrix.chart.output }}
+          helm dependency build ./charts/${{ matrix.chart }}
+          helm template ./charts/${{ matrix.chart }} --output-dir ./output/${{ matrix.chart }}
 
-      - name: Run Snyk IaC Scan for ${{ matrix.chart.name }}
+      - name: Run Snyk IaC Scan for ${{ matrix.chart }}
         continue-on-error: true
         uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
         with:
-          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/${{ matrix.chart.name }}"
-          file: ${{ matrix.chart.output }}
+          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/${{ matrix.chart }}"
+          file: ./output/${{ matrix.chart }}
