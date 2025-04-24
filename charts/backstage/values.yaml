@@ -361,7 +361,6 @@ orchestrator:
       limits:
         memory: "1Gi"
         cpu: "500m"
-        
     # -- Secret name for the user-created secret to connect an external DB
     externalDBsecretRef: ""
 
