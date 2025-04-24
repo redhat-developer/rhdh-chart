@@ -90,6 +90,17 @@ metadata:
 spec:
   template:
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command:
+            - sh
+            - -c
+{{- if .Values.upstream.postgresql.enabled }}
+            - "until nc -z {{ .Release.Name }}-postgresql 5432; do echo 'Waiting for DB...'; sleep 2; done"
+{{- else }}
+            - "until nc -z {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} {{ .Values.upstream.backstage.appConfig.backend.database.connection.port }}; do echo 'Waiting for external DB...'; sleep 2; done"
+{{- end }}
       containers:
       - name: psql
         image: {{ .Values.orchestrator.sonataflowPlatform.createDBJobImage }}
@@ -102,14 +113,14 @@ spec:
               key: password
         command: [ "sh", "-c" ]
         args:
-          - "sleep 30 && psql -h {{ .Release.Name }}-postgresql -U postgres -c 'CREATE DATABASE sonataflow;'"
+          - "psql -h {{ .Release.Name }}-postgresql -U postgres -c 'CREATE DATABASE sonataflow;'"
 {{- else }}
             secretKeyRef:
               name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
               key: POSTGRES_PASSWORD
         command: [ "sh", "-c" ]
         args:
-          - "sleep 30 && psql -h {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} -U {{ .Values.upstream.backstage.appConfig.backend.database.connection.user }} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;'"
+          - "psql -h {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} -U {{ .Values.upstream.backstage.appConfig.backend.database.connection.user }} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;'"
 {{- end }}
       restartPolicy: Never
   backoffLimit: 2
