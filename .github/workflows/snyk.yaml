@@ -29,7 +29,7 @@ jobs:
           helm template ./charts/backstage --output-dir ./output/backstage
           helm template ./charts/orchestrator-infra --output-dir ./output/orchestrator-infra
 
-      - name: Run SNYK IaC Scan for Backstage
+      - name: Run SNYK IaC Scan for Developer Hub
         continue-on-error: true
         uses: snyk/actions/iac@0.4.0
         env:
