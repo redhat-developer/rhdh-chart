@@ -34,14 +34,6 @@ jobs:
           helm repo update
           helm dependency build ./charts/${{ matrix.chart }}
           helm template ./charts/${{ matrix.chart }} --output-dir ./output/${{ matrix.chart }}
-    
-      - name: Debug rendered files
-        run: |
-          echo "Files rendered for ${{ matrix.chart }}:"
-          find ./output/${{ matrix.chart }} -type f
-          echo "---"
-          echo "First 20 lines of a rendered YAML file:"
-          head -n 20 $(find ./output/${{ matrix.chart }} -type f -name '*.yaml' | head -n 1 || echo "/dev/null")        
 
       - name: Run Snyk IaC Scan for ${{ matrix.chart }}
         continue-on-error: true
