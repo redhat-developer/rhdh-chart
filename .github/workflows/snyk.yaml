@@ -31,7 +31,7 @@ jobs:
 
       - name: Run SNYK IaC Scan for Developer Hub
         continue-on-error: true
-        uses: snyk/actions/iac@0.4.0
+        uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
@@ -41,7 +41,7 @@ jobs:
 
       - name: Run Snyk IaC Scan for Orchestrator Infra
         continue-on-error: true
-        uses: snyk/actions/iac@0.4.0
+        uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
