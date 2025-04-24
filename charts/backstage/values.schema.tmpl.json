@@ -321,6 +321,11 @@
                             "title": "externalDB name",
                             "type": "string",
                             "additionalProperties": false
+                        },
+                        "createDBJobImage": {
+                            "title": "Container Image name for job",
+                            "type": "string",
+                            "additionalProperties": false
                         }
                     }
                 }

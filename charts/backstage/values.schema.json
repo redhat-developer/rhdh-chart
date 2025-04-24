@@ -126,6 +126,11 @@
                 "sonataflowPlatform": {
                     "additionalProperties": false,
                     "properties": {
+                        "createDBJobImage": {
+                            "additionalProperties": false,
+                            "title": "Container Image name for job",
+                            "type": "string"
+                        },
                         "eventing": {
                             "additionalProperties": false,
                             "properties": {

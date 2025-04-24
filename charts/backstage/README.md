@@ -194,6 +194,7 @@ Kubernetes: `>= 1.25.0-0`
 | orchestrator.enabled |  | bool | `false` |
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `false` |
 | orchestrator.serverlessOperator.enabled |  | bool | `false` |
+| orchestrator.sonataflowPlatform.createDBJobImage |  | string | `"postgres:15"` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBName |  | string | `""` |

@@ -92,7 +92,7 @@ spec:
     spec:
       containers:
       - name: psql
-        image: postgres:15
+        image: {{ .Values.orchestrator.sonataflowPlatform.createDBJobImage }}
         env:
         - name: PGPASSWORD
           valueFrom:

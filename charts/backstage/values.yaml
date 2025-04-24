@@ -363,3 +363,4 @@ orchestrator:
         cpu: "500m"
     externalDBsecretRef: ""
     externalDBName: ""
+    createDBJobImage: "postgres:15"
