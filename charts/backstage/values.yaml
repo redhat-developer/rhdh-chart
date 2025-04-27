@@ -371,4 +371,4 @@ orchestrator:
     initContainerImage: busybox
 
     # -- Image for the container used by the create-db job
-    createDBJobImage: "postgres:15"
+    createDBJobImage: "postgres:17"
