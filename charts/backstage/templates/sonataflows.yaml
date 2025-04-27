@@ -1,6 +1,6 @@
 {{- if and (default false .Values.orchestrator.enabled) (default false .Values.orchestrator.serverlessLogicOperator.enabled) }}
 {{- $sonataflowplatformExists := lookup "sonataflow.org/v1alpha08" "SonataFlowPlatform" .Release.Namespace "sonataflow-platform" }}
-{{- if $sonataflowplatformExists }}
+{{- if and .Release.IsInstall $sonataflowplatformExists }}
 {{- fail "Cannot create multiple sonataflowplatform in the same namespace, one already exists." }}
 {{- end }}
 
@@ -113,14 +113,14 @@ spec:
               key: password
         command: [ "sh", "-c" ]
         args:
-          - "psql -h {{ .Release.Name }}-postgresql -U postgres -c 'CREATE DATABASE sonataflow;'"
+          - "psql -h {{ .Release.Name }}-postgresql -U postgres -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
 {{- else }}
             secretKeyRef:
               name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
               key: POSTGRES_PASSWORD
         command: [ "sh", "-c" ]
         args:
-          - "psql -h {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} -U {{ .Values.upstream.backstage.appConfig.backend.database.connection.user }} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;'"
+          - "psql -h {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} -U {{ .Values.upstream.backstage.appConfig.backend.database.connection.user }} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
 {{- end }}
       restartPolicy: Never
   backoffLimit: 2
