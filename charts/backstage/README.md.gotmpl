@@ -283,6 +283,33 @@ helm install <release_name> charts/orchestrator-infra
 3. Install backstage chart with helm, setting orchestrator to be enabled.
 4. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
 
+### Additional value configurations
+
+To install orchestrator, you must edit the values.yaml to include the follwing MAX_ENTRY_SIZE enviroment variable in the install-dynamic-plugins init container:
+```env:
+  - name: NPM_CONFIG_USERCONFIG
+    value: /opt/app-root/src/.npmrc.dynamic-plugins
+  - name: MAX_ENTRY_SIZE
+    value: '30000000'
+```
+You can do this by editing and overriding the base values.yaml for the backstage chart, which can be found [here](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml)
+
+### Enablement of Notifications Plugin
+To enable the notifications and signals plugin, please edit the dynamic plugin configmap post-installation and add the following:
+```      
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-notifications"
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-signals"
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-notifications-backend-dynamic"
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-signals-backend-dynamic"
+```
+Enabling these plugins will allow to recieve notifications from workflows running with Orchestrator.
+
+### Using Orchestrator while configuring an ExternalDB 
+
 To use orchestrator with an external DB, please follow the instructions in [our documentation](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)
 and populate the following values in the values.yaml:
 ```bash
@@ -291,8 +318,11 @@ and populate the following values in the values.yaml:
 ```
 Please note that externalDBName is the name of the user-configured existing database, not the database that orchestrator and sonataflow resources will use.
 
+To avoid setting varialbles inline in the helm command, you can prepeare an alternatve values file, like <orchestrator-overriding-values.yaml> that will encapsulate all value changes that are required smoothly install Orchestrator via the backstage helm chart.
+The default values.yaml can be found [here](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml)
 Finally, install the helm chart:
+
 ```
-helm install <release_name> charts/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true \
---set externalDBsecretRef=<cred-secret> --set externalDBName=example
+helm install <release_name> backstage/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true \
+--set externalDBsecretRef=<cred-secret> --set externalDBName=example --values=<orchestrator-overriding-values.yaml>
 ```
