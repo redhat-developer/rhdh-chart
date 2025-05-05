@@ -2,7 +2,7 @@
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 4.0.0](https://img.shields.io/badge/Version-4.0.0-informational?style=flat-square)
+![Version: 4.0.1](https://img.shields.io/badge/Version-4.0.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -347,6 +347,23 @@ helm install <release_name> charts/orchestrator-infra
 2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed.
 3. Install backstage chart with helm, setting orchestrator to be enabled.
 4. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
+
+### Enablement of Notifications Plugin
+
+To enable the notifications and signals plugin, please edit the dynamic plugin configmap after the installation and add the following:
+```     
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-notifications"
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-signals"
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-notifications-backend-dynamic"
+- disabled: false
+  package: "./dynamic-plugins/dist/backstage-plugin-signals-backend-dynamic"
+```
+Enabling these plugins will allow you to recieve notifications from workflows running with Orchestrator.
+
+### Using Orchestrator while configuring an ExternalDB
 
 To use orchestrator with an external DB, please follow the instructions in [our documentation](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)
 and populate the following values in the values.yaml:
