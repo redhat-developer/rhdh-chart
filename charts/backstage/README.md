@@ -341,8 +341,8 @@ helm install <release_name> rhdh-developer/backstage --set orchestrator.enabled=
 
 ### Enablement of Notifications Plugin
 
-The orchestrator has a dependency on the Notifications plugin.
-To enable the notifications and signals plugin, please edit the dynamic plugin configmap after the installation and add the following:
+Workflows running with orchestrator may use the Notifications plugin.
+To enable the Notifications and Signals plugins, please edit the dynamic plugin configmap after the installation and add the following:
 
 ```     
 - disabled: false
