@@ -325,19 +325,25 @@ upstream:
 ## Installing RHDH with Orchestrator
 
 Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, on boarding developers ,and user-made workflows of Backstage actions or external systems.
-Orchestrator is a flavor of RHDH, and can be installed alongside the RHDH in the same namespace and in the folloing way:
+Orchestrator is a flavor of RHDH, and can be installed alongside the RHDH in the same namespace and in the following way:
 
-1. Have an admin install the orchestrator-infra helm chart, which will install the pre-requisites required to install RHDH flavored Orchestrator. This proccess will include installing cluster-wide resources, so should be done with admin privileges
+1. Have an admin install the [orchestrator-infra helm chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/orchestrator-infra#readme), which will install the pre-requisites required to install RHDH flavored Orchestrator. This proccess will include installing cluster-wide resources, so should be done with admin privileges
 ```
-helm install <release_name> charts/orchestrator-infra
+helm install <release_name> rhdh-developer/orchestrator-infra
 ```
 2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed.
-3. Install backstage chart with helm, setting orchestrator to be enabled.
-4. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
+3. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
+4. Install backstage chart with helm, setting orchestrator to be enabled, like so:
+
+```
+helm install <release_name> rhdh-developer/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true
+```
 
 ### Enablement of Notifications Plugin
 
+The orchestrator has a dependency on the Notifications plugin.
 To enable the notifications and signals plugin, please edit the dynamic plugin configmap after the installation and add the following:
+
 ```     
 - disabled: false
   package: "./dynamic-plugins/dist/backstage-plugin-notifications"
@@ -360,8 +366,8 @@ and populate the following values in the values.yaml:
 ```
 Please note that externalDBName is the name of the user-configured existing database, not the database that orchestrator and sonataflow resources will use.
 
-Finally, install the helm chart:
+Finally, install the helm chart (including setting up the external DB):
 ```
-helm install <release_name> charts/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true \
+helm install <release_name> rhdh-developer/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true \
 --set externalDBsecretRef=<cred-secret> --set externalDBName=example
 ```
