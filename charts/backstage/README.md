@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-![Version: 4.1.0](https://img.shields.io/badge/Version-4.1.0-informational?style=flat-square)
+![Version: 4.2.0](https://img.shields.io/badge/Version-4.2.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -161,7 +161,7 @@ Kubernetes: `>= 1.19.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://backstage.github.io/charts | upstream(backstage) | 2.5.1 |
-| https://charts.bitnami.com/bitnami | common | 2.30.0 |
+| https://charts.bitnami.com/bitnami | common | 2.31.1 |
 
 ## Values
 
