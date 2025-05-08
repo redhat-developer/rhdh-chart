@@ -37,7 +37,7 @@ keywords:
   - developer-hub
   - redhat-developer-hub
   - redhat
-kubeVersion: ">= 1.19.0-0"
+kubeVersion: ">= 1.27.0-0"
 maintainers:
   - name: Red Hat
     url: https://redhat.com
