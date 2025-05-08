@@ -262,7 +262,7 @@ upstream:
       enabled: true
 ```
 
-## Installing RHDH with Orchestrator
+## Installing RHDH with Orchestrator on OpenShift
 
 Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, onboarding developers, and user-made workflows of Backstage actions or external systems.
 Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the same namespace and in the following way: 
@@ -279,13 +279,17 @@ helm install <release_name> rhdh-developer/redhat-developer-hub-orchestrator-inf
 3. Install the `backstage` chart with Helm, enabling orchestrator, serverlessLogicOperator, and serverlessOperator, like so:
 
 ```
-helm install <release_name> rhdh-developer/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true
-```
+helm install <release_name> rhdh-developer/backstage \
+  --set orchestrator.enabled=true \
+  --set orchestrator.serverlessLogicOperator.enabled=true \
+  --set orchestrator.serverlessOperator.enabled=true```
 
 ### Enablement of Notifications Plugin
 
-Workflows running with orchestrator may use the Notifications plugin.
-To enable the Notifications and Signals plugins, please edit the dynamic plugin configmap after the installation and add the following:
+Workflows running with Orchestrator may use the Notifications plugin.
+For this, you must enable the Notifications and Signals plugins.
+To do so, you would need to edit the [default Helm values.yaml](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml) file, and add the plugins listed below to the global.dynamic.plugins list.
+Do this before installing the Helm Chart, or upgrade the Helm release with the new values file.
 
 ```      
 - disabled: false
