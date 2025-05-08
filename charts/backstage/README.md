@@ -156,7 +156,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Requirements
 
-Kubernetes: `>= 1.19.0-0`
+Kubernetes: `>= 1.27.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
