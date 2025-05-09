@@ -39,7 +39,7 @@ This chart bootstraps a [Backstage](https://backstage.io/docs/deployment/docker)
 
 ## Prerequisites
 
-- Kubernetes 1.27+ ([OpenShift 4.14+](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html/release_notes/ocp-4-14-release-notes#ocp-4-14-aws-security-groups))
+- Kubernetes 1.27+ ([OpenShift 4.14+](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html-single/release_notes/index#ocp-4-14-about-this-release))
 - Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
 - PV provisioner support in the underlying infrastructure
 - [Backstage container image](https://backstage.io/docs/deployment/docker)
