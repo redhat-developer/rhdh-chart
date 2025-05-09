@@ -64,7 +64,7 @@ jobs:
       - name: Check for changes after pre-commit
         id: diff-checker
         run: |
-          echo "CHANGED=$(if git diff --quiet; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
+          echo "CHANGED=$(if git diff --quiet; then echo "false"; else echo "true"; fi)" >> $GITHUB_OUTPUT
 
       - name: Commit any changes
         if: ${{ steps.diff-checker.outputs.CHANGED == 'true' }}
