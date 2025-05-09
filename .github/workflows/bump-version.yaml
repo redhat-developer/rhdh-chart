@@ -49,7 +49,7 @@ jobs:
         with:
           python-version: 3.13
 
-      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         if: steps.command.outputs.command-name == 'bump'
         with:
           go-version: ^1
@@ -81,7 +81,7 @@ jobs:
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
         id: get_version
-        uses: mikefarah/yq@c59fa8de59f1f5a16fdbfd1e2a6e97a1b42a64b9 # v4.45.2
+        uses: mikefarah/yq@734e2cd25402f10f51351c4034625043f07e7b06 # v4.45.3
         with:
           cmd: yq ".version" charts/backstage/Chart.yaml
 
@@ -94,7 +94,7 @@ jobs:
 
       - name: Bump the version
         if: steps.command.outputs.command-name == 'bump'
-        uses: mikefarah/yq@c59fa8de59f1f5a16fdbfd1e2a6e97a1b42a64b9 # v4.45.2
+        uses: mikefarah/yq@734e2cd25402f10f51351c4034625043f07e7b06 # v4.45.3
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/backstage/Chart.yaml
 

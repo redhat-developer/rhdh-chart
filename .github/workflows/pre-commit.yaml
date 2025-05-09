@@ -1,7 +1,9 @@
 name: Pre-commit
 
 on:
-  pull_request:
+  # pull_request_target needed to be able to commit and push pre-commit diffs to external fork PRs.
+  # But we included a manual authorization safeguard to prevent PWN requests. See the 'authorize' job below.
+  pull_request_target:
     branches:
       - main
       - rhdh-1.[0-9]+
@@ -13,20 +15,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  authorize:
+    # The 'external' environment is configured with the maintainers team as required reviewers.
+    # All the subsequent jobs in this workflow 'need' this job, which will require manual approval for PRs coming from external forks.
+    # see list of approvers in OWNERS file
+    environment:
+      ${{ (github.event.pull_request.head.repo.full_name == github.repository ||
+      contains(fromJSON('["coreydaley","gazarenkov","kadel","nickboldt","rm3l","kim-tsao","openshift-cherrypick-robot", "Fortune-Ndlovu", "subhashkhileri", "zdrapela"]'), github.actor)) && 'internal' || 'external' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: approved
+        run: echo "✓"
+
   pre-commit:
     name: Pre-commit
     runs-on: ubuntu-latest
+    needs: authorize
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       GO111MODULE: on
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: 3.13
 
-      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
         with:
           go-version: ^1
 
@@ -35,5 +57,37 @@ jobs:
 
       - name: Run pre-commit
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+        continue-on-error: true  # Don't fail immediately; we'll handle it below
         with:
           extra_args: --verbose --all-files --show-diff-on-failure
+
+      - name: Check for changes after pre-commit
+        id: diff-checker
+        run: |
+          echo "CHANGED=$(if git diff --quiet; then echo "false"; else echo "true"; fi)" >> $GITHUB_OUTPUT
+
+      - name: Commit any changes
+        if: ${{ steps.diff-checker.outputs.CHANGED == 'true' }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git fetch --prune
+          git pull --rebase --autostash
+          git add -A .
+          git commit \
+            -m "chore(pre-commit): Auto-fix hooks" \
+            -m "Co-authored-by: $GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
+          git push
+
+      - name: Comment on PR if manifests were updated
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        if: ${{ !cancelled() && steps.diff-checker.outputs.CHANGED == 'true' }}
+        continue-on-error: true
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ <b>Files changed after running the pre-commit hooks</b><br/><br/>Those changes should have been pushed automatically to your PR branch.<br/><br/><b>NOTE: </b>If the PR checks are stuck after this additional commit, manually close the PR and immediately reopen it to trigger the checks again.'
+            })
