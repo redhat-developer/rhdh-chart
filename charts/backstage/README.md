@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-![Version: 4.2.1](https://img.shields.io/badge/Version-4.2.1-informational?style=flat-square)
+![Version: 4.2.2](https://img.shields.io/badge/Version-4.2.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -333,13 +333,13 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install <release_name> rhdh-developer/redhat-developer-hub-orchestrator-infra
+helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra
 ```
 2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed. To do so, follow the post-install notes given by the chart, or see them [here](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/orchestrator-infra/templates/NOTES.txt)
 3. Install the `backstage` chart with Helm, enabling orchestrator, serverlessLogicOperator, and serverlessOperator, like so:
 
 ```
-helm install <release_name> rhdh-developer/backstage \
+helm install <release_name> redhat-developer/backstage \
   --set orchestrator.enabled=true \
   --set orchestrator.serverlessLogicOperator.enabled=true \
   --set orchestrator.serverlessOperator.enabled=true```
@@ -375,7 +375,7 @@ Please note that `externalDBName` is the name of the user-configured existing da
 
 Finally, install the Helm Chart (including [setting up the external DB](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)):
 ```
-helm install <release_name> rhdh-developer/backstage \
+helm install <release_name> redhat-developer/backstage \
   --set orchestrator.enabled=true \
   --set orchestrator.serverlessLogicOperator.enabled=true \
   --set orchestrator.serverlessOperator.enabled=true \
