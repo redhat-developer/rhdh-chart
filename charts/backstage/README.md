@@ -342,7 +342,8 @@ helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-i
 helm install <release_name> redhat-developer/backstage \
   --set orchestrator.enabled=true \
   --set orchestrator.serverlessLogicOperator.enabled=true \
-  --set orchestrator.serverlessOperator.enabled=true```
+  --set orchestrator.serverlessOperator.enabled=true
+```
 
 ### Enablement of Notifications Plugin
 
