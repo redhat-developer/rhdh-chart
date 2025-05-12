@@ -1,0 +1,12 @@
+serverlessLogicOperator:
+  enabled: true
+  subscription:
+    namespace: operators
+    spec:
+      sourceNamespace: olm
+
+serverlessOperator:
+  subscription:
+    namespace: operators
+    spec:
+      sourceNamespace: olm

@@ -1,3 +1,4 @@
+nameOverride: developer-hub
 global:
   dynamic:
     # -- Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field.
@@ -32,7 +33,7 @@ global:
 # -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
 # @default -- Use Openshift compatible settings
 upstream:
-  nameOverride: backstage
+  nameOverride: developer-hub
   backstage:
     image:
       registry: quay.io
@@ -67,6 +68,7 @@ upstream:
                 subject: legacy-default-config
                 secret: ${BACKEND_SECRET}
     containerSecurityContext:
+      readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
         drop: ["ALL"]
@@ -143,9 +145,17 @@ upstream:
       - name: temp
         mountPath: /tmp
     extraVolumes:
+      # -- Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start.
       - name: dynamic-plugins-root
-        persistentVolumeClaim:
-          claimName: '{{ printf "%s-dynamic-plugins-root" .Release.Name }}'
+        ephemeral:
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  # -- Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins.
+                  storage: 5Gi
       # Volume that will expose the `dynamic-plugins.yaml` file from the `dynamic-plugins` config map.
       # The `dynamic-plugins` config map is created by the helm chart from the content of the `global.dynamic` field.
       - name: dynamic-plugins
@@ -182,6 +192,7 @@ upstream:
             memory: 2.5Gi
             ephemeral-storage: 5Gi
         securityContext:
+          readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
@@ -198,6 +209,9 @@ upstream:
         env:
           - name: NPM_CONFIG_USERCONFIG
             value: /opt/app-root/src/.npmrc.dynamic-plugins
+            # This following variable is required for orchestrator to startup properly.
+          - name: MAX_ENTRY_SIZE
+            value: "30000000"
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /dynamic-plugins-root
@@ -233,6 +247,8 @@ upstream:
   postgresql:
     enabled: true
     postgresqlDataDir: /var/lib/pgsql/data/userdata
+    serviceBindings:
+      enabled: true
     image:
       registry: quay.io
       repository: fedora/postgresql-15
@@ -259,7 +275,6 @@ upstream:
         enabled: true
         size: 1Gi
         mountPath: /var/lib/pgsql/data
-        storageClass: null
       extraEnvVars:
         - name: POSTGRESQL_ADMIN_PASSWORD
           valueFrom:
@@ -315,18 +330,6 @@ route:
     # <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled.
     insecureEdgeTerminationPolicy: "Redirect"
 
-dynamicPlugins:
-  cache:
-    # -- Spec of the dynamic plugins root volume claim.
-    # <br/> Note that, by default, this is set to use the default storage class, if available in the cluster.
-    volumeClaimSpec:
-      accessModes:
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: 5Gi
-      storageClassName: null
-
 # -- Test pod parameters
 test:
   # -- Whether to enable the test-connection pod used for testing the Release using `helm test`.
@@ -341,3 +344,35 @@ test:
 
     # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
     tag: latest
+
+orchestrator:
+  enabled: false
+  serverlessLogicOperator:
+    enabled: true
+  serverlessOperator:
+    enabled: true
+  sonataflowPlatform:
+    monitoring:
+      enabled: true
+    eventing:
+      broker:
+        name: ""
+        namespace: ""
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    # -- Secret name for the user-created secret to connect an external DB
+    externalDBsecretRef: ""
+
+    # -- Name for the user-configured external Database
+    externalDBName: ""
+
+    # -- Image for the init container used by the create-db job
+    initContainerImage: busybox
+
+    # -- Image for the container used by the create-db job
+    createDBJobImage: "postgres:15"

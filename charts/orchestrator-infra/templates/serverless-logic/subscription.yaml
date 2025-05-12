@@ -1,0 +1,10 @@
+{{- $unmanagedSubscriptionExists := include "unmanaged-resource-exists" (list "operators.coreos.com/v1alpha1" "Subscription" .Values.serverlessLogicOperator.subscription.namespace .Values.serverlessLogicOperator.subscription.spec.name .Release.Name .Capabilities.APIVersions ) }}
+{{- if and (eq $unmanagedSubscriptionExists "false") .Values.serverlessLogicOperator.enabled }}
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: {{ .Values.serverlessLogicOperator.subscription.spec.name }}
+  namespace: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+spec:
+  {{- toYaml .Values.serverlessLogicOperator.subscription.spec | nindent 2 }}
+{{- end }}

@@ -1,0 +1,132 @@
+{
+  "$id": "https://raw.githubusercontent.com/redhat-developer/rhdh-chart/main/charts/backstage/values.schema.json",
+  "properties": {
+    "serverlessLogicOperator": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Whether the operator should be deployed by the chart",
+          "type": "boolean"
+        },
+        "subscription": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "openshift-serverless-logic",
+              "title": "Namespace where the operator should be deployed",
+              "type": "string"
+            },
+            "spec": {
+              "additionalProperties": false,
+              "properties": {
+                "channel": {
+                  "default": "alpha",
+                  "title": "Channel of an operator package to subscribe to",
+                  "type": "string"
+                },
+                "installPlanApproval": {
+                  "default": "Manual",
+                  "title": "Whether the update should be installed automatically",
+                  "type": "string"
+                },
+                "name": {
+                  "default": "logic-operator-rhel8",
+                  "title": "Name of the operator package",
+                  "type": "string"
+                },
+                "source": {
+                  "default": "redhat-operators",
+                  "title": "Name of the catalog source",
+                  "type": "string"
+                },
+                "sourceNamespace": {
+                  "default": "openshift-marketplace",
+                  "title": "Name of the catalog source Namespace",
+                  "type": "string"
+                },
+                "startingCSV": {
+                  "default": "logic-operator-rhel8.v1.33.0",
+                  "title": "The initial version of the operator",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      }
+    },
+    "serverlessOperator": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Whether the operator should be deployed by the chart",
+          "type": "boolean"
+        },
+        "subscription": {
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "default": "openshift-serverless",
+              "title": "Namespace where the operator should be deployed",
+              "type": "string"
+            },
+            "spec": {
+              "additionalProperties": false,
+              "properties": {
+                "channel": {
+                  "default": "stable",
+                  "title": "Channel of an operator package to subscribe to",
+                  "type": "string"
+                },
+                "installPlanApproval": {
+                  "default": "Manual",
+                  "title": "Whether the update should be installed automatically",
+                  "type": "string"
+                },
+                "name": {
+                  "default": "serverless-operator",
+                  "title": "Name of the operator package",
+                  "type": "string"
+                },
+                "source": {
+                  "default": "redhat-operators",
+                  "title": "Name of the catalog source",
+                  "type": "string"
+                },
+                "sourceNamespace": {
+                  "default": "openshift-marketplace",
+                  "title": "Name of the catalog source Namespace",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Wheather the test pod should be activated",
+          "type": "boolean"
+        },
+        "image": {
+          "default": "bitnami/kubectl:latest",
+          "type": "string",
+          "title": "The base image for the testing pod"
+        }
+      }
+    }
+  },
+  "title": "Root Schema",
+  "type": "object"
+}
