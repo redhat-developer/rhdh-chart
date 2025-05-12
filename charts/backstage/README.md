@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-![Version: 4.2.1](https://img.shields.io/badge/Version-4.2.1-informational?style=flat-square)
+![Version: 4.2.2](https://img.shields.io/badge/Version-4.2.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -322,23 +322,37 @@ upstream:
       enabled: true
 ```
 
-## Installing RHDH with Orchestrator
+## Installing RHDH with Orchestrator on OpenShift
 
-Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, on boarding developers ,and user-made workflows of Backstage actions or external systems.
-Orchestrator is a flavor of RHDH, and can be installed alongside the RHDH in the same namespace and in the folloing way:
+Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, onboarding developers, and user-made workflows of Backstage actions or external systems.
+Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the same namespace and in the following way:
 
-1. Have an admin install the orchestrator-infra helm chart, which will install the pre-requisites required to install RHDH flavored Orchestrator. This proccess will include installing cluster-wide resources, so should be done with admin privileges
+1. Have an admin install the [orchestrator-infra Helm Chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/orchestrator-infra#readme), which will install the prerequisites required to deploy the Orchestrator-flavored RHDH. This process will include installing cluster-wide resources, so should be done with admin privileges:
 ```
-helm install <release_name> charts/orchestrator-infra
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add backstage https://backstage.github.io/charts
+helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
+
+helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra
 ```
-2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed.
-3. Install backstage chart with helm, setting orchestrator to be enabled.
-4. Enable serverlessLogicOperator and serverlessOperator in the backstage values.
+2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed. To do so, follow the post-install notes given by the chart, or see them [here](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/orchestrator-infra/templates/NOTES.txt)
+3. Install the `backstage` chart with Helm, enabling orchestrator, serverlessLogicOperator, and serverlessOperator, like so:
+
+```
+helm install <release_name> redhat-developer/backstage \
+  --set orchestrator.enabled=true \
+  --set orchestrator.serverlessLogicOperator.enabled=true \
+  --set orchestrator.serverlessOperator.enabled=true
+```
 
 ### Enablement of Notifications Plugin
 
-To enable the notifications and signals plugin, please edit the dynamic plugin configmap after the installation and add the following:
-```     
+Workflows running with Orchestrator may use the Notifications plugin.
+For this, you must enable the Notifications and Signals plugins.
+To do so, you would need to edit the [default Helm values.yaml](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml) file, and add the plugins listed below to the global.dynamic.plugins list.
+Do this before installing the Helm Chart, or upgrade the Helm release with the new values file.
+
+```yaml
 - disabled: false
   package: "./dynamic-plugins/dist/backstage-plugin-notifications"
 - disabled: false
@@ -358,10 +372,14 @@ and populate the following values in the values.yaml:
     externalDBsecretRef: <cred-secret>
     externalDBName: ""
 ```
-Please note that externalDBName is the name of the user-configured existing database, not the database that orchestrator and sonataflow resources will use.
+Please note that `externalDBName` is the name of the user-configured existing database, not the database that the orchestrator and sonataflow resources will use.
 
-Finally, install the helm chart:
+Finally, install the Helm Chart (including [setting up the external DB](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)):
 ```
-helm install <release_name> charts/backstage --set orchestrator.enabled=true --set orchestrator.serverlessLogicOperator.enabled=true --set orchestrator.serverlessOperator.enabled=true \
---set externalDBsecretRef=<cred-secret> --set externalDBName=example
+helm install <release_name> redhat-developer/backstage \
+  --set orchestrator.enabled=true \
+  --set orchestrator.serverlessLogicOperator.enabled=true \
+  --set orchestrator.serverlessOperator.enabled=true \
+  --set orchestrator.sonataflowPlatform.externalDBsecretRef=<cred-secret> \
+  --set orchestrator.sonataflowPlatform.externalDBName=example
 ```
