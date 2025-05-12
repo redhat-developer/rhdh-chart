@@ -352,7 +352,7 @@ For this, you must enable the Notifications and Signals plugins.
 To do so, you would need to edit the [default Helm values.yaml](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml) file, and add the plugins listed below to the global.dynamic.plugins list.
 Do this before installing the Helm Chart, or upgrade the Helm release with the new values file.
 
-```     
+```yaml
 - disabled: false
   package: "./dynamic-plugins/dist/backstage-plugin-notifications"
 - disabled: false
