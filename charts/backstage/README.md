@@ -1,7 +1,15 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
+<<<<<<< HEAD
 ![Version: 4.2.6](https://img.shields.io/badge/Version-4.2.6-informational?style=flat-square)
+=======
+<<<<<<< HEAD
+![Version: 4.2.5](https://img.shields.io/badge/Version-4.2.5-informational?style=flat-square)
+=======
+![Version: 4.2.4](https://img.shields.io/badge/Version-4.2.4-informational?style=flat-square)
+>>>>>>> e6dee0d (Bump backstage chart version to 4.2.6 after enabling orchestrator by default)
+>>>>>>> fa4bac8 (Bump backstage chart version to 4.2.6 after enabling orchestrator by default)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Red Hat Developer Hub is a Red Hat supported version of Backstage.

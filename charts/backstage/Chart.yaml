@@ -48,6 +48,9 @@ sources: []
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
+<<<<<<< HEAD
 # Note that when this chart is published to https://github.com/openshift-helm-charts/charts
 # it will follow the RHDH versioning 1.y.z
+=======
+>>>>>>> fa4bac8 (Bump backstage chart version to 4.2.6 after enabling orchestrator by default)
 version: 4.2.6
