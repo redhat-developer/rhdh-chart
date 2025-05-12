@@ -348,9 +348,9 @@ test:
 orchestrator:
   enabled: false
   serverlessLogicOperator:
-    enabled: false
+    enabled: true
   serverlessOperator:
-    enabled: false
+    enabled: true
   sonataflowPlatform:
     monitoring:
       enabled: true
