@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-![Version: 4.2.3](https://img.shields.io/badge/Version-4.2.3-informational?style=flat-square)
+![Version: 4.2.4](https://img.shields.io/badge/Version-4.2.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub.
@@ -179,8 +179,8 @@ Kubernetes: `>= 1.27.0-0`
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
 | nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |
-| orchestrator.serverlessLogicOperator.enabled |  | bool | `false` |
-| orchestrator.serverlessOperator.enabled |  | bool | `false` |
+| orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
+| orchestrator.serverlessOperator.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"postgres:15"` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
@@ -336,14 +336,13 @@ helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra
 ```
 2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed. To do so, follow the post-install notes given by the chart, or see them [here](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/orchestrator-infra/templates/NOTES.txt)
-3. Install the `backstage` chart with Helm, enabling orchestrator, serverlessLogicOperator, and serverlessOperator, like so:
+3. Install the `backstage` chart with Helm, enabling orchestrator, like so:
 
 ```
-helm install <release_name> redhat-developer/backstage \
-  --set orchestrator.enabled=true \
-  --set orchestrator.serverlessLogicOperator.enabled=true \
-  --set orchestrator.serverlessOperator.enabled=true
+helm install <release_name> redhat-developer/backstage --set orchestrator.enabled=true
 ```
+Note that serverlessLogicOperator, and serverlessOperator are enabled by default. They can be disabled together or seperately by passing the following flags:
+`--set orchestrator.serverlessLogicOperator.enabled=false --set orchestrator.serverlessOperator.enabled=false`
 
 ### Enablement of Notifications Plugin
 
@@ -378,8 +377,6 @@ Finally, install the Helm Chart (including [setting up the external DB](https://
 ```
 helm install <release_name> redhat-developer/backstage \
   --set orchestrator.enabled=true \
-  --set orchestrator.serverlessLogicOperator.enabled=true \
-  --set orchestrator.serverlessOperator.enabled=true \
   --set orchestrator.sonataflowPlatform.externalDBsecretRef=<cred-secret> \
   --set orchestrator.sonataflowPlatform.externalDBName=example
 ```

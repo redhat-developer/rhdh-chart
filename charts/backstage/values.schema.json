@@ -103,7 +103,7 @@
                     "additionalProperties": false,
                     "properties": {
                         "enabled": {
-                            "default": false,
+                            "default": true,
                             "title": "enabled flag",
                             "type": "boolean"
                         }
@@ -115,7 +115,7 @@
                     "additionalProperties": false,
                     "properties": {
                         "enabled": {
-                            "default": false,
+                            "default": true,
                             "title": "enabled flag",
                             "type": "boolean"
                         }
