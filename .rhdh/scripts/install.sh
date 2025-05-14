@@ -99,6 +99,10 @@ helm upgrade redhat-developer-hub -i "${CHART_URL}" --version "$CV" \
     --set global.postgresql.auth.password="$PASSWORD"
 
 echo "
+While deploying you can watch at 
+https://console-openshift-console.${CLUSTER_ROUTER_BASE}/topology/ns/${namespace}?view=graph
+"
+echo "
 Once deployed, Developer Hub $CV will be available at
 https://redhat-developer-hub-${namespace}.${CLUSTER_ROUTER_BASE}
 "
