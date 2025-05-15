@@ -60,15 +60,70 @@ if [[ "$CV" == *"-CI" ]] || [[ $chartrepo -eq 1 ]]; then
   mkdir -p /tmp/"$CV"-unpacked && pushd /tmp/"$CV"-unpacked >/dev/null 2>&1 || exit 1
   helm pull oci://quay.io/rhdh/chart --version "$CV" -d /tmp/"$CV"-unpacked # get tarball
   helm repo index /tmp/"$CV"-unpacked # create index.yaml
+
+  # HelmChartRepository does not support OCI artifacts.
+  # Host an in-cluster Helm repo serving both the index and chart files.
+  if oc -n "$namespace" get configmap helm-repo-files > /dev/null; then
+    oc -n "$namespace" delete configmap helm-repo-files
+  fi
+  oc -n "$namespace" create configmap helm-repo-files \
+    --from-file=/tmp/"$CV"-unpacked/index.yaml \
+    --from-file=/tmp/"$CV"-unpacked/chart-${CV}.tgz
+  cat <<EOF > helm-repo.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helm-repo
+  annotations:
+    rhdh.redhat.com/chart-version: "$CV"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helm-repo
+  template:
+    metadata:
+      labels:
+        app: helm-repo
+      annotations:
+        rhdh.redhat.com/chart-version: "$CV"
+    spec:
+      containers:
+      - name: nginx
+        image: quay.io/openshifttest/nginx-alpine:1.2.4
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: chart-vol
+          mountPath: /data/http/charts
+      volumes:
+      - name: chart-vol
+        configMap:
+          name: helm-repo-files
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helm-repo
+spec:
+  selector:
+    app: helm-repo
+  ports:
+  - port: 80
+    targetPort: 8080
+EOF
+  oc apply -f helm-repo.yaml || kubctl apply -f helm-repo.yaml
+
   cat <<EOF > repo.yaml
 apiVersion: helm.openshift.io/v1beta1
 kind: HelmChartRepository
 metadata:
   name: rhdh-next-ci-repo
+  annotations:
+    rhdh.redhat.com/chart-version: "$CV"
 spec:
   connectionConfig:
-    file: >-
-      ./index.yaml
+    url: http://helm-repo.${namespace}.svc.cluster.local/charts
 EOF
 
   oc apply -f repo.yaml || kubctl apply -f repo.yaml
