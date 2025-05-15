@@ -112,7 +112,7 @@ spec:
   - port: 80
     targetPort: 8080
 EOF
-  oc apply -f helm-repo.yaml || kubctl apply -f helm-repo.yaml
+  oc apply -f helm-repo.yaml || kubectl apply -f helm-repo.yaml
 
   cat <<EOF > repo.yaml
 apiVersion: helm.openshift.io/v1beta1
