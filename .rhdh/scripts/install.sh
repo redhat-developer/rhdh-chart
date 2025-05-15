@@ -126,7 +126,7 @@ spec:
     url: http://helm-repo.${namespace}.svc.cluster.local/charts
 EOF
 
-  oc apply -f repo.yaml || kubctl apply -f repo.yaml
+  oc apply -f repo.yaml || kubectl apply -f repo.yaml
   popd  >/dev/null 2>&1 || exit 1
 
   # clean up temp files
