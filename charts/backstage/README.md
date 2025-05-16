@@ -1,15 +1,17 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rhdh-chart&style=flat-square)](https://artifacthub.io/packages/search?repo=rhdh-chart)
-![Version: 3.2.3](https://img.shields.io/badge/Version-3.2.3-informational?style=flat-square)
+![Version: 3.2.4](https://img.shields.io/badge/Version-3.2.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart for deploying Red Hat Developer Hub.
+Red Hat Developer Hub is a Red Hat supported version of Backstage.
+It comes with pre-built plug-ins and configuration settings, supports use of an external database, and can
+help streamline the process of setting up a self-managed internal
+developer portal for adopters who are just starting out.
 
 The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.5/html-single/telemetry_data_collection/index
 
-**Homepage:** <https://redhat-developer.github.io/rhdh-chart/>
+**Homepage:** <https://red.ht/rhdh>
 
 ## Productized RHDH
 
@@ -57,7 +59,7 @@ This chart bootstraps a [Backstage](https://backstage.io/docs/deployment/docker)
 
 ## Prerequisites
 
-- Kubernetes 1.25+ (OpenShift 4.12+)
+- Kubernetes 1.27+ ([OpenShift 4.14+](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html-single/release_notes/index#ocp-4-14-about-this-release))
 - Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
 - PV provisioner support in the underlying infrastructure
 - [Backstage container image](https://backstage.io/docs/deployment/docker)
@@ -68,6 +70,10 @@ Charts are available in the following formats:
 
 - [Chart Repository](https://helm.sh/docs/topics/chart_repository/)
 - [OCI Artifacts](https://helm.sh/docs/topics/registries/)
+
+### Note
+
+Up-to-date instructions on installing RHDH through the chart can be found in the [installation docs](https://github.com/redhat-developer/rhdh-chart/tree/main/.rhdh/docs/installation-ci-charts.adoc).
 
 ### Installing from the Chart Repository
 
@@ -108,12 +114,12 @@ helm upgrade -i <release_name> redhat-developer/backstage
 
 Note: this repo replaces https://github.com/janus-idp/helm-backstage, which has been deprecated in Feb 2024.
 
-Charts are also available in OCI format. The list of available releases can be found [here](https://github.com/orgs/redhat-developer/packages/container/package/rhdh-chart%2Fbackstage).
+Charts are also available in OCI format. The list of available releases can be found [here](https://quay.io/repository/rhdh/chart?tab=tags).
 
 Install one of the available versions:
 
 ```shell
-helm upgrade -i <release_name> oci://ghcr.io/redhat-developer/rhdh-chart/backstage --version=<version>
+helm upgrade -i <release_name> oci://quay.io/rhdh/chart --version=<version>
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -170,7 +176,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Requirements
 
-Kubernetes: `>= 1.25.0-0`
+Kubernetes: `>= 1.27.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
