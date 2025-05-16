@@ -42,7 +42,7 @@ kubeVersion: ">= 1.27.0-0"
 maintainers:
   - name: Red Hat
     url: https://redhat.com
-name: redhat-developer-hub
+name: backstage
 type: application
 sources: []
 # This is the chart version. This version number should be incremented each time you make changes
