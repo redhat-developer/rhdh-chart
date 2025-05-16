@@ -346,7 +346,7 @@ test:
     tag: latest
 
 orchestrator:
-  enabled: false
+  enabled: true
   serverlessLogicOperator:
     enabled: true
   serverlessOperator:
