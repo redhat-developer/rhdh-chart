@@ -1,15 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-<<<<<<< HEAD
 ![Version: 4.2.6](https://img.shields.io/badge/Version-4.2.6-informational?style=flat-square)
-=======
-<<<<<<< HEAD
-![Version: 4.2.5](https://img.shields.io/badge/Version-4.2.5-informational?style=flat-square)
-=======
-![Version: 4.2.4](https://img.shields.io/badge/Version-4.2.4-informational?style=flat-square)
->>>>>>> e6dee0d (Bump backstage chart version to 4.2.6 after enabling orchestrator by default)
->>>>>>> fa4bac8 (Bump backstage chart version to 4.2.6 after enabling orchestrator by default)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Red Hat Developer Hub is a Red Hat supported version of Backstage.
@@ -189,11 +181,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
 | nameOverride |  | string | `"developer-hub"` |
-<<<<<<< HEAD
 | orchestrator.enabled |  | bool | `false` |
-=======
-| orchestrator.enabled |  | bool | `true` |
->>>>>>> da534c2 (chore(values): Update the RHDH (Backstage) Helm chart to enable Orchestrator functionality by default.)
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
 | orchestrator.serverlessOperator.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"postgres:15"` |
