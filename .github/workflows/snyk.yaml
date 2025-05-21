@@ -16,10 +16,8 @@ jobs:
         chartConfig:
           - name: "backstage"
             path: "backstage"
-            cliArgs: ""
           - name: "orchestrator-infra"
             path: "orchestrator-infra"
-            cliArgs: ""
           - name: "backstage-orchestrator"
             path: "backstage"
             cliArgs: >
@@ -44,10 +42,10 @@ jobs:
 
           helm dependency build ./charts/${{ matrix.chartConfig.path }}
           helm template ./charts/${{ matrix.chartConfig.path }} \
-            ${{ matrix.chartConfig.cliArgs }} \
+            ${{ matrix.chartConfig.cliArgs || '' }} \
             --output-dir ./output/${{ matrix.chartConfig.name }}
 
-      - name: Run Snyk IaC Scan for ${{ matrix.chartConfig.name }}
+      - name: Run Snyk IaC Scan for ${{ matrix.chart.name }}
         continue-on-error: true
         uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
         env:
