@@ -12,10 +12,19 @@ jobs:
 
     strategy:
       matrix:
-        chart:
-          - backstage
-          - orchestrator-infra
-          - backstage-orchestrator
+        chartConfig:
+          - name: "backstage"
+            path: "backstage"
+            cliArgs: ""
+          - name: "orchestrator-infra"
+            path: "orchestrator-infra"
+            cliArgs: ""
+          - name: "backstage-orchestrator"
+            path: "backstage"
+            cliArgs: >
+              --set orchestrator.enabled=true
+              --set orchestrator.serverlessOperator.enabled=true
+              --set orchestrator.serverlessLogicOperator.enabled=true
 
     steps:
       - name: Checkout
@@ -34,25 +43,17 @@ jobs:
           helm repo add backstage https://backstage.github.io/charts
           helm repo update
 
-          if [ "${{ matrix.chart }}" = "backstage-orchestrator" ]; then
-            helm dependency build ./charts/backstage
-            helm template rhdh charts/backstage \
-              --set orchestrator.enabled=true \
-              --set orchestrator.serverlessOperator.enabled=true \
-              --set orchestrator.serverlessLogicOperator.enabled=true \
-              --output-dir ./output/backstage-orchestrator
-          else
-            helm dependency build ./charts/${{ matrix.chart }}
-            helm template rhdh ./charts/${{ matrix.chart }} \
-              --output-dir ./output/${{ matrix.chart }}
-          fi
+          helm dependency build ./charts/${{ matrix.chartConfig.path }}
+          helm template rhdh ./charts/${{ matrix.chartConfig.path }} \
+            ${{ matrix.chartConfig.cliArgs }} \
+            --output-dir ./output/${{ matrix.chartConfig.name }}
 
-      - name: Run Snyk IaC Scan for ${{ matrix.chart }}
+      - name: Run Snyk IaC Scan for ${{ matrix.chartConfig.name }}
         continue-on-error: true
-        uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
+        uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
         with:
-          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/${{ matrix.chart }}"
-          file: ./output/${{ matrix.chart }}
+          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/${{ matrix.chartConfig.name }}"
+          file: ./output/${{ matrix.chartConfig.name }}
