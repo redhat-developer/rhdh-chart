@@ -36,8 +36,10 @@ jobs:
 
           if [ "${{ matrix.chart }}" = "backstage-orchestrator" ]; then
             helm dependency build ./charts/backstage
-            helm template rhdh ./charts/backstage \
-              -f charts/backstage/values.orchestrator-enabled.yaml \
+            helm template rhdh charts/backstage \
+              --set orchestrator.enabled=true \
+              --set orchestrator.serverlessOperator.enabled=true \
+              --set orchestrator.serverlessLogicOperator.enabled=true \
               --output-dir ./output/backstage-orchestrator
           else
             helm dependency build ./charts/${{ matrix.chart }}
