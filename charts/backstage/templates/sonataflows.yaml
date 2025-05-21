@@ -92,18 +92,25 @@ spec:
     spec:
       initContainers:
         - name: wait-for-db
-          image: {{ .Values.orchestrator.sonataflowPlatform.initContainerImage }}
+          image: "{{- tpl .Values.orchestrator.sonataflowPlatform.initContainerImage . -}}"
           command:
-            - sh
+            - bash
             - -c
-{{- if .Values.upstream.postgresql.enabled }}
-            - "until nc -z {{ .Release.Name }}-postgresql 5432; do echo 'Waiting for DB...'; sleep 2; done"
-{{- else }}
-            - "until nc -z {{ .Values.upstream.backstage.appConfig.backend.database.connection.host }} {{ .Values.upstream.backstage.appConfig.backend.database.connection.port }}; do echo 'Waiting for external DB...'; sleep 2; done"
-{{- end }}
+            - |
+              {{- if .Values.upstream.postgresql.enabled }}
+              dbHost="{{ .Release.Name }}-postgresql"
+              dbPort="5432"
+              {{- else }}
+              dbHost="{{ .Values.upstream.backstage.appConfig.backend.database.connection.host }}"
+              dbPort="{{ .Values.upstream.backstage.appConfig.backend.database.connection.port }}"
+              {{- end }}
+              until timeout --preserve-status --kill-after=3 2 bash -c ">/dev/tcp/${dbHost}/${dbPort}"; do
+                echo 'Waiting for DB...'
+                sleep 2
+              done
       containers:
       - name: psql
-        image: {{ .Values.orchestrator.sonataflowPlatform.createDBJobImage }}
+        image: "{{- tpl .Values.orchestrator.sonataflowPlatform.createDBJobImage . -}}"
         env:
         - name: PGPASSWORD
           valueFrom:
@@ -125,9 +132,3 @@ spec:
       restartPolicy: Never
   backoffLimit: 2
 {{- end }}
-
-
-
-
-
-
