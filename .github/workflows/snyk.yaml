@@ -15,6 +15,7 @@ jobs:
         chart:
           - backstage
           - orchestrator-infra
+          - backstage-orchestrator
 
     steps:
       - name: Checkout
@@ -32,8 +33,17 @@ jobs:
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add backstage https://backstage.github.io/charts
           helm repo update
-          helm dependency build ./charts/${{ matrix.chart }}
-          helm template ./charts/${{ matrix.chart }} --output-dir ./output/${{ matrix.chart }}
+
+          if [ "${{ matrix.chart }}" = "backstage-orchestrator" ]; then
+            helm dependency build ./charts/backstage
+            helm template rhdh ./charts/backstage \
+              -f charts/backstage/values.orchestrator-enabled.yaml \
+              --output-dir ./output/backstage-orchestrator
+          else
+            helm dependency build ./charts/${{ matrix.chart }}
+            helm template rhdh ./charts/${{ matrix.chart }} \
+              --output-dir ./output/${{ matrix.chart }}
+          fi
 
       - name: Run Snyk IaC Scan for ${{ matrix.chart }}
         continue-on-error: true
