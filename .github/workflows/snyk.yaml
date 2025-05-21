@@ -23,8 +23,6 @@ jobs:
             path: "backstage"
             cliArgs: >
               --set orchestrator.enabled=true
-              --set orchestrator.serverlessOperator.enabled=true
-              --set orchestrator.serverlessLogicOperator.enabled=true
 
     steps:
       - name: Checkout
