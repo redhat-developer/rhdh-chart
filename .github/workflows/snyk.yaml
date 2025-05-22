@@ -4,7 +4,6 @@ on:
   workflow_dispatch:  # allow manual runs from UI
   schedule:
     - cron: "0 0 * * 0"  # weekly scan (every Sunday at 00:00 UTC)
-  pull_request: # trigger to test PR behavior
 
 jobs:
   scan-iac:
