@@ -20,8 +20,7 @@ jobs:
             path: "orchestrator-infra"
           - name: "backstage-orchestrator"
             path: "backstage"
-            cliArgs: >
-              --set orchestrator.enabled=true
+            cliArgs: "--set orchestrator.enabled=true"
 
     steps:
       - name: Checkout
