@@ -8,7 +8,7 @@ on:
 
 jobs:
   scan-iac:
-    name: Scan Rendered Templates
+    name: Scan Rendered Templates (${{ matrix.chartConfig.name }})
     runs-on: ubuntu-latest
 
     strategy:
