@@ -1,0 +1,126 @@
+{{- $unmanagedSubscriptionExists := include "unmanaged-resource-exists" (list "operators.coreos.com/v1alpha1" "Subscription" .Values.openshiftPipelines.subscription.namespace .Values.openshiftPipelines.subscription.spec.name .Release.Name .Capabilities.APIVersions ) }}
+{{- if and (eq $unmanagedSubscriptionExists "false") .Values.openshiftPipelines.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csv-cleanup
+  namespace: openshift-operators
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-2"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: csv-cleanup-role
+- kind:
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["clusterroles", "clusterrolebindings"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["operators.coreos.com"]
+  resources: ["clusterserviceversions"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["apps", ""]
+  resources: ["deployments", "pods"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["messaging.knative.dev"]
+  resources: ["subscriptions"]
+  verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csv-cleanup-rolebinding
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csv-cleanup-role
+subjects:
+- kind: ServiceAccount
+  name: csv-cleanup
+  namespace: openshift-operators    
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pipeline-cleanup
+  namespace: openshift-operators
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  serviceAccountName: csv-cleanup
+  restartPolicy: Never
+  terminationGracePeriodSeconds: 0
+  containers:
+  - name: crd-check
+    image: quay.io/openshift/origin-cli:latest
+    imagePullPolicy: IfNotPresent
+    command:
+    - sh
+    - -c
+    - >
+      echo "Deleting CSV..."; 
+      oc delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n openshift-operators;
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: openshift-pipelines-cleanup
+  namespace: openshift-operators
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  template:
+    spec:
+      serviceAccountName: csv-cleanup
+      restartPolicy: Never
+      containers:
+      - name: cleanup
+        image: quay.io/openshift/origin-cli:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+
+          set +e 
+          echo "Deleting OpenShift Pipelines resources..."
+
+          # Delete pipeline CRs cluster-wide (can loop over namespaces if needed)
+          oc delete pipeline,pipelinerun,task,taskrun,pipelineresource --all --all-namespaces --ignore-not-found
+
+          # Delete the CSV (adjust the exact CSV name if needed)
+          oc delete csv openshift-pipelines-operator-rh.v1.18.1 -n openshift-operators --ignore-not-found
+
+          # Delete the Subscription that installed the operator (adjust namespace and name)
+          oc delete subscription openshift-pipelines-operator-rh -n openshift-operators --ignore-not-found
+
+          # Delete CRDs (must be cluster admin)
+          oc delete crd tasks.tekton.dev pipelineruns.tekton.dev pipelines.tekton.dev taskruns.tekton.dev pipelineresources.tekton.dev --ignore-not-found
+
+          # Delete ClusterRoles and RoleBindings related to the operator
+          oc delete clusterrole openshift-pipelines-operator -n openshift-operators --ignore-not-found
+          oc delete clusterrolebinding openshift-pipelines-operator -n openshift-operators --ignore-not-found
+
+          oc delete ns openshift-pipelines --ignore-not-found
+
+          echo "Cleanup done."
+      terminationGracePeriodSeconds: 0
+
+{{- end }}

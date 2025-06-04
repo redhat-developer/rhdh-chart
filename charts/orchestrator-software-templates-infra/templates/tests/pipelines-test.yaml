@@ -1,0 +1,142 @@
+{{- if and .Values.openshiftPipelines.enabled .Values.test.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Name }}-test-openshift-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: hello-world
+  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  labels:
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "2"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+spec:
+  steps:
+    - name: echo
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+        runAsNonRoot: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 20Mi
+        limits:
+          cpu: 10m
+          memory: 20Mi
+      image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+      imagePullPolicy: IfNotPresent
+      script: |
+        #!/bin/sh
+        echo "Hello from Tekton"
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-pipeline
+  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-pipeline-role
+  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+rules:
+  - apiGroups: ["tekton.dev"]
+    resources: ["taskruns"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-pipeline-rolebinding
+  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-pipeline
+    namespace: {{ .Release.Name }}-test-openshift-pipelines
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-pipeline-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: hello-world-run
+  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "3"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+spec:
+  taskRef:
+    name: hello-world
+  serviceAccountName: {{ .Release.Name }}-pipeline
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wait-for-taskrun
+  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "4"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-pipeline
+      restartPolicy: Never
+      containers:
+        - name: wait-for-taskrun
+          image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              for i in {1..60}; do
+                status=$(kubectl get taskrun hello-world-run -n {{ .Release.Name }}-test-openshift-pipelines -o jsonpath='{.status.conditions[?(@.type=="Succeeded")].reason}')
+                echo "TaskRun status: $status"
+                if [ "$status" = "Succeeded" ]; then
+                  echo "TaskRun succeeded!"
+                  exit 0
+                fi
+                if [ "$status" = "Failed" ]; then
+                  echo "TaskRun failed!"
+                  exit 1
+                fi
+                sleep 5
+              done
+              echo "Timeout waiting for TaskRun to succeed"
+              exit 1
+
+
+{{- end }}
