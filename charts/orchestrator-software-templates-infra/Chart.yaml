@@ -1,0 +1,9 @@
+apiVersion: v2
+name: orchestrator-software-templates-infra
+description: A Helm chart to install Openshift GitOps and Openshift Pipelines
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.16.0"

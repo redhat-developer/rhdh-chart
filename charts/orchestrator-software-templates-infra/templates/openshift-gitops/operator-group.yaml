@@ -1,0 +1,11 @@
+{{- if .Values.openshiftGitops.enabled }}
+
+{{- if .Values.serverlessLogicOperator.enabled }}
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: rhdh-gitops
+  namespace: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+spec: {}
+{{- end }}
+{{- end }}
