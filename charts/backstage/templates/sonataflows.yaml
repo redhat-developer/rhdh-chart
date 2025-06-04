@@ -93,6 +93,13 @@ spec:
       initContainers:
         - name: wait-for-db
           image: "{{- tpl .Values.orchestrator.sonataflowPlatform.initContainerImage . -}}"
+            resources:
+              limits:
+                cpu: "100m"
+                memory: "64Mi"
+              requests:
+                cpu: "50m"
+                memory: "32Mi"
           command:
             - bash
             - -c
@@ -113,10 +120,19 @@ spec:
         image: "{{- tpl .Values.orchestrator.sonataflowPlatform.createDBJobImage . -}}"
         securityContext:
           runAsNonRoot: true
+          runAsUser: 10001
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
               - ALL
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
         env:
         - name: PGPASSWORD
           valueFrom:
