@@ -111,6 +111,12 @@ spec:
       containers:
       - name: psql
         image: "{{- tpl .Values.orchestrator.sonataflowPlatform.createDBJobImage . -}}"
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
         env:
         - name: PGPASSWORD
           valueFrom:
