@@ -1,0 +1,50 @@
+openshiftPipelines:
+  # -- whether the operator should be deployed by the chart
+  enabled: true
+  subscription:
+    # -- namespace where the operator should be deployed
+    namespace: openshift-operators
+    # -- name of the operator package
+    name: openshift-pipelines-operator-rh
+    spec:
+      # -- channel of an operator package to subscribe to
+      channel: latest
+      # --  whether the update should be installed automatically
+      installPlanApproval: Automatic
+      # -- name of the operator package
+      name: openshift-pipelines-operator-rh
+      # --  name of the catalog source
+      source: redhat-operators
+      sourceNamespace: openshift-marketplace
+
+openshiftGitops:
+  # -- whether the operator should be deployed by the chart
+  enabled: false
+  subscription:
+    # -- namespace where the operator should be deployed
+    namespace: openshift-operators
+    spec:
+      # -- channel of an operator package to subscribe to
+      channel: stable
+      # -- whether the update should be installed automatically
+      installPlanApproval: Manual
+      # -- name of the operator package
+      name: serverless-operator
+      # -- name of the catalog source
+      source: redhat-operators
+      sourceNamespace: openshift-marketplace
+
+
+test:
+  # -- Whether to enable the pod used for testing the Release using `helm test`.
+  enabled: true
+
+  image:
+    # -- Test infra-test Tekton Task pod image registry
+    registry: bitnami
+
+    # -- Test infra-test Tekton Task pod image repository.
+    repository: kubectl
+
+    # -- Test infra-test Tekton Task pod image tag.
+    tag: latest

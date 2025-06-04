@@ -1,0 +1,6 @@
+{{- if .Values.openshiftGitops.enabled }}
+apiVersion: v1
+kind: openshift-pipelines
+metadata:
+  name: {{ .Values.serverlessLogicOperator.subscription.namespace }}
+{{- end }}
