@@ -93,13 +93,13 @@ spec:
       initContainers:
         - name: wait-for-db
           image: "{{- tpl .Values.orchestrator.sonataflowPlatform.initContainerImage . -}}"
-            resources:
-              limits:
-                cpu: "100m"
-                memory: "64Mi"
-              requests:
-                cpu: "50m"
-                memory: "32Mi"
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
           command:
             - bash
             - -c
