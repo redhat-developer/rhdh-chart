@@ -13,6 +13,7 @@ metadata:
 spec:
   containers:
     - name: curl
+      imagePullPolicy: Always
       securityContext:
         allowPrivilegeEscalation: false
         readOnlyRootFilesystem: true
