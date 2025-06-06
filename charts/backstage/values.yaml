@@ -267,7 +267,6 @@ upstream:
         runAsUser: 10001
         runAsNonRoot: true
         allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
         capabilities:
           drop:
             - ALL
