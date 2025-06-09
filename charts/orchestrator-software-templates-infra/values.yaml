@@ -19,21 +19,117 @@ openshiftPipelines:
 
 openshiftGitops:
   # -- whether the operator should be deployed by the chart
-  enabled: false
+  enabled: true
+
+  # -- name of instances
+  name: argocd
+
+  # -- namespace of rhdh instance, will be used to install openshift-gitops
+  namespaces:
+    - toast
+  
+  # -- subscription config
   subscription:
-    # -- namespace where the operator should be deployed
     namespace: openshift-operators
+    # -- namespace where the operator should be deployed
     spec:
       # -- channel of an operator package to subscribe to
-      channel: stable
+      channel: gitops-1.14
       # -- whether the update should be installed automatically
-      installPlanApproval: Manual
+      installPlanApproval: Automatic
       # -- name of the operator package
-      name: serverless-operator
+      name: openshift-gitops-operator
       # -- name of the catalog source
       source: redhat-operators
       sourceNamespace: openshift-marketplace
-
+      disableDefaultArgoCD: true
+  argocd_cr:
+    controller:
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 2048Mi
+        requests:
+          cpu: 250m
+          memory: 1024Mi
+    ha:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 250m
+          memory: 128Mi
+      enabled: false
+    rbac:
+      defaultPolicy: ""
+      policy: |
+        g, system:cluster-admins, role:admin
+      scopes: "[groups]"
+    redis:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 250m
+          memory: 128Mi
+    repo:
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1024Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
+    server:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 125m
+          memory: 128Mi
+      route:
+        enabled: true
+    sso:
+      dex:
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 128Mi
+        openShiftOAuth: true
+      provider: dex
+  initialRepositories: []
+    #initialRepositories:
+    #  - name: redhat-cop
+    #    type: helm
+    #    url: https://redhat-cop.github.io/helm-charts
+    # configure your repo credential template (override this)
+  repositoryCredentials: []
+    # repositoryCredentials:
+    #   - name: private-repo-creds
+    #     url: https://gitlab-ce.apps.openshift-498-bd8hw.do500.redhatlabs.dev
+    #     type: git
+    #     password: password
+    #     username: username
+  initialApps: []
+    # initialApps:
+    #   - name: init-app
+    #     path: argocd/
+    #     repoURL: https://gitlab-ce.apps.openshift-498-bd8hw.do500.redhatlabs.dev
+    #     targetRevision: HEAD
+    # adding your secrets for git access or other repository credentials
+  secrets: []
+  # EXAMPLE ...
+  # secrets:
+  #   - name: git-auth
+  #     username: 'user'
+  #     password: 'pass1234'
+  #     sshPrivateKey: ''
 
 test:
   # -- Whether to enable the pod used for testing the Release using `helm test`.

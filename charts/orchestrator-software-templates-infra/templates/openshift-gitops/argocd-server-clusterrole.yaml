@@ -1,0 +1,35 @@
+{{- if .Values.openshiftGitops.namespaces }}
+{{- $rules := .Values.clusterRoleRulesServer }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: argocd-server
+    app.kubernetes.io/name: {{ .Values.openshiftGitops.namespaces | first }}-gitops-argocd-server
+    app.kubernetes.io/part-of: {{ .Values.openshiftGitops.namespaces | first }}
+  name: {{ .Values.openshiftGitops.namespaces | first }}-gitops-argocd-server
+{{- if $rules }}
+{{- toYaml $rules | nindent 0 }}
+{{- else }}
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - list    # supports listing events in UI
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  verbs:
+  - get     # supports viewing pod logs from UI
+{{- end }}
+{{- end }}

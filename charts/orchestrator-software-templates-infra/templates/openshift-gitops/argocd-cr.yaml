@@ -1,0 +1,20 @@
+{{- if .Values.openshiftGitops.namespaces }}
+{{- range $ns := .Values.openshiftGitops.namespaces }}
+---
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: {{ $.Values.openshiftGitops.name }}
+  labels:
+    app: {{ $.Values.openshiftGitops.name }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "25"
+  namespace: {{ $ns }}
+spec:
+  applicationInstanceLabelKey: rht-gitops.com/{{ $ns }}
+  {{- if $.Values.openshiftGitops.argocd_cr }}
+  {{- $.Values.openshiftGitops.argocd_cr | toYaml | trim | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end }}
