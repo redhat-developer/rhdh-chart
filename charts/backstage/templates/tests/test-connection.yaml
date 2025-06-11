@@ -13,12 +13,14 @@ metadata:
 spec:
   containers:
     - name: curl
+      imagePullPolicy: Always
       securityContext:
         allowPrivilegeEscalation: false
         readOnlyRootFilesystem: true
         capabilities:
           drop: ["ALL"]
-        runAsNonRoot: false
+        runAsNonRoot: true
+        runAsUser: 10001
       resources:
         requests:
           cpu: 10m
@@ -32,7 +34,6 @@ spec:
           - ls
           - /usr/bin/curl
       image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
-      imagePullPolicy: IfNotPresent
       command: ["/bin/sh", "-c"]
       args:
         - |
