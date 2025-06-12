@@ -71,7 +71,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: cleanup-pipelines
-        image: quay.io/openshift/origin-cli:latest
+        image: {{ .Values.cleanupContainerImage }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

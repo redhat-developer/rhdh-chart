@@ -70,7 +70,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: cleanup
-        image: quay.io/openshift/origin-cli:latest
+        image: {{ .Values.cleanupContainerImage }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -139,7 +139,7 @@ spec:
                   oc patch argocd "$argo_name" -n "$ns" --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' || \
                     echo "    Warning: Failed to patch finalizers for $argo_name in $ns. It might remain."
                   echo "  Re-attempting delete for ArgoCD instance '$argo_name' in namespace: $ns after finalizer removal."
-                  oc delete argocd "$argo_name" -n "$ns" --ignore-not-found
+                  oc delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
                 fi
               fi
             done

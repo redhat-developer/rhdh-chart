@@ -69,6 +69,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
+| cleanupContainerImage |  | string | `"quay.io/openshift/origin-cli:latest"` |
 | openshiftGitops.argocd_cr.controller.resources.limits.cpu |  | string | `"2000m"` |
 | openshiftGitops.argocd_cr.controller.resources.limits.memory |  | string | `"2048Mi"` |
 | openshiftGitops.argocd_cr.controller.resources.requests.cpu |  | string | `"250m"` |
