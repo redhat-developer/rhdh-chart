@@ -164,7 +164,7 @@ Kubernetes: `>= 1.27.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://backstage.github.io/charts | upstream(backstage) | 2.5.2 |
-| https://charts.bitnami.com/bitnami | common | 2.31.1 |
+| https://charts.bitnami.com/bitnami | common | 2.31.3 |
 
 ## Values
 
