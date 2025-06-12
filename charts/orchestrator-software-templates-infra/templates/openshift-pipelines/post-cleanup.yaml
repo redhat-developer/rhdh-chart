@@ -1,9 +1,9 @@
-{{- if and .Values.openshiftPipelines.enabled }}
+{{- if .Values.openshiftPipelines.enabled }}
 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: csv-cleanup
+  name: csv-cleanup-pipelines
   namespace: openshift-operators
   annotations:
     "helm.sh/hook": pre-delete
@@ -12,7 +12,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: csv-cleanup-role
+  name: csv-cleanup-role-pipelines
   annotations:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-weight": "-1"
@@ -23,6 +23,9 @@ rules:
   - apiGroups: ["operators.coreos.com"]
     resources: ["clusterserviceversions"]
     verbs: ["get", "list", "delete"]
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["subscription", "subscriptions"]
+    verbs: ["get", "list", "delete", "watch"]
   - apiGroups: ["apps", ""]
     resources: ["deployments", "pods"]
     verbs: ["get", "list", "delete"]
@@ -39,17 +42,17 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: csv-cleanup-rolebinding
+  name: csv-cleanup-rolebinding-pipelines
   annotations:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-weight": "-1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: csv-cleanup-role
+  name: csv-cleanup-role-pipelines
 subjects:
 - kind: ServiceAccount
-  name: csv-cleanup
+  name: csv-cleanup-pipelines
   namespace: openshift-operators    
 ---
 apiVersion: batch/v1
@@ -64,10 +67,10 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: csv-cleanup
+      serviceAccountName: csv-cleanup-pipelines
       restartPolicy: Never
       containers:
-      - name: cleanup
+      - name: cleanup-pipelines
         image: quay.io/openshift/origin-cli:latest
         securityContext:
           allowPrivilegeEscalation: false
