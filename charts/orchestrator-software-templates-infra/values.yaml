@@ -131,6 +131,7 @@ openshiftGitops:
   #     username: 'user'
   #     password: 'pass1234'
   #     sshPrivateKey: ''
+  # -- A container image and tag, will be used for the pos-cleanup tasks.
 
 test:
   # -- Whether to enable the pod used for testing the Release using `helm test`.
@@ -145,3 +146,5 @@ test:
 
     # -- Test infra-test Tekton Task pod image tag.
     tag: latest
+
+cleanupContainerImage: quay.io/openshift/origin-cli:latest
