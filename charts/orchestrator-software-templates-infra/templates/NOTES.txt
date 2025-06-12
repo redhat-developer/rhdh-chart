@@ -21,7 +21,6 @@ Helm Release {{ .Release.Name }} installed in namespace {{ .Release.Namespace }}
 {{- $openshiftGitopsInstalled = $yes }}
 {{- end }}
 {{- end }}
-{{- end }}
 
 
 Components                         Installed   Namespace

@@ -24,9 +24,10 @@ openshiftGitops:
   # -- name of instances
   name: argocd
 
-  # -- namespace of rhdh instance, will be used to install openshift-gitops
+  # -- namespace of rhdh instance, will be used to install openshift-gitops.
   namespaces:
-    - toast
+    - rhdh
+
   
   # -- subscription config
   subscription:
@@ -34,7 +35,7 @@ openshiftGitops:
     # -- namespace where the operator should be deployed
     spec:
       # -- channel of an operator package to subscribe to
-      channel: gitops-1.14
+      channel: latest
       # -- whether the update should be installed automatically
       installPlanApproval: Automatic
       # -- name of the operator package
