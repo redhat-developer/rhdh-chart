@@ -1,0 +1,102 @@
+{{- if .Values.openshiftPipelines.enabled }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csv-cleanup-pipelines
+  namespace: openshift-operators
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-2"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: csv-cleanup-role-pipelines
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["clusterserviceversions"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["subscription", "subscriptions"]
+    verbs: ["get", "list", "delete", "watch"]
+  - apiGroups: ["apps", ""]
+    resources: ["deployments", "pods"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "services", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelines", "pipelineruns", "tasks", "taskruns", "pipelineresources"]
+    verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csv-cleanup-rolebinding-pipelines
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csv-cleanup-role-pipelines
+subjects:
+- kind: ServiceAccount
+  name: csv-cleanup-pipelines
+  namespace: openshift-operators    
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: openshift-pipelines-cleanup
+  namespace: openshift-operators
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  template:
+    spec:
+      serviceAccountName: csv-cleanup-pipelines
+      restartPolicy: Never
+      containers:
+      - name: cleanup-pipelines
+        image: {{ .Values.cleanupContainerImage }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set +e
+
+          echo "Waiting for Subscription to be deleted..."
+          oc delete subscription openshift-pipelines-operator-rh -n openshift-operators --ignore-not-found
+          oc wait --for=delete subscription/openshift-pipelines-operator-rh -n openshift-operators --timeout=60s
+
+          echo "Waiting for CSV to be deleted..."
+          oc delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n openshift-operators --ignore-not-found
+          oc wait --for=delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n openshift-operators --timeout=120s
+
+
+          echo "Cleanup finished."
+
+      terminationGracePeriodSeconds: 0
+
+{{- end }}
