@@ -1,0 +1,165 @@
+{{- if and .Values.openshiftGitops.enabled }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csv-cleanup-gitops
+  namespace: openshift-operators
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-2"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: csv-cleanup-role-gitops
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["clusterserviceversions"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["apps", ""]
+    resources: ["deployments", "pods"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "services", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["subscription", "subscriptions"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications", "appprojects", "argocds", "argocd"]
+    verbs: ["get", "list", "watch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csv-cleanup-rolebinding-gitops
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csv-cleanup-role
+subjects:
+- kind: ServiceAccount
+  name: csv-cleanup-gitops
+  namespace: openshift-operators    
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: openshift-gitops-cleanup-gitops
+  namespace: openshift-operators
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  template:
+spec:
+  template:
+    spec:
+      serviceAccountName: csv-cleanup-gitops
+      restartPolicy: Never
+      containers:
+      - name: cleanup
+        image: quay.io/openshift/origin-cli:latest
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set +e # Continue on error
+
+          echo "Starting OpenShift GitOps Cleanup Job..."
+
+          # --- Phase 1: Delete all AppProjects ---
+          echo "Phase 1: Deleting all AppProject resources across all namespaces..."
+          
+          # Get unique list of namespaces that contain AppProjects
+          namespaces_with_appprojects=$(oc get appprojects.argoproj.io -A -o custom-columns="NAMESPACE:.metadata.namespace" --no-headers 2>/dev/null | sort -u)
+
+          if [ -z "$namespaces_with_appprojects" ]; then
+            echo "No AppProject resources found. Skipping AppProject deletion."
+          else
+            echo "$namespaces_with_appprojects" | while read -r ns; do
+              echo "  Processing namespace: $ns for AppProjects"
+              # Get all AppProjects in the current namespace
+              appprojects_in_ns=$(oc get appprojects.argoproj.io -n "$ns" -o custom-columns="NAME:.metadata.name" --no-headers 2>/dev/null)
+
+              if [ -z "$appprojects_in_ns" ]; then
+                echo "    No AppProjects found in $ns."
+              else
+                echo "$appprojects_in_ns" | while read -r proj; do
+                  if [ -n "$proj" ]; then
+                    echo "    Deleting AppProject: $proj in namespace: $ns"
+                    oc delete appprojects.argoproj.io "$proj" -n "$ns" --ignore-not-found
+                  fi
+                done
+              fi
+            done
+          fi
+          echo "Phase 1: AppProject deletion complete."
+          echo ""
+
+          # --- Phase 2: Delete all ArgoCD instances ---
+          echo "Phase 2: Deleting all ArgoCD instances across all namespaces..."
+
+          # Get a list of all ArgoCD instances (namespace and name) once
+          argo_instances=$(oc get argocd -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name" --no-headers 2>/dev/null)
+
+          if [ -z "$argo_instances" ]; then
+            echo "No ArgoCD instances found. Skipping ArgoCD instance deletion."
+          else
+            echo "$argo_instances" | while read -r ns argo_name; do
+              if [ -n "$ns" ] && [ -n "$argo_name" ]; then
+                echo "  Attempting to delete ArgoCD instance '$argo_name' in namespace: $ns"
+                # First, try a regular delete. If it gets stuck (due to finalizers),
+                # we will attempt to patch.
+                oc delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
+                
+                # Check if the ArgoCD instance is still present (meaning it's stuck with a finalizer)
+                if oc get argocd "$argo_name" -n "$ns" &>/dev/null; then
+                  echo "  ArgoCD instance '$argo_name' in namespace '$ns' is stuck. Attempting to remove finalizers."
+                  # Patch the resource to remove finalizers
+                  oc patch argocd "$argo_name" -n "$ns" --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' || \
+                    echo "    Warning: Failed to patch finalizers for $argo_name in $ns. It might remain."
+                  echo "  Re-attempting delete for ArgoCD instance '$argo_name' in namespace: $ns after finalizer removal."
+                  oc delete argocd "$argo_name" -n "$ns" --ignore-not-found
+                fi
+              fi
+            done
+          fi
+          echo "Phase 2: ArgoCD instance deletion complete."
+          echo ""
+
+          # --- OpenShift GitOps Operator Cleanup ---
+          echo "Initiating OpenShift GitOps Operator Subscription and CSV cleanup..."
+
+          echo "Attempting to delete Subscription 'openshift-gitops-operator' in 'openshift-operators'..."
+          oc delete subscription openshift-gitops-operator -n openshift-operators --ignore-not-found
+          echo "Waiting for Subscription to be deleted (timeout 60s)..."
+          oc wait --for=delete subscription/openshift-gitops-operator -n openshift-operators --timeout=60s || echo "Subscription deletion timed out or resource not found, continuing..."
+
+          echo "Attempting to delete ClusterServiceVersion (CSV) for openshift-gitops-operator in 'openshift-operators'..."
+          oc delete csv -l operators.coreos.com/openshift-gitops-operator.openshift-operators='' -n openshift-operators --ignore-not-found
+          echo "Waiting for CSV to be deleted (timeout 120s)..."
+          oc wait --for=delete csv -l operators.coreos.com/openshift-gitops-operator.openshift-operators='' -n openshift-operators --timeout=120s || echo "CSV deletion timed out or resource not found, continuing..."
+
+          echo "OpenShift GitOps cleanup job finished successfully."
+
+{{- end }}
