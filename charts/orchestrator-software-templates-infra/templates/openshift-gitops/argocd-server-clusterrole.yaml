@@ -12,24 +12,9 @@ metadata:
 {{- toYaml $rules | nindent 0 }}
 {{- else }}
 rules:
-- apiGroups:
-  - '*'
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - list    # supports listing events in UI
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - pods/log
-  verbs:
-  - get     # supports viewing pod logs from UI
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "logs"]
+    verbs: ["get"]
 {{- end }}
 {{- end }}

@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: csv-cleanup-pipelines
-  namespace: openshift-operators
+  namespace: {{ .Values.openshiftPipelines.subscription.namespace }}
   annotations:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-weight": "-2"
@@ -53,13 +53,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: csv-cleanup-pipelines
-  namespace: openshift-operators    
+  namespace: {{ .Values.openshiftPipelines.subscription.namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: openshift-pipelines-cleanup
-  namespace: openshift-operators
+  namespace: {{ .Values.openshiftPipelines.subscription.namespace }}
   annotations:
     "helm.sh/hook": post-delete
     "helm.sh/hook-weight": "-5"
@@ -72,6 +72,13 @@ spec:
       containers:
       - name: cleanup-pipelines
         image: {{ .Values.cleanupContainerImage }}
+        resources:
+          requests:
+            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.resources.limits.cpu }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: csv-cleanup-gitops
-  namespace: openshift-operators
+  namespace: {{ .Values.openshiftGitops.subscription.namespace }}
   annotations:
     "helm.sh/hook": pre-delete
     "helm.sh/hook-weight": "-2"
@@ -50,13 +50,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: csv-cleanup-gitops
-  namespace: openshift-operators    
+  namespace: {{ .Values.openshiftGitops.subscription.namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: openshift-gitops-cleanup-gitops
-  namespace: openshift-operators
+  namespace: {{ .Values.openshiftGitops.subscription.namespace }}
   annotations:
     "helm.sh/hook": post-delete
     "helm.sh/hook-weight": "-5"
@@ -71,6 +71,16 @@ spec:
       containers:
       - name: cleanup
         image: {{ .Values.cleanupContainerImage }}
+        resources:
+          requests:
+            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.resources.limits.cpu }}
+        env:
+          - name: NAMESPACE
+            value: {{ .Values.openshiftGitops.subscription.namespace }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -150,16 +160,16 @@ spec:
           # --- OpenShift GitOps Operator Cleanup ---
           echo "Initiating OpenShift GitOps Operator Subscription and CSV cleanup..."
 
-          echo "Attempting to delete Subscription 'openshift-gitops-operator' in 'openshift-operators'..."
-          oc delete subscription openshift-gitops-operator -n openshift-operators --ignore-not-found
+          echo "Attempting to delete Subscription 'openshift-gitops-operator' in 'NAMESPACE'..."
+          oc delete subscription openshift-gitops-operator -n $NAMESPACE --ignore-not-found
           echo "Waiting for Subscription to be deleted (timeout 60s)..."
-          oc wait --for=delete subscription/openshift-gitops-operator -n openshift-operators --timeout=60s || echo "Subscription deletion timed out or resource not found, continuing..."
+          oc wait --for=delete subscription/openshift-gitops-operator -n $NAMESPACE --timeout=60s || echo "Subscription deletion timed out or resource not found, continuing..."
 
-          echo "Attempting to delete ClusterServiceVersion (CSV) for openshift-gitops-operator in 'openshift-operators'..."
-          oc delete csv -l operators.coreos.com/openshift-gitops-operator.openshift-operators='' -n openshift-operators --ignore-not-found
+          echo "Attempting to delete ClusterServiceVersion (CSV) for openshift-gitops-operator in 'NAMESPACE'..."
+          oc delete csv -l operators.coreos.com/openshift-gitops-operator.$NAMESPACE='' -n $NAMESPACE --ignore-not-found
           echo "Waiting for CSV to be deleted (timeout 120s)..."
-          oc wait --for=delete csv -l operators.coreos.com/openshift-gitops-operator.openshift-operators='' -n openshift-operators --timeout=120s || echo "CSV deletion timed out or resource not found, continuing..."
+          oc wait --for=delete csv -l operators.coreos.com/openshift-gitops-operator.$NAMESPACE='' -n $NAMESPACE --timeout=120s || echo "CSV deletion timed out or resource not found, continuing..."
 
           echo "OpenShift GitOps cleanup job finished successfully."
-
+        
 {{- end }}
