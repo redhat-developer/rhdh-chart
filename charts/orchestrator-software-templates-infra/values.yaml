@@ -28,7 +28,6 @@ openshiftGitops:
   namespaces:
     - rhdh
 
-  
   # -- subscription config
   subscription:
     namespace: openshift-operators
@@ -106,7 +105,7 @@ openshiftGitops:
       provider: dex
   initialRepositories: []
     #initialRepositories:
-    #  - name: redhat-cop
+    #   - name: redhat-cop
     #    type: helm
     #    url: https://redhat-cop.github.io/helm-charts
     # configure your repo credential template (override this)
