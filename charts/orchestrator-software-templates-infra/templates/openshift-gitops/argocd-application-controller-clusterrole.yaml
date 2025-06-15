@@ -1,5 +1,4 @@
-{{- if and (.Values.namespaces) (.Values.teamInstancesAreClusterScoped) }}
-{{- $rules := .Values.clusterRoleRulesController }}
+{{- if .Values.openshiftGitops.namespaces }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -9,19 +8,9 @@ metadata:
     app.kubernetes.io/name: {{ .Values.namespaces | first }}-argocd-application-controller
     app.kubernetes.io/part-of: {{ .Values.namespaces | first }}
   name: {{ .Values.namespaces | first }}-argocd-application-controller
-{{- if $rules }}
-{{- toYaml $rules | nindent 0 }}
-{{- else }}
 rules:
-- apiGroups:
-  - '*'
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- nonResourceURLs:
-  - '*'
-  verbs:
-  - '*'
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get"]
 {{- end }}
 {{- end }}
