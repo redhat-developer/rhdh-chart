@@ -5,12 +5,11 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/component: application-controller
-    app.kubernetes.io/name: {{ .Values.namespaces | first }}-argocd-application-controller
-    app.kubernetes.io/part-of: {{ .Values.namespaces | first }}
-  name: {{ .Values.namespaces | first }}-argocd-application-controller
+    app.kubernetes.io/name: {{ .Values.openshiftGitops.namespaces | first }}-argocd-application-controller
+    app.kubernetes.io/part-of: {{ .Values.openshiftGitops.namespaces | first }}
+  name: {{ .Values.openshiftGitops.namespaces | first }}-argocd-application-controller
 rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get"]
-{{- end }}
 {{- end }}
