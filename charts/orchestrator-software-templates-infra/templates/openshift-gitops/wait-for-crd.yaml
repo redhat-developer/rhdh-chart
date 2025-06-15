@@ -13,7 +13,14 @@ metadata:
 spec:
   containers:
   - name: crd-check 
-    image: quay.io/openshift/origin-cli:latest
+    image: {{ .Values.cleanupContainerImage }}
+    resources:
+      requests:
+        memory: {{ .Values.resources.requests.memory }}
+        cpu: {{ .Values.resources.requests.cpu }}
+      limits:
+        memory: {{ .Values.resources.limits.memory }}
+        cpu: {{ .Values.resources.limits.cpu }}
     imagePullPolicy: IfNotPresent
     command: ['sh', '-c', 'while [ true ]; do oc get crd argocds.argoproj.io applications.argoproj.io appprojects.argoproj.io; if [ $? -eq 0 ]; then break; fi ; sleep 5s; done']
   restartPolicy: Never
