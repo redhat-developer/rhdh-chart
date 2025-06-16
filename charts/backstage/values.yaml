@@ -263,7 +263,7 @@ upstream:
       podSecurityContext:
         enabled: false
       containerSecurityContext:
-        enabled: true
+        enabled: false
         runAsUser: 10001
         runAsNonRoot: true
         allowPrivilegeEscalation: false
