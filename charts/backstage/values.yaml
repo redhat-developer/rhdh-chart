@@ -68,7 +68,6 @@ upstream:
                 subject: legacy-default-config
                 secret: ${BACKEND_SECRET}
     containerSecurityContext:
-      runAsUser: 10001
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
@@ -198,7 +197,6 @@ upstream:
           capabilities:
             drop: ["ALL"]
           runAsNonRoot: true
-          runAsUser: 10001
           seccompProfile:
             type: "RuntimeDefault"
         # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
@@ -264,7 +262,6 @@ upstream:
         enabled: false
       containerSecurityContext:
         enabled: false
-        runAsUser: 10001
         runAsNonRoot: true
         allowPrivilegeEscalation: false
         capabilities:

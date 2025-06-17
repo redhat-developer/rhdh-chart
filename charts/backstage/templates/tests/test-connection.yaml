@@ -20,7 +20,6 @@ spec:
         capabilities:
           drop: ["ALL"]
         runAsNonRoot: true
-        runAsUser: 10001
       resources:
         requests:
           cpu: 10m
