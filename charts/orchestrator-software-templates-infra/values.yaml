@@ -103,34 +103,39 @@ openshiftGitops:
             memory: 128Mi
         openShiftOAuth: true
       provider: dex
+  # -- Initial repositories configuration
   initialRepositories: []
-    #initialRepositories:
-    #   - name: redhat-cop
-    #    type: helm
-    #    url: https://redhat-cop.github.io/helm-charts
-    # configure your repo credential template (override this)
+    #  initialRepositories:
+    #     - name: redhat-cop
+    #      type: helm
+    #      url: https://redhat-cop.github.io/helm-charts
+
+  # -- Repository credential templates
   repositoryCredentials: []
-    # repositoryCredentials:
-    #   - name: private-repo-creds
-    #     url: https://gitlab-ce.apps.openshift-498-bd8hw.do500.redhatlabs.dev
-    #     type: git
-    #     password: password
-    #     username: username
+    #  repositoryCredentials:
+    #    - name: private-repo-creds
+    #      url: ''
+    #      type: git
+    #      password: password
+    #      username: username
+
+  # -- Initial applications to deploy
   initialApps: []
-    # initialApps:
-    #   - name: init-app
-    #     path: argocd/
-    #     repoURL: https://gitlab-ce.apps.openshift-498-bd8hw.do500.redhatlabs.dev
-    #     targetRevision: HEAD
-    # adding your secrets for git access or other repository credentials
+    #  initialApps:
+    #    - name: init-app
+    #      path: argocd/
+    #      repoURL: ''
+    #      targetRevision: HEAD
+
+  # -- Secrets for Git access or other repository credentials
   secrets: []
-  # EXAMPLE ...
-  # secrets:
-  #   - name: git-auth
-  #     username: 'user'
-  #     password: 'pass1234'
-  #     sshPrivateKey: ''
-  # -- A container image and tag, will be used for the pos-cleanup tasks.
+    #  EXAMPLE ...
+    #  secrets:
+    #    - name: git-auth
+    #      username: 'user'
+    #      password: 'pass1234'
+    #      sshPrivateKey: ''
+
 
 test:
   # -- Whether to enable the pod used for testing the Release using `helm test`.
@@ -146,6 +151,7 @@ test:
     # -- Test infra-test Tekton Task pod image tag.
     tag: latest
 
+# -- A container image and tag, will be used for the post-cleanup tasks.
 cleanupContainerImage: quay.io/openshift/origin-cli:latest
 resources:
   requests:
