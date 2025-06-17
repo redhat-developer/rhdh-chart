@@ -69,7 +69,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
-| cleanupContainerImage |  | string | `"quay.io/openshift/origin-cli:latest"` |
+| cleanupContainerImage | A container image and tag, will be used for the post-cleanup tasks. | string | `"quay.io/openshift/origin-cli:latest"` |
 | openshiftGitops.argocd_cr.controller.resources.limits.cpu |  | string | `"2000m"` |
 | openshiftGitops.argocd_cr.controller.resources.limits.memory |  | string | `"2048Mi"` |
 | openshiftGitops.argocd_cr.controller.resources.requests.cpu |  | string | `"250m"` |
@@ -102,12 +102,12 @@ The command removes all the Kubernetes components associated with the chart and 
 | openshiftGitops.argocd_cr.sso.dex.resources.requests.memory |  | string | `"128Mi"` |
 | openshiftGitops.argocd_cr.sso.provider |  | string | `"dex"` |
 | openshiftGitops.enabled | whether the operator should be deployed by the chart | bool | `true` |
-| openshiftGitops.initialApps |  | list | `[]` |
-| openshiftGitops.initialRepositories |  | list | `[]` |
+| openshiftGitops.initialApps | Initial applications to deploy | list | `[]` |
+| openshiftGitops.initialRepositories | Initial repositories configuration | list | `[]` |
 | openshiftGitops.name | name of instances | string | `"argocd"` |
 | openshiftGitops.namespaces | namespace of rhdh instance, will be used to install openshift-gitops. | list | `["rhdh"]` |
-| openshiftGitops.repositoryCredentials |  | list | `[]` |
-| openshiftGitops.secrets |  | list | `[]` |
+| openshiftGitops.repositoryCredentials | Repository credential templates | list | `[]` |
+| openshiftGitops.secrets | Secrets for Git access or other repository credentials | list | `[]` |
 | openshiftGitops.subscription | subscription config | object | `{"namespace":"openshift-operators","spec":{"channel":"latest","disableDefaultArgoCD":true,"installPlanApproval":"Automatic","name":"openshift-gitops-operator","source":"redhat-operators","sourceNamespace":"openshift-marketplace"}}` |
 | openshiftGitops.subscription.spec | namespace where the operator should be deployed | object | `{"channel":"latest","disableDefaultArgoCD":true,"installPlanApproval":"Automatic","name":"openshift-gitops-operator","source":"redhat-operators","sourceNamespace":"openshift-marketplace"}` |
 | openshiftGitops.subscription.spec.channel | channel of an operator package to subscribe to | string | `"latest"` |
@@ -122,6 +122,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | openshiftPipelines.subscription.spec.name | name of the operator package | string | `"openshift-pipelines-operator-rh"` |
 | openshiftPipelines.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
 | openshiftPipelines.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
+| resources.limits.cpu |  | string | `"500m"` |
+| resources.limits.memory |  | string | `"1Gi"` |
+| resources.requests.cpu |  | string | `"250m"` |
+| resources.requests.memory |  | string | `"64Mi"` |
 | test.enabled | Whether to enable the pod used for testing the Release using `helm test`. | bool | `true` |
 | test.image.registry | Test infra-test Tekton Task pod image registry | string | `"bitnami"` |
 | test.image.repository | Test infra-test Tekton Task pod image repository. | string | `"kubectl"` |

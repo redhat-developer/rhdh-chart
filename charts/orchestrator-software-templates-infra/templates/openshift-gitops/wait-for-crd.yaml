@@ -2,9 +2,51 @@
 {{- if .Values.openshiftGitops.namespaces }}
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-check-sa 
+  namespace: {{ .Values.openshiftGitops.namespaces | first }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-check-role
+  namespace: {{ .Values.openshiftGitops.namespaces | first }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-check-rolebinding
+  namespace: {{ .Values.openshiftGitops.namespaces | first }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+subjects:
+  - kind: ServiceAccount
+    name: cluster-check-sa
+    namespace: {{ .Values.openshiftGitops.namespaces | first }}
+roleRef:
+  kind: ClusterRole
+  name: cluster-check-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
 kind: Pod
 metadata:
-  name: cluster-check 
+  name: cluster-check
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "-1"
@@ -12,8 +54,16 @@ metadata:
   namespace: {{ .Values.openshiftGitops.namespaces | first }}
 spec:
   containers:
-  - name: crd-check 
+  - name: crd-check
     image: {{ .Values.cleanupContainerImage }}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       requests:
         memory: {{ .Values.resources.requests.memory }}
@@ -25,7 +75,6 @@ spec:
     command: ['sh', '-c', 'while [ true ]; do oc get crd argocds.argoproj.io applications.argoproj.io appprojects.argoproj.io; if [ $? -eq 0 ]; then break; fi ; sleep 5s; done']
   restartPolicy: Never
   terminationGracePeriodSeconds: 0
-  serviceAccount: default
-  serviceAccountName: default
+  serviceAccountName: cluster-check-sa
 {{- end }}
 {{- end }}
