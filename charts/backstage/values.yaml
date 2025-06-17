@@ -72,7 +72,6 @@ upstream:
       allowPrivilegeEscalation: false
       capabilities:
         drop: ["ALL"]
-      runAsNonRoot: true
       seccompProfile:
         type: "RuntimeDefault"
     resources:
@@ -196,7 +195,6 @@ upstream:
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
-          runAsNonRoot: true
           seccompProfile:
             type: "RuntimeDefault"
         # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
@@ -262,7 +260,6 @@ upstream:
         enabled: false
       containerSecurityContext:
         enabled: false
-        runAsNonRoot: true
         allowPrivilegeEscalation: false
         capabilities:
           drop:

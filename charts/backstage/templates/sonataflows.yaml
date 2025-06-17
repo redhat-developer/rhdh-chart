@@ -93,7 +93,6 @@ spec:
       initContainers:
         - name: wait-for-db
           securityContext:
-            runAsNonRoot: true
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             capabilities:
@@ -133,7 +132,6 @@ spec:
             cpu: "100m"
             memory: "64Mi"
         securityContext:
-          runAsNonRoot: true
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           capabilities:
