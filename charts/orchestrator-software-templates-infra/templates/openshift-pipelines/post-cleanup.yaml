@@ -21,10 +21,7 @@ rules:
     resources: ["customresourcedefinitions"]
     verbs: ["get", "list", "delete"]
   - apiGroups: ["operators.coreos.com"]
-    resources: ["clusterserviceversions"]
-    verbs: ["get", "list", "delete"]
-  - apiGroups: ["operators.coreos.com"]
-    resources: ["subscription", "subscriptions"]
+    resources: ["clusterserviceversions", "subscriptions"]
     verbs: ["get", "list", "delete", "watch"]
   - apiGroups: ["apps", ""]
     resources: ["deployments", "pods"]
@@ -37,7 +34,7 @@ rules:
     verbs: ["get", "list", "delete"]
   - apiGroups: ["tekton.dev"]
     resources: ["pipelines", "pipelineruns", "tasks", "taskruns", "pipelineresources"]
-    verbs: ["get", "list", "delete"]
+    verbs: ["get", "list", "delete", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -72,6 +69,9 @@ spec:
       containers:
       - name: cleanup-pipelines
         image: {{ .Values.cleanupContainerImage }}
+        env:
+          - name: NAMESPACE
+            value: {{ .Values.openshiftPipelines.subscription.namespace }}
         resources:
           requests:
             memory: {{ .Values.resources.requests.memory }}
@@ -94,16 +94,14 @@ spec:
           set +e
 
           echo "Waiting for Subscription to be deleted..."
-          oc delete subscription openshift-pipelines-operator-rh -n openshift-operators --ignore-not-found
-          oc wait --for=delete subscription/openshift-pipelines-operator-rh -n openshift-operators --timeout=60s
+          oc delete subscription openshift-pipelines-operator-rh -n $NAMESPACE --ignore-not-found
+          oc wait --for=delete subscription/openshift-pipelines-operator-rh -n $NAMESPACE --timeout=60s
 
           echo "Waiting for CSV to be deleted..."
-          oc delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n openshift-operators --ignore-not-found
-          oc wait --for=delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n openshift-operators --timeout=120s
+          oc delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n $NAMESPACE --ignore-not-found
+          oc wait --for=delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n $NAMESPACE --timeout=120s
 
 
           echo "Cleanup finished."
-
-      terminationGracePeriodSeconds: 0
 
 {{- end }}
