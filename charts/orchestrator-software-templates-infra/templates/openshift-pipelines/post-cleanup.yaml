@@ -6,16 +6,16 @@ metadata:
   name: csv-cleanup-pipelines
   namespace: {{ .Values.openshiftPipelines.subscription.namespace }}
   annotations:
-    "helm.sh/hook": pre-delete
-    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook": pre-install,pre-upgrade,post-delete
+    "helm.sh/hook-weight": "10"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: csv-cleanup-role-pipelines
   annotations:
-    "helm.sh/hook": pre-delete
-    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook": pre-install,pre-upgrade,post-delete
+    "helm.sh/hook-weight": "10"
 rules:
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
@@ -44,8 +44,8 @@ kind: ClusterRoleBinding
 metadata:
   name: csv-cleanup-rolebinding-pipelines
   annotations:
-    "helm.sh/hook": pre-delete
-    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook": pre-install,pre-upgrade,post-delete
+    "helm.sh/hook-weight": "10"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
