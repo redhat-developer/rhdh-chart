@@ -105,7 +105,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | openshiftGitops.initialApps | Initial applications to deploy | list | `[]` |
 | openshiftGitops.initialRepositories | Initial repositories configuration | list | `[]` |
 | openshiftGitops.name | name of instances | string | `"argocd"` |
-| openshiftGitops.namespaces | namespace of rhdh instance, will be used to install openshift-gitops. | list | `["rhdh"]` |
+| openshiftGitops.namespaces | namespace of rhdh instance, will be used to install openshift-gitops. | list | `["default"]` |
 | openshiftGitops.repositoryCredentials | Repository credential templates | list | `[]` |
 | openshiftGitops.secrets | Secrets for Git access or other repository credentials | list | `[]` |
 | openshiftGitops.subscription | subscription config | object | `{"namespace":"openshift-operators","spec":{"channel":"latest","disableDefaultArgoCD":true,"installPlanApproval":"Automatic","name":"openshift-gitops-operator","source":"redhat-operators","sourceNamespace":"openshift-marketplace"}}` |
