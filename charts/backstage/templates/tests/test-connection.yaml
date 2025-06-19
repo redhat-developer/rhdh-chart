@@ -13,6 +13,7 @@ metadata:
 spec:
   containers:
     - name: curl
+      image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
       imagePullPolicy: Always
       securityContext:
         allowPrivilegeEscalation: false
@@ -31,7 +32,6 @@ spec:
           command:
           - ls
           - /usr/bin/curl
-      image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
       command: ["/bin/sh", "-c"]
       args:
         - |
