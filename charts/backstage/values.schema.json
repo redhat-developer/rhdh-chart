@@ -155,9 +155,19 @@
                             "title": "eventing configuration",
                             "type": "object"
                         },
+                        "externalDBHost": {
+                            "additionalProperties": false,
+                            "title": "Host for the user-configured external Database",
+                            "type": "string"
+                        },
                         "externalDBName": {
                             "additionalProperties": false,
                             "title": "Name for the user-configured external Database",
+                            "type": "string"
+                        },
+                        "externalDBPort": {
+                            "additionalProperties": false,
+                            "title": "Port for the user-configured external Database",
                             "type": "string"
                         },
                         "externalDBsecretRef": {
