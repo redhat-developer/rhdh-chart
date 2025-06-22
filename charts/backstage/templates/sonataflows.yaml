@@ -49,7 +49,7 @@ spec:
             name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
             userKey: POSTGRES_USER
             passwordKey: POSTGRES_PASSWORD
-          jdbcUrl: jdbc:postgresql://{{ .Values.orchestrator.sonataflowPlatform.externalDBHost }}:{{ .Values.orchestrator.sonataflowPlatform.externalDBPort }}/{{ .Values.orchestrator.sonataflowPlatform.externalDBName }}?currentSchema=data-index-service
+          jdbcUrl: jdbc:postgresql://{{ .Values.orchestrator.sonataflowPlatform.externalDBHost }}:{{ .Values.orchestrator.sonataflowPlatform.externalDBPort }}/sonataflow?currentSchema=data-index-service
 {{- end }}
 {{- if .Values.orchestrator.sonataflowPlatform.dataIndexImage }}
       podTemplate:
@@ -71,10 +71,10 @@ spec:
             databaseName: sonataflow
 {{- else }}
           secretRef:
-            name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
+            name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
             userKey: POSTGRES_USER
             passwordKey: POSTGRES_PASSWORD
-          jdbcUrl: jdbc:postgresql://{{ .Values.orchestrator.sonataflowPlatform.externalDBHost }}:{{ .Values.orchestrator.sonataflowPlatform.externalDBPort }}/{{ .Values.orchestrator.sonataflowPlatform.externalDBName }}?currentSchema=jobs-service
+          jdbcUrl: jdbc:postgresql://{{ .Values.orchestrator.sonataflowPlatform.externalDBHost }}:{{ .Values.orchestrator.sonataflowPlatform.externalDBPort }}/sonataflow?currentSchema=jobs-service
 {{- end }}
 {{- if .Values.orchestrator.sonataflowPlatform.jobServiceImage }}
       podTemplate:
@@ -128,12 +128,12 @@ spec:
             - name: POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
+                  name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
                   key: POSTGRES_HOST
             - name: POSTGRES_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
+                  name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
                   key: POSTGRES_PORT
 {{- end }}
       containers:
@@ -164,12 +164,12 @@ spec:
           - name: POSTGRES_HOST
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
+                name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
                 key: POSTGRES_HOST
           - name: POSTGRES_USER
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef}}
+                name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
                 key: POSTGRES_USER
 {{- end }}
         command: [ "sh", "-c" ]
