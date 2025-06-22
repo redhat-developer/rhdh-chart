@@ -133,10 +133,7 @@ EOF
   rm -fr /tmp/"$CV"-unpacked
 fi
 
-# 1. install (or upgrade)
-helm upgrade redhat-developer-hub -i "${CHART_URL}" --version "$CV"
-
-# 2. collect values
+# collect values
 PASSWORD=$(kubectl get secret redhat-developer-hub-postgresql -o jsonpath="{.data.password}" | base64 -d)
 if [[ $(oc auth can-i get route/openshift-console) == "yes" ]]; then
   CLUSTER_ROUTER_BASE=$(oc get route console -n openshift-console -o=jsonpath='{.spec.host}' | sed 's/^[^.]*\.//')
@@ -148,7 +145,7 @@ elif [[ -z $CLUSTER_ROUTER_BASE ]]; then
   exit 1
 fi
 
-# 3. change values
+# change values
 helm upgrade redhat-developer-hub -i "${CHART_URL}" --version "$CV" \
     --set global.clusterRouterBase="${CLUSTER_ROUTER_BASE}" \
     --set global.postgresql.auth.password="$PASSWORD"
