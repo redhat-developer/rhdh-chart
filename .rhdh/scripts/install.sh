@@ -133,8 +133,16 @@ EOF
   rm -fr /tmp/"$CV"-unpacked
 fi
 
-# collect values
-PASSWORD=$(kubectl get secret redhat-developer-hub-postgresql -o jsonpath="{.data.password}" | base64 -d)
+# collect values - check for existing secret in the target namespace
+if kubectl get secret redhat-developer-hub-postgresql -n "$namespace" &> /dev/null; then
+  PASSWORD=$(kubectl get secret redhat-developer-hub-postgresql -n "$namespace" -o jsonpath="{.data.password}" | base64 -d)
+  echo "Found existing PostgreSQL secret in namespace $namespace, preserving password"
+else
+  # Generate a new password for first-time installation
+  PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
+  echo "No existing PostgreSQL secret found in namespace $namespace, generating new password"
+fi
+
 if [[ $(oc auth can-i get route/openshift-console) == "yes" ]]; then
   CLUSTER_ROUTER_BASE=$(oc get route console -n openshift-console -o=jsonpath='{.spec.host}' | sed 's/^[^.]*\.//')
 elif [[ -z $CLUSTER_ROUTER_BASE ]]; then
