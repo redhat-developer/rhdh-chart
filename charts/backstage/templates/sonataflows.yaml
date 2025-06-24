@@ -177,7 +177,7 @@ spec:
               secretKeyRef:
                 name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
                 key: POSTGRES_PORT
-          - name: POSTGRES_PASSWORD
+          - name: PGPASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
