@@ -29,7 +29,16 @@ global:
       existingSecret: ""
       # -- Instead of generating a secret value, use the following value
       value: ""
+  # -- UX-related global configuration options
+  ux:
+    # -- Set default theme for Backstage UI. Options: light, dark, auto
+    defaultTheme: "auto"
 
+    # -- Enable experimental UX features
+    experimentalFeatures:
+      feedbackWidget: false
+      compactMode: false
+      guidedTours: false
 # -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
 # @default -- Use Openshift compatible settings
 upstream:

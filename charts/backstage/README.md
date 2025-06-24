@@ -180,6 +180,9 @@ Kubernetes: `>= 1.27.0-0`
 | global.dynamic.includes[0] | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. | string | `"dynamic-plugins.default.yaml"` |
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
+| global.ux | UX-related global configuration options | object | `{"defaultTheme":"auto","experimentalFeatures":{"compactMode":false,"feedbackWidget":false,"guidedTours":false}}` |
+| global.ux.defaultTheme | Set default theme for Backstage UI. Options: light, dark, auto | string | `"auto"` |
+| global.ux.experimentalFeatures | Enable experimental UX features | object | `{"compactMode":false,"feedbackWidget":false,"guidedTours":false}` |
 | nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
