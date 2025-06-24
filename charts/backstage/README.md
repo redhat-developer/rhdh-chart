@@ -381,7 +381,7 @@ and populate the following values in the values.yaml:
 The values for externalDBHost and externalDBPort should match the ones configured in the cred-secret.
 
 Please note that `externalDBName` is the name of the user-configured existing database, not the database that the orchestrator and sonataflow resources will use.
-A Job will run to create the 'sonataflow' databse in the external database for the workflows to use.
+A Job will run to create the 'sonataflow' database in the external database for the workflows to use.
 
 Finally, install the Helm Chart (including [setting up the external DB](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)):
 ```
