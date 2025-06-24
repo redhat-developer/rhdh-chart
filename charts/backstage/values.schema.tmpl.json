@@ -322,6 +322,16 @@
                             "type": "string",
                             "additionalProperties": false
                         },
+                        "externalDBHost": {
+                            "title": "Host for the user-configured external Database",
+                            "type": "string",
+                            "additionalProperties": false
+                        },
+                        "externalDBPort": {
+                            "title": "Port for the user-configured external Database",
+                            "type": "string",
+                            "additionalProperties": false
+                        },
                         "initContainerImage": {
                             "title": "Image for the init container used by the create-db job",
                             "type": "string",

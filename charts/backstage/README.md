@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-![Version: 4.2.9](https://img.shields.io/badge/Version-4.2.9-informational?style=flat-square)
+![Version: 4.2.11](https://img.shields.io/badge/Version-4.2.11-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Red Hat Developer Hub is a Red Hat supported version of Backstage.
@@ -163,7 +163,7 @@ Kubernetes: `>= 1.27.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://backstage.github.io/charts | upstream(backstage) | 2.5.2 |
+| https://backstage.github.io/charts | upstream(backstage) | 2.5.3 |
 | https://charts.bitnami.com/bitnami | common | 2.31.3 |
 
 ## Values
@@ -187,7 +187,9 @@ Kubernetes: `>= 1.27.0-0`
 | orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBHost | Host for the user-configured external Database | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBName | Name for the user-configured external Database | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBPort | Port for the user-configured external Database | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBsecretRef | Secret name for the user-created secret to connect an external DB | string | `""` |
 | orchestrator.sonataflowPlatform.initContainerImage | Image for the init container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
 | orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
@@ -373,13 +375,20 @@ and populate the following values in the values.yaml:
 ```bash
     externalDBsecretRef: <cred-secret>
     externalDBName: ""
+    externalDBHost: ""
+    externalDBPort: ""
 ```
+The values for externalDBHost and externalDBPort should match the ones configured in the cred-secret.
+
 Please note that `externalDBName` is the name of the user-configured existing database, not the database that the orchestrator and sonataflow resources will use.
+A Job will run to create the 'sonataflow' database in the external database for the workflows to use.
 
 Finally, install the Helm Chart (including [setting up the external DB](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)):
 ```
 helm install <release_name> redhat-developer/backstage \
   --set orchestrator.enabled=true \
   --set orchestrator.sonataflowPlatform.externalDBsecretRef=<cred-secret> \
-  --set orchestrator.sonataflowPlatform.externalDBName=example
+  --set orchestrator.sonataflowPlatform.externalDBName=example \
+  --set orchestrator.sonataflowPlatform.externalDBHost=example \
+  --set orchestrator.sonataflowPlatform.externalDBPort=example
 ```
