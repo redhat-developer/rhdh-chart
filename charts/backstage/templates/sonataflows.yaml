@@ -123,6 +123,7 @@ spec:
                 echo 'Waiting for DB...'
                 sleep 2
               done
+              echo 'Connection made!'
 {{- if not .Values.upstream.postgresql.enabled }}
           env:
             - name: POSTGRES_HOST
@@ -171,14 +172,24 @@ spec:
               secretKeyRef:
                 name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
                 key: POSTGRES_USER
+          - name: POSTGRES_PORT
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
+                key: POSTGRES_PORT
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.orchestrator.sonataflowPlatform.externalDBsecretRef }}
+                key: POSTGRES_PASSWORD
 {{- end }}
         command: [ "sh", "-c" ]
 {{- if .Values.upstream.postgresql.enabled }}
         args:
-          - "psql -h {{ .Release.Name }}-postgresql -U postgres -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
+          - "psql -h {{ .Release.Name }}-postgresql -p 5432 -U postgres -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
 {{- else }}
         args:
-          - "psql -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
+          - "psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
 {{- end }}
       restartPolicy: Never
   backoffLimit: 2
