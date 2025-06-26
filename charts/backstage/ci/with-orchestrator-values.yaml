@@ -1,0 +1,20 @@
+route:
+  enabled: false
+
+upstream:
+  postgresql:
+    primary:
+      persistence:
+        enabled: false
+
+global:
+  dynamic:
+    plugins:
+      # Enable additional plugins, which should be merged with the Orchestrator plugins
+      - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import-backend-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import
+        disabled: false
+
+orchestrator:
+  enabled: true
