@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift (Community Version)
 
-![Version: 3.2.4](https://img.shields.io/badge/Version-3.2.4-informational?style=flat-square)
+![Version: 3.2.5](https://img.shields.io/badge/Version-3.2.5-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Red Hat Developer Hub is a Red Hat supported version of Backstage.
@@ -9,7 +9,7 @@ It comes with pre-built plug-ins and configuration settings, supports use of an 
 help streamline the process of setting up a self-managed internal
 developer portal for adopters who are just starting out.
 
-The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.5/html-single/telemetry_data_collection/index
+The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.6/html-single/telemetry_data_collection_and_analysis/index
 
 **Homepage:** <https://red.ht/rhdh>
 
