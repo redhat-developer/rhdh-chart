@@ -54,9 +54,12 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --target-branch "${{ github.event.pull_request.base.ref }}")
-          if [[ -n "$changed" ]]; then
+          listChanged=$(ct list-changed --target-branch "${{ github.event.pull_request.base.ref }}")
+          if [[ -n "$listChanged" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            if grep 'charts/backstage' <<< "$listChanged"; then
+              echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Add Helm Repositories
@@ -129,6 +132,22 @@ jobs:
           curl -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
           chmod +x install-olm.sh
           ./install-olm.sh "${OLM_VERSION}"
+
+      # https://issues.redhat.com/browse/RHIDP-7469 - minimal testing of the Orchestrator flavor.
+      # The Orchestrator flavor requires installing the orchestrator-infra chart as a prerequisite,
+      # but the OpenShift Serverless and Serverless Operators installed by this chart are available only on OCP (from the Red Hat Catalog).
+      # For the simple testing that we are doing here on a vanilla K8s cluster, we only need both the Knative and SonataFlow CRDs.
+      # TODO(rm3l): Update this when/if there is an upstream counterpart installable via OLM.
+      # NOTES:
+      # - Serverless 1.35 corresponds to Knative 1.18
+      # - Serverless Logic 1.35 corresponds to Sonataflow 1.43
+      - name: Install Knative and SonataFlow CRDs via the orchestrator-infra-chart as minimum prerequisite for testing the Orchestrator flavor
+        if: steps.list-changed.outputs.backstageChartChanged == 'true'
+        run: |
+          for crdDir in charts/orchestrator-infra/crds/*; do
+            kubectl apply -f "${crdDir}"
+          done
+          kubectl apply -f https://github.com/apache/incubator-kie-kogito-serverless-operator/releases/download/v1.43.1/operator.yaml
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
