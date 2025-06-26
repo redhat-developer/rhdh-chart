@@ -145,8 +145,7 @@ fi
 
 # change values
 helm upgrade redhat-developer-hub -i "${CHART_URL}" --version "$CV" \
-    --set global.clusterRouterBase="${CLUSTER_ROUTER_BASE}" \
-    --set global.postgresql.auth.password="$PASSWORD"
+    --set global.clusterRouterBase="${CLUSTER_ROUTER_BASE}"
 
 echo "
 While deploying you can watch at 
