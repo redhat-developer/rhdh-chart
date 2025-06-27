@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 3.2.5](https://img.shields.io/badge/Version-3.2.5-informational?style=flat-square)
+![Version: 3.2.6](https://img.shields.io/badge/Version-3.2.6-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -14,7 +14,6 @@ The telemetry data collection feature is enabled by default. Red Hat Developer H
 
 For the **PRODUCTIZED** version of this chart, see:
 
-* https://github.com/rhdh-bot/openshift-helm-charts - CI builds for testing purposes only
 * https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
 
 ## Maintainers
