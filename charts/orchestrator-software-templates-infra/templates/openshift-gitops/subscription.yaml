@@ -9,7 +9,7 @@ spec:
   channel: {{ .Values.openshiftGitops.subscription.spec.channel }}
   installPlanApproval: {{ .Values.openshiftGitops.subscription.installPlanApproval }}
   name: {{ .Values.openshiftGitops.subscription.spec.name }}
-  source: {{ .Values.openshiftGitops.subscription.spec.sourceName | default "redhat-operators" | quote }}
+  source: {{ .Values.openshiftGitops.subscription.spec.source | default "redhat-operators" | quote }}
   sourceNamespace: {{ .Values.openshiftGitops.subscription.spec.sourceNamespace | default "openshift-marketplace" | quote }}
   config:
     env:

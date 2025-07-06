@@ -1,6 +1,6 @@
 > **Notice:**  
->The openshift-gitops subchart is adapted from the [gitops operator Helm Chart provided in the janus-idp-bootstrap project.](https://github.com/redhat-gpte-devopsautomation/janus-idp-bootstrap/tree/main/charts/gitops-operator). Orchestrator-software-templates-infra will act as a wrapper Chart for that unreleased Chart, providing some of it's functionallity and adapting it for orchestrator needs and applying specific configuration.
->The following Document is the README of the afformentioned chart.
+>The openshift-gitops subchart is adapted from the [gitops operator Helm Chart provided in the redhat-gpte-devopsautomation/janus-idp-bootstrap project](https://github.com/redhat-gpte-devopsautomation/janus-idp-bootstrap/tree/main/charts/gitops-operator). Orchestrator-software-templates-infra will act as a wrapper Chart for that unreleased Chart, providing some of its functionality and adapting it for orchestrator needs and applying specific configuration.
+>The following Document is the README of the aforementioned chart.
 
 
 # ⚓️ GitOps Operator Helm Deploy

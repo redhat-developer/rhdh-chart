@@ -72,6 +72,8 @@ spec:
         env:
           - name: NAMESPACE
             value: {{ .Values.openshiftPipelines.subscription.namespace }}
+          - name: NAME
+            value: {{ .Values.openshiftPipelines.subscription.name }}
         resources:
           requests:
             memory: {{ .Values.resources.requests.memory }}
@@ -94,13 +96,12 @@ spec:
           set +e
 
           echo "Waiting for Subscription to be deleted..."
-          oc delete subscription openshift-pipelines-operator-rh -n $NAMESPACE --ignore-not-found
-          oc wait --for=delete subscription/openshift-pipelines-operator-rh -n $NAMESPACE --timeout=60s
+          kubectl delete subscription $NAME -n $NAMESPACE --ignore-not-found
+          kubectl wait --for=delete subscription/$NAME -n $NAMESPACE --timeout=60s
 
           echo "Waiting for CSV to be deleted..."
-          oc delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n $NAMESPACE --ignore-not-found
-          oc wait --for=delete csv -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators='' -n $NAMESPACE --timeout=120s
-
+          kubectl delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --ignore-not-found
+          kubectl wait --for=delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --timeout=120s
 
           echo "Cleanup finished."
 

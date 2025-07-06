@@ -10,6 +10,6 @@ spec:
   channel: {{ .Values.openshiftPipelines.subscription.spec.channel }}
   installPlanApproval: {{ .Values.openshiftPipelines.subscription.spec.installPlanApproval }}
   name: {{ .Values.openshiftPipelines.subscription.spec.name }}
-  source: {{ .Values.openshiftPipelines.subscription.spec.sourceName | default "redhat-operators"  }}
+  source: {{ .Values.openshiftPipelines.subscription.spec.source | default "redhat-operators"  }}
   sourceNamespace: {{ .Values.openshiftPipelines.subscription.spec.sourceNamespace | default "openshift-marketplace" }}
 {{- end }}

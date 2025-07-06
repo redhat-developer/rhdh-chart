@@ -23,7 +23,7 @@ metadata:
 rules:
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
-    verbs: ["get"]
+    verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -73,7 +73,15 @@ spec:
         memory: {{ .Values.resources.limits.memory }}
         cpu: {{ .Values.resources.limits.cpu }}
     imagePullPolicy: IfNotPresent
-    command: ['sh', '-c', 'while [ true ]; do oc get crd argocds.argoproj.io applications.argoproj.io appprojects.argoproj.io; if [ $? -eq 0 ]; then break; fi ; sleep 5s; done']
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          kubectl get crd argocds.argoproj.io > /dev/null 2>&1 && echo "ArgoCD CRD ready" && break
+          echo "Waiting for argocds.argoproj.io CRD..."
+          sleep 5
+        done
   restartPolicy: Never
   terminationGracePeriodSeconds: 0
   serviceAccountName: cluster-check-sa

@@ -4,7 +4,21 @@
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart to install Openshift GitOps and Openshift Pipelines
+A Helm chart to install Openshift GitOps and Openshift Pipelines, which are required operators for installing Software Templates to be avaliable on RHDH.
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Red Hat Developer Hub Team |  | <https://github.com/redhat-developer/rhdh-chart> |
+
+## Source Code
+
+* <https://github.com/redhat-developer/rhdh-software-templates-infrastructure>
+
+## Requirements
+
+Kubernetes: `>= 1.25.0-0`
 
 ## TL;DR
 
@@ -105,7 +119,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | openshiftGitops.initialApps | Initial applications to deploy | list | `[]` |
 | openshiftGitops.initialRepositories | Initial repositories configuration | list | `[]` |
 | openshiftGitops.name | name of instances | string | `"argocd"` |
-| openshiftGitops.namespaces | namespace of rhdh instance, will be used to install openshift-gitops. | list | `["default"]` |
+| openshiftGitops.namespaces | namespace of rhdh instance, will be used to install openshift-gitops. | list | `["rhdh"]` |
 | openshiftGitops.repositoryCredentials | Repository credential templates | list | `[]` |
 | openshiftGitops.secrets | Secrets for Git access or other repository credentials | list | `[]` |
 | openshiftGitops.subscription | subscription config | object | `{"namespace":"openshift-operators","spec":{"channel":"latest","disableDefaultArgoCD":true,"installPlanApproval":"Automatic","name":"openshift-gitops-operator","source":"redhat-operators","sourceNamespace":"openshift-marketplace"}}` |

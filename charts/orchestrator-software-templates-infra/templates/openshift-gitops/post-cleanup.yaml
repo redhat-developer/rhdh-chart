@@ -79,6 +79,8 @@ spec:
         env:
           - name: NAMESPACE
             value: {{ .Values.openshiftGitops.subscription.namespace }}
+          - name: NAME
+            value: {{ .Values.openshiftGitops.subscription.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -99,7 +101,7 @@ spec:
           echo "Phase 1: Deleting all AppProject resources across all namespaces..."
           
           # Get unique list of namespaces that contain AppProjects
-          namespaces_with_appprojects=$(oc get appprojects.argoproj.io -A -o custom-columns="NAMESPACE:.metadata.namespace" --no-headers 2>/dev/null | sort -u)
+          namespaces_with_appprojects=$(kubectl get appprojects.argoproj.io -A -o custom-columns="NAMESPACE:.metadata.namespace" --no-headers 2>/dev/null | sort -u)
 
           if [ -z "$namespaces_with_appprojects" ]; then
             echo "No AppProject resources found. Skipping AppProject deletion."
@@ -107,7 +109,7 @@ spec:
             echo "$namespaces_with_appprojects" | while read -r ns; do
               echo "  Processing namespace: $ns for AppProjects"
               # Get all AppProjects in the current namespace
-              appprojects_in_ns=$(oc get appprojects.argoproj.io -n "$ns" -o custom-columns="NAME:.metadata.name" --no-headers 2>/dev/null)
+              appprojects_in_ns=$(kubectl get appprojects.argoproj.io -n "$ns" -o custom-columns="NAME:.metadata.name" --no-headers 2>/dev/null)
 
               if [ -z "$appprojects_in_ns" ]; then
                 echo "    No AppProjects found in $ns."
@@ -115,7 +117,7 @@ spec:
                 echo "$appprojects_in_ns" | while read -r proj; do
                   if [ -n "$proj" ]; then
                     echo "    Deleting AppProject: $proj in namespace: $ns"
-                    oc delete appprojects.argoproj.io "$proj" -n "$ns" --ignore-not-found
+                    kubectl delete appprojects.argoproj.io "$proj" -n "$ns" --ignore-not-found
                   fi
                 done
               fi
@@ -128,7 +130,7 @@ spec:
           echo "Phase 2: Deleting all ArgoCD instances across all namespaces..."
 
           # Get a list of all ArgoCD instances (namespace and name) once
-          argo_instances=$(oc get argocd -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name" --no-headers 2>/dev/null)
+          argo_instances=$(kubectl get argocd -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name" --no-headers 2>/dev/null)
 
           if [ -z "$argo_instances" ]; then
             echo "No ArgoCD instances found. Skipping ArgoCD instance deletion."
@@ -138,16 +140,16 @@ spec:
                 echo "  Attempting to delete ArgoCD instance '$argo_name' in namespace: $ns"
                 # First, try a regular delete. If it gets stuck (due to finalizers),
                 # we will attempt to patch.
-                oc delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
+                kubectl delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
                 
                 # Check if the ArgoCD instance is still present (meaning it's stuck with a finalizer)
-                if oc get argocd "$argo_name" -n "$ns" &>/dev/null; then
+                if kubectl get argocd "$argo_name" -n "$ns" &>/dev/null; then
                   echo "  ArgoCD instance '$argo_name' in namespace '$ns' is stuck. Attempting to remove finalizers."
                   # Patch the resource to remove finalizers
-                  oc patch argocd "$argo_name" -n "$ns" --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' || \
+                  kubectl patch argocd "$argo_name" -n "$ns" --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' || \
                     echo "    Warning: Failed to patch finalizers for $argo_name in $ns. It might remain."
                   echo "  Re-attempting delete for ArgoCD instance '$argo_name' in namespace: $ns after finalizer removal."
-                  oc delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
+                  kubectl delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
                 fi
               fi
             done
@@ -158,15 +160,15 @@ spec:
           # --- OpenShift GitOps Operator Cleanup ---
           echo "Initiating OpenShift GitOps Operator Subscription and CSV cleanup..."
 
-          echo "Attempting to delete Subscription 'openshift-gitops-operator' in 'NAMESPACE'..."
-          oc delete subscription openshift-gitops-operator -n $NAMESPACE --ignore-not-found
+          echo "Attempting to delete Subscription $NAME in $NAMESPACE..."
+          kubectl delete subscription $NAME -n $NAMESPACE --ignore-not-found
           echo "Waiting for Subscription to be deleted (timeout 60s)..."
-          oc wait --for=delete subscription/openshift-gitops-operator -n $NAMESPACE --timeout=60s || echo "Subscription deletion timed out or resource not found, continuing..."
+          kubectl wait --for=delete subscription/$NAME -n $NAMESPACE --timeout=60s || echo "Subscription deletion timed out or resource not found, continuing..."
 
-          echo "Attempting to delete ClusterServiceVersion (CSV) for openshift-gitops-operator in 'NAMESPACE'..."
-          oc delete csv -l operators.coreos.com/openshift-gitops-operator.$NAMESPACE='' -n $NAMESPACE --ignore-not-found
+          echo "Attempting to delete ClusterServiceVersion (CSV) for $NAME in $NAMESPACE..."
+          kubectl delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --ignore-not-found
           echo "Waiting for CSV to be deleted (timeout 120s)..."
-          oc wait --for=delete csv -l operators.coreos.com/openshift-gitops-operator.$NAMESPACE='' -n $NAMESPACE --timeout=120s || echo "CSV deletion timed out or resource not found, continuing..."
+          kubectl wait --for=delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --timeout=120s || echo "CSV deletion timed out or resource not found, continuing..."
 
           echo "OpenShift GitOps cleanup job finished successfully."
         

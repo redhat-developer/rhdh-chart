@@ -1,5 +1,5 @@
 {{- if .Values.openshiftGitops.namespaces }}
-{{- range $ns := .Values.openshiftGitopsnamespaces }}
+{{- range $ns := .Values.openshiftGitops.namespaces }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
