@@ -54,7 +54,7 @@ roleRef:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: wait-for-tekton-crds
+  name: {{ .Release.Name }}-wait-for-crds
   namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
@@ -67,7 +67,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-pipeline
       restartPolicy: Never
       containers:
-        - name: wait-for-tekton-crds
+        - name: {{ .Release.Name }}-wait-for-crds
           image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
           resources:
             requests:
@@ -82,8 +82,8 @@ spec:
               drop:
                 - ALL
             runAsNonRoot: true
-          seccompProfile:
-            type: RuntimeDefault
+            seccompProfile:
+              type: RuntimeDefault
           command:
             - /bin/sh
             - -c
@@ -173,7 +173,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-pipeline
       restartPolicy: Never
       containers:
-        - name: wait-for-taskrun
+        - name: {{ .Release.Name }}-wait-for-taskrun
           image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
           resources:
             requests:
@@ -188,8 +188,8 @@ spec:
               drop:
                 - ALL
             runAsNonRoot: true
-          seccompProfile:
-            type: RuntimeDefault
+            seccompProfile:
+              type: RuntimeDefault
           command:
             - /bin/sh
             - -c
