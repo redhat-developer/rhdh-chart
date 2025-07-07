@@ -137,11 +137,24 @@ spec:
             - /bin/sh
             - -c
             - |
+              echo "Waiting for Tekton CRDs to be available..."
               for i in {1..60}; do
-                status=$(kubectl get taskrun hello-world-run -n {{ .Release.Name }}-pipelines -o jsonpath='{.status.conditions[?(@.type=="Succeeded")].reason}')
+                kubectl get crd tasks.tekton.dev taskruns.tekton.dev > /dev/null 2>&1 && echo "Tekton CRDs found" && break
+                echo "Waiting for tasks.tekton.dev CRD..."
+                sleep 5
+              done
+
+              if ! kubectl get crd tasks.tekton.dev > /dev/null 2>&1; then
+                echo "Timed out waiting for Tekton CRDs"
+                exit 1
+              fi
+
+              echo " Checking TaskRun status..."
+              for i in {1..60}; do
+                status=$(kubectl get taskrun hello-world-run -n {{ .Release.Name }}-pipelines -o jsonpath='{.status.conditions[?(@.type=="Succeeded")].reason}' 2>/dev/null)
                 echo "TaskRun status: $status"
                 if [ "$status" = "Succeeded" ]; then
-                  echo "TaskRun succeeded!"
+                  echo " TaskRun succeeded!"
                   exit 0
                 fi
                 if [ "$status" = "Failed" ]; then
@@ -150,7 +163,8 @@ spec:
                 fi
                 sleep 5
               done
-              echo "Timeout waiting for TaskRun to succeed"
+
+              echo " Timeout waiting for TaskRun to succeed"
               exit 1
 
 
