@@ -6,7 +6,7 @@ openshiftPipelines:
       channel: alpha
       installPlanApproval: Automatic
       name: tektoncd-operator
-      source:  operatorhubio-catalog
+      source: operatorhubio-catalog
       sourceNamespace: olm
 
 openshiftGitops:
@@ -18,9 +18,8 @@ openshiftGitops:
     spec:
       channel: alpha
       installPlanApproval: Automatic
-      name: oargocd-operator
-      source:  operatorhubio-catalog
+      name: argocd-operator
+      source: operatorhubio-catalog
       sourceNamespace: olm
 
-cleanupContainerImage: alpine
-
+cleanupContainerImage: bitnami/kubectl:latest
