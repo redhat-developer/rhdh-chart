@@ -8,40 +8,6 @@ metadata:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: hook-succeeded,hook-failed
 ---
-apiVersion: tekton.dev/v1beta1
-kind: Task
-metadata:
-  name: hello-world
-  namespace: {{ .Release.Name }}-pipelines
-  labels:
-    app.kubernetes.io/component: test
-  annotations:
-    helm.sh/hook: test
-    helm.sh/hook-weight: "2"
-    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
-spec:
-  steps:
-    - name: echo
-      securityContext:
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
-        capabilities:
-          drop: ["ALL"]
-        runAsNonRoot: true
-      resources:
-        requests:
-          cpu: 10m
-          memory: 20Mi
-        limits:
-          cpu: 10m
-          memory: 20Mi
-      image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
-      imagePullPolicy: IfNotPresent
-      script: |
-        #!/bin/sh
-        echo "Hello from Tekton"
-
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -85,6 +51,97 @@ roleRef:
   name: {{ .Release.Name }}-pipeline-role
   apiGroup: rbac.authorization.k8s.io
 ---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wait-for-tekton-crds
+  namespace: {{ .Release.Name }}-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "2"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-pipeline
+      restartPolicy: Never
+      containers:
+        - name: wait-for-tekton-crds
+          image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set +e
+              echo "Waiting for Tekton CRDs to be available..."
+              for i in {1..60}; do
+                echo "Checking for Tekton CRDs... (attempt $i/60)"
+                
+                # Check if both CRDs exist, ignore errors
+                if kubectl get crd tasks.tekton.dev > /dev/null 2>&1 && kubectl get crd taskruns.tekton.dev > /dev/null 2>&1; then
+                  echo "Tekton CRDs found successfully!"
+                  exit 0
+                fi
+                
+                # CRDs not ready yet, wait and retry
+                echo "Tekton CRDs not ready, waiting 5 seconds..."
+                sleep 5
+              done
+
+              echo "Timed out waiting for Tekton CRDs after 5 minutes"
+              echo "This might indicate that the OpenShift Pipelines operator is not installed or not ready"
+              exit 1
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: hello-world
+  namespace: {{ .Release.Name }}-pipelines
+  labels:
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "3"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+spec:
+  steps:
+    - name: echo
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+        runAsNonRoot: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 20Mi
+        limits:
+          cpu: 10m
+          memory: 20Mi
+      image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+      imagePullPolicy: IfNotPresent
+      script: |
+        #!/bin/sh
+        echo "Hello from Tekton"
+
+---
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
@@ -92,7 +149,7 @@ metadata:
   namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
-    helm.sh/hook-weight: "3"
+    helm.sh/hook-weight: "4"
     helm.sh/hook-delete-policy: hook-succeeded,hook-failed
 spec:
   taskRef:
@@ -107,7 +164,7 @@ metadata:
   namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
-    helm.sh/hook-weight: "4"
+    helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: hook-succeeded,hook-failed
 spec:
   backoffLimit: 5
@@ -137,24 +194,12 @@ spec:
             - /bin/sh
             - -c
             - |
-              echo "Waiting for Tekton CRDs to be available..."
-              for i in {1..60}; do
-                kubectl get crd tasks.tekton.dev taskruns.tekton.dev > /dev/null 2>&1 && echo "Tekton CRDs found" && break
-                echo "Waiting for tasks.tekton.dev CRD..."
-                sleep 5
-              done
-
-              if ! kubectl get crd tasks.tekton.dev > /dev/null 2>&1; then
-                echo "Timed out waiting for Tekton CRDs"
-                exit 1
-              fi
-
-              echo " Checking TaskRun status..."
+              echo "Checking TaskRun status..."
               for i in {1..60}; do
                 status=$(kubectl get taskrun hello-world-run -n {{ .Release.Name }}-pipelines -o jsonpath='{.status.conditions[?(@.type=="Succeeded")].reason}' 2>/dev/null)
                 echo "TaskRun status: $status"
                 if [ "$status" = "Succeeded" ]; then
-                  echo " TaskRun succeeded!"
+                  echo "TaskRun succeeded!"
                   exit 0
                 fi
                 if [ "$status" = "Failed" ]; then
@@ -164,7 +209,7 @@ spec:
                 sleep 5
               done
 
-              echo " Timeout waiting for TaskRun to succeed"
+              echo "Timeout waiting for TaskRun to succeed"
               exit 1
 
 
