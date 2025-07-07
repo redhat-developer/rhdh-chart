@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Release.Name }}-test-openshift-pipelines
+  name: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "0"
@@ -12,7 +12,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: hello-world
-  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  namespace: {{ .Release.Name }}-pipelines
   labels:
     app.kubernetes.io/component: test
   annotations:
@@ -46,7 +46,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Release.Name }}-pipeline
-  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "1"
@@ -56,7 +56,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Release.Name }}-pipeline-role
-  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "1"
@@ -71,7 +71,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ .Release.Name }}-pipeline-rolebinding
-  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "1"
@@ -79,7 +79,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Release.Name }}-pipeline
-    namespace: {{ .Release.Name }}-test-openshift-pipelines
+    namespace: {{ .Release.Name }}-pipelines
 roleRef:
   kind: Role
   name: {{ .Release.Name }}-pipeline-role
@@ -89,7 +89,7 @@ apiVersion: tekton.dev/v1beta1
 kind: TaskRun
 metadata:
   name: hello-world-run
-  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "3"
@@ -104,7 +104,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: wait-for-taskrun
-  namespace: {{ .Release.Name }}-test-openshift-pipelines
+  namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "4"
@@ -138,7 +138,7 @@ spec:
             - -c
             - |
               for i in {1..60}; do
-                status=$(kubectl get taskrun hello-world-run -n {{ .Release.Name }}-test-openshift-pipelines -o jsonpath='{.status.conditions[?(@.type=="Succeeded")].reason}')
+                status=$(kubectl get taskrun hello-world-run -n {{ .Release.Name }}-pipelines -o jsonpath='{.status.conditions[?(@.type=="Succeeded")].reason}')
                 echo "TaskRun status: $status"
                 if [ "$status" = "Succeeded" ]; then
                   echo "TaskRun succeeded!"
