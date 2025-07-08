@@ -29,7 +29,7 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded,hook-failed
 rules:
   - apiGroups: ["tekton.dev"]
-    resources: ["taskruns"]
+    resources: ["tasks", "taskruns"]
     verbs: ["get", "list", "watch"]
 
 ---
@@ -51,63 +51,6 @@ roleRef:
   name: {{ .Release.Name }}-pipeline-role
   apiGroup: rbac.authorization.k8s.io
 ---
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ .Release.Name }}-wait-for-crds
-  namespace: {{ .Release.Name }}-pipelines
-  annotations:
-    helm.sh/hook: test
-    helm.sh/hook-weight: "2"
-    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
-spec:
-  backoffLimit: 5
-  template:
-    spec:
-      serviceAccountName: {{ .Release.Name }}-pipeline
-      restartPolicy: Never
-      containers:
-        - name: {{ .Release.Name }}-wait-for-crds
-          image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
-          resources:
-            requests:
-              memory: {{ .Values.resources.requests.memory }}
-              cpu: {{ .Values.resources.requests.cpu }}
-            limits:
-              memory: {{ .Values.resources.limits.memory }}
-              cpu: {{ .Values.resources.limits.cpu }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            runAsNonRoot: true
-            seccompProfile:
-              type: RuntimeDefault
-          command:
-            - /bin/sh
-            - -c
-            - |
-              set +e
-              echo "Waiting for Tekton CRDs to be available..."
-              for i in {1..60}; do
-                echo "Checking for Tekton CRDs... (attempt $i/60)"
-                
-                # Check if both CRDs exist, ignore errors
-                if kubectl get crd tasks.tekton.dev > /dev/null 2>&1 && kubectl get crd taskruns.tekton.dev > /dev/null 2>&1; then
-                  echo "Tekton CRDs found successfully!"
-                  exit 0
-                fi
-                
-                # CRDs not ready yet, wait and retry
-                echo "Tekton CRDs not ready, waiting 5 seconds..."
-                sleep 5
-              done
-
-              echo "Timed out waiting for Tekton CRDs after 5 minutes"
-              echo "This might indicate that the OpenShift Pipelines operator is not installed or not ready"
-              exit 1
----
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
@@ -117,7 +60,7 @@ metadata:
     app.kubernetes.io/component: test
   annotations:
     helm.sh/hook: test
-    helm.sh/hook-weight: "3"
+    helm.sh/hook-weight: "2"
     helm.sh/hook-delete-policy: hook-succeeded,hook-failed
 spec:
   steps:
@@ -141,6 +84,63 @@ spec:
         #!/bin/sh
         echo "Hello from Tekton"
 
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wait-for-tekton-api
+  namespace: {{ .Release.Name }}-pipelines
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "3"
+    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-pipeline
+      restartPolicy: Never
+      containers:
+        - name: wait-for-tekton-api
+          image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set +e
+              echo "Waiting for Tekton API to be ready..."
+              for i in {1..30}; do
+                echo "Checking Tekton API readiness... (attempt $i/30)"
+                
+                # Try to get the Task we just created to verify API is responsive
+                if kubectl get task hello-world -n {{ .Release.Name }}-pipelines > /dev/null 2>&1; then
+                  echo "Tekton API is ready - Task can be retrieved successfully!"
+                  exit 0
+                fi
+                
+                # API not ready yet, wait and retry
+                echo "Tekton API not ready, waiting 5 seconds..."
+                sleep 5
+              done
+
+              echo "Timed out waiting for Tekton API to be ready"
+              echo "This might indicate that the Tekton controllers are not running properly"
+              exit 1
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
@@ -173,7 +173,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-pipeline
       restartPolicy: Never
       containers:
-        - name: {{ .Release.Name }}-wait-for-taskrun
+        - name: wait-for-taskrun
           image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
           resources:
             requests:
