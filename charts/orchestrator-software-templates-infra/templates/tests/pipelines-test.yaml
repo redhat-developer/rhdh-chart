@@ -30,7 +30,7 @@ metadata:
 rules:
   - apiGroups: ["tekton.dev"]
     resources: ["tasks", "taskruns"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "create", "delete"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,48 +51,14 @@ roleRef:
   name: {{ .Release.Name }}-pipeline-role
   apiGroup: rbac.authorization.k8s.io
 ---
-apiVersion: tekton.dev/v1beta1
-kind: Task
-metadata:
-  name: hello-world
-  namespace: {{ .Release.Name }}-pipelines
-  labels:
-    app.kubernetes.io/component: test
-  annotations:
-    helm.sh/hook: test
-    helm.sh/hook-weight: "2"
-    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
-spec:
-  steps:
-    - name: echo
-      securityContext:
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
-        capabilities:
-          drop: ["ALL"]
-        runAsNonRoot: true
-      resources:
-        requests:
-          cpu: 10m
-          memory: 20Mi
-        limits:
-          cpu: 10m
-          memory: 20Mi
-      image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
-      imagePullPolicy: IfNotPresent
-      script: |
-        #!/bin/sh
-        echo "Hello from Tekton"
-
----
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: wait-for-tekton-api
+  name: tekton-test
   namespace: {{ .Release.Name }}-pipelines
   annotations:
     helm.sh/hook: test
-    helm.sh/hook-weight: "3"
+    helm.sh/hook-weight: "2"
     helm.sh/hook-delete-policy: hook-succeeded,hook-failed
 spec:
   backoffLimit: 5
@@ -101,7 +67,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}-pipeline
       restartPolicy: Never
       containers:
-        - name: wait-for-tekton-api
+        - name: tekton-test
           image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
           resources:
             requests:
@@ -123,93 +89,102 @@ spec:
             - -c
             - |
               set +e
+              echo "Starting Tekton test..."
+              
+              # Wait for Tekton API to be available
               echo "Waiting for Tekton API to be ready..."
-              for i in {1..30}; do
-                echo "Checking Tekton API readiness... (attempt $i/30)"
-                
-                # Try to get the Task we just created to verify API is responsive
-                if kubectl get task hello-world -n {{ .Release.Name }}-pipelines > /dev/null 2>&1; then
-                  echo "Tekton API is ready - Task can be retrieved successfully!"
-                  exit 0
+              for i in {1..60}; do
+                echo "Checking Tekton API... (attempt $i/60)"
+                if kubectl api-resources | grep -q "tasks.*tekton.dev"; then
+                  echo "Tekton API is available!"
+                  break
                 fi
-                
-                # API not ready yet, wait and retry
-                echo "Tekton API not ready, waiting 5 seconds..."
+                if [ $i -eq 60 ]; then
+                  echo "Timed out waiting for Tekton API"
+                  exit 1
+                fi
                 sleep 5
               done
-
-              echo "Timed out waiting for Tekton API to be ready"
-              echo "This might indicate that the Tekton controllers are not running properly"
-              exit 1
----
-apiVersion: tekton.dev/v1beta1
-kind: TaskRun
-metadata:
-  name: hello-world-run
-  namespace: {{ .Release.Name }}-pipelines
-  annotations:
-    helm.sh/hook: test
-    helm.sh/hook-weight: "4"
-    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
-spec:
-  taskRef:
-    name: hello-world
-  serviceAccountName: {{ .Release.Name }}-pipeline
-
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: wait-for-taskrun
-  namespace: {{ .Release.Name }}-pipelines
-  annotations:
-    helm.sh/hook: test
-    helm.sh/hook-weight: "5"
-    helm.sh/hook-delete-policy: hook-succeeded,hook-failed
-spec:
-  backoffLimit: 5
-  template:
-    spec:
-      serviceAccountName: {{ .Release.Name }}-pipeline
-      restartPolicy: Never
-      containers:
-        - name: wait-for-taskrun
-          image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
-          resources:
-            requests:
-              memory: {{ .Values.resources.requests.memory }}
-              cpu: {{ .Values.resources.requests.cpu }}
-            limits:
-              memory: {{ .Values.resources.limits.memory }}
-              cpu: {{ .Values.resources.limits.cpu }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            runAsNonRoot: true
-            seccompProfile:
-              type: RuntimeDefault
-          command:
-            - /bin/sh
-            - -c
-            - |
-              echo "Checking TaskRun status..."
+              
+              # Create Task
+              echo "Creating Tekton Task..."
+              cat <<EOF | kubectl apply -f -
+              apiVersion: tekton.dev/v1beta1
+              kind: Task
+              metadata:
+                name: hello-world
+                namespace: {{ .Release.Name }}-pipelines
+              spec:
+                steps:
+                  - name: echo
+                    securityContext:
+                      allowPrivilegeEscalation: false
+                      readOnlyRootFilesystem: true
+                      capabilities:
+                        drop: ["ALL"]
+                      runAsNonRoot: true
+                    resources:
+                      requests:
+                        cpu: 10m
+                        memory: 20Mi
+                      limits:
+                        cpu: 10m
+                        memory: 20Mi
+                    image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+                    script: |
+                      #!/bin/sh
+                      echo "Hello from Tekton"
+              EOF
+              
+              # Wait for Task to be ready
+              echo "Waiting for Task to be ready..."
+              for i in {1..30}; do
+                if kubectl get task hello-world -n {{ .Release.Name }}-pipelines > /dev/null 2>&1; then
+                  echo "Task is ready!"
+                  break
+                fi
+                if [ $i -eq 30 ]; then
+                  echo "Timed out waiting for Task"
+                  exit 1
+                fi
+                sleep 2
+              done
+              
+              # Create TaskRun
+              echo "Creating TaskRun..."
+              cat <<EOF | kubectl apply -f -
+              apiVersion: tekton.dev/v1beta1
+              kind: TaskRun
+              metadata:
+                name: hello-world-run
+                namespace: {{ .Release.Name }}-pipelines
+              spec:
+                taskRef:
+                  name: hello-world
+                serviceAccountName: {{ .Release.Name }}-pipeline
+              EOF
+              
+              # Wait for TaskRun to complete
+              echo "Waiting for TaskRun to complete..."
               for i in {1..60}; do
                 status=$(kubectl get taskrun hello-world-run -n {{ .Release.Name }}-pipelines -o jsonpath='{.status.conditions[?(@.type=="Succeeded")].reason}' 2>/dev/null)
                 echo "TaskRun status: $status"
                 if [ "$status" = "Succeeded" ]; then
                   echo "TaskRun succeeded!"
+                  # Cleanup
+                  kubectl delete taskrun hello-world-run -n {{ .Release.Name }}-pipelines 2>/dev/null || true
+                  kubectl delete task hello-world -n {{ .Release.Name }}-pipelines 2>/dev/null || true
                   exit 0
                 fi
                 if [ "$status" = "Failed" ]; then
                   echo "TaskRun failed!"
+                  kubectl describe taskrun hello-world-run -n {{ .Release.Name }}-pipelines
                   exit 1
                 fi
                 sleep 5
               done
-
-              echo "Timeout waiting for TaskRun to succeed"
+              
+              echo "Timeout waiting for TaskRun to complete"
               exit 1
 
 
