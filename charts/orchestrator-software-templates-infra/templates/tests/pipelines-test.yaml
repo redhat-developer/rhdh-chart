@@ -6,7 +6,6 @@ metadata:
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -16,7 +15,6 @@ metadata:
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "1"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -26,7 +24,6 @@ metadata:
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "1"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 rules:
   - apiGroups: ["tekton.dev"]
     resources: ["tasks", "taskruns"]
@@ -41,7 +38,6 @@ metadata:
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "1"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 subjects:
   - kind: ServiceAccount
     name: {{ .Release.Name }}-pipeline
@@ -59,7 +55,6 @@ metadata:
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: "2"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 spec:
   backoffLimit: 5
   template:
