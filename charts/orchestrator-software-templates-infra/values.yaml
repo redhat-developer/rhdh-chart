@@ -104,7 +104,8 @@ openshiftGitops:
         openShiftOAuth: true
       provider: dex
   # -- Initial repositories configuration
-  initialRepositories: []
+  initialRepositories:
+    []
     #  initialRepositories:
     #     - name: redhat-cop
     #      type: helm
@@ -152,7 +153,7 @@ test:
     tag: latest
 
 # -- A container image and tag, will be used for the post-cleanup tasks.
-cleanupContainerImage: quay.io/openshift/origin-cli:latest
+cleanupContainerImage: bitnami/kubectl:latest
 resources:
   requests:
     memory: "64Mi"

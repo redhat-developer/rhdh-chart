@@ -80,7 +80,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.openshiftGitops.subscription.namespace }}
           - name: NAME
-            value: {{ .Values.openshiftGitops.subscription.name }}
+            value: {{ .Values.openshiftGitops.subscription.spec.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -97,8 +97,52 @@ spec:
 
           echo "Starting OpenShift GitOps Cleanup Job..."
 
-          # --- Phase 1: Delete all AppProjects ---
-          echo "Phase 1: Deleting all AppProject resources across all namespaces..."
+          # --- Phase 1: Delete OpenShift GitOps Operator Subscription FIRST ---
+          echo "Phase 1: Deleting OpenShift GitOps Operator Subscription to stop operator reconciliation..."
+          
+          echo "Attempting to delete Subscription $NAME in $NAMESPACE..."
+          kubectl delete subscription $NAME -n $NAMESPACE --ignore-not-found
+          echo "Waiting for Subscription to be deleted (timeout 90s)..."
+          kubectl wait --for=delete subscription/$NAME -n $NAMESPACE --timeout=90s || echo "Subscription deletion timed out or resource not found, continuing..."
+          
+          # Give the operator time to stop reconciling
+          echo "Waiting 10 seconds for operator to stop reconciling..."
+          sleep 10
+          
+          echo "Phase 1: Subscription deletion complete."
+          echo ""
+
+          # --- Phase 2: Delete all Applications ---
+          echo "Phase 2: Deleting all Application resources across all namespaces..."
+          
+          # Get unique list of namespaces that contain Applications
+          namespaces_with_apps=$(kubectl get applications.argoproj.io -A -o custom-columns="NAMESPACE:.metadata.namespace" --no-headers 2>/dev/null | sort -u)
+
+          if [ -z "$namespaces_with_apps" ]; then
+            echo "No Application resources found. Skipping Application deletion."
+          else
+            echo "$namespaces_with_apps" | while read -r ns; do
+              echo "  Processing namespace: $ns for Applications"
+              # Get all Applications in the current namespace
+              applications_in_ns=$(kubectl get applications.argoproj.io -n "$ns" -o custom-columns="NAME:.metadata.name" --no-headers 2>/dev/null)
+
+              if [ -z "$applications_in_ns" ]; then
+                echo "    No Applications found in $ns."
+              else
+                echo "$applications_in_ns" | while read -r app; do
+                  if [ -n "$app" ]; then
+                    echo "    Deleting Application: $app in namespace: $ns"
+                    kubectl delete applications.argoproj.io "$app" -n "$ns" --ignore-not-found
+                  fi
+                done
+              fi
+            done
+          fi
+          echo "Phase 2: Application deletion complete."
+          echo ""
+
+          # --- Phase 3: Delete all AppProjects ---
+          echo "Phase 3: Deleting all AppProject resources across all namespaces..."
           
           # Get unique list of namespaces that contain AppProjects
           namespaces_with_appprojects=$(kubectl get appprojects.argoproj.io -A -o custom-columns="NAMESPACE:.metadata.namespace" --no-headers 2>/dev/null | sort -u)
@@ -123,11 +167,11 @@ spec:
               fi
             done
           fi
-          echo "Phase 1: AppProject deletion complete."
+          echo "Phase 3: AppProject deletion complete."
           echo ""
 
-          # --- Phase 2: Delete all ArgoCD instances ---
-          echo "Phase 2: Deleting all ArgoCD instances across all namespaces..."
+          # --- Phase 4: Delete all ArgoCD instances ---
+          echo "Phase 4: Deleting all ArgoCD instances across all namespaces..."
 
           # Get a list of all ArgoCD instances (namespace and name) once
           argo_instances=$(kubectl get argocd -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name" --no-headers 2>/dev/null)
@@ -154,21 +198,31 @@ spec:
               fi
             done
           fi
-          echo "Phase 2: ArgoCD instance deletion complete."
+          echo "Phase 4: ArgoCD instance deletion complete."
           echo ""
 
-          # --- OpenShift GitOps Operator Cleanup ---
-          echo "Initiating OpenShift GitOps Operator Subscription and CSV cleanup..."
-
-          echo "Attempting to delete Subscription $NAME in $NAMESPACE..."
-          kubectl delete subscription $NAME -n $NAMESPACE --ignore-not-found
-          echo "Waiting for Subscription to be deleted (timeout 60s)..."
-          kubectl wait --for=delete subscription/$NAME -n $NAMESPACE --timeout=60s || echo "Subscription deletion timed out or resource not found, continuing..."
-
-          echo "Attempting to delete ClusterServiceVersion (CSV) for $NAME in $NAMESPACE..."
-          kubectl delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --ignore-not-found
+          # --- Phase 5: Delete ClusterServiceVersion (CSV) ---
+          echo "Phase 5: Deleting ClusterServiceVersion (CSV) for $NAME in $NAMESPACE..."
+          
+          # Find CSVs that match the operator name pattern
+          csv_names=$(kubectl get csv -n $NAMESPACE -o name | grep -E "(gitops|argocd)" 2>/dev/null || echo "")
+          
+          if [ -z "$csv_names" ]; then
+            echo "No GitOps/ArgoCD CSVs found in $NAMESPACE."
+          else
+            echo "$csv_names" | while read -r csv_name; do
+              if [ -n "$csv_name" ]; then
+                echo "  Deleting CSV: $csv_name"
+                kubectl delete "$csv_name" -n $NAMESPACE --ignore-not-found
+              fi
+            done
+          fi
+          
           echo "Waiting for CSV to be deleted (timeout 120s)..."
-          kubectl wait --for=delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --timeout=120s || echo "CSV deletion timed out or resource not found, continuing..."
+          kubectl wait --for=delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --timeout=120s 2>/dev/null || echo "CSV deletion wait timed out or resource not found, continuing..."
+
+          echo "Phase 5: CSV deletion complete."
+          echo ""
 
           echo "OpenShift GitOps cleanup job finished successfully."
         
