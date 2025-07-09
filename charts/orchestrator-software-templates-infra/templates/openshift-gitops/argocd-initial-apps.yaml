@@ -1,4 +1,4 @@
-{{- if .Values.openshiftGitops.initialApps }}
+{{- if and .Values.openshiftGitops.initialApps (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1/Application") }}
 {{- range $app := .Values.openshiftGitops.initialApps }}
 {{- range $ns := $.Values.openshiftGitops.namespaces }}
 ---
@@ -7,10 +7,6 @@ kind: Application
 metadata:
   name: {{ $app.name }}
   namespace: {{ $ns }}
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "25"
-    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   destination:
     namespace: {{ $ns }}
