@@ -31,8 +31,10 @@ metadata:
 type: Opaque
 stringData:
   .npmrc: |
-    {{- if .Values.global.dynamic.npmrc.userConfig }}
-    {{- .Values.global.dynamic.npmrc.userConfig | nindent 4 }}
+    {{- if and .Values.global.dynamic .Values.global.dynamic.npmrc }}
+      {{- if .Values.global.dynamic.npmrc.userConfig }}
+{{ .Values.global.dynamic.npmrc.extra | nindent 6 }}
+      {{- end }}
     {{- end }}
     @redhat:registry=https://npm.registry.redhat.com
 {{- end }}
