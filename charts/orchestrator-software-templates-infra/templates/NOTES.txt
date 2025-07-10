@@ -25,8 +25,8 @@ Helm Release {{ .Release.Name }} installed in namespace {{ .Release.Namespace }}
 
 Components                         Installed    Namespace
 ====================================================================
-Openshift Pipelines Operator      {{ $openshiftPipelinesInstalled }}      {{ .Values.openshiftPipelines.subscription.namespace }}
-Openshift Gitops Operator         {{ $openshiftGitopsInstalled }}     {{ .Values.openshiftGitops.subscription.namespace }}
+Openshift Pipelines Operator      {{ $openshiftPipelinesInstalled }}        {{ .Values.openshiftPipelines.subscription.namespace }}
+Openshift Gitops Operator         {{ $openshiftGitopsInstalled }}        {{ .Values.openshiftGitops.subscription.namespace }}
 ====================================================================
 {{/* Empty line */}}
 

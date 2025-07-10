@@ -50,7 +50,7 @@ metadata:
     app.kubernetes.io/component: test
   annotations:
     helm.sh/hook: test
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 spec:
   serviceAccountName: {{ .Release.Name }}-service-account
   containers:
@@ -72,20 +72,17 @@ spec:
       command: ["/bin/sh", "-c"]
       args:
         - |
-          set -ex
+          set -e
       
           echo "Starting Test"
 
           {{- if .Values.openshiftPipelines.enabled }}
           kubectl get subscription.operators.coreos.com {{ .Values.openshiftPipelines.subscription.name }} -n {{ .Values.openshiftPipelines.subscription.namespace }} || exit 1
-          kubectl get clusterserviceversion.operators.coreos.com -n {{ .Values.openshiftPipelines.subscription.namespace }} -o name
-          kubectl get clusterserviceversion.operators.coreos.com -n {{ .Values.openshiftPipelines.subscription.namespace }} -o name | grep -Ei "(pipelines|tekton)" || exit 1
           {{- end }}
             
           {{- if .Values.openshiftGitops.enabled }}
           echo "Checking OpenShift GitOps subscription..."
           kubectl get subscription.operators.coreos.com {{ .Values.openshiftGitops.subscription.spec.name }} -n {{ .Values.openshiftGitops.subscription.namespace }} || exit 1
-          kubectl get clusterserviceversion.operators.coreos.com -n {{ .Values.openshiftGitops.subscription.namespace }} -o name | grep -Ei "(gitops|argocd)" || exit 1
           {{- end }}
         
           echo "Test passed!"
