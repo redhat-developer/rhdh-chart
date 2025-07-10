@@ -21,16 +21,24 @@ data:
     {{- $_ := set $dynamic "plugins" $plugins }}
 
     {{- include "common.tplvalues.render" (dict "value" $dynamic "context" $) | nindent 4 }}
-  
 ---
 {{- if .Values.orchestrator.enabled }}
+  {{- $secretName := printf "%s-dynamic-plugins-npmrc" .Release.Name }}
+  {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace $secretName }}
+  {{- if not $existingSecret }}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Release.Name}}-dynamic-plugins-npmrc
+  name: {{ $secretName }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: "Helm"
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 type: Opaque
 stringData:
   .npmrc: |
     @redhat:registry=https://npm.registry.redhat.com
+  {{- end }}
 {{- end }}
