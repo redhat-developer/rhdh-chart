@@ -32,7 +32,7 @@ type: Opaque
 stringData:
   .npmrc: |
     {{- if and .Values.global.dynamic .Values.global.dynamic.npmrc }}
-      {{- if .Values.global.dynamic.npmrc.userConfig }}
+      {{- if .Values.global.dynamic.npmrc.extra }}
 {{ .Values.global.dynamic.npmrc.extra | nindent 6 }}
       {{- end }}
     {{- end }}
