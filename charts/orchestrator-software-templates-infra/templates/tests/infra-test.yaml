@@ -21,8 +21,8 @@ rules:
     resources: ["subscriptions"]
     verbs: ["list", "get"]
   - apiGroups: ["operators.coreos.com"]
-    resources: ["clusterserviceversions"]
-    verbs: ["list", "get"]
+    resources: ["clusterserviceversions", "csv"]
+    verbs: ["list", "get", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -78,11 +78,14 @@ spec:
 
           {{- if .Values.openshiftPipelines.enabled }}
           kubectl get subscription.operators.coreos.com {{ .Values.openshiftPipelines.subscription.name }} -n {{ .Values.openshiftPipelines.subscription.namespace }} || exit 1
+          kubectl get clusterserviceversion.operators.coreos.com -n {{ .Values.openshiftPipelines.subscription.namespace }} -o name
+          kubectl get clusterserviceversion.operators.coreos.com -n {{ .Values.openshiftPipelines.subscription.namespace }} -o name | grep -Ei "(pipelines|tekton)" || exit 1
           {{- end }}
             
           {{- if .Values.openshiftGitops.enabled }}
           echo "Checking OpenShift GitOps subscription..."
           kubectl get subscription.operators.coreos.com {{ .Values.openshiftGitops.subscription.spec.name }} -n {{ .Values.openshiftGitops.subscription.namespace }} || exit 1
+          kubectl get clusterserviceversion.operators.coreos.com -n {{ .Values.openshiftGitops.subscription.namespace }} -o name | grep -Ei "(gitops|argocd)" || exit 1
           {{- end }}
         
           echo "Test passed!"
