@@ -21,20 +21,3 @@ data:
     {{- $_ := set $dynamic "plugins" $plugins }}
 
     {{- include "common.tplvalues.render" (dict "value" $dynamic "context" $) | nindent 4 }}
----
-{{- if .Values.orchestrator.enabled }}
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ printf "%s-dynamic-plugins-npmrc" .Release.Name }}
-  namespace: {{ .Release.Namespace }}
-type: Opaque
-stringData:
-  .npmrc: |
-    {{- if and .Values.global.dynamic .Values.global.dynamic.npmrc }}
-      {{- if .Values.global.dynamic.npmrc.extra }}
-{{ .Values.global.dynamic.npmrc.extra | nindent 6 }}
-      {{- end }}
-    {{- end }}
-    @redhat:registry=https://npm.registry.redhat.com
-{{- end }}
