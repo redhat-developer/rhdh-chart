@@ -52,7 +52,7 @@ if ! helm show chart $CHART_URL --version "$CV" &> /dev/null; then
 
 echo "Using ${CHART_URL} to install Helm chart"
 
-# choose namespace for the install (or create if non-existant)
+# choose namespace for the install (or create if non-existent)
 oc new-project "$namespace" || oc project "$namespace"
 
 # generate repo.yaml and index.yaml so we don't have to publish a new file every time
@@ -68,7 +68,7 @@ if [[ "$CV" == *"-CI" ]] || [[ $chartrepo -eq 1 ]]; then
   fi
   oc -n "$namespace" create configmap helm-repo-files \
     --from-file=/tmp/"$CV"-unpacked/index.yaml \
-    --from-file=/tmp/"$CV"-unpacked/chart-${CV}.tgz
+    --from-file="/tmp/$CV-unpacked/chart-${CV}.tgz"
   cat <<EOF > helm-repo.yaml
 apiVersion: apps/v1
 kind: Deployment
