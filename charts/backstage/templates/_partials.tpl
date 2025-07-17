@@ -9,7 +9,7 @@ plugins:
         dataIndexService:
           url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
   - disabled: false
-    package: "{{ $config.orchestratorPlugins.scope }}/{{ $config.orchestratorPlugins.orchestrator.package }}"
+    package: "{{ $config.orchestratorPlugins.orchestrator.package }}"
     integrity: "{{ $config.orchestratorPlugins.orchestrator.integrity }}"
     pluginConfig:
       dynamicPlugins:
@@ -25,14 +25,14 @@ plugins:
                   text: Orchestrator
                 path: /orchestrator
   - disabled: false
-    package: "{{ $config.orchestratorPlugins.scope }}/{{ $config.orchestratorPlugins.scaffolderBackendOrchestrator.package }}"
+    package: "{{ $config.orchestratorPlugins.scaffolderBackendOrchestrator.package }}"
     integrity: "{{ $config.orchestratorPlugins.scaffolderBackendOrchestrator.integrity }}"
     pluginConfig:
       orchestrator:
         dataIndexService:
           url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
   - disabled: false
-    package: "{{ $config.orchestratorPlugins.scope }}/{{ $config.orchestratorPlugins.orchestratorFormWidgets.package }}"
+    package: "{{ $config.orchestratorPlugins.orchestratorFormWidgets.package }}"
     integrity: "{{ $config.orchestratorPlugins.orchestratorFormWidgets.integrity }}"
     pluginConfig:
       dynamicPlugins:
