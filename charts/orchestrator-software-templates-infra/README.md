@@ -1,7 +1,7 @@
 
 # Orchestrator Software Templates Infra Chart for OpenShift (Community Version)
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart to install Openshift GitOps and Openshift Pipelines, which are required operators for installing the Orchestrator Software Templates to be available on RHDH.
