@@ -2,7 +2,7 @@
 {{- $config := include "orchestrator.plugins.config" . | fromYaml  }}
 plugins:
   - disabled: false
-    package: "{{ $config.orchestratorPlugins.scope }}/{{ $config.orchestratorPlugins.orchestratorBackend.package }}"
+    package: "{{ $config.orchestratorPlugins.orchestratorBackend.package }}"
     integrity: "{{ $config.orchestratorPlugins.orchestratorBackend.integrity }}"
     pluginConfig:
       orchestrator:
