@@ -46,7 +46,7 @@ orchestratorPlugins:
       package: "backstage-plugin-orchestrator@1.6.0"
       integrity: sha512-fOSJv2PgtD2urKwBM7p9W6gV/0UIHSf4pkZ9V/wQO0eg0Zi5Mys/CL1ba3nO9x9l84MX11UBZ2r7PPVJPrmOtw==
     orchestratorBackend:
-      package: "backstage-plugin-orchestrator-backend-dynamic@1.6.0"
+      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-backend-dynamic/-/backstage-plugin-orchestrator-backend-dynamic-1.6.0.tgz"
       integrity: sha512-Kr55YbuVwEADwGef9o9wyimcgHmiwehPeAtVHa9g2RQYoSPEa6BeOlaPzB6W5Ke3M2bN/0j0XXtpLuvrlXQogA==
     scaffolderBackendOrchestrator:
       package: "backstage-plugin-scaffolder-backend-module-orchestrator-dynamic@1.6.0"
