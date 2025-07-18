@@ -12,8 +12,7 @@ data:
     {{- end }}
 
     {{- if .Values.orchestrator.enabled }}
-      {{- $orchestratorPlugins := include "orchestrator.plugins" . | fromYaml }}
-      {{- range $orchestratorPlugins.plugins }}
+      {{- range .Values.orchestrator.plugins }}
         {{- $plugins = append $plugins . }}
       {{- end }}
     {{- end }}

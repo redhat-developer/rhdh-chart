@@ -206,6 +206,35 @@
                     "type": "boolean",
                     "default": false
                 },
+                "plugins": {
+                    "title": "List of orchestrator plugins and their configuration",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command.",
+                                "type": "string"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package. Optional for local packages. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            },
+                            "disabled": {
+                                "title": "Disable the plugin.",
+                                "type": "boolean",
+                                "default": false
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ]
+                    }
+                },
                 "serverlessLogicOperator": {
                     "title": "serverlessLogicOperator configuration",
                     "type": "object",
