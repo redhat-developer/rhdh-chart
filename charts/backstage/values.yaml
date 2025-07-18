@@ -349,6 +349,12 @@ test:
     # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
     tag: latest
 
+  # -- Whether to inject a fake dynamic plugins npmrc secret.
+  # <br />See RHDHBUGS-1893 and RHDHBUGS-1464 for the motivation behind this.
+  # <br />This is only used for testing purposes and should not be used in production.
+  # <br />Only relevant when `test.enabled` field is set to `true`.
+  injectTestNpmrcSecret: false
+
 orchestrator:
   enabled: false
   serverlessLogicOperator:
