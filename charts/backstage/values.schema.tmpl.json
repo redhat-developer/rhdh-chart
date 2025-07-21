@@ -196,6 +196,45 @@
                 }
             }
         },
+        "test": {
+            "title": "Test configuration for the Backstage chart.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "title": "Enable test configuration. If enabled, test resources will be created to verify the Helm Release has been successfully deployed using the `helm test` command.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "image": {
+                    "title": "Image to use for the test pod. Note that the image needs to have both the `sh` and `curl` binaries in it.",
+                    "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "registry": {
+                                "title": "Registry to use for the test pod image.",
+                                "type": "string",
+                                "default": "quay.io"
+                            },
+                            "repository": {
+                                "title": "Repository to use for the test pod image.",
+                                "type": "string",
+                                "default": "curl/curl"
+                            },
+                            "tag": {
+                                "title": "Tag to use for the test pod image.",
+                                "type": "string",
+                                "default": "latest"
+                            }
+                        }
+                },
+                "injectTestNpmrcSecret": {
+                    "title": "Whether to inject a fake dynamic plugins npmrc secret. This is only used for testing purposes and should not be used in production. It is only relevant when `test.enabled` field is set to `true`.",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
         "orchestrator": {
             "title": "orchestrator configuration",
             "type": "object",
