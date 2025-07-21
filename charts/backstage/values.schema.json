@@ -388,11 +388,6 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "registry",
-                        "repository",
-                        "tag"
-                    ],
                     "title": "Image to use for the test pod. Note that the image needs to have both the `sh` and `curl` binaries in it.",
                     "type": "object"
                 },
@@ -402,9 +397,6 @@
                     "type": "boolean"
                 }
             },
-            "required": [
-                "image"
-            ],
             "title": "Test configuration for the Backstage chart.",
             "type": "object"
         },
