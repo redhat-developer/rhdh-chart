@@ -59,11 +59,11 @@
                                         "type": "boolean"
                                     },
                                     "integrity": {
-                                        "title": "Integrity checksum of the package. Optional for local packages. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                        "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
                                         "type": "string"
                                     },
                                     "package": {
-                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command.",
+                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
                                         "type": "string"
                                     },
                                     "pluginConfig": {
@@ -98,6 +98,35 @@
                     "default": false,
                     "title": "enabled flag",
                     "type": "boolean"
+                },
+                "plugins": {
+                    "items": {
+                        "properties": {
+                            "disabled": {
+                                "default": false,
+                                "title": "Disable the plugin.",
+                                "type": "boolean"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                "type": "string"
+                            },
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "List of orchestrator plugins and their configuration",
+                    "type": "array"
                 },
                 "serverlessLogicOperator": {
                     "additionalProperties": false,
