@@ -1,0 +1,49 @@
+{{- if .Values.rhdhConfig.enabled }}
+{{- if not .Values.rhdhConfig.secretRef.name }}
+  {{- fail "Backstage's secret name defined in 'rhdhConfig.secretRef.name' is required" }}
+{{- end }}
+{{- $secret := lookup "v1" "Secret" .Values.orchestratorTemplates.rhdhChartNamespace .Values.rhdhConfig.secretRef.name }}
+{{- if not $secret }}
+  {{- fail (printf "Secret %s not found in namespace %s" .Values.rhdhConfig.secretRef.name .Values.orchestratorTemplates.rhdhChartNamespace ) }}
+{{- end }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestrator-auth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    rhdh.redhat.com/ext-config-sync: "true"
+data:
+  orchestrator-auth.yaml: |
+    {{- if and .Values.rhdhConfig.secretRef.github.token (dig "data" .Values.rhdhConfig.secretRef.github.token "" $secret) }}
+    integrations:
+      github:
+        - host: github.com
+          token: {{ printf "${%s}" .Values.rhdhConfig.secretRef.github.token }}
+    {{- end }}
+    {{- if and (and .Values.rhdhConfig.secretRef.gitlab.token (dig "data" .Values.rhdhConfig.secretRef.gitlab.token "" $secret) )
+               (and .Values.rhdhConfig.secretRef.gitlab.host (dig "data" .Values.rhdhConfig.secretRef.gitlab.host "" $secret  ) ) }}
+      gitlab:
+        - host: {{ printf "${%s}" .Values.rhdhConfig.secretRef.gitlab.host }}
+          token: {{ printf "${%s}" .Values.rhdhConfig.secretRef.gitlab.token }}
+          apiBaseUrl: https://{{ printf "${%s}" .Values.rhdhConfig.secretRef.gitlab.host }}/api/v4
+    {{- end }}
+    {{- if and .Values.rhdhConfig.secretRef.github.token (dig "data" .Values.rhdhConfig.secretRef.github.token "" $secret) }}
+    auth:
+      environment: development
+      providers:
+    {{- end }}
+    {{- if and (and .Values.rhdhConfig.secretRef.github.clientId (dig "data" .Values.rhdhConfig.secretRef.github.clientId "" $secret) )
+               (and .Values.rhdhConfig.secretRef.github.clientSecret  (dig "data" .Values.rhdhConfig.secretRef.github.clientSecret "" $secret  ) ) }}
+        github:
+          development:
+            clientId: {{ printf "${%s}" .Values.rhdhConfig.secretRef.github.clientId }}
+            clientSecret: {{ printf "${%s}" .Values.rhdhConfig.secretRef.github.clientSecret }}
+    {{- end }}
+    {{- if .Values.rhdhConfig.enableGuestProvider }}
+        guest:
+          dangerouslyAllowOutsideDevelopment: true
+          userEntityRef: user:default/guest
+    {{- end }}
+{{- end }}

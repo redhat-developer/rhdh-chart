@@ -1,0 +1,14 @@
+{{- if eq "true" (include "install-argocd-project" .) }}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: rhdh
+  namespace: {{ include "get-argocd-namespace" . }}
+spec:
+  destinations:
+  - name: '*'
+    namespace: '*'
+    server: '*'
+  sourceRepos:
+  - '*'
+{{- end }}
