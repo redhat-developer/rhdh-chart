@@ -239,30 +239,48 @@ Update the "Bump Version" GitHub workflow to support multiple charts instead of 
    - Create PR: `test-pr-for-bumping-chart-versions` → `example-bumping-chart-versions`
 
 9. **Test the Workflow**
-   Comment on your PR with:
-   ```
-   /bump orchestrator-infra patch
-   ```
+   Comment on your PR in sequence, passing `minor`, `major`, `patch` to all charts, e.g., `orchestrator-infra`, `backstage`, and `orchestrator-software-templates-infra` BUT make sure to wait until each active finishes before commenting the next argument. Go to action tab of your fork and you will see your runs e.g.:
 
-10. **Verify Results**
-    - Eyes reaction appears on comment
-    - Workflow runs successfully 
-    - Shows dry-run output with version bump (e.g., `0.2.0` → `0.2.1`)
-    - No actual commit (because you're in testing mode)
+   ```
+   /bump orchestrator-infra minor
+   ```
+   > Note The eyes reaction fails because the default GITHUB_TOKEN on forks has restricted permissions for `issue_comment` events. This is actually expected behavior and actually proves our security boundaries are working correctly.
 
----
+   If you Navigate to the `Actions` tab, you will see your run, e.g.,:
+   ![actions-tab](./images/actions-tab.png)
+   
+   click on it and you will notice Annotations error and warnings, these are fine to ignore:
+   ![actions-run](./images/actions-run.png)
+
+    Red Error: "Process completed with exit code 1"
+    Expected! Our workflow is designed to exit gracefully when GitHub App tokens aren't available. The exit code 1 indicates "controlled failure" the workflow detected it's running in testing mode and stopped safely rather than proceeding with invalid credentials.
+
+    Yellow Warning: "set-output command is deprecated"
+    Cosmetic warning. GitHub is phasing out older syntax in favor of $GITHUB_OUTPUT, but the old syntax still works perfectly. This doesn't break functionality it's just GitHub encouraging modern practices.
+
+    Yellow Warning: "Restore cache failed: Dependencies file not found"
+    Build optimization warning. GitHub Actions tries to cache dependencies (like Go modules, Python packages) to speed up builds. Since we're running a one-off workflow test, there's no prior cache to restore. This doesn't affect our workflow execution.
+
+    Yellow Warning: "Adding reaction 'eyes' to comment failed"
+    Security boundary working correctly. As we discussed, fork tokens can't add reactions. This proves our security model is functioning as designed.
+    These are all "environmental" issues, not "logic" issues. Our core workflow (parsing commands, validating charts, calculating versions, modifying files) executed good.
+
+    Next if you navigate to the run itself click `Chart Version`, you will notice **All tests pass** and if you untoggle `Validate chart name` the chart name was validated see:
+    ![chart-name-validated](./images/chart-name-validated.png)
+
+    also if you untoggle `Bump the version`, you will notice this line `"yq -i '.version = \"0.3.0\"' charts/orchestrator-infra/Chart.yaml"` meaning the version was updated and your code works.
 
 ## **Phase 4: Remove Testing Mode (Security Reasons)**
 
 After successful testing, create the production version:
 
-11. **Update Workflow for Production**
+11. **Update Workflow for Production** for example:
     ```bash
     git checkout example-bumping-chart-versions
     ```
 
 12. **Remove Testing Fallbacks**
-    Replace the testing sections with production-only code:
+    Replace the testing sections with your production-only code:
 
     ```yaml
     # REMOVE THIS TESTING BLOCK:
@@ -322,7 +340,7 @@ After successful testing, create the production version:
         commit_author: RHDH Bot <146280956+rhdh-bot@users.noreply.github.com >
     ```
 
-13. **Commit Production Version**
+13. **Commit Production Version** 
     ```bash
     git add .github/workflows/bump-version.yaml
     git commit -m "feat: finalize production workflow - remove testing fallbacks"
@@ -332,6 +350,7 @@ After successful testing, create the production version:
 ---
 
 ## **Phase 6: Submit to Main Repository**
+targeting our actual rhdh-chart main branch for example 
 
 14. **Create PR to Main Repository**
     - Go to: `https://github.com/redhat-developer/rhdh-chart`
