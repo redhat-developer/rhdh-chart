@@ -57,6 +57,20 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           reactions: eyes
 
+      - name: Validate chart name
+        if: steps.command.outputs.command-name == 'bump'
+        run: |
+          VALID_CHARTS=("backstage" "orchestrator-infra" "orchestrator-software-templates-infra")
+          CHART_NAME="${{ steps.command.outputs.chart-name }}"
+          
+          if [[ ! " ${VALID_CHARTS[@]} " =~ " ${CHART_NAME} " ]]; then
+            echo "Invalid chart name: ${CHART_NAME}"
+            echo "Valid charts: ${VALID_CHARTS[*]}"
+            exit 1
+          fi
+          
+          echo "Valid chart name: ${CHART_NAME}"
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         if: steps.command.outputs.command-name == 'bump'
         with:
@@ -94,7 +108,7 @@ jobs:
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
         id: get_version
-        uses: mikefarah/yq@f03c9dc599c37bfcaf533427211d05e51e6fee64 # v4.47.1
+        uses: mikefarah/yq@1187c954ec44c3a0e62c13ca7dc9dadc1ca80ae7 # v4.46.1
         with:
           cmd: yq ".version" charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
@@ -107,7 +121,7 @@ jobs:
 
       - name: Bump the version
         if: steps.command.outputs.command-name == 'bump'
-        uses: mikefarah/yq@f03c9dc599c37bfcaf533427211d05e51e6fee64 # v4.47.1
+        uses: mikefarah/yq@1187c954ec44c3a0e62c13ca7dc9dadc1ca80ae7 # v4.46.1
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
