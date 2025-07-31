@@ -88,22 +88,35 @@ jobs:
       - name: Generate token
         if: steps.command.outputs.command-name == 'bump'
         id: generate_token
+        continue-on-error: true
         uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
         with:
           app_id: ${{ vars.RHDH_GITHUB_APP_ID }}
           private_key: ${{ secrets.RHDH_GITHUB_APP_PRIVATE_KEY }}
 
+      - name: Set token for checkout
+        if: steps.command.outputs.command-name == 'bump'
+        id: set_token
+        run: |
+          if [ "${{ steps.generate_token.outcome }}" == "success" ]; then
+            echo "token=${{ steps.generate_token.outputs.token }}" >> $GITHUB_OUTPUT
+            echo "Using app token"
+          else
+            echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
+            echo "Using default GitHub token (testing mode)"
+          fi
+
       - name: Checkout Repository
         if: steps.command.outputs.command-name == 'bump'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ steps.set_token.outputs.token }}
 
       - name: Checkout Pull Request
         if: steps.command.outputs.command-name == 'bump'
         run: gh pr checkout ${{ github.event.issue.number }}
         env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.set_token.outputs.token }}
 
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
@@ -134,8 +147,18 @@ jobs:
         if: steps.command.outputs.command-name == 'bump'
         uses: chainguard-dev/actions/setup-gitsign@main
 
+      - name: Show changes (dry-run)
+        if: steps.command.outputs.command-name == 'bump' && steps.generate_token.outcome != 'success'
+        run: |
+          echo "=== DRY RUN MODE ==="
+          echo "Would bump ${{ steps.command.outputs.chart-name }} from ${{ steps.get_version.outputs.result }} to ${{ steps.semver.outputs.new_version }}"
+          echo "=== File changes ==="
+          git diff charts/${{ steps.command.outputs.chart-name }}/Chart.yaml || true
+          echo "=== Git status ==="
+          git status --porcelain || true
+
       - name: Commit pre-commit changes
-        if: steps.command.outputs.command-name == 'bump'
+        if: steps.command.outputs.command-name == 'bump' && steps.generate_token.outcome == 'success'
         uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6
         with:
           commit_message: Bump ${{ steps.command.outputs.chart-name }} version to ${{ steps.semver.outputs.new_version }}
