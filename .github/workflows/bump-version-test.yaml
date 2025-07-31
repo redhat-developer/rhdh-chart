@@ -1,0 +1,49 @@
+name: Bump Test (Push Trigger)
+
+on:
+  push:
+    branches: [ example-bumping-chart-versions ]
+
+jobs:
+  chart-version:
+    name: Chart Version Test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Test chart parsing
+        run: |
+          echo "Testing chart version bump logic..."
+          
+          # Simulate the command parsing
+          CHART_NAME="orchestrator-infra"
+          BUMP_LEVEL="patch"
+          
+          echo "Chart Name: $CHART_NAME"
+          echo "Bump Level: $BUMP_LEVEL"
+
+      - name: Get version
+        id: get_version
+        uses: mikefarah/yq@v4
+        with:
+          cmd: yq ".version" charts/orchestrator-infra/Chart.yaml
+
+      - name: Display current version
+        run: |
+          echo "Current version: ${{ steps.get_version.outputs.result }}"
+          
+      - name: Test semver bump
+        uses: actions-ecosystem/action-bump-semver@v1
+        id: semver
+        with:
+          current_version: ${{ steps.get_version.outputs.result }}
+          level: patch
+
+      - name: Display new version
+        run: |
+          echo "New version would be: ${{ steps.semver.outputs.new_version }}" 
