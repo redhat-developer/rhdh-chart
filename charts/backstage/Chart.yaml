@@ -48,3 +48,5 @@ sources: []
 # Note that when this chart is published to https://github.com/openshift-helm-charts/charts
 # it will follow the RHDH versioning 1.y.z
 version: 4.5.2
+
+# Testing bump
