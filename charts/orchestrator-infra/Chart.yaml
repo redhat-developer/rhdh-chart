@@ -15,5 +15,3 @@ type: application
 sources:
   - https://github.com/redhat-developer/rhdh-chart
 version: 0.2.0
-
-# Testing bump version
