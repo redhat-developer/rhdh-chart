@@ -14,5 +14,6 @@ See [charts/backstage/README.md](charts/backstage/README.md).
 See [charts/orchestrator-infra/README.md](charts/orchestrator-infra/README.md)
 
 ## Contributing and reporting issues
+## Contributing and reporting issues
 
 To report issues against this chart, please use JIRA (not GH issues): https://issues.redhat.com/browse/RHIDP
