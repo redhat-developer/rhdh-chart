@@ -1,7 +1,7 @@
 
 # Orchestrator Infra Chart for OpenShift
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless Logic Operator, both required to configure Red Hat Developer Hub to use the Orchestrator.
@@ -90,7 +90,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.name | name of the operator package | string | `"logic-operator-rhel8"` |
 | serverlessLogicOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
 | serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
-| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator-rhel8.v1.35.0"` |
+| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator-rhel8.v1.36.0"` |
 | serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
 | serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
@@ -108,10 +108,10 @@ The orchestrator-infra chart requires several CRDs for Knative Eventing and Knat
 The KnativeEventing and KnativeServing CRDs are required for this chart to run. These CRDs need to be present under the crds/ directory before running `helm install`.
 After installing the openshift-serverless subscription, more Knative CRDs will be installed on the cluster.
 
-The versions of the CRDs present in the chart and the ones in the subscrtiprion must match. In order to verify the correct CRD, use this following command to extract the CRD:
+The versions of the CRDs present in the chart and the ones in the subscription must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
 ```bash
-docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0 /manifests/operator_v1beta1_knativeeventing_crd.yaml > knative-eventing-crd.yaml
+docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.36.0 /manifests/operator_v1beta1_knativeeventing_crd.yaml > knative-eventing-crd.yaml
 
-docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.35.0 /manifests/operator_v1beta1_knativeserving_crd.yaml > knative-serving-crd.yaml
+docker run --rm --entrypoint cat registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.36.0 /manifests/operator_v1beta1_knativeserving_crd.yaml > knative-serving-crd.yaml
 ```
