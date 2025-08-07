@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Release.Name }}-allow-knative-to-sonataflow-and-workflows
+  name: {{ .Release.Name }}-allow-infra-ns-to-workflow-ns
   # Sonataflow and Workflows are using the RHDH target namespace.
   namespace: {{ .Release.Namespace | quote }}
 spec:
@@ -17,6 +17,11 @@ spec:
           matchLabels:
             # Allow auxiliary knative function for workflow (such as m2k-save-transformation)
             kubernetes.io/metadata.name: knative-serving
+      - namespaceSelector:
+          matchLabels:
+            # Allow communication between the serverless logic operator and the workflow namespace.
+            kubernetes.io/metadata.name: openshift-serverless-logic
+      
 ---
 # NetworkPolicy to unblock incoming traffic to the namespace
 apiVersion: networking.k8s.io/v1
