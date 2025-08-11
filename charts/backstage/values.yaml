@@ -413,14 +413,27 @@ orchestrator:
           frontend:
             red-hat-developer-hub.backstage-plugin-orchestrator:
               appIcons:
-                - importName: OrchestratorIcon
-                  name: orchestratorIcon
+                - name: orchestratorIcon
+                  importName: OrchestratorIcon
               dynamicRoutes:
-                - importName: OrchestratorPage
+                - path: /orchestrator
+                  importName: OrchestratorPage
                   menuItem:
                     icon: orchestratorIcon
                     text: Orchestrator
-                  path: /orchestrator
+              entityTabs:        
+                - path: /workflows
+                  title: Workflows
+                  mountPoint: entity.page.workflows          
+              mountPoints: 
+                - mountPoint: entity.page.workflows/cards
+                  importName: OrchestratorCatalogTab
+                  config:
+                    layout:
+                      gridColumn: "1 / -1"                                
+                    if: 
+                      anyOf:
+                        - IsOrchestratorCatalogTabAvailable
     - disabled: false
       package: "https://npm.stage.registry.redhat.com/@redhat/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic/-/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic-1.7.0.tgz"
       integrity: sha512-XeR78NJCLVCBPUWNDWiojckLOF3ASIsPTyaYbH0WB2ko8de/bgZ4QVzMo5FXK1xK6TwRgUVY4M3JRpSY7dxm6Q==
