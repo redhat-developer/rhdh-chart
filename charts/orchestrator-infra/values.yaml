@@ -15,7 +15,7 @@ serverlessLogicOperator:
       source: redhat-operators
       sourceNamespace: openshift-marketplace
       # -- The initial version of the operator, must match CRDs installed by the chart
-      startingCSV: logic-operator-rhel8.v1.35.0
+      startingCSV: logic-operator-rhel8.v1.36.0
 
 serverlessOperator:
   # -- whether the operator should be deployed by the chart
