@@ -1,12 +1,12 @@
 
-# RHDH Backstage Helm Chart for OpenShift (Community Version)
+# RHDH Backstage Helm Chart for OpenShift
 
-![Version: 4.2.5](https://img.shields.io/badge/Version-4.2.5-informational?style=flat-square)
+![Version: 4.5.4](https://img.shields.io/badge/Version-4.5.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart for deploying Red Hat Developer Hub.
+A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
 
-The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.5/html-single/telemetry_data_collection/index
+The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.6/html-single/telemetry_data_collection_and_analysis/index
 
 **Homepage:** <https://red.ht/rhdh>
 
@@ -160,8 +160,8 @@ Kubernetes: `>= 1.27.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://backstage.github.io/charts | upstream(backstage) | 2.5.2 |
-| https://charts.bitnami.com/bitnami | common | 2.31.1 |
+| https://backstage.github.io/charts | upstream(backstage) | 2.6.0 |
+| https://charts.bitnami.com/bitnami | common | 2.31.4 |
 
 ## Values
 
@@ -179,14 +179,17 @@ Kubernetes: `>= 1.27.0-0`
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
 | nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |
+| orchestrator.plugins | Orchestrator plugins and their configuration | list | `[{"disabled":false,"integrity":"sha512-Kr55YbuVwEADwGef9o9wyimcgHmiwehPeAtVHa9g2RQYoSPEa6BeOlaPzB6W5Ke3M2bN/0j0XXtpLuvrlXQogA==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-backend-dynamic/-/backstage-plugin-orchestrator-backend-dynamic-1.6.0.tgz","pluginConfig":{"orchestrator":{"dataIndexService":{"url":"http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}"}}}},{"disabled":false,"integrity":"sha512-fOSJv2PgtD2urKwBM7p9W6gV/0UIHSf4pkZ9V/wQO0eg0Zi5Mys/CL1ba3nO9x9l84MX11UBZ2r7PPVJPrmOtw==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator/-/backstage-plugin-orchestrator-1.6.0.tgz","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-orchestrator":{"appIcons":[{"importName":"OrchestratorIcon","name":"orchestratorIcon"}],"dynamicRoutes":[{"importName":"OrchestratorPage","menuItem":{"icon":"orchestratorIcon","text":"Orchestrator"},"path":"/orchestrator"}]}}}}},{"disabled":false,"integrity":"sha512-Bueeix4661fXEnfJ9y31Yw91LXJgw6hJUG7lPVdESCi9VwBCjDB9Rm8u2yPqP8sriwr0OMtKtqD+Odn3LOPyVw==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic/-/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic-1.6.0.tgz","pluginConfig":{"orchestrator":{"dataIndexService":{"url":"http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}"}}}},{"disabled":false,"integrity":"sha512-Tqn6HO21Q1TQ7TFUoRhwBVCtSBzbQYz+OaanzzIB0R24O6YtVx3wR7Chtr5TzC05Vz5GkBO1+FZid8BKpqljgA==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-form-widgets/-/backstage-plugin-orchestrator-form-widgets-1.6.0.tgz","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-orchestrator-form-widgets":{}}}}}]` |
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
 | orchestrator.serverlessOperator.enabled |  | bool | `true` |
-| orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"postgres:15"` |
+| orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBHost | Host for the user-configured external Database | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBName | Name for the user-configured external Database | string | `""` |
+| orchestrator.sonataflowPlatform.externalDBPort | Port for the user-configured external Database | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBsecretRef | Secret name for the user-created secret to connect an external DB | string | `""` |
-| orchestrator.sonataflowPlatform.initContainerImage | Image for the init container used by the create-db job | string | `"busybox"` |
+| orchestrator.sonataflowPlatform.initContainerImage | Image for the init container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
 | orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
 | orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
@@ -206,11 +209,12 @@ Kubernetes: `>= 1.27.0-0`
 | route.tls.key | Key file contents | string | `""` |
 | route.tls.termination | Specify TLS termination. | string | `"edge"` |
 | route.wildcardPolicy | Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed. | string | `"None"` |
-| test | Test pod parameters | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"curl/curl","tag":"latest"}}` |
+| test | Test pod parameters | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"curl/curl","tag":"latest"},"injectTestNpmrcSecret":false}` |
 | test.enabled | Whether to enable the test-connection pod used for testing the Release using `helm test`. | bool | `true` |
 | test.image.registry | Test connection pod image registry | string | `"quay.io"` |
 | test.image.repository | Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"curl/curl"` |
 | test.image.tag | Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"latest"` |
+| test.injectTestNpmrcSecret | Whether to inject a fake dynamic plugins npmrc secret. <br />See RHDHBUGS-1893 and RHDHBUGS-1464 for the motivation behind this. <br />This is only used for testing purposes and should not be used in production. <br />Only relevant when `test.enabled` field is set to `true`. | bool | `false` |
 | upstream | Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml) | object | Use Openshift compatible settings |
 | upstream.backstage.extraVolumes[0] | Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start. | object | `{"ephemeral":{"volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}}}}},"name":"dynamic-plugins-root"}` |
 | upstream.backstage.extraVolumes[0].ephemeral.volumeClaimTemplate.spec.resources.requests.storage | Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins. | string | `"5Gi"` |
@@ -370,13 +374,20 @@ and populate the following values in the values.yaml:
 ```bash
     externalDBsecretRef: <cred-secret>
     externalDBName: ""
+    externalDBHost: ""
+    externalDBPort: ""
 ```
+The values for externalDBHost and externalDBPort should match the ones configured in the cred-secret.
+
 Please note that `externalDBName` is the name of the user-configured existing database, not the database that the orchestrator and sonataflow resources will use.
+A Job will run to create the 'sonataflow' database in the external database for the workflows to use.
 
 Finally, install the Helm Chart (including [setting up the external DB](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)):
 ```
 helm install <release_name> redhat-developer/backstage \
   --set orchestrator.enabled=true \
   --set orchestrator.sonataflowPlatform.externalDBsecretRef=<cred-secret> \
-  --set orchestrator.sonataflowPlatform.externalDBName=example
+  --set orchestrator.sonataflowPlatform.externalDBName=example \
+  --set orchestrator.sonataflowPlatform.externalDBHost=example \
+  --set orchestrator.sonataflowPlatform.externalDBPort=example
 ```

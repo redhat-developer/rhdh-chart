@@ -18,7 +18,6 @@ spec:
         readOnlyRootFilesystem: true
         capabilities:
           drop: ["ALL"]
-        runAsNonRoot: false
       resources:
         requests:
           cpu: 10m
@@ -32,7 +31,7 @@ spec:
           - ls
           - /usr/bin/curl
       image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
-      imagePullPolicy: IfNotPresent
+      imagePullPolicy: Always
       command: ["/bin/sh", "-c"]
       args:
         - |

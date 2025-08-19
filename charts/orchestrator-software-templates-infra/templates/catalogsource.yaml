@@ -1,0 +1,20 @@
+{{- $pipelinesEnabled := .Values.openshiftPipelines.enabled }}
+{{- $gitopsEnabled := .Values.openshiftGitops.enabled }}
+{{- $shouldCreate := or $pipelinesEnabled $gitopsEnabled }}
+
+
+{{- if $shouldCreate }}
+{{- $existing := lookup "operators.coreos.com/v1alpha1" "CatalogSource" "olm" "operatorhubio-catalog" -}}
+{{- if not $existing }}
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: operatorhubio-catalog
+  namespace: olm
+spec:
+  sourceType: grpc
+  image: quay.io/operator-framework/upstream-community-operators:latest
+  displayName: OperatorHub.io Catalog
+  publisher: OperatorHub.io
+{{- end }}
+{{- end }}

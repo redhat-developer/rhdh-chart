@@ -1,0 +1,26 @@
+openshiftPipelines:
+  subscription:
+    namespace: operators
+    name: tektoncd-operator
+    spec:
+      channel: alpha
+      installPlanApproval: Automatic
+      name: tektoncd-operator
+      source: operatorhubio-catalog
+      sourceNamespace: olm
+
+openshiftGitops:
+  name: argocd
+  namespaces:
+    - olm
+  subscription:
+    namespace: operators
+    name: argocd-operator
+    spec:
+      channel: alpha
+      installPlanApproval: Automatic
+      name: argocd-operator
+      source: operatorhubio-catalog
+      sourceNamespace: olm
+
+cleanupContainerImage: bitnami/kubectl:latest

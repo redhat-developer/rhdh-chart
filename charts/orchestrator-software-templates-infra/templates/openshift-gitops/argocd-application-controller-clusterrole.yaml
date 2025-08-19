@@ -1,0 +1,15 @@
+{{- if .Values.openshiftGitops.namespaces }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/name: {{ .Values.openshiftGitops.namespaces | first }}-argocd-application-controller
+    app.kubernetes.io/part-of: {{ .Values.openshiftGitops.namespaces | first }}
+  name: {{ .Values.openshiftGitops.namespaces | first }}-argocd-application-controller
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get"]
+{{- end }}

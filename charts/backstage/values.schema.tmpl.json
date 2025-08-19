@@ -42,11 +42,11 @@
                                 "type": "object",
                                 "properties": {
                                     "package": {
-                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command.",
+                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
                                         "type": "string"
                                     },
                                     "integrity": {
-                                        "title": "Integrity checksum of the package. Optional for local packages. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                        "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
                                         "type": "string"
                                     },
                                     "pluginConfig": {
@@ -196,6 +196,45 @@
                 }
             }
         },
+        "test": {
+            "title": "Test configuration for the Backstage chart.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "title": "Enable test configuration. If enabled, test resources will be created to verify the Helm Release has been successfully deployed using the `helm test` command.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "image": {
+                    "title": "Image to use for the test pod. Note that the image needs to have both the `sh` and `curl` binaries in it.",
+                    "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "registry": {
+                                "title": "Registry to use for the test pod image.",
+                                "type": "string",
+                                "default": "quay.io"
+                            },
+                            "repository": {
+                                "title": "Repository to use for the test pod image.",
+                                "type": "string",
+                                "default": "curl/curl"
+                            },
+                            "tag": {
+                                "title": "Tag to use for the test pod image.",
+                                "type": "string",
+                                "default": "latest"
+                            }
+                        }
+                },
+                "injectTestNpmrcSecret": {
+                    "title": "Whether to inject a fake dynamic plugins npmrc secret. This is only used for testing purposes and should not be used in production. It is only relevant when `test.enabled` field is set to `true`.",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
         "orchestrator": {
             "title": "orchestrator configuration",
             "type": "object",
@@ -205,6 +244,35 @@
                     "title": "enabled flag",
                     "type": "boolean",
                     "default": false
+                },
+                "plugins": {
+                    "title": "List of orchestrator plugins and their configuration",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
+                                "type": "string"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            },
+                            "disabled": {
+                                "title": "Disable the plugin.",
+                                "type": "boolean",
+                                "default": false
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ]
+                    }
                 },
                 "serverlessLogicOperator": {
                     "title": "serverlessLogicOperator configuration",
@@ -319,6 +387,16 @@
                         },
                         "externalDBName": {
                             "title": "Name for the user-configured external Database",
+                            "type": "string",
+                            "additionalProperties": false
+                        },
+                        "externalDBHost": {
+                            "title": "Host for the user-configured external Database",
+                            "type": "string",
+                            "additionalProperties": false
+                        },
+                        "externalDBPort": {
+                            "title": "Port for the user-configured external Database",
                             "type": "string",
                             "additionalProperties": false
                         },

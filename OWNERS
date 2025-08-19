@@ -1,8 +1,16 @@
+# if adding/removing approvers, remember to update the .github/workflows/*.yaml files
+# to add/remove them from the authorize job(s), if any
 approvers:
- - coreydaley
- - davidfestal
- - gazarenkov
- - kadel
- - nickboldt
  - rm3l
- - tumido
+ - gazarenkov
+ - nickboldt
+ - kim-tsao
+ - coreydaley
+ - kadel
+
+reviewers:
+ - rm3l
+ - gazarenkov
+ - Fortune-Ndlovu
+ - subhashkhileri
+ - zdrapela

@@ -13,8 +13,9 @@ cd /tmp
 # Create or select a namespace
 # Install the chart repo
 # Install the chart, then update the clusterRouterBase
+# NOTE: Replace 1.y-zzz with an actual chart from https://quay.io/repository/rhdh/chart?tab=tags&tag=latest
 curl -sSLO https://raw.githubusercontent.com/redhat-developer/rhdh-chart/refs/heads/main/.rhdh/scripts/install.sh && chmod +x install.sh
-./install.sh 1.7-20-CI --namespace rhdh-1-7-20-ci
+./install.sh 1.y-zzz-CI --namespace rhdh-ci
 ```
 
 That's it! 

@@ -59,11 +59,11 @@
                                         "type": "boolean"
                                     },
                                     "integrity": {
-                                        "title": "Integrity checksum of the package. Optional for local packages. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                        "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
                                         "type": "string"
                                     },
                                     "package": {
-                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command.",
+                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
                                         "type": "string"
                                     },
                                     "pluginConfig": {
@@ -98,6 +98,35 @@
                     "default": false,
                     "title": "enabled flag",
                     "type": "boolean"
+                },
+                "plugins": {
+                    "items": {
+                        "properties": {
+                            "disabled": {
+                                "default": false,
+                                "title": "Disable the plugin.",
+                                "type": "boolean"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                "type": "string"
+                            },
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "List of orchestrator plugins and their configuration",
+                    "type": "array"
                 },
                 "serverlessLogicOperator": {
                     "additionalProperties": false,
@@ -155,9 +184,19 @@
                             "title": "eventing configuration",
                             "type": "object"
                         },
+                        "externalDBHost": {
+                            "additionalProperties": false,
+                            "title": "Host for the user-configured external Database",
+                            "type": "string"
+                        },
                         "externalDBName": {
                             "additionalProperties": false,
                             "title": "Name for the user-configured external Database",
+                            "type": "string"
+                        },
+                        "externalDBPort": {
+                            "additionalProperties": false,
+                            "title": "Port for the user-configured external Database",
                             "type": "string"
                         },
                         "externalDBsecretRef": {
@@ -320,6 +359,45 @@
                 }
             },
             "title": "OpenShift Route parameters.",
+            "type": "object"
+        },
+        "test": {
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "title": "Enable test configuration. If enabled, test resources will be created to verify the Helm Release has been successfully deployed using the `helm test` command.",
+                    "type": "boolean"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "registry": {
+                            "default": "quay.io",
+                            "title": "Registry to use for the test pod image.",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "default": "curl/curl",
+                            "title": "Repository to use for the test pod image.",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "default": "latest",
+                            "title": "Tag to use for the test pod image.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Image to use for the test pod. Note that the image needs to have both the `sh` and `curl` binaries in it.",
+                    "type": "object"
+                },
+                "injectTestNpmrcSecret": {
+                    "default": false,
+                    "title": "Whether to inject a fake dynamic plugins npmrc secret. This is only used for testing purposes and should not be used in production. It is only relevant when `test.enabled` field is set to `true`.",
+                    "type": "boolean"
+                }
+            },
+            "title": "Test configuration for the Backstage chart.",
             "type": "object"
         },
         "upstream": {
@@ -1145,6 +1223,38 @@
                             "title": "Backstage container command arguments",
                             "type": "array"
                         },
+                        "autoscaling": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": false,
+                                    "description": "Enable autoscaling",
+                                    "title": "Backstage Autoscaling",
+                                    "type": "boolean"
+                                },
+                                "maxReplicas": {
+                                    "default": 100,
+                                    "title": "Maximum number of Backstage pod replicas that the autoscaler is allowed to scale up to",
+                                    "type": "integer"
+                                },
+                                "minReplicas": {
+                                    "default": 1,
+                                    "title": "Minimum number of Backstage pod replicas that the autoscaler is allowed to scale down to",
+                                    "type": "integer"
+                                },
+                                "targetCPUUtilizationPercentage": {
+                                    "default": 80,
+                                    "title": "Percentage of CPU that each Backstage pod should be using on average before the autoscaler decides to scale",
+                                    "type": "integer"
+                                },
+                                "targetMemoryUtilizationPercentage": {
+                                    "title": "Percentage of memory that each Backstage pod should be using on average before the autoscaler decides to scale",
+                                    "type": "integer"
+                                }
+                            },
+                            "title": "Autoscaling parameters",
+                            "type": "object"
+                        },
                         "command": {
                             "default": [],
                             "items": {
@@ -1359,7 +1469,7 @@
                                             "description": "EnvVar represents an environment variable present in a Container.",
                                             "properties": {
                                                 "name": {
-                                                    "description": "Name of the environment variable. Must be a C_IDENTIFIER.",
+                                                    "description": "Name of the environment variable. May consist of any printable ASCII characters except '='.",
                                                     "type": "string"
                                                 },
                                                 "value": {
@@ -1477,7 +1587,7 @@
                                         "x-kubernetes-patch-strategy": "merge"
                                     },
                                     "envFrom": {
-                                        "description": "List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.",
+                                        "description": "List of sources to populate environment variables in the container. The keys defined within a source may consist of any printable ASCII characters except '='. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.",
                                         "items": {
                                             "description": "EnvFromSource represents the source of a set of ConfigMaps or Secrets",
                                             "properties": {
@@ -1496,7 +1606,7 @@
                                                     "type": "object"
                                                 },
                                                 "prefix": {
-                                                    "description": "Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.",
+                                                    "description": "Optional text to prepend to the name of each environment variable. May consist of any printable ASCII characters except '='.",
                                                     "type": "string"
                                                 },
                                                 "secretRef": {
@@ -2593,7 +2703,7 @@
                                 "description": "EnvVar represents an environment variable present in a Container.",
                                 "properties": {
                                     "name": {
-                                        "description": "Name of the environment variable. Must be a C_IDENTIFIER.",
+                                        "description": "Name of the environment variable. May consist of any printable ASCII characters except '='.",
                                         "type": "string"
                                     },
                                     "value": {
@@ -3678,7 +3788,7 @@
                                         "description": "Represents a Glusterfs mount that lasts the lifetime of a pod. Glusterfs volumes do not support ownership management or SELinux relabeling.",
                                         "properties": {
                                             "endpoints": {
-                                                "description": "endpoints is the endpoint name that details Glusterfs topology. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
+                                                "description": "endpoints is the endpoint name that details Glusterfs topology.",
                                                 "type": "string"
                                             },
                                             "path": {
@@ -4585,7 +4695,7 @@
                                             "description": "EnvVar represents an environment variable present in a Container.",
                                             "properties": {
                                                 "name": {
-                                                    "description": "Name of the environment variable. Must be a C_IDENTIFIER.",
+                                                    "description": "Name of the environment variable. May consist of any printable ASCII characters except '='.",
                                                     "type": "string"
                                                 },
                                                 "value": {
@@ -4703,7 +4813,7 @@
                                         "x-kubernetes-patch-strategy": "merge"
                                     },
                                     "envFrom": {
-                                        "description": "List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.",
+                                        "description": "List of sources to populate environment variables in the container. The keys defined within a source may consist of any printable ASCII characters except '='. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.",
                                         "items": {
                                             "description": "EnvFromSource represents the source of a set of ConfigMaps or Secrets",
                                             "properties": {
@@ -4722,7 +4832,7 @@
                                                     "type": "object"
                                                 },
                                                 "prefix": {
-                                                    "description": "Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.",
+                                                    "description": "Optional text to prepend to the name of each environment variable. May consist of any printable ASCII characters except '='.",
                                                     "type": "string"
                                                 },
                                                 "secretRef": {

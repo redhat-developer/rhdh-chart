@@ -13,6 +13,7 @@ jobs:
       contents: write
       id-token: write
       issues: write
+      pull-requests: write
 
     steps:
       - name: Check for command
@@ -24,16 +25,30 @@ jobs:
             const commentBody = context.payload.comment.body;
             const commandPrefix = "/bump ";
             let commandName = "";
-            let commandArgs = "";
+            let chartName = "";
+            let bumpLevel = "";
 
             if (commentBody.startsWith(commandPrefix)) {
               commandName = "bump";
               const args = commentBody.slice(commandPrefix.length).trim().split(" ");
-              commandArgs = args[0] || "patch";
-            }
+              
+              if (args.length > 0 && args[0]) {
+                chartName = args[0];
+                bumpLevel = args[1] || "patch"; 
 
-            core.setOutput("command-name", commandName);
-            core.setOutput("command-arguments", commandArgs);
+                console.log(`Chart Name: ${chartName}, Bump Level: ${bumpLevel}`);
+                console.log(`Args array: ${JSON.stringify(args)}`);
+
+                const fs = require('fs');
+                fs.appendFileSync(process.env.GITHUB_OUTPUT, `chart-name=${chartName}\n`);
+                fs.appendFileSync(process.env.GITHUB_OUTPUT, `bump-level=${bumpLevel}\n`);
+                fs.appendFileSync(process.env.GITHUB_OUTPUT, `command-name=${commandName}\n`);
+
+              } else {
+                commandName = "";
+                core.warning("No chart name provided. Format: /bump <chart-name> [level]");
+                }
+            }
 
       - name: Add eyes reaction
         if: steps.command.outputs.command-name == 'bump'
@@ -42,7 +57,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           comment-id: ${{ github.event.comment.id }}
-          reaction-type: eyes
+          reactions: eyes
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         if: steps.command.outputs.command-name == 'bump'
@@ -68,7 +83,7 @@ jobs:
 
       - name: Checkout Repository
         if: steps.command.outputs.command-name == 'bump'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           token: ${{ steps.generate_token.outputs.token }}
 
@@ -81,22 +96,22 @@ jobs:
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
         id: get_version
-        uses: mikefarah/yq@b534aa9ee5d38001fba3cd8fe254a037e4847b37 # v4.45.4
+        uses: mikefarah/yq@f03c9dc599c37bfcaf533427211d05e51e6fee64 # v4.47.1
         with:
-          cmd: yq ".version" charts/backstage/Chart.yaml
+          cmd: yq ".version" charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
-      - uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5  # v1
+      - uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1
         if: steps.command.outputs.command-name == 'bump'
         id: semver
         with:
           current_version: ${{ steps.get_version.outputs.result }}
-          level: ${{ steps.command.outputs.command-arguments }}
+          level: ${{ steps.command.outputs.bump-level }}
 
       - name: Bump the version
         if: steps.command.outputs.command-name == 'bump'
-        uses: mikefarah/yq@b534aa9ee5d38001fba3cd8fe254a037e4847b37 # v4.45.4
+        uses: mikefarah/yq@f03c9dc599c37bfcaf533427211d05e51e6fee64 # v4.47.1
         with:
-          cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/backstage/Chart.yaml
+          cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
       - name: Run pre-commit
         if: steps.command.outputs.command-name == 'bump'
@@ -109,10 +124,10 @@ jobs:
 
       - name: Commit pre-commit changes
         if: steps.command.outputs.command-name == 'bump'
-        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6
         with:
-          commit_message: Bump version to ${{ steps.semver.outputs.new_version }}
-          commit_options: '-s'
+          commit_message: Bump ${{ steps.command.outputs.chart-name }} version to ${{ steps.semver.outputs.new_version }}
+          commit_options: "-s"
           commit_user_name: RHDH Bot
-          commit_user_email: 146280956+rhdh-bot@users.noreply.github.com 
+          commit_user_email: 146280956+rhdh-bot@users.noreply.github.com
           commit_author: RHDH Bot <146280956+rhdh-bot@users.noreply.github.com >

@@ -7,18 +7,23 @@ on:
 
 jobs:
   scan-iac:
-    name: Scan Rendered Templates
+    name: Scan Rendered Templates (${{ matrix.chartConfig.name }})
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        chart:
-          - backstage
-          - orchestrator-infra
+        chartConfig:
+          - name: "backstage"
+            path: "backstage"
+          - name: "orchestrator-infra"
+            path: "orchestrator-infra"
+          - name: "backstage-orchestrator"
+            path: "backstage"
+            cliArgs: "--set orchestrator.enabled=true"
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
 
@@ -27,20 +32,23 @@ jobs:
         with:
           version: v3.17.0
 
-      - name: Render Templates for ${{ matrix.chart }}
+      - name: Render Templates for ${{ matrix.chartConfig.name }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add backstage https://backstage.github.io/charts
           helm repo update
-          helm dependency build ./charts/${{ matrix.chart }}
-          helm template ./charts/${{ matrix.chart }} --output-dir ./output/${{ matrix.chart }}
 
-      - name: Run Snyk IaC Scan for ${{ matrix.chart }}
+          helm dependency build ./charts/${{ matrix.chartConfig.path }}
+          helm template ./charts/${{ matrix.chartConfig.path }} \
+            ${{ matrix.chartConfig.cliArgs || '' }} \
+            --output-dir ./output/${{ matrix.chartConfig.name }}
+
+      - name: Run Snyk IaC Scan for ${{ matrix.chartConfig.name }}
         continue-on-error: true
         uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
         with:
-          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/${{ matrix.chart }}"
-          file: ./output/${{ matrix.chart }}
+          args: --report --org=$SNYK_ORG_ID --target-name="redhat-developer/rhdh-chart/${{ matrix.chartConfig.name }}"
+          file: ./output/${{ matrix.chartConfig.name }}

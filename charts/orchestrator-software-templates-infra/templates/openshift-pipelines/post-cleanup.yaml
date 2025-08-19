@@ -1,0 +1,108 @@
+{{- if .Values.openshiftPipelines.enabled }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csv-cleanup-pipelines
+  namespace: {{ .Values.openshiftPipelines.subscription.namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-delete
+    "helm.sh/hook-weight": "10"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: csv-cleanup-role-pipelines
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-delete
+    "helm.sh/hook-weight": "10"
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["clusterserviceversions", "subscriptions"]
+    verbs: ["get", "list", "delete", "watch"]
+  - apiGroups: ["apps", ""]
+    resources: ["deployments", "pods"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "services", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelines", "pipelineruns", "tasks", "taskruns", "pipelineresources"]
+    verbs: ["get", "list", "delete", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csv-cleanup-rolebinding-pipelines
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-delete
+    "helm.sh/hook-weight": "10"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: csv-cleanup-role-pipelines
+subjects:
+- kind: ServiceAccount
+  name: csv-cleanup-pipelines
+  namespace: {{ .Values.openshiftPipelines.subscription.namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: openshift-pipelines-cleanup
+  namespace: {{ .Values.openshiftPipelines.subscription.namespace }}
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded,hook-failed
+spec:
+  template:
+    spec:
+      serviceAccountName: csv-cleanup-pipelines
+      restartPolicy: Never
+      containers:
+      - name: cleanup-pipelines
+        image: {{ .Values.cleanupContainerImage }}
+        env:
+          - name: NAMESPACE
+            value: {{ .Values.openshiftPipelines.subscription.namespace }}
+          - name: NAME
+            value: {{ .Values.openshiftPipelines.subscription.name }}
+        resources:
+          requests:
+            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.resources.limits.cpu }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set +e
+
+          echo "Waiting for Subscription to be deleted..."
+          kubectl delete subscription $NAME -n $NAMESPACE --ignore-not-found
+          kubectl wait --for=delete subscription/$NAME -n $NAMESPACE --timeout=60s
+
+          echo "Waiting for CSV to be deleted..."
+          kubectl delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --ignore-not-found
+          kubectl wait --for=delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --timeout=120s
+
+          echo "Cleanup finished."
+
+{{- end }}

@@ -1,0 +1,163 @@
+openshiftPipelines:
+  # -- whether the operator should be deployed by the chart
+  enabled: true
+  subscription:
+    # -- namespace where the operator should be deployed
+    namespace: openshift-operators
+    # -- name of the operator package
+    name: openshift-pipelines-operator-rh
+    spec:
+      # -- channel of an operator package to subscribe to
+      channel: latest
+      # --  whether the update should be installed automatically
+      installPlanApproval: Automatic
+      # -- name of the operator package
+      name: openshift-pipelines-operator-rh
+      # --  name of the catalog source
+      source: redhat-operators
+      sourceNamespace: openshift-marketplace
+
+openshiftGitops:
+  # -- whether the operator should be deployed by the chart
+  enabled: true
+
+  # -- name of instances
+  name: argocd
+
+  # -- namespace of rhdh instance, will be used to install openshift-gitops.
+  namespaces:
+    - rhdh
+
+  # -- subscription config
+  subscription:
+    namespace: openshift-operators
+    # -- namespace where the operator should be deployed
+    spec:
+      # -- channel of an operator package to subscribe to
+      channel: latest
+      # -- whether the update should be installed automatically
+      installPlanApproval: Automatic
+      # -- name of the operator package
+      name: openshift-gitops-operator
+      # -- name of the catalog source
+      source: redhat-operators
+      sourceNamespace: openshift-marketplace
+      disableDefaultArgoCD: true
+  argocd_cr:
+    controller:
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 2048Mi
+        requests:
+          cpu: 250m
+          memory: 1024Mi
+    ha:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 250m
+          memory: 128Mi
+      enabled: false
+    rbac:
+      defaultPolicy: ""
+      policy: |
+        g, system:cluster-admins, role:admin
+      scopes: "[groups]"
+    redis:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 250m
+          memory: 128Mi
+    repo:
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1024Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
+    server:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 125m
+          memory: 128Mi
+      route:
+        enabled: true
+    sso:
+      dex:
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 128Mi
+        openShiftOAuth: true
+      provider: dex
+  # -- Initial repositories configuration
+  initialRepositories:
+    []
+    #  initialRepositories:
+    #     - name: redhat-cop
+    #      type: helm
+    #      url: https://redhat-cop.github.io/helm-charts
+
+  # -- Repository credential templates
+  repositoryCredentials: []
+    #  repositoryCredentials:
+    #    - name: private-repo-creds
+    #      url: ''
+    #      type: git
+    #      password: password
+    #      username: username
+
+  # -- Initial applications to deploy
+  initialApps: []
+    #  initialApps:
+    #    - name: init-app
+    #      path: argocd/
+    #      repoURL: ''
+    #      targetRevision: HEAD
+
+  # -- Secrets for Git access or other repository credentials
+  secrets: []
+    #  EXAMPLE ...
+    #  secrets:
+    #    - name: git-auth
+    #      username: 'user'
+    #      password: 'pass1234'
+    #      sshPrivateKey: ''
+
+
+test:
+  # -- Whether to enable the pod used for testing the Release using `helm test`.
+  enabled: true
+
+  image:
+    # -- Test infra-test Tekton Task pod image registry
+    registry: bitnami
+
+    # -- Test infra-test Tekton Task pod image repository.
+    repository: kubectl
+
+    # -- Test infra-test Tekton Task pod image tag.
+    tag: latest
+
+# -- A container image and tag, will be used for the post-cleanup tasks.
+cleanupContainerImage: bitnami/kubectl:latest
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"

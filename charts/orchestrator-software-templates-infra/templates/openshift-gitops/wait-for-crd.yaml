@@ -1,0 +1,89 @@
+{{- if .Values.openshiftGitops.enabled }}
+{{- if .Values.openshiftGitops.namespaces }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-check-sa 
+  namespace: {{ .Values.openshiftGitops.namespaces | first }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-check-role
+  namespace: {{ .Values.openshiftGitops.namespaces | first }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-check-rolebinding
+  namespace: {{ .Values.openshiftGitops.namespaces | first }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+subjects:
+  - kind: ServiceAccount
+    name: cluster-check-sa
+    namespace: {{ .Values.openshiftGitops.namespaces | first }}
+roleRef:
+  kind: ClusterRole
+  name: cluster-check-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cluster-check
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  namespace: {{ .Values.openshiftGitops.namespaces | first }}
+spec:
+  containers:
+  - name: crd-check
+    image: {{ .Values.cleanupContainerImage }}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      runAsUser: 1001
+      seccompProfile:
+        type: RuntimeDefault
+    resources:
+      requests:
+        memory: {{ .Values.resources.requests.memory }}
+        cpu: {{ .Values.resources.requests.cpu }}
+      limits:
+        memory: {{ .Values.resources.limits.memory }}
+        cpu: {{ .Values.resources.limits.cpu }}
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          kubectl get crd argocds.argoproj.io > /dev/null 2>&1 && echo "ArgoCD CRD ready" && break
+          echo "Waiting for argocds.argoproj.io CRD..."
+          sleep 5
+        done
+  restartPolicy: Never
+  terminationGracePeriodSeconds: 0
+  serviceAccountName: cluster-check-sa
+{{- end }}
+{{- end }}

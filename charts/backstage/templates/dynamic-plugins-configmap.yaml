@@ -12,8 +12,7 @@ data:
     {{- end }}
 
     {{- if .Values.orchestrator.enabled }}
-      {{- $orchestratorPlugins := include "orchestrator.plugins" . | fromYaml }}
-      {{- range $orchestratorPlugins.plugins }}
+      {{- range .Values.orchestrator.plugins }}
         {{- $plugins = append $plugins . }}
       {{- end }}
     {{- end }}
@@ -21,16 +20,3 @@ data:
     {{- $_ := set $dynamic "plugins" $plugins }}
 
     {{- include "common.tplvalues.render" (dict "value" $dynamic "context" $) | nindent 4 }}
-  
----
-{{- if .Values.orchestrator.enabled }}
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ .Release.Name}}-dynamic-plugins-npmrc
-  namespace: {{ .Release.Namespace }}
-type: Opaque
-stringData:
-  .npmrc: |
-    @redhat:registry=https://npm.registry.redhat.com
-{{- end }}

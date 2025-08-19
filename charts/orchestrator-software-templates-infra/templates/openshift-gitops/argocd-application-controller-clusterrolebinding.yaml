@@ -1,0 +1,23 @@
+{{- if .Values.openshiftGitops.namespaces }}
+{{- range $ns := .Values.openshiftGitops.namespaces }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/name: {{ $ns }}-argocd-application-controller
+    app.kubernetes.io/part-of: {{ $.Values.openshiftGitops.namespaces | first }}
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  name: {{ $ns }}-argocd-application-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $.Values.openshiftGitops.namespaces | first }}-argocd-application-controller
+subjects:
+- kind: ServiceAccount
+  name: {{ $.Values.openshiftGitops.name }}-argocd-application-controller
+  namespace: {{ $ns }}
+{{- end }}
+{{- end }}
