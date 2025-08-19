@@ -22,7 +22,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
-    version: "2.31.3"
+    version: "2.31.4"
   - name: backstage
     repository: https://backstage.github.io/charts
     version: "2.6.0"
@@ -47,4 +47,4 @@ sources: []
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 # Note that when this chart is published to https://github.com/openshift-helm-charts/charts
 # it will follow the RHDH versioning 1.y.z
-version: 4.5.3
+version: 4.5.4
