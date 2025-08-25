@@ -1,0 +1,40 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: orchestrator-catalog
+  namespace: {{ .Release.Namespace }}
+  labels:
+    rhdh.redhat.com/ext-config-sync: "true"
+data:
+  "orchestrator-catalog.yaml": |
+    catalog:
+      rules:
+        - allow:
+            [
+              Component,
+              System,
+              Group,
+              Resource,
+              Location,
+              Template,
+              API,
+              User,
+              Domain,
+            ]
+      locations:
+      {{- if .Values.rhdhConfig.enableGuestProvider }}
+        - type: url
+          target: https://github.com/rhdhorchestrator/orchestrator-helm-chart/blob/main/resources/users.yaml
+      {{- end }}
+        - type: url
+          target: https://github.com/rhdhorchestrator/workflow-software-templates/blob/{{ .Values.rhdhConfig.catalogBranch }}/entities/workflow-resources.yaml
+        - type: url
+          target: https://github.com/rhdhorchestrator/workflow-software-templates/blob/{{ .Values.rhdhConfig.catalogBranch }}/scaffolder-templates/github-workflows/basic-workflow/template.yaml
+        - type: url
+          target: https://github.com/rhdhorchestrator/workflow-software-templates/blob/{{ .Values.rhdhConfig.catalogBranch }}/scaffolder-templates/github-workflows/advanced-workflow/template.yaml
+        - type: url
+          target: https://github.com/rhdhorchestrator/workflow-software-templates/blob/{{ .Values.rhdhConfig.catalogBranch }}/scaffolder-templates/gitlab-workflows/basic-workflow/template.yaml
+        - type: url
+          target: https://github.com/rhdhorchestrator/workflow-software-templates/blob/{{ .Values.rhdhConfig.catalogBranch }}/scaffolder-templates/gitlab-workflows/advanced-workflow/template.yaml
+        - type: url
+          target: https://github.com/redhat-developer/rhdh-plugins/blob/main/workspaces/orchestrator/plugins/orchestrator-common/src/generated/docs/api-doc/orchestrator-api.yaml

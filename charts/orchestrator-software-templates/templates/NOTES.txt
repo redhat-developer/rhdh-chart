@@ -1,0 +1,130 @@
+{{/* Empty line */}}
+Helm Release {{ .Release.Name }} installed in namespace {{ .Release.Namespace }}.
+{{- $yes := "YES" }}
+{{- $no := "NO " }}
+{{- $tektonPipelineInstalled := $no }}
+{{- $tektonTaskInstalled := $no }}
+{{- $argocdInstalled := $no }}
+{{- $orchestratorAuthInstalled := $no }}
+{{- $orchestratorCatalogInstalled := $no }}
+
+{{- if eq "true" (include "install-tekton-pipeline" .) }}
+{{- $tektonPipelineInstalled = $yes }}
+{{- end }}
+
+{{- if eq "true" (include "install-tekton-task" .) }}
+{{- $tektonTaskInstalled = $yes }}
+{{- end }}
+
+{{- if eq "true" (include "install-argocd-project" .) }}
+{{- $argocdInstalled = $yes }}
+{{- end }}
+
+{{- if .Values.rhdhConfig.enabled }}
+{{- $orchestratorAuthInstalled = $yes }}
+{{- $orchestratorCatalogInstalled = $yes }}
+{{- end }}
+
+{{- $gitopsNamespace := include "get-argocd-namespace" . }}
+
+Components                   Installed   Namespace
+====================================================================
+Tekton pipeline              {{ $tektonPipelineInstalled }}        {{ $gitopsNamespace }}
+Tekton task                  {{ $tektonTaskInstalled }}        {{ $gitopsNamespace }}
+ArgoCD project               {{ $argocdInstalled }}        {{ $gitopsNamespace }}
+Orchestrator auth config     {{ $orchestratorAuthInstalled }}        {{ .Release.Namespace }}
+Orchestrator catalog config  {{ $orchestratorCatalogInstalled }}        {{ .Release.Namespace }}
+====================================================================
+
+Prerequisites check:
+{{- if not (.Capabilities.APIVersions.Has "tekton.dev/v1/Task") }}
+WARN: CRD for tekton.dev/v1/Task is not installed
+{{- else }}
+The required CRD tekton.dev/v1/Task is already installed.
+{{- end }}
+{{- if not (.Capabilities.APIVersions.Has "tekton.dev/v1/Pipeline") }}
+WARN: CRD for tekton.dev/v1/Pipeline is not installed
+{{- else }}
+The required CRD tekton.dev/v1/Pipeline is already installed.
+{{- end }}
+{{- if not (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1/AppProject") }}
+WARN: CRD for argoproj.io/v1alpha1/AppProject is not installed
+{{- else }}
+The required CRD argoproj.io/v1alpha1/AppProject is already installed.
+{{- end }}
+====================================================================
+
+{{- if .Values.rhdhConfig.enabled }}
+Software Templates Configuration:
+  - Authentication integrations configured for supported SCM providers
+  - Catalog locations configured for orchestrator workflows
+  - ConfigMaps created with label 'rhdh.redhat.com/ext-config-sync: true'
+
+{{- $secret := lookup "v1" "Secret" .Values.orchestratorTemplates.rhdhChartNamespace .Values.rhdhConfig.secretRef.name }}
+{{- if $secret }}
+Required secret '{{ .Values.rhdhConfig.secretRef.name }}' found in namespace '{{ .Values.orchestratorTemplates.rhdhChartNamespace }}'
+{{- else }}
+Warning: Secret '{{ .Values.rhdhConfig.secretRef.name }}' not found in namespace '{{ .Values.orchestratorTemplates.rhdhChartNamespace }}'
+{{- end }}
+{{- end }}
+
+====================================================================
+Next Steps:
+====================================================================
+
+1. Create your environment-specific values file:
+   
+   # Get your RHDH route URL
+   RHDH_ROUTE="https://$(oc get route -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }} -o jsonpath='{.items[0].spec.host}')"
+   
+   # Copy template and replace placeholders
+   cp orchestrator-templates-values.yaml.template my-orchestrator-values.yaml
+   sed -i "s|{{RHDH_BASE_URL}}|$RHDH_ROUTE|g" my-orchestrator-values.yaml
+
+2. Backup current values and upgrade backstage chart:
+   
+   # Backup current configuration
+   helm get values {{ .Values.orchestratorTemplates.rhdhChartReleaseName }} \
+     -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }} > current-backstage-values.yaml
+   
+   # Upgrade with both value files
+   helm upgrade {{ .Values.orchestratorTemplates.rhdhChartReleaseName }} redhat-developer/backstage \
+     -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }} \
+     -f current-backstage-values.yaml \
+     -f my-orchestrator-values.yaml
+
+3. Verify the deployment:
+   
+   {{- if .Values.rhdhConfig.enabled }}
+   kubectl get configmaps -n {{ .Release.Namespace }} -l rhdh.redhat.com/ext-config-sync=true
+   {{- end }}
+   kubectl get pipelines,tasks -n {{ $gitopsNamespace }}
+   kubectl get appprojects -n {{ $gitopsNamespace }}
+
+4. Access your RHDH instance and check the 'Create' section for new software templates.
+
+{{- if not $secret }}
+5. Create the required secret (if missing):
+   ./hack/orchestrator-templates-setup.sh
+{{- end }}
+
+====================================================================
+Troubleshooting:
+====================================================================
+
+If upgrade fails, rollback:
+  helm rollback {{ .Values.orchestratorTemplates.rhdhChartReleaseName }} -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }}
+
+If placeholders remain in values file:
+  grep "{{.*}}" my-orchestrator-values.yaml
+
+If software templates not visible:
+  kubectl logs -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }} -l app.kubernetes.io/name=backstage
+
+If ConfigMaps not loading:
+  kubectl get configmaps -n {{ .Release.Namespace }} -l rhdh.redhat.com/ext-config-sync=true
+
+For more information, visit:
+https://github.com/redhat-developer/rhdh-chart
+
+{{/* Empty line */}}

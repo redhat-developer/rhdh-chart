@@ -1,0 +1,37 @@
+orchestratorTemplates:
+  enabled: true
+  rhdhChartReleaseName: rhdh
+  rhdhChartNamespace: rhdh
+
+tekton:
+  enabled: true
+
+argocd:
+  enabled: true
+  argocdNamespace: orchestrator-gitops # References the ArgoCD instance created by infra chart
+  argocdUrl: ARGOCD_URL # https://argocd-server-orchestrator-gitops.apps.your-cluster.com
+  argocdUsername: ARGOCD_USERNAME
+  argocdPassword: ARGOCD_PASSWORD
+
+rhdhConfig:
+  secretRef:
+    name: orchestrator-auth-secret # Name of the secret containing the configuration
+    backstage:
+      backendSecret: BACKEND_SECRET # Key in the secret for backend authentication
+    k8s:
+      clusterToken: K8S_CLUSTER_TOKEN # Key in the secret for Kubernetes cluster token
+      clusterUrl: K8S_CLUSTER_URL # Key in the secret for Kubernetes cluster URL
+    github:
+      token: GITHUB_TOKEN # Key in the secret for GitHub token
+      clientId: GITHUB_CLIENT_ID # Key in the secret for GitHub client ID
+      clientSecret: GITHUB_CLIENT_SECRET # Key in the secret for GitHub client secret
+    gitlab:
+      host: GITLAB_HOST # Key in the secret for GitLab host
+      token: GITLAB_TOKEN # Key in the secret for GitLab token
+    argocd:
+      url: ARGOCD_URL # Key in the secret for ArgoCD URL
+      username: ARGOCD_USERNAME # Key in the secret for ArgoCD username
+      password: ARGOCD_PASSWORD # Key in the secret for ArgoCD password
+  enabled: true # Enable RHDH operator
+  enableGuestProvider: false # Enable guest authentication provider
+  catalogBranch: main # Branch to use for catalog templates

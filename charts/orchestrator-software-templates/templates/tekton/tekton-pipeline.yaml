@@ -1,0 +1,175 @@
+{{- if eq "true" (include "install-tekton-pipeline" .) }}
+  {{- $gitopsNamespace := include "get-argocd-namespace" . }}
+  {{- $version := include "get-tekton-version" . }}
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: workflow-deployment
+  namespace: {{ .Values.argocd.argocdNamespace }}
+spec:
+  description: |
+    This pipeline clones a git repo, builds a Docker image with Kaniko and pushes it to a registry
+  params:
+    - name: gitUrl
+      description: The SSH URL of the repository to clone
+      type: string
+    - name: gitOpsUrl
+      description: The SSH URL of the config repository for pushing the changes
+      type: string
+    - name: workflowId
+      description: The workflow ID from the repository
+      type: string
+    - name: convertToFlat
+      description: Whether conversion to flat layout is needed or it's already flattened
+      type: string
+      default: "true"
+    - name: quayOrgName
+      description: The Quay Organization Name of the published workflow
+      type: string
+    - name: quayRepoName
+      description: The Quay Repository Name of the published workflow
+      type: string
+  workspaces:
+    - name: workflow-source
+    - name: workflow-gitops
+    - name: ssh-creds
+    - name: docker-credentials
+  tasks:
+    - name: fetch-workflow
+      taskRef:
+        name: git-cli
+      workspaces:
+        - name: source
+          workspace: workflow-source
+        - name: ssh-directory
+          workspace: ssh-creds
+      params:
+        - name: GIT_USER_NAME
+          value: The Orchestrator Tekton Pipeline
+        - name: GIT_USER_EMAIL
+          value: rhdhorchestrator@redhat.com
+        - name: USER_HOME
+          value: /home/git
+        - name: GIT_SCRIPT
+          value: |
+            eval "$(ssh-agent -s)"
+            ssh-add "${PARAM_USER_HOME}"/.ssh/id_rsa
+            git clone $(params.gitUrl) workflow
+            cd workflow
+    - name: fetch-workflow-gitops
+      taskRef:
+        name: git-cli
+      workspaces:
+        - name: source
+          workspace: workflow-gitops
+        - name: ssh-directory
+          workspace: ssh-creds
+      params:
+        - name: GIT_USER_NAME
+          value: The Orchestrator Tekton Pipeline
+        - name: GIT_USER_EMAIL
+          value: rhdhorchestrator@redhat.com
+        - name: USER_HOME
+          value: /home/git
+        - name: GIT_SCRIPT
+          value: |
+            eval "$(ssh-agent -s)"
+            ssh-add "${PARAM_USER_HOME}"/.ssh/id_rsa
+            git clone $(params.gitOpsUrl) workflow-gitops
+    - name: flatten-workflow
+      runAfter: ["fetch-workflow"]
+      taskRef:
+        name: flattener
+      workspaces:
+        - name: workflow-source
+          workspace: workflow-source
+      params:
+        - name: workflowId
+          value: $(params.workflowId)
+        - name: convertToFlat
+          value: $(params.convertToFlat)
+    - name: build-manifests
+      runAfter: ["flatten-workflow"]
+      taskRef:
+        name: build-manifests
+      workspaces:
+        - name: workflow-source
+          workspace: workflow-source
+      params:
+        - name: workflowId
+          value: $(params.workflowId)
+    - name: build-gitops
+      runAfter: ["build-manifests", "fetch-workflow-gitops"]
+      taskRef:
+        name: build-gitops
+      workspaces:
+        - name: workflow-source
+          workspace: workflow-source
+        - name: workflow-gitops
+          workspace: workflow-gitops
+      params:
+        - name: workflowId
+          value: $(params.workflowId)
+        - name: imageTag
+          value: $(tasks.fetch-workflow.results.commit)
+    - name: build-and-push-image
+      runAfter: ["flatten-workflow"]
+      taskRef:
+{{- if (semverCompare ">=1.17" $version) }}
+        resolver: cluster
+        params:
+        - name: kind
+          value: task
+        - name: name
+          value: buildah
+        - name: namespace
+          value: openshift-pipelines
+{{- else }}
+        name: buildah
+        kind: ClusterTask
+{{- end }}
+      workspaces:
+        - name: source
+          workspace: workflow-source
+        - name: dockerconfig
+          workspace: docker-credentials
+      params:
+        - name: IMAGE
+          value: quay.io/$(params.quayOrgName)/$(params.quayRepoName):$(tasks.fetch-workflow.results.commit)
+        - name: DOCKERFILE
+          value: flat/workflow-builder.Dockerfile
+        - name: CONTEXT
+          value: flat/$(params.workflowId)
+        - name: BUILD_EXTRA_ARGS
+          value: '--authfile=/workspace/dockerconfig/.dockerconfigjson --ulimit nofile=4096:4096 --build-arg WF_RESOURCES=. '
+    - name: push-workflow-gitops
+      runAfter: ["build-gitops", "build-and-push-image"]
+      taskRef:
+        name: git-cli
+      workspaces:
+        - name: source
+          workspace: workflow-gitops
+        - name: ssh-directory
+          workspace: ssh-creds
+      params:
+        - name: GIT_USER_NAME
+          value: The Orchestrator Tekton Pipeline
+        - name: GIT_USER_EMAIL
+          value: rhdhorchestrator@redhat.com
+        - name: USER_HOME
+          value: /home/git
+        - name: GIT_SCRIPT
+          value: |
+            WORKFLOW_COMMIT=$(tasks.fetch-workflow.results.commit)
+
+            eval "$(ssh-agent -s)"
+            ssh-add "${PARAM_USER_HOME}"/.ssh/id_rsa
+
+            cd workflow-gitops
+            git add .
+            git diff
+            # TODO: create PR
+            git commit -m "Deployment for workflow commit $WORKFLOW_COMMIT from $(params.gitUrl)"
+            # TODO: parametrize branch
+            git push origin main
+{{- end }}
