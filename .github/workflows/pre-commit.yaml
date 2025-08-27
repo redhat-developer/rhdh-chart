@@ -21,7 +21,7 @@ jobs:
     # see list of approvers in OWNERS file
     environment:
       ${{ (github.event.pull_request.head.repo.full_name == github.repository ||
-      contains(fromJSON('["coreydaley","gazarenkov","kadel","nickboldt","rm3l","kim-tsao","Fortune-Ndlovu","subhashkhileri","zdrapela","openshift-cherrypick-robot", "Fortune-Ndlovu", "subhashkhileri", "zdrapela"]'), github.actor)) && 'internal' || 'external' }}
+      contains(fromJSON('["coreydaley","gazarenkov","kadel","nickboldt","rm3l","kim-tsao","Fortune-Ndlovu","subhashkhileri","zdrapela","openshift-cherrypick-robot", "Fortune-Ndlovu", "subhashkhileri", "zdrapela"]'), github.event.pull_request.user.login)) && 'internal' || 'external' }}
     runs-on: ubuntu-latest
     steps:
       - name: approved
@@ -42,7 +42,7 @@ jobs:
         with:
           fetch-depth: 0
           repository: ${{github.event.pull_request.head.repo.full_name}}
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
