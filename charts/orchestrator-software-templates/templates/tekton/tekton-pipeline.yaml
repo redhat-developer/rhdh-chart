@@ -1,5 +1,4 @@
 {{- if eq "true" (include "install-tekton-pipeline" .) }}
-  {{- $gitopsNamespace := include "get-argocd-namespace" . }}
   {{- $version := include "get-tekton-version" . }}
 apiVersion: tekton.dev/v1
 kind: Pipeline

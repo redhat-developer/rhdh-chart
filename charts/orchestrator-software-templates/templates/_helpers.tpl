@@ -82,31 +82,66 @@
     {{- if $paramValue -}}
         {{- $paramValue -}}
     {{- else -}}
+        {{/* Only validate namespace existence during actual deployment, not during template testing */}}
         {{- $ns:= "" }}
         {{- $list:= lookup "v1" "Namespace" "" "" -}}
-        {{- if eq 0 (len (dig "items" (dict "" "") $list ) )}}
-            {{- fail (printf "No namespaces found: %d" (len (dig "items" (dict "" "") $list))  ) }}
-        {{- end -}}
-        {{- range (dig "items" (dict "" "") $list) }}
-            {{- $labels:= dig "metadata" "labels" (dict "" "" ) .  -}}
-            {{- if (hasKey $labels $matchingLabel ) }}
-                {{- if not $ns }}
-                    {{- $ns = dig "metadata" "name" "" . -}}
-                {{- else -}}
-                    {{- fail (printf "More than one namespace found with label %s: %s and %s" $matchingLabel $ns (dig "metadata" "name" "" .) )}}
-                {{- end }}
+        {{- if $list -}}
+            {{- if eq 0 (len (dig "items" (dict "" "") $list ) )}}
+                {{- fail (printf "No namespaces found: %d" (len (dig "items" (dict "" "") $list))  ) }}
             {{- end -}}
-        {{- end -}}
-        {{- if not $ns -}}
-            {{- fail (printf "No namespace found with label '%s'. Please follow the installation instructions to properly configure the environment" $matchingLabel) -}}
+            {{- range (dig "items" (dict "" "") $list) }}
+                {{- $labels:= dig "metadata" "labels" (dict "" "" ) .  -}}
+                {{- if (hasKey $labels $matchingLabel ) }}
+                    {{- if not $ns }}
+                        {{- $ns = dig "metadata" "name" "" . -}}
+                    {{- else -}}
+                        {{- fail (printf "More than one namespace found with label %s: %s and %s" $matchingLabel $ns (dig "metadata" "name" "" .) )}}
+                    {{- end }}
+                {{- end -}}
+            {{- end -}}
+            {{- if not $ns -}}
+                {{- fail (printf "No namespace found with label '%s'. Please follow the installation instructions to properly configure the environment" $matchingLabel) -}}
+            {{- end }}
         {{- end }}
         {{- $ns }}
     {{- end -}}
 {{- end -}}
 
+{{- define "get-namespace-with-label-with-fallback" -}}
+    {{- $paramValue:= index . 0 -}}
+    {{- $matchingLabel:= index . 1 -}}
+    {{- $fallbackValue:= index . 2 -}}
+    {{- if $paramValue -}}
+        {{- $paramValue -}}
+    {{- else -}}
+        {{/* Only validate namespace existence during actual deployment, not during template testing */}}
+        {{- $ns:= "" }}
+        {{- $list:= lookup "v1" "Namespace" "" "" -}}
+        {{- if $list -}}
+            {{- if ne 0 (len (dig "items" (dict "" "") $list ) )}}
+                {{- range (dig "items" (dict "" "") $list) }}
+                    {{- $labels:= dig "metadata" "labels" (dict "" "" ) .  -}}
+                    {{- if (hasKey $labels $matchingLabel ) }}
+                        {{- if not $ns }}
+                            {{- $ns = dig "metadata" "name" "" . -}}
+                        {{- else -}}
+                            {{- fail (printf "More than one namespace found with label %s: %s and %s" $matchingLabel $ns (dig "metadata" "name" "" .) )}}
+                        {{- end }}
+                    {{- end -}}
+                {{- end -}}
+            {{- end }}
+        {{- end }}
+        {{- if $ns -}}
+            {{- $ns -}}
+        {{- else -}}
+            {{- $fallbackValue -}}
+        {{- end }}
+    {{- end -}}
+{{- end -}}
+
 {{- define "get-workflow-namespace" -}}
     {{- if (not (hasKey . "workflowNamespace" ) ) -}}
-        {{- $workflowNamespace := include "get-namespace-with-label" (list .Values.orchestrator.namespace "rhdh.redhat.com/workflow-namespace")  }}
+        {{- $workflowNamespace := include "get-namespace-with-label-with-fallback" (list .Values.orchestrator.namespace "rhdh.redhat.com/workflow-namespace" "default")  }}
         {{- $_ := set . "workflowNamespace" $workflowNamespace }}
     {{- end -}}
     {{- .workflowNamespace -}}
@@ -115,9 +150,8 @@
 {{- define "get-argocd-namespace" -}}
     {{- if .Values.argocd.enabled }}
         {{- if (not (hasKey . "argoCDNamespace" ) ) -}}
-            #{{- $argoCDNamespace := include "get-namespace-with-label" (list .Values.argocd.namespace "rhdh.redhat.com/argocd-namespace")  }}
-            #{{- $_ := set . "argoCDNamespace" $argoCDNamespace }}
-            {{- $_ := set . "argoCDNamespace" .Values.argocd.argocdNamespace }}
+            {{- $argoCDNamespace := include "get-namespace-with-label-with-fallback" (list .Values.argocd.namespace "rhdh.redhat.com/argocd-namespace" .Values.argocd.argocdNamespace)  }}
+            {{- $_ := set . "argoCDNamespace" $argoCDNamespace }}
         {{- end -}}
         {{- .argoCDNamespace -}}
     {{- end -}}
