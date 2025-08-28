@@ -25,8 +25,8 @@ base64_encode() {
 temp_secret1_file=$(mktemp)
 temp_secret2_file=$(mktemp)
 
-cat "$secret1_file" | yq e '.data[".dockerconfigjson"]' | base64 -d > "$temp_secret1_file"
-cat "$secret2_file" | yq e '.data[".dockerconfigjson"]' | base64 -d > "$temp_secret2_file"
+yq e '.data[".dockerconfigjson"]' "$secret1_file" | base64 -d > "$temp_secret1_file"
+yq e '.data[".dockerconfigjson"]' "$secret2_file" | base64 -d > "$temp_secret2_file"
 
 # Merge the decoded files
 merged_secret_file=$(mktemp)
@@ -44,7 +44,7 @@ metadata:
   namespace: orchestrator-gitops
 type: kubernetes.io/dockerconfigjson
 data:
-  .dockerconfigjson: $(cat $encoded_merged_secret)" > docker-credentials-secret.yaml
+  .dockerconfigjson: $(cat "$encoded_merged_secret")" > docker-credentials-secret.yaml
 
 # Clean up temporary files
 rm "$temp_secret1_file" "$temp_secret2_file" "$merged_secret_file" "$encoded_merged_secret"

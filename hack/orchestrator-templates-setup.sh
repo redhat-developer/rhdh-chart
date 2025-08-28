@@ -20,7 +20,7 @@ function captureRHDHNamespace {
   if [ "$use_default" == true ]; then
     rhdh_workspace="$default"
   else
-    read -p "Enter RHDH Operator namespace (default: $default): " value
+    read -r -p "Enter RHDH Operator namespace (default: $default): " value
     if [ -z "$value" ]; then
         rhdh_workspace="$default"
     else
@@ -35,7 +35,7 @@ function captureWorkflowNamespace {
   if [ "$use_default" == true ]; then
     workflow_namespace="$default"
   else
-    read -p "Enter workflow namespace (default: $default): " value
+    read -r -p "Enter workflow namespace (default: $default): " value
     if [ -z "$value" ]; then
         workflow_namespace="$default"
     else
@@ -58,12 +58,12 @@ function generateK8sToken {
   sa_namespace="rhdh"
   sa_name="rhdh"
   if [ "$use_default" == false ]; then
-    read -p "Which namespace should be used or created to check the SA holding the persistent token? (default: $sa_namespace): "
-    if [ -n "$sa_namespace" ]; then
-      sa_namespace="$sa_namespace"
+    read -r -p "Which namespace should be used or created to check the SA holding the persistent token? (default: $sa_namespace): " selected_namespace
+    if [ -n "$selected_namespace" ]; then
+      sa_namespace="$selected_namespace"
     fi
 
-    read -p "What is the name of the SA? (default: $sa_name): " selected_name
+    read -r -p "What is the name of the SA? (default: $sa_name): " selected_name
     if [ -n "$selected_name" ]; then
       sa_name="$selected_name"
     fi
@@ -75,14 +75,14 @@ function generateK8sToken {
     oc create namespace "$sa_namespace"
   fi
 
-  if oc get sa -n "$sa_namespace" $sa_name &> /dev/null; then
+  if oc get sa -n "$sa_namespace" "$sa_name" &> /dev/null; then
     echo "ServiceAccount '$sa_name' already exists in '$sa_namespace'."
   else
     echo "ServiceAccount '$sa_name' does not exist in '$sa_namespace'. Creating..."
     oc create sa "$sa_name" -n "$sa_namespace"
   fi
 
-  oc adm policy add-cluster-role-to-user cluster-admin -z $sa_name -n $sa_namespace
+  oc adm policy add-cluster-role-to-user cluster-admin -z "$sa_name" -n "$sa_namespace"
   echo "Added cluster-admin role to '$sa_name' in '$sa_namespace'."
 
     cat <<EOF | kubectl apply -f -
@@ -96,12 +96,12 @@ metadata:
     kubernetes.io/service-account.name: orchestrator
 EOF
 
-  K8S_CLUSTER_TOKEN=$(oc -n $sa_namespace get secret/${sa_name} -o jsonpath='{.data.token}' | base64 -d )
+  K8S_CLUSTER_TOKEN=$(oc -n "$sa_namespace" get secret/"${sa_name}" -o jsonpath='{.data.token}' | base64 -d )
 }
 
 function captureGitToken {
    if [ -z "$GITHUB_TOKEN" ]; then
-    read -s -p "Enter GitHub access token: " value
+    read -r -s -p "Enter GitHub access token: " value
     echo ""
     GITHUB_TOKEN=$value
   else
@@ -111,7 +111,7 @@ function captureGitToken {
 
 function captureGitlabToken {
    if [ -z "$GITLAB_TOKEN" ]; then
-    read -s -p "Enter Gitlab user access token: " value
+    read -r -s -p "Enter Gitlab user access token: " value
     echo ""
     GITLAB_TOKEN=$value
   else
@@ -121,7 +121,7 @@ function captureGitlabToken {
 
 function captureGitlabHost {
    if [ -z "$GITLAB_HOST" ]; then
-    read -s -p "Enter Gitlab host name: " value
+    read -r -s -p "Enter Gitlab host name: " value
     echo ""
     GITLAB_HOST=$value
   else
@@ -131,7 +131,7 @@ function captureGitlabHost {
 
 function captureGitClientId {
    if [ -z "$GITHUB_CLIENT_ID" ]; then
-    read -s -p "Enter GitHub client ID (empty for disabling it): " value
+    read -r -s -p "Enter GitHub client ID (empty for disabling it): " value
     echo ""
     GITHUB_CLIENT_ID=$value
   else
@@ -141,7 +141,7 @@ function captureGitClientId {
 
 function captureGitClientSecret {
    if [ -z "$GITHUB_CLIENT_SECRET" ]; then
-    read -s -p "Enter GitHub client secret (empty for disabling it): " value
+    read -r -s -p "Enter GitHub client secret (empty for disabling it): " value
     echo ""
     GITHUB_CLIENT_SECRET=$value
   else
@@ -150,11 +150,11 @@ function captureGitClientSecret {
 }
 
 function captureArgoCDNamespace {
-  default="orchestrator-gitops"
+  default="rhdh"
   if [ "$use_default" == true ]; then
     argocd_namespace="$default"
   else
-    read -p "Enter ArgoCD installation namespace (default: $default): " value
+    read -r -p "Enter ArgoCD installation namespace (default: $default): " value
 
     if [ -z "$value" ]; then
         argocd_namespace="$default"
@@ -185,7 +185,7 @@ function captureArgoCDURL {
           fi
       done
     fi
-    argocd_route=$(oc get route -n $ARGOCD_NAMESPACE -l app.kubernetes.io/managed-by=$selected_instance -ojsonpath='{.items[0].status.ingress[0].host}')
+    argocd_route=$(oc get route -n "$ARGOCD_NAMESPACE" -l app.kubernetes.io/managed-by="$selected_instance" -ojsonpath='{.items[0].status.ingress[0].host}')
     echo "Found Route at $argocd_route"
     ARGOCD_URL=https://$argocd_route
   fi
@@ -194,15 +194,15 @@ function captureArgoCDURL {
 
 function captureArgoCDCreds {
   if [ -n "$selected_instance" ]; then
-    admin_password=$(oc get secret -n $ARGOCD_NAMESPACE ${selected_instance}-cluster -ojsonpath='{.data.admin\.password}' | base64 -d)
-    ARGOCD_USERNAME=admin
-    ARGOCD_PASSWORD=$admin_password
+    admin_password=$(oc get secret -n "$ARGOCD_NAMESPACE" "${selected_instance}-cluster" -ojsonpath='{.data.admin\.password}' | base64 -d)
+    ARGOCD_USERNAME="admin"
+    ARGOCD_PASSWORD="$admin_password"
   fi
 }
 
 function captureNotificationsEmailHostname {
    if [ -z "$NOTIFICATIONS_EMAIL_HOSTNAME" ]; then
-    read -p "Enter the SMTP server hostname for notification emails (empty for disabling it): " value
+    read -r -p "Enter the SMTP server hostname for notification emails (empty for disabling it): " value
     echo ""
     NOTIFICATIONS_EMAIL_HOSTNAME=$value
   else
@@ -212,7 +212,7 @@ function captureNotificationsEmailHostname {
 
 function captureNotificationsEmailUsername {
    if [ -z "$NOTIFICATIONS_EMAIL_USERNAME" ]; then
-    read -p "Enter the SMTP server username for notification emails (empty for disabling it): " value
+    read -r -p "Enter the SMTP server username for notification emails (empty for disabling it): " value
     echo ""
     NOTIFICATIONS_EMAIL_USERNAME=$value
   else
@@ -222,7 +222,7 @@ function captureNotificationsEmailUsername {
 
 function captureNotificationsEmailPassword {
    if [ -z "$NOTIFICATIONS_EMAIL_PASSWORD" ]; then
-    read -s -p "Enter the SMTP server password for notification emails (empty for disabling it): " value
+    read -r -s -p "Enter the SMTP server password for notification emails (empty for disabling it): " value
     echo ""
     NOTIFICATIONS_EMAIL_PASSWORD=$value
   else
@@ -254,8 +254,8 @@ function checkPrerequisite {
 }
 
 function createBackstageSecret {
-  if 2>/dev/null 1>&2 oc get secret orchestrator-auth-secret -n $RHDH_NAMESPACE; then
-    oc delete secret orchestrator-auth-secret -n $RHDH_NAMESPACE
+  if 2>/dev/null 1>&2 oc get secret orchestrator-auth-secret -n "$RHDH_NAMESPACE"; then
+    oc delete secret orchestrator-auth-secret -n "$RHDH_NAMESPACE"
   fi
   declare -A secretKeys
   if [ -n "$K8S_CLUSTER_URL" ]; then
@@ -301,21 +301,21 @@ function createBackstageSecret {
   for key in "${!secretKeys[@]}"; do
     cmd="${cmd} --from-literal=${key}=${secretKeys[$key]}"
   done
-  eval $cmd
+  eval "$cmd"
 }
 
 function labelNamespaces {
   for a in $(oc get namespace -l rhdh.redhat.com/workflow-namespace -oname); do
-    oc label $a rhdh.redhat.com/workflow-namespace- ;
+    oc label "$a" rhdh.redhat.com/workflow-namespace- ;
   done
   for a in $(oc get namespace -l rhdh.redhat.com/argocd-namespace -oname); do
-    oc label $a rhdh.redhat.com/argocd-namespace- ;
+    oc label "$a" rhdh.redhat.com/argocd-namespace- ;
   done
   if [ -n "$WORKFLOW_NAMESPACE" ]; then
-    oc label namespace $WORKFLOW_NAMESPACE rhdh.redhat.com/workflow-namespace=
+    oc label namespace "$WORKFLOW_NAMESPACE" rhdh.redhat.com/workflow-namespace=
   fi
   if [[ -n "$ARGOCD_NAMESPACE" && -n "$ARGOCD_PASSWORD" && -n "$ARGOCD_URL" && -n "$ARGOCD_USERNAME" ]]; then
-    oc label namespace $ARGOCD_NAMESPACE rhdh.redhat.com/argocd-namespace=
+    oc label namespace "$ARGOCD_NAMESPACE" rhdh.redhat.com/argocd-namespace=
   fi
 }
 
