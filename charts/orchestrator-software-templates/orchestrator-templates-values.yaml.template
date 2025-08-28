@@ -1,0 +1,211 @@
+# Template file for orchestrator templates values
+# This values file will be merged with the existing values in the backstage release.
+# 
+# INSTRUCTIONS FOR MANUAL EDITING:
+# 1. Replace __RHDH_BASE_URL__ with your actual RHDH route URL
+#    Example: https://rhdh-developer-hub-rhdh.apps.cluster-abc123.abc123.sandbox.opentlc.com
+# 2. Replace {{CLUSTER_DOMAIN}} with your cluster's domain (if needed)
+#    Example: apps.cluster-abc123.abc123.sandbox.opentlc.com
+# 3. Update any other environment-specific values as needed
+# 
+# AUTOMATED GENERATION:
+# You can also use sed to replace placeholders automatically:
+#   RHDH_ROUTE="https://$(oc get route -n your-rhdh-namespace -o jsonpath='{.items[0].spec.host}')"
+#   sed -i "s|__RHDH_BASE_URL__|$RHDH_ROUTE|g" this-file.yaml
+# 
+# VALIDATION:
+# After editing, verify that no __*__ placeholders remain:
+#   grep "__.*__" this-file.yaml
+
+# Configure dynamic plugins directly (no ConfigMap mounting needed)
+global:
+  dynamic:
+    includes:
+      - "dynamic-plugins.default.yaml"
+    plugins:
+      - disabled: false
+        package: ./dynamic-plugins/dist/backstage-community-plugin-tekton
+      - disabled: false
+        package: ./dynamic-plugins/dist/backstage-community-plugin-redhat-argocd
+      - disabled: false
+        package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-argo-cd-backend-dynamic
+      - disabled: false
+        package: ./dynamic-plugins/dist/roadiehq-scaffolder-backend-argocd-dynamic
+      - disabled: false
+        package: ./dynamic-plugins/dist/backstage-plugin-kubernetes-backend-dynamic
+        pluginConfig:
+          kubernetes:
+            clusterLocatorMethods:
+              - type: config
+                clusters:
+                  - name: Default Cluster
+                    authProvider: serviceAccount
+                    url: https://kubernetes.default.svc
+                    skipTLSVerify: false
+            customResources:
+              - apiVersion: v1
+                group: tekton.dev
+                plural: pipelines
+              - apiVersion: v1
+                group: tekton.dev
+                plural: pipelineruns
+              - apiVersion: v1
+                group: tekton.dev
+                plural: taskruns
+              - apiVersion: v1
+                group: route.openshift.io
+                plural: routes
+            serviceLocatorMethod:
+              type: multiTenant
+      - disabled: false
+        package: ./dynamic-plugins/dist/backstage-plugin-kubernetes
+      - disabled: false
+        package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-github-dynamic
+      - disabled: false
+        package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-gitlab-dynamic
+
+upstream:
+  backstage:
+    appConfig:
+      app:
+        baseUrl: __RHDH_BASE_URL__
+      auth:
+        environment: development
+        providers:
+          guest:
+            dangerouslyAllowOutsideDevelopment: true
+          github:
+            development:
+              clientId: ${GITHUB_CLIENT_ID}
+              clientSecret: ${GITHUB_CLIENT_SECRET}
+              scopes:
+                - user:email
+                - user:name
+                - user:login
+                - repo
+      includes:
+        - orchestrator-catalog.yaml
+        - orchestrator-auth.yaml
+      backend:
+        auth:
+          externalAccess:
+            - options:
+                secret: ${BACKEND_SECRET}
+                subject: legacy-default-config
+              type: legacy
+        baseUrl: __RHDH_BASE_URL__
+        cors:
+          origin: __RHDH_BASE_URL__
+        database:
+          connection:
+            password: ${POSTGRESQL_ADMIN_PASSWORD}
+            user: postgres
+      argocd:
+        appLocatorMethods:
+          - instances:
+              - name: main
+                url: ${ARGOCD_URL}
+                username: ${ARGOCD_USERNAME}
+                password: ${ARGOCD_PASSWORD}
+            type: config
+    extraEnvVarsSecrets:
+      - orchestrator-auth-secret
+    extraAppConfig:
+      - configMapRef: orchestrator-catalog
+        filename: orchestrator-catalog.yaml
+      - configMapRef: orchestrator-auth
+        filename: orchestrator-auth.yaml
+    extraEnvVars:
+      - name: BACKEND_SECRET
+        valueFrom:
+          secretKeyRef:
+            key: backend-secret
+            name: '{{ include "janus-idp.backend-secret-name" $ }}'
+      - name: POSTGRESQL_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: postgres-password
+            name: '{{- include "janus-idp.postgresql.secretName" . }}'
+      - name: NODE_TLS_REJECT_UNAUTHORIZED
+        value: "0" 
+
+orchestrator:
+  enabled: true
+  serverlessLogicOperator:
+    enabled: true
+  serverlessOperator:
+    enabled: true
+  sonataflowPlatform:
+    monitoring:
+      enabled: true
+    eventing:
+      broker:
+        name: ""
+        namespace: ""
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    # -- Secret name for the user-created secret to connect an external DB
+    externalDBsecretRef: ""
+
+    # -- Name for the user-configured external Database
+    externalDBName: ""
+
+    # -- Host for the user-configured external Database
+    externalDBHost: ""
+
+    # -- Port for the user-configured external Database
+    externalDBPort: ""
+
+    # -- Image for the init container used by the create-db job
+    initContainerImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
+
+    # -- Image for the container used by the create-db job
+    createDBJobImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
+
+  # -- Orchestrator plugins and their configuration
+  plugins:
+    # RHDHBUGS-1464: Note that the plugins here fetch the packages from their direct HTTP download URLs from the (official) Red Hat NPM Registry.
+    # Previously, we were using the "@redhat/plugin@version" form along with injecting a .npmrc Secret to resolve the "@redhat" scope,
+    # but this caused conflicting issues with user-provided .npmrc secrets.
+    - disabled: false
+      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-backend-dynamic/-/backstage-plugin-orchestrator-backend-dynamic-1.6.0.tgz"
+      integrity: sha512-Kr55YbuVwEADwGef9o9wyimcgHmiwehPeAtVHa9g2RQYoSPEa6BeOlaPzB6W5Ke3M2bN/0j0XXtpLuvrlXQogA==
+      pluginConfig:
+        orchestrator:
+          dataIndexService:
+            url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
+    - disabled: false
+      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator/-/backstage-plugin-orchestrator-1.6.0.tgz"
+      integrity: sha512-fOSJv2PgtD2urKwBM7p9W6gV/0UIHSf4pkZ9V/wQO0eg0Zi5Mys/CL1ba3nO9x9l84MX11UBZ2r7PPVJPrmOtw==
+      pluginConfig:
+        dynamicPlugins:
+          frontend:
+            red-hat-developer-hub.backstage-plugin-orchestrator:
+              appIcons:
+                - importName: OrchestratorIcon
+                  name: orchestratorIcon
+              dynamicRoutes:
+                - importName: OrchestratorPage
+                  menuItem:
+                    icon: orchestratorIcon
+                    text: Orchestrator
+                  path: /orchestrator
+    - disabled: false
+      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic/-/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic-1.6.0.tgz"
+      integrity: sha512-Bueeix4661fXEnfJ9y31Yw91LXJgw6hJUG7lPVdESCi9VwBCjDB9Rm8u2yPqP8sriwr0OMtKtqD+Odn3LOPyVw==
+      pluginConfig:
+        orchestrator:
+          dataIndexService:
+            url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
+    - disabled: false
+      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-form-widgets/-/backstage-plugin-orchestrator-form-widgets-1.6.0.tgz"
+      integrity: sha512-Tqn6HO21Q1TQ7TFUoRhwBVCtSBzbQYz+OaanzzIB0R24O6YtVx3wR7Chtr5TzC05Vz5GkBO1+FZid8BKpqljgA==
+      pluginConfig:
+        dynamicPlugins:
+          frontend:
+            red-hat-developer-hub.backstage-plugin-orchestrator-form-widgets: {}

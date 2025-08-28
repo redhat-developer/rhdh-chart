@@ -26,7 +26,7 @@ openshiftGitops:
 
   # -- namespace of rhdh instance, will be used to install openshift-gitops.
   namespaces:
-    - rhdh
+    - orchestrator-gitops
 
   # -- subscription config
   subscription:

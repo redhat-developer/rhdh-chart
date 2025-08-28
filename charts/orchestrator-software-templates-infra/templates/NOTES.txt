@@ -46,5 +46,5 @@ oc wait --for=condition=Ready pod --all -n openshift-pipelines --timeout=120s
 Run the following command to validate that the openshift-gitops namespace and all pods within it are operational:
 
 oc wait --for=jsonpath='{.status.phase}'=Active namespace/openshift-gitops --timeout=80s && \
-oc wait --for=condition=Ready pod --all -n {{ .Release.Namespace }} --timeout=120s
+oc wait --for=condition=Ready pod --all -n orchestrator-gitops --timeout=120s
 {{- end }}

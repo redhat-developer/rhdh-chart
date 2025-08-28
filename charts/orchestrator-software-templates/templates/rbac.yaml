@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backstage
+  namespace: {{ .Values.orchestratorTemplates.rhdhChartNamespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-weight": "-5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Values.argocd.argocdNamespace }}
+  name: backstage-k8s-read
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-weight": "-4"
+rules:
+  - apiGroups:
+      [
+        "",
+        "apps",
+        "batch",
+        "networking.k8s.io",
+        "tekton.dev",
+        "route.openshift.io",
+        "autoscaling",
+      ]
+    resources:
+      [
+        "pods",
+        "services",
+        "configmaps",
+        "limitranges",
+        "resourcequotas",
+        "deployments",
+        "replicasets",
+        "statefulsets",
+        "jobs",
+        "cronjobs",
+        "ingresses",
+        "horizontalpodautoscalers",
+        "pipelines",
+        "pipelineruns",
+        "taskruns",
+        "routes",
+        "daemonsets",
+      ]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: {{ .Values.argocd.argocdNamespace }}
+  name: backstage-k8s-read-binding
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-weight": "-3"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: backstage-k8s-read
+subjects:
+  - kind: ServiceAccount
+    name: backstage
+    namespace: {{ .Values.orchestratorTemplates.rhdhChartNamespace }}

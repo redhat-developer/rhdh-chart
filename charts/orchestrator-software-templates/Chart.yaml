@@ -3,14 +3,15 @@ annotations:
   charts.openshift.io/provider: Red Hat Developer Hub Team
   charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
 apiVersion: v2
-name: orchestrator-software-templates-infra
+name: orchestrator-software-templates
 description: >
-  A Helm chart to install Openshift GitOps and Openshift Pipelines, which are required operators for installing the Orchestrator Software Templates to be available on RHDH.
+  This Helm chart deploys the Orchestrator Software Templates for Red Hat Developer Hub (RHDH) and other necessary GitOps configurations.
+
 kubeVersion: ">= 1.25.0-0"
 type: application
 sources:
-  - https://github.com/redhat-developer/rhdh-software-templates-infrastructure
-version: 0.2.2
+  - https://github.com/redhat-developer/rhdh-chart
+version: 0.1.0
 maintainers:
   - name: Red Hat Developer Hub Team
     url: https://github.com/redhat-developer/rhdh-chart
