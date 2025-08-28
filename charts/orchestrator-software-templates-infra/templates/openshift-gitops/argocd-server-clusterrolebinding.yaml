@@ -9,6 +9,10 @@ metadata:
     app.kubernetes.io/name: {{ $ns }}-argocd-server
     app.kubernetes.io/part-of: {{ $ns }}
   name: {{ $ns }}-argocd-server
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

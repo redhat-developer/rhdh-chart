@@ -9,7 +9,9 @@ metadata:
     app.kubernetes.io/name: {{ $ns }}-argocd-application-controller
     app.kubernetes.io/part-of: {{ $.Values.openshiftGitops.namespaces | first }}
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
   name: {{ $ns }}-argocd-application-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,14 @@
+{{- if eq "true" (include "install-argocd-project" .) }}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: orchestrator-gitops
+  namespace: {{ include "get-argocd-namespace" . }}
+spec:
+  destinations:
+  - name: '*'
+    namespace: '*'
+    server: '*'
+  sourceRepos:
+  - '*'
+{{- end }}
