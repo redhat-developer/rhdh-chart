@@ -2,9 +2,14 @@
 {{- if not .Values.rhdhConfig.secretRef.name }}
   {{- fail "Backstage's secret name defined in 'rhdhConfig.secretRef.name' is required" }}
 {{- end }}
-{{- $secret := lookup "v1" "Secret" .Values.orchestratorTemplates.rhdhChartNamespace .Values.rhdhConfig.secretRef.name }}
-{{- if not $secret }}
-  {{- fail (printf "Secret %s not found in namespace %s" .Values.rhdhConfig.secretRef.name .Values.orchestratorTemplates.rhdhChartNamespace ) }}
+{{/* Only validate secret existence during actual deployment, not during template testing */}}
+{{- $secret := dict }}
+{{- $nsExists := lookup "v1" "Namespace" "" .Values.orchestratorTemplates.rhdhChartNamespace }}
+{{- if $nsExists }}
+  {{- $secret = lookup "v1" "Secret" .Values.orchestratorTemplates.rhdhChartNamespace .Values.rhdhConfig.secretRef.name }}
+  {{- if not $secret }}
+    {{- fail (printf "Secret %s not found in namespace %s" .Values.rhdhConfig.secretRef.name .Values.orchestratorTemplates.rhdhChartNamespace ) }}
+  {{- end }}
 {{- end }}
 
 apiVersion: v1
