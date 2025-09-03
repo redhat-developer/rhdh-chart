@@ -409,6 +409,16 @@
                             "title": "Image for the container used by the create-db job",
                             "type": "string",
                             "additionalProperties": false
+                        },
+                        "jobServiceImage": {
+                            "title": "Image for the container used by the sonataflow jobs service",
+                            "type": "string",
+                            "additionalProperties": false
+                        },
+                        "dataIndexImage": {
+                            "title": "Image for the container used by the sonataflow data index",
+                            "type": "string",
+                            "additionalProperties": false
                         }
                     }
                 }
