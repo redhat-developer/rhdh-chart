@@ -12,7 +12,7 @@ openshiftPipelines:
 openshiftGitops:
   name: argocd
   namespaces:
-    - olm
+    - orchestrator-gitops
   subscription:
     namespace: operators
     name: argocd-operator
