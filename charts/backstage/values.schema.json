@@ -160,6 +160,11 @@
                             "title": "Image for the container used by the create-db job",
                             "type": "string"
                         },
+                        "dataIndexImage": {
+                            "additionalProperties": false,
+                            "title": "Image for the container used by the sonataflow data index",
+                            "type": "string"
+                        },
                         "eventing": {
                             "additionalProperties": false,
                             "properties": {
@@ -207,6 +212,11 @@
                         "initContainerImage": {
                             "additionalProperties": false,
                             "title": "Image for the init container used by the create-db job",
+                            "type": "string"
+                        },
+                        "jobServiceImage": {
+                            "additionalProperties": false,
+                            "title": "Image for the container used by the sonataflow jobs service",
                             "type": "string"
                         },
                         "monitoring": {
