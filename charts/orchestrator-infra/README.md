@@ -97,7 +97,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessOperator.subscription.spec.installPlanApproval | whether the update should be installed automatically | string | `"Manual"` |
 | serverlessOperator.subscription.spec.name | name of the operator package | string | `"serverless-operator"` |
 | serverlessOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
-| serverlessOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
+| serverlessOperator.subscription.spec.sourceNamespace | namespace of the catalog source | string | `"openshift-marketplace"` |
 | tests.enabled | Whether to create the test pod used for testing the Release using `helm test`. | bool | `true` |
 | tests.image | Test pod image | string | `"bitnami/kubectl:latest"` |
 
