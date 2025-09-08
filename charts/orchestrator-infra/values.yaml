@@ -32,6 +32,7 @@ serverlessOperator:
       name: serverless-operator
       # -- name of the catalog source
       source: redhat-operators
+      # -- namespace of the catalog source
       sourceNamespace: openshift-marketplace
 
 tests:
