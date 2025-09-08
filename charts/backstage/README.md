@@ -183,6 +183,7 @@ Kubernetes: `>= 1.27.0-0`
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
 | orchestrator.serverlessOperator.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
+| orchestrator.sonataflowPlatform.dataIndexImage | Image for the container used by the sonataflow data index, optional and used for disconnected environments | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBHost | Host for the user-configured external Database | string | `""` |
@@ -190,6 +191,7 @@ Kubernetes: `>= 1.27.0-0`
 | orchestrator.sonataflowPlatform.externalDBPort | Port for the user-configured external Database | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBsecretRef | Secret name for the user-created secret to connect an external DB | string | `""` |
 | orchestrator.sonataflowPlatform.initContainerImage | Image for the init container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
+| orchestrator.sonataflowPlatform.jobServiceImage | Image for the container used by the sonataflow jobs service, optional and used for disconnected environments | string | `""` |
 | orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
 | orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
