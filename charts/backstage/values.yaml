@@ -357,8 +357,10 @@ test:
 
 orchestrator:
   enabled: false
+  #  Disable Serverless Logic Operator is it already exists on the cluster
   serverlessLogicOperator:
     enabled: true
+  #  Disable Serverless Operator is it already exists on the cluster
   serverlessOperator:
     enabled: true
   sonataflowPlatform:
@@ -398,7 +400,6 @@ orchestrator:
 
     # -- Image for the container used by the sonataflow data index, optional and used for disconnected environments
     dataIndexImage: ""
-
 
   # -- Orchestrator plugins and their configuration
   plugins:
