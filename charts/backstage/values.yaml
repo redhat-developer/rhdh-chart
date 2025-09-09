@@ -357,10 +357,10 @@ test:
 
 orchestrator:
   enabled: false
-  #  Disable Serverless Logic Operator is it already exists on the cluster
+  #  Disable Serverless Logic Operator if it already exists on the cluster
   serverlessLogicOperator:
     enabled: true
-  #  Disable Serverless Operator is it already exists on the cluster
+  #  Disable Serverless Operator if it already exists on the cluster
   serverlessOperator:
     enabled: true
   sonataflowPlatform:
