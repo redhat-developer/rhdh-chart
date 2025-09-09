@@ -41,7 +41,7 @@ spec:
             userKey: username
             passwordKey: password
           serviceRef:
-            name: {{ .Release.Name }}-postgresql
+            name: {{ .Release.Name }}-postgresql{{- if eq .Values.upstream.postgresql.architecture "replication" }}-primary{{- end }}
             namespace: {{ .Release.Namespace }}
             databaseName: sonataflow
 {{- else }}
@@ -66,7 +66,7 @@ spec:
             userKey: username
             passwordKey: password
           serviceRef:
-            name: {{ .Release.Name }}-postgresql
+            name: {{ .Release.Name }}-postgresql{{- if eq .Values.upstream.postgresql.architecture "replication" }}-primary{{- end }}
             namespace: {{ .Release.Namespace }}
             databaseName: sonataflow
 {{- else }}
@@ -113,7 +113,7 @@ spec:
             - -c
             - |
 {{- if .Values.upstream.postgresql.enabled }}
-              dbHost="{{ .Release.Name }}-postgresql"
+              dbHost="{{ .Release.Name }}-postgresql{{- if eq .Values.upstream.postgresql.architecture "replication" }}-primary{{- end }}"
               dbPort="5432"
 {{- else }}
               dbHost=${POSTGRES_HOST}
@@ -186,7 +186,7 @@ spec:
         command: [ "sh", "-c" ]
 {{- if .Values.upstream.postgresql.enabled }}
         args:
-          - "psql -h {{ .Release.Name }}-postgresql -p 5432 -U postgres -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
+          - "psql -h {{ .Release.Name }}-postgresql{{- if eq .Values.upstream.postgresql.architecture "replication" }}-primary{{- end }} -p 5432 -U postgres -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
 {{- else }}
         args:
           - "psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
