@@ -74,7 +74,7 @@ After configuring all prerequisites, you can install the chart with the followin
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-templates redhat-developer/orchestrator-software-templates
+helm install my-orchestrator-templates redhat-developer/orchestrator-software-templates --version {{ template "chart.version" . }}
 ```
 
 Now, follow the instruction on the post-installation Notes. They will include the steps to create a custom values.yaml file to allow you to update the backstage chart
