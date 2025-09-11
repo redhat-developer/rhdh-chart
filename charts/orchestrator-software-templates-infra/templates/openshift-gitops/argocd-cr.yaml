@@ -5,9 +5,9 @@
 apiVersion: argoproj.io/v1beta1
 kind: ArgoCD
 metadata:
-  name: {{ $.Values.openshiftGitops.name }}
+  name: {{ $ns }}
   labels:
-    app: {{ $.Values.openshiftGitops.name }}
+    app: {{ $ns }}
   namespace: {{ $ns }}
   annotations:
     helm.sh/hook: post-install,post-upgrade
