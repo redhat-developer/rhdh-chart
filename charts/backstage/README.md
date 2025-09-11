@@ -13,7 +13,7 @@ The telemetry data collection feature is enabled by default. Red Hat Developer H
 ## Productized RHDH
 
 This repository now provides the productized RHDH chart.
-For the **Generally Available** version of this chart, see:
+For the **GENERALLY AVAILABLE** version of this chart, see:
 
 * https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
 

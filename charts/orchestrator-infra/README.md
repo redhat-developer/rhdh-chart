@@ -6,8 +6,6 @@
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless Logic Operator, both required to configure Red Hat Developer Hub to use the Orchestrator.
 
-Some comment here.
-
 ## Maintainers
 
 | Name | Email | Url |
