@@ -5983,6 +5983,28 @@ entries:
       charts.openshift.io/provider: Red Hat Developer Hub Team
       charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
     apiVersion: v2
+    created: "2025-09-11T15:30:29.148086399Z"
+    description: 'A Helm chart to install Openshift GitOps and Openshift Pipelines,
+      which are required operators for installing the Orchestrator Software Templates
+      to be available on RHDH. '
+    digest: e2adb20d679500e604a10928b747eafbc0ff180d3f23a47a406bfb4d51f07536
+    kubeVersion: '>= 1.25.0-0'
+    maintainers:
+    - name: Red Hat Developer Hub Team
+      url: https://github.com/redhat-developer/rhdh-chart
+    name: orchestrator-software-templates-infra
+    sources:
+    - https://github.com/redhat-developer/rhdh-software-templates-infrastructure
+    type: application
+    urls:
+    - https://github.com/redhat-developer/rhdh-chart/releases/download/orchestrator-software-templates-infra-0.2.3/orchestrator-software-templates-infra-0.2.3.tgz
+    version: 0.2.3
+  - annotations:
+      charts.openshift.io/name: Orchestrator Software Templates Infrastructure for
+        Red Hat Developer Hub
+      charts.openshift.io/provider: Red Hat Developer Hub Team
+      charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
+    apiVersion: v2
     created: "2025-09-03T08:42:34.409937861Z"
     description: 'A Helm chart to install Openshift GitOps and Openshift Pipelines,
       which are required operators for installing the Orchestrator Software Templates
@@ -6228,4 +6250,4 @@ entries:
     urls:
     - https://github.com/redhat-developer/rhdh-chart/releases/download/redhat-developer-hub-orchestrator-infra-0.0.4/redhat-developer-hub-orchestrator-infra-0.0.4.tgz
     version: 0.0.4
-generated: "2025-09-10T16:49:01.598114814Z"
+generated: "2025-09-11T15:30:29.148330396Z"
