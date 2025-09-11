@@ -6,6 +6,8 @@
 
 This Helm chart deploys the Orchestrator Software Templates for Red Hat Developer Hub (RHDH) and other necessary GitOps configurations.
 
+Another comment.
+
 ## Maintainers
 
 | Name | Email | Url |

@@ -6,6 +6,8 @@
 
 A Helm chart to install Openshift GitOps and Openshift Pipelines, which are required operators for installing the Orchestrator Software Templates to be available on RHDH.
 
+Another line.
+
 ## Maintainers
 
 | Name | Email | Url |
