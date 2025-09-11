@@ -58,5 +58,5 @@ jobs:
         run: |
           ct lint \
             --debug \
-            --config ct.yaml \
+            --config ct-lint.yaml \
             --target-branch "${{ github.event.pull_request.base.ref }}"
