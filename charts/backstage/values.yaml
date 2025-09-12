@@ -424,13 +424,13 @@ orchestrator:
               entityTabs:
                 - path: /workflows
                   title: Workflows
-                  mountPoint: entity.page.workflows          
+                  mountPoint: entity.page.workflows
               mountPoints:
                 - mountPoint: entity.page.workflows/cards
                   importName: OrchestratorCatalogTab
                   config:
                     layout:
-                      gridColumn: "1 / -1"                                
+                      gridColumn: "1 / -1"
                     if:
                       anyOf:
                         - IsOrchestratorCatalogTabAvailable
