@@ -12,7 +12,7 @@
 ## Productized RHDH 
 
 This repository now provides the productized RHDH chart.
-For the **GENERALLY AVAILABLE** version of this chart, see:
+For the **Generally Available** version of this chart, see:
 
 * https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
 
@@ -28,7 +28,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage
+helm install my-backstage redhat-developer/backstage --version {{ template "chart.version" . }}
 ```
 
 ## Introduction

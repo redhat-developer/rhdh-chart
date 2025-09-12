@@ -11,7 +11,7 @@ kubeVersion: ">= 1.25.0-0"
 type: application
 sources:
   - https://github.com/redhat-developer/rhdh-chart
-version: 0.1.0
+version: 0.1.1
 maintainers:
   - name: Red Hat Developer Hub Team
     url: https://github.com/redhat-developer/rhdh-chart

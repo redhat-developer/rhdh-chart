@@ -20,7 +20,7 @@
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra
+helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version {{ template "chart.version" . }}
 ```
 
 > **Tip**: List all releases using `helm list`

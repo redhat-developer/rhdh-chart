@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 4.5.9](https://img.shields.io/badge/Version-4.5.9-informational?style=flat-square)
+![Version: 4.5.10](https://img.shields.io/badge/Version-4.5.10-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -13,7 +13,7 @@ The telemetry data collection feature is enabled by default. Red Hat Developer H
 ## Productized RHDH
 
 This repository now provides the productized RHDH chart.
-For the **GENERALLY AVAILABLE** version of this chart, see:
+For the **Generally Available** version of this chart, see:
 
 * https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
 
@@ -30,7 +30,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage
+helm install my-backstage redhat-developer/backstage --version 4.5.10
 ```
 
 ## Introduction
