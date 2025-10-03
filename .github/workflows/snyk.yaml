@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Snyk IaC Scan for ${{ matrix.chartConfig.name }}
         continue-on-error: true
-        uses: snyk/actions/iac@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
+        uses: snyk/actions/iac@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
