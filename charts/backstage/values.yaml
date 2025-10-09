@@ -39,6 +39,7 @@ upstream:
       registry: quay.io
       repository: rhdh/rhdh-hub-rhel9
       tag: latest
+      pullPolicy: IfNotPresent
     command: []
     # FIXME (tumido): USE POSTGRES_PASSWORD and POSTGRES_USER instead of POSTGRES_ADMIN_PASSWORD
     # This is a hack. In {fedora,rhel}/postgresql images, regular user is forbidden
