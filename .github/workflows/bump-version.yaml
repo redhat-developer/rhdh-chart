@@ -96,7 +96,7 @@ jobs:
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
         id: get_version
-        uses: mikefarah/yq@6251e95af8df3505def48c71f3119836701495d6 # v4.47.2
+        uses: mikefarah/yq@0ecdce24e83f0fa127940334be98c86b07b0c488 # v4.48.1
         with:
           cmd: yq ".version" charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
@@ -109,7 +109,7 @@ jobs:
 
       - name: Bump the version
         if: steps.command.outputs.command-name == 'bump'
-        uses: mikefarah/yq@6251e95af8df3505def48c71f3119836701495d6 # v4.47.2
+        uses: mikefarah/yq@0ecdce24e83f0fa127940334be98c86b07b0c488 # v4.48.1
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
