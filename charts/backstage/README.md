@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 3.2.6](https://img.shields.io/badge/Version-3.2.6-informational?style=flat-square)
+![Version: 3.2.7](https://img.shields.io/badge/Version-3.2.7-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -20,12 +20,7 @@ For the **PRODUCTIZED** version of this chart, see:
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Red Hat Developer Hub Team |  | <https://github.com/redhat-developer/rhdh-chart> |
-
-## Source Code
-
-* <https://github.com/redhat-developer/rhdh-chart>
-* <https://github.com/redhat-developer/rhdh>
+| Red Hat |  | <https://redhat.com> |
 
 ---
 
@@ -193,6 +188,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.dynamic.includes[0] | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. | string | `"dynamic-plugins.default.yaml"` |
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
+| nameOverride |  | string | `"developer-hub"` |
 | route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
 | route.annotations | Route specific annotations | object | `{}` |
 | route.enabled | Enable the creation of the route resource | bool | `true` |
