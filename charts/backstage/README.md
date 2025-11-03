@@ -53,7 +53,7 @@ Charts are available in the following formats:
 
 ### Note
 
-Up-to-date instructions on installing RHDH through the chart can be found in the [installation docs](https://github.com/redhat-developer/rhdh-chart/blob/main/.rhdh/docs/installing-ci-charts.adoc).
+Up-to-date instructions on installing RHDH through the chart can be found in the [installation docs](https://github.com/redhat-developer/rhdh-chart/tree/main/.rhdh/docs/installation-ci-charts.adoc).
 
 ### Installing from the Chart Repository
 
