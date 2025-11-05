@@ -451,7 +451,7 @@ orchestrator:
           dataIndexService:
             url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
     - disabled: false
-      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-form-widgets/-/backstage-plugin-orchestrator-form-widgets-1.7.1.tgz"
+      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-form-widgets/-/backstage-plugin-orchestrator-form-widgets-1.8.2.tgz"
       integrity: sha512-Pe0dn3g+YTK3jbl36E8nt4zdyH/3w+MWgRyFWPc2B0eV4/L/aRfRC4KxcktmHPdamRGXTIaXL6cFae8TZl8Htw==
       pluginConfig:
         dynamicPlugins:
