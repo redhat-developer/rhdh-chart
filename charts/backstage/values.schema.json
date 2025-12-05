@@ -4560,7 +4560,9 @@
                                     "description": "Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
                                     "enum": [
                                         "Always",
-                                        "IfNotPresent"
+                                        "IfNotPresent",
+                                        "Never",
+                                        ""
                                     ],
                                     "title": "Specify a imagePullPolicy.",
                                     "type": "string"

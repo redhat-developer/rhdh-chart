@@ -59,12 +59,12 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           reactions: eyes
 
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6
         if: steps.command.outputs.command-name == 'bump'
         with:
           python-version: 3.14
 
-      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
         if: steps.command.outputs.command-name == 'bump'
         with:
           go-version: ^1
@@ -83,7 +83,7 @@ jobs:
 
       - name: Checkout Repository
         if: steps.command.outputs.command-name == 'bump'
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           token: ${{ steps.generate_token.outputs.token }}
 
@@ -96,7 +96,7 @@ jobs:
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
         id: get_version
-        uses: mikefarah/yq@0ecdce24e83f0fa127940334be98c86b07b0c488 # v4.48.1
+        uses: mikefarah/yq@7ccaf8e700ce99eb3f0f6cef7f5930a0b3c827cd # v4.49.2
         with:
           cmd: yq ".version" charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
@@ -109,7 +109,7 @@ jobs:
 
       - name: Bump the version
         if: steps.command.outputs.command-name == 'bump'
-        uses: mikefarah/yq@0ecdce24e83f0fa127940334be98c86b07b0c488 # v4.48.1
+        uses: mikefarah/yq@7ccaf8e700ce99eb3f0f6cef7f5930a0b3c827cd # v4.49.2
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
