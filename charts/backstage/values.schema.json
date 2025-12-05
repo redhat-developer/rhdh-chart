@@ -4595,7 +4595,7 @@
                                     "type": "string"
                                 },
                                 "tag": {
-                                    "default": "latest",
+                                    "default": "next",
                                     "description": "Immutable tags are recommended.",
                                     "title": "Backstage image tag",
                                     "type": "string"
