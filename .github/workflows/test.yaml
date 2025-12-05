@@ -15,23 +15,9 @@ concurrency:
 jobs:
 
   test-chart:
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          # 'latest' is the latest RC or stable release of RHDH (built from a release branch)
-          - latest
-        experimental: [false]
-        include:
-          # 'next' is the upcoming release of RHDH
-          # (built from the RHDH main branch, so might be unstable)
-          - version: next
-            experimental: true
-
     # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
-    name: Test ${{ matrix.version == 'latest' && 'Latest' || matrix.version }} Release
+    name: Test Latest Release
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental }}
 
     steps:
       - name: Checkout
@@ -161,4 +147,4 @@ jobs:
             --config ct-install.yaml \
             --upgrade \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-set-args="--set upstream.backstage.image.tag=${{ matrix.version }} --set upstream.ingress.enabled=true --set global.host=rhdh.127.0.0.1.sslip.io"
+            --helm-extra-set-args="--set upstream.ingress.enabled=true --set global.host=rhdh.127.0.0.1.sslip.io"
