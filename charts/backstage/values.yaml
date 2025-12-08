@@ -39,7 +39,7 @@ upstream:
       registry: quay.io
       repository: rhdh-community/rhdh
       tag: next
-      pullPolicy: IfNotPresent
+      pullPolicy: ""
     command: []
     # FIXME (tumido): USE POSTGRES_PASSWORD and POSTGRES_USER instead of POSTGRES_ADMIN_PASSWORD
     # This is a hack. In {fedora,rhel}/postgresql images, regular user is forbidden
@@ -213,7 +213,7 @@ upstream:
             # This following variable is required for orchestrator to startup properly.
           - name: MAX_ENTRY_SIZE
             value: "30000000"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: ""
         volumeMounts:
           - mountPath: /dynamic-plugins-root
             name: dynamic-plugins-root
