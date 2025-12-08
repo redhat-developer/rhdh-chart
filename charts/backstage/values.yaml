@@ -14,6 +14,12 @@ global:
     # listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description).
     plugins: []
 
+    # -- Catalog index configuration for automatic plugin discovery.
+    # The `install-dynamic-plugins.py` script will pull this image if the `CATALOG_INDEX_IMAGE` environment variable is set, extract `dynamic-plugins.default.yaml`,
+    # and write it to `dynamic-plugins-root` volume mount.
+    catalogIndex:
+      image: "quay.io/rhdh/plugin-catalog-index:1.9"
+
   # -- Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled.
   clusterRouterBase: "apps.example.com"
   # -- Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`.
@@ -213,6 +219,8 @@ upstream:
             # This following variable is required for orchestrator to startup properly.
           - name: MAX_ENTRY_SIZE
             value: "30000000"
+          - name: CATALOG_INDEX_IMAGE
+            value: '{{ .Values.global.dynamic.catalogIndex.image }}'
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /dynamic-plugins-root

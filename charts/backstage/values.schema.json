@@ -40,6 +40,18 @@
                 "dynamic": {
                     "additionalProperties": false,
                     "properties": {
+                        "catalogIndex": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "image": {
+                                    "default": "quay.io/rhdh/plugin-catalog-index:1.9",
+                                    "title": "Catalog index OCI image reference",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Catalog index configuration for automatic plugin discovery",
+                            "type": "object"
+                        },
                         "includes": {
                             "default": [
                                 "dynamic-plugins.default.yaml"
@@ -4619,6 +4631,10 @@
                                         {
                                             "name": "MAX_ENTRY_SIZE",
                                             "value": "30000000"
+                                        },
+                                        {
+                                            "name": "CATALOG_INDEX_IMAGE",
+                                            "value": "{{ .Values.global.dynamic.catalogIndex.image }}"
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",

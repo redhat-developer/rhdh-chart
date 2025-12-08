@@ -72,6 +72,18 @@
                                 "type": "string"
                             },
                             "default": []
+                        },
+                        "catalogIndex": {
+                            "title": "Catalog index configuration for automatic plugin discovery",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "image": {
+                                    "title": "Catalog index OCI image reference",
+                                    "type": "string",
+                                    "default": "quay.io/rhdh/plugin-catalog-index:1.9"
+                                }
+                            }
                         }
                     }
                 },
