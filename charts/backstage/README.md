@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 4.5.4](https://img.shields.io/badge/Version-4.5.4-informational?style=flat-square)
+![Version: 4.8.0](https://img.shields.io/badge/Version-4.8.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -13,7 +13,7 @@ The telemetry data collection feature is enabled by default. Red Hat Developer H
 ## Productized RHDH
 
 This repository now provides the productized RHDH chart.
-For the **GENERALLY AVAILABLE** version of this chart, see:
+For the **Generally Available** version of this chart, see:
 
 * https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
 
@@ -30,7 +30,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage
+helm install my-backstage redhat-developer/backstage --version 4.8.0
 ```
 
 ## Introduction
@@ -160,7 +160,7 @@ Kubernetes: `>= 1.27.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://backstage.github.io/charts | upstream(backstage) | 2.6.0 |
+| https://backstage.github.io/charts | upstream(backstage) | 2.6.3 |
 | https://charts.bitnami.com/bitnami | common | 2.31.4 |
 
 ## Values
@@ -179,10 +179,11 @@ Kubernetes: `>= 1.27.0-0`
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
 | nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |
-| orchestrator.plugins | Orchestrator plugins and their configuration | list | `[{"disabled":false,"integrity":"sha512-Kr55YbuVwEADwGef9o9wyimcgHmiwehPeAtVHa9g2RQYoSPEa6BeOlaPzB6W5Ke3M2bN/0j0XXtpLuvrlXQogA==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-backend-dynamic/-/backstage-plugin-orchestrator-backend-dynamic-1.6.0.tgz","pluginConfig":{"orchestrator":{"dataIndexService":{"url":"http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}"}}}},{"disabled":false,"integrity":"sha512-fOSJv2PgtD2urKwBM7p9W6gV/0UIHSf4pkZ9V/wQO0eg0Zi5Mys/CL1ba3nO9x9l84MX11UBZ2r7PPVJPrmOtw==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator/-/backstage-plugin-orchestrator-1.6.0.tgz","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-orchestrator":{"appIcons":[{"importName":"OrchestratorIcon","name":"orchestratorIcon"}],"dynamicRoutes":[{"importName":"OrchestratorPage","menuItem":{"icon":"orchestratorIcon","text":"Orchestrator"},"path":"/orchestrator"}]}}}}},{"disabled":false,"integrity":"sha512-Bueeix4661fXEnfJ9y31Yw91LXJgw6hJUG7lPVdESCi9VwBCjDB9Rm8u2yPqP8sriwr0OMtKtqD+Odn3LOPyVw==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic/-/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic-1.6.0.tgz","pluginConfig":{"orchestrator":{"dataIndexService":{"url":"http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}"}}}},{"disabled":false,"integrity":"sha512-Tqn6HO21Q1TQ7TFUoRhwBVCtSBzbQYz+OaanzzIB0R24O6YtVx3wR7Chtr5TzC05Vz5GkBO1+FZid8BKpqljgA==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-form-widgets/-/backstage-plugin-orchestrator-form-widgets-1.6.0.tgz","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-orchestrator-form-widgets":{}}}}}]` |
+| orchestrator.plugins | Orchestrator plugins and their configuration | list | `[{"disabled":false,"integrity":"sha512-6G0YguzCM5nCDpOrIGJpLTXVMr6EBdIVqSXtsLH9RvBH25RTuFpfJ7q6eEp26DqveaiqUCfBpJ51smdjcsEzFQ==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-backend-dynamic/-/backstage-plugin-orchestrator-backend-dynamic-1.8.2.tgz","pluginConfig":{"orchestrator":{"dataIndexService":{"url":"http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}"}}}},{"disabled":false,"integrity":"sha512-rnUA6iZ2JVAyASfwS4P9HeFmpqCgH6FQouzzg4s6lCPAsYUFvu6tifJ3df5lThXPUTJ2cDvvQgamU+4DiHP2jw==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator/-/backstage-plugin-orchestrator-1.8.2.tgz","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-orchestrator":{"appIcons":[{"importName":"OrchestratorIcon","name":"orchestratorIcon"}],"dynamicRoutes":[{"importName":"OrchestratorPage","menuItem":{"icon":"orchestratorIcon","text":"Orchestrator"},"path":"/orchestrator"}],"entityTabs":[{"mountPoint":"entity.page.workflows","path":"/workflows","title":"Workflows"}],"mountPoints":[{"config":{"if":{"anyOf":["IsOrchestratorCatalogTabAvailable"]},"layout":{"gridColumn":"1 / -1"}},"importName":"OrchestratorCatalogTab","mountPoint":"entity.page.workflows/cards"}]}}}}},{"disabled":false,"integrity":"sha512-N2hCn9RI/QVEoK56FAkGkSDbvfQCOIzVsJTwDX0kf//npO++2crRSJpB1Lr/m2UtYxfaXZX53p8sPcK3g8yWkQ==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic/-/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic-1.8.2.tgz","pluginConfig":{"orchestrator":{"dataIndexService":{"url":"http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}"}}}},{"disabled":false,"integrity":"sha512-Pe0dn3g+YTK3jbl36E8nt4zdyH/3w+MWgRyFWPc2B0eV4/L/aRfRC4KxcktmHPdamRGXTIaXL6cFae8TZl8Htw==","package":"https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-form-widgets/-/backstage-plugin-orchestrator-form-widgets-1.8.2.tgz","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-orchestrator-form-widgets":{}}}}}]` |
 | orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
 | orchestrator.serverlessOperator.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
+| orchestrator.sonataflowPlatform.dataIndexImage | Image for the container used by the sonataflow data index, optional and used for disconnected environments | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBHost | Host for the user-configured external Database | string | `""` |
@@ -190,6 +191,7 @@ Kubernetes: `>= 1.27.0-0`
 | orchestrator.sonataflowPlatform.externalDBPort | Port for the user-configured external Database | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBsecretRef | Secret name for the user-created secret to connect an external DB | string | `""` |
 | orchestrator.sonataflowPlatform.initContainerImage | Image for the init container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
+| orchestrator.sonataflowPlatform.jobServiceImage | Image for the container used by the sonataflow jobs service, optional and used for disconnected environments | string | `""` |
 | orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
 | orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |

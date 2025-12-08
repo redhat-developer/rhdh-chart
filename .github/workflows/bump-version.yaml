@@ -19,7 +19,7 @@ jobs:
       - name: Check for command
         id: command
         continue-on-error: true
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const commentBody = context.payload.comment.body;
@@ -52,19 +52,19 @@ jobs:
 
       - name: Add eyes reaction
         if: steps.command.outputs.command-name == 'bump'
-        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           comment-id: ${{ github.event.comment.id }}
           reactions: eyes
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6
         if: steps.command.outputs.command-name == 'bump'
         with:
-          python-version: 3.13
+          python-version: 3.14
 
-      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
         if: steps.command.outputs.command-name == 'bump'
         with:
           go-version: ^1
@@ -83,7 +83,7 @@ jobs:
 
       - name: Checkout Repository
         if: steps.command.outputs.command-name == 'bump'
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           token: ${{ steps.generate_token.outputs.token }}
 
@@ -96,7 +96,7 @@ jobs:
       - name: Get version
         if: steps.command.outputs.command-name == 'bump'
         id: get_version
-        uses: mikefarah/yq@f03c9dc599c37bfcaf533427211d05e51e6fee64 # v4.47.1
+        uses: mikefarah/yq@7ccaf8e700ce99eb3f0f6cef7f5930a0b3c827cd # v4.49.2
         with:
           cmd: yq ".version" charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
@@ -109,7 +109,7 @@ jobs:
 
       - name: Bump the version
         if: steps.command.outputs.command-name == 'bump'
-        uses: mikefarah/yq@f03c9dc599c37bfcaf533427211d05e51e6fee64 # v4.47.1
+        uses: mikefarah/yq@7ccaf8e700ce99eb3f0f6cef7f5930a0b3c827cd # v4.49.2
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/${{ steps.command.outputs.chart-name }}/Chart.yaml
 
@@ -124,7 +124,7 @@ jobs:
 
       - name: Commit pre-commit changes
         if: steps.command.outputs.command-name == 'bump'
-        uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6
+        uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # v7
         with:
           commit_message: Bump ${{ steps.command.outputs.chart-name }} version to ${{ steps.semver.outputs.new_version }}
           commit_options: "-s"

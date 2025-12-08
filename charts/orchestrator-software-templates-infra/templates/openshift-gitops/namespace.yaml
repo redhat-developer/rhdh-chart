@@ -1,6 +1,6 @@
 {{- if .Values.openshiftGitops.namespaces }}
 {{- range $index, $ns := .Values.openshiftGitops.namespaces }}
-{{- if ne $index 0 }}
+{{- if and (ne $ns "openshift-gitops") (ne $ns "olm") }}
 ---
 apiVersion: v1
 kind: Namespace
@@ -9,6 +9,7 @@ metadata:
     "openshift.io/description": ""
     "openshift.io/display-name": ""
     "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
   labels:
     kubernetes.io/metadata.name: {{ $ns }}
     openshift.io/cluster-monitoring: "true"

@@ -8,6 +8,10 @@ metadata:
     app.kubernetes.io/name: {{ .Values.openshiftGitops.namespaces | first }}-argocd-application-controller
     app.kubernetes.io/part-of: {{ .Values.openshiftGitops.namespaces | first }}
   name: {{ .Values.openshiftGitops.namespaces | first }}-argocd-application-controller
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
 rules:
   - apiGroups: [""]
     resources: ["pods"]

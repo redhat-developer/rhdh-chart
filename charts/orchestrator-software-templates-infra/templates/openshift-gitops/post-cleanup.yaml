@@ -1,4 +1,4 @@
-{{- if and .Values.openshiftGitops.enabled }}
+{{- if .Values.openshiftGitops.enabled }}
 
 apiVersion: v1
 kind: ServiceAccount
@@ -17,24 +17,15 @@ metadata:
     "helm.sh/hook": pre-install,pre-upgrade,post-delete
     "helm.sh/hook-weight": "10"
 rules:
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    verbs: ["get", "list", "delete"]
   - apiGroups: ["operators.coreos.com"]
     resources: ["clusterserviceversions", "subscriptions"]
-    verbs: ["get", "list", "delete", "watch"]
-  - apiGroups: ["apps", ""]
-    resources: ["deployments", "pods"]
-    verbs: ["get", "list", "delete"]
-  - apiGroups: [""]
-    resources: ["pods", "services", "namespaces"]
-    verbs: ["get", "list", "delete"]
-  - apiGroups: ["rbac.authorization.k8s.io"]
-    resources: ["clusterroles", "clusterrolebindings"]
-    verbs: ["get", "list", "delete"]
+    verbs: ["get", "list", "delete", "watch", "patch", "update"]
   - apiGroups: ["argoproj.io"]
-    resources: ["applications", "appprojects", "argocds", "argocd"]
-    verbs: ["get", "list", "watch", "delete"]
+    resources: ["argocds", "applications", "appprojects"]
+    verbs: ["get", "list", "delete", "watch", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -55,7 +46,7 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: openshift-gitops-cleanup-gitops
+  name: openshift-gitops-cleanup
   namespace: {{ .Values.openshiftGitops.subscription.namespace }}
   annotations:
     "helm.sh/hook": post-delete
@@ -67,8 +58,17 @@ spec:
       serviceAccountName: csv-cleanup-gitops
       restartPolicy: Never
       containers:
-      - name: cleanup
+      - name: cleanup-gitops
         image: {{ .Values.cleanupContainerImage }}
+        env:
+          - name: NAMESPACE
+            value: {{ .Values.openshiftGitops.subscription.namespace }}
+          - name: NAME
+            value: {{ .Values.openshiftGitops.subscription.spec.name }}
+          - name: ARGOCD_NAME
+            value: {{ .Values.openshiftGitops.name }}
+          - name: ARGOCD_NAMESPACES
+            value: {{ join "," .Values.openshiftGitops.namespaces }}
         resources:
           requests:
             memory: {{ .Values.resources.requests.memory }}
@@ -76,11 +76,6 @@ spec:
           limits:
             memory: {{ .Values.resources.limits.memory }}
             cpu: {{ .Values.resources.limits.cpu }}
-        env:
-          - name: NAMESPACE
-            value: {{ .Values.openshiftGitops.subscription.namespace }}
-          - name: NAME
-            value: {{ .Values.openshiftGitops.subscription.spec.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -93,137 +88,51 @@ spec:
         - /bin/sh
         - -c
         - |
-          set +e # Continue on error
+          set +e
 
-          echo "Starting OpenShift GitOps Cleanup Job..."
+          echo "Waiting for Subscription to be deleted..."
+          kubectl delete subscription.operators.coreos.com $NAME -n $NAMESPACE --ignore-not-found
+          kubectl wait --for=delete subscription.operators.coreos.com/$NAME -n $NAMESPACE --timeout=30s || echo "Subscription deletion timed out, continuing..."
 
-          # --- Phase 1: Delete OpenShift GitOps Operator Subscription FIRST ---
-          echo "Phase 1: Deleting OpenShift GitOps Operator Subscription to stop operator reconciliation..."
-          
-          echo "Attempting to delete Subscription $NAME in $NAMESPACE..."
-          kubectl delete subscription $NAME -n $NAMESPACE --ignore-not-found
-          echo "Waiting for Subscription to be deleted (timeout 90s)..."
-          kubectl wait --for=delete subscription/$NAME -n $NAMESPACE --timeout=90s || echo "Subscription deletion timed out or resource not found, continuing..."
-          
-          # Give the operator time to stop reconciling
-          echo "Waiting 10 seconds for operator to stop reconciling..."
-          sleep 10
-          
-          echo "Phase 1: Subscription deletion complete."
-          echo ""
+          echo "Waiting for CSV to be deleted..."
+          kubectl delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --ignore-not-found
+          kubectl wait --for=delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --timeout=60s || echo "CSV deletion timed out, continuing..."
 
-          # --- Phase 2: Delete all Applications ---
-          echo "Phase 2: Deleting all Application resources across all namespaces..."
-          
-          # Get unique list of namespaces that contain Applications
-          namespaces_with_apps=$(kubectl get applications.argoproj.io -A -o custom-columns="NAMESPACE:.metadata.namespace" --no-headers 2>/dev/null | sort -u)
-
-          if [ -z "$namespaces_with_apps" ]; then
-            echo "No Application resources found. Skipping Application deletion."
-          else
-            echo "$namespaces_with_apps" | while read -r ns; do
-              echo "  Processing namespace: $ns for Applications"
-              # Get all Applications in the current namespace
-              applications_in_ns=$(kubectl get applications.argoproj.io -n "$ns" -o custom-columns="NAME:.metadata.name" --no-headers 2>/dev/null)
-
-              if [ -z "$applications_in_ns" ]; then
-                echo "    No Applications found in $ns."
-              else
-                echo "$applications_in_ns" | while read -r app; do
-                  if [ -n "$app" ]; then
-                    echo "    Deleting Application: $app in namespace: $ns"
-                    kubectl delete applications.argoproj.io "$app" -n "$ns" --ignore-not-found
-                  fi
-                done
-              fi
-            done
-          fi
-          echo "Phase 2: Application deletion complete."
-          echo ""
-
-          # --- Phase 3: Delete all AppProjects ---
-          echo "Phase 3: Deleting all AppProject resources across all namespaces..."
-          
-          # Get unique list of namespaces that contain AppProjects
-          namespaces_with_appprojects=$(kubectl get appprojects.argoproj.io -A -o custom-columns="NAMESPACE:.metadata.namespace" --no-headers 2>/dev/null | sort -u)
-
-          if [ -z "$namespaces_with_appprojects" ]; then
-            echo "No AppProject resources found. Skipping AppProject deletion."
-          else
-            echo "$namespaces_with_appprojects" | while read -r ns; do
-              echo "  Processing namespace: $ns for AppProjects"
-              # Get all AppProjects in the current namespace
-              appprojects_in_ns=$(kubectl get appprojects.argoproj.io -n "$ns" -o custom-columns="NAME:.metadata.name" --no-headers 2>/dev/null)
-
-              if [ -z "$appprojects_in_ns" ]; then
-                echo "    No AppProjects found in $ns."
-              else
-                echo "$appprojects_in_ns" | while read -r proj; do
-                  if [ -n "$proj" ]; then
-                    echo "    Deleting AppProject: $proj in namespace: $ns"
-                    kubectl delete appprojects.argoproj.io "$proj" -n "$ns" --ignore-not-found
-                  fi
-                done
-              fi
-            done
-          fi
-          echo "Phase 3: AppProject deletion complete."
-          echo ""
-
-          # --- Phase 4: Delete all ArgoCD instances ---
-          echo "Phase 4: Deleting all ArgoCD instances across all namespaces..."
-
-          # Get a list of all ArgoCD instances (namespace and name) once
-          argo_instances=$(kubectl get argocd -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name" --no-headers 2>/dev/null)
-
-          if [ -z "$argo_instances" ]; then
-            echo "No ArgoCD instances found. Skipping ArgoCD instance deletion."
-          else
-            echo "$argo_instances" | while read -r ns argo_name; do
-              if [ -n "$ns" ] && [ -n "$argo_name" ]; then
-                echo "  Attempting to delete ArgoCD instance '$argo_name' in namespace: $ns"
-                # First, try a regular delete. If it gets stuck (due to finalizers),
-                # we will attempt to patch.
-                kubectl delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
+          echo "Finding and cleaning up all ArgoCD resources..."
+          # Get all ArgoCD resources across all namespaces
+          kubectl get argocd --all-namespaces -o jsonpath='{range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}' | while read -r ns name; do
+            if [ -n "$ns" ] && [ -n "$name" ]; then
+              echo "  - Found ArgoCD $name in namespace $ns"
+              
+              # Try normal deletion first
+              kubectl delete argocd $name -n $ns --ignore-not-found --timeout=15s 2>/dev/null || true
+              
+              # Check if still exists (likely stuck with finalizers)
+              if kubectl get argocd $name -n $ns >/dev/null 2>&1; then
+                echo "    ArgoCD $name stuck, removing finalizers..."
                 
-                # Check if the ArgoCD instance is still present (meaning it's stuck with a finalizer)
-                if kubectl get argocd "$argo_name" -n "$ns" &>/dev/null; then
-                  echo "  ArgoCD instance '$argo_name' in namespace '$ns' is stuck. Attempting to remove finalizers."
-                  # Patch the resource to remove finalizers
-                  kubectl patch argocd "$argo_name" -n "$ns" --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]' || \
-                    echo "    Warning: Failed to patch finalizers for $argo_name in $ns. It might remain."
-                  echo "  Re-attempting delete for ArgoCD instance '$argo_name' in namespace: $ns after finalizer removal."
-                  kubectl delete argocd "$argo_name" -n "$ns" --ignore-not-found --timeout=30s
-                fi
+                # Remove finalizers using JSON patch
+                kubectl patch argocd $name -n $ns --type='merge' -p '{"metadata":{"finalizers":[]}}' || true
+                
+                # Force delete
+                kubectl delete argocd $name -n $ns --force --grace-period=0 2>/dev/null || true
+                
+                echo "    ArgoCD $name force deleted"
+              else
+                echo "    ArgoCD $name deleted successfully"
               fi
-            done
-          fi
-          echo "Phase 4: ArgoCD instance deletion complete."
-          echo ""
+            fi
+          done
 
-          # --- Phase 5: Delete ClusterServiceVersion (CSV) ---
-          echo "Phase 5: Deleting ClusterServiceVersion (CSV) for $NAME in $NAMESPACE..."
-          
-          # Find CSVs that match the operator name pattern
-          csv_names=$(kubectl get csv -n $NAMESPACE -o name | grep -E "(gitops|argocd)" 2>/dev/null || echo "")
-          
-          if [ -z "$csv_names" ]; then
-            echo "No GitOps/ArgoCD CSVs found in $NAMESPACE."
-          else
-            echo "$csv_names" | while read -r csv_name; do
-              if [ -n "$csv_name" ]; then
-                echo "  Deleting CSV: $csv_name"
-                kubectl delete "$csv_name" -n $NAMESPACE --ignore-not-found
-              fi
-            done
-          fi
-          
-          echo "Waiting for CSV to be deleted (timeout 120s)..."
-          kubectl wait --for=delete csv -l operators.coreos.com/$NAME.$NAMESPACE='' -n $NAMESPACE --timeout=120s 2>/dev/null || echo "CSV deletion wait timed out or resource not found, continuing..."
+          echo "Cleaning up AppProjects and Applications in managed namespaces..."
+          echo "$ARGOCD_NAMESPACES" | tr ',' '\n' | while read -r ns; do
+            if [ -n "$ns" ]; then
+              echo "  - Cleaning namespace $ns"
+              kubectl delete appproject default -n $ns --ignore-not-found --timeout=15s 2>/dev/null || true
+              kubectl delete application -l app.kubernetes.io/managed-by=Helm -n $ns --ignore-not-found --timeout=15s 2>/dev/null || true
+            fi
+          done
 
-          echo "Phase 5: CSV deletion complete."
-          echo ""
+          echo "Cleanup finished."
 
-          echo "OpenShift GitOps cleanup job finished successfully."
-        
 {{- end }}
