@@ -4638,7 +4638,7 @@
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",
-                                    "imagePullPolicy": "",
+                                    "imagePullPolicy": "IfNotPresent",
                                     "name": "install-dynamic-plugins",
                                     "resources": {
                                         "limits": {
