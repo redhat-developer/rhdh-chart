@@ -301,6 +301,12 @@ upstream:
           origin: 'https://{{- include "janus-idp.hostname" . }}'
 ```
 
+### Catalog Index Configuration
+
+The chart supports automatic plugin discovery through a catalog index OCI image. This is configured via `global.dynamic.catalogIndex.image` and allows you to use a pre-defined set of dynamic plugins.
+
+For detailed information on configuring the catalog index, including how to override the default image or use a private registry, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
+
 ### Vanilla Kubernetes compatibility mode
 
 In order to deploy this chart on vanilla Kubernetes or any other non-OCP platform, please make sure to apply the following changes. Note that further customizations may be required, depending on your exact Kubernetes setup:
