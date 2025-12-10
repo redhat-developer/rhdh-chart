@@ -13,7 +13,7 @@
                         "registry": "quay.io",
                         "repository": "janus-idp/redhat-backstage-build",
                         "tag": "latest",
-                        "pullPolicy": "IfNotPresent"
+                        "pullPolicy": ""
                     }
                 }
             }
