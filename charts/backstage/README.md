@@ -173,7 +173,6 @@ Kubernetes: `>= 1.27.0-0`
 | global.auth.backend.existingSecret | Instead of generating a secret value, refer to existing secret | string | `""` |
 | global.auth.backend.value | Instead of generating a secret value, use the following value | string | `""` |
 | global.clusterRouterBase | Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled. | string | `"apps.example.com"` |
-| global.dynamic.catalogIndex | Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount. | object | `{"image":"quay.io/rhdh/plugin-catalog-index:1.9"}` |
 | global.dynamic.includes | Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field. Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
 | global.dynamic.includes[0] | List of dynamic plugins included inside the `janus-idp/backstage-showcase` container image, some of which are disabled by default. This file ONLY works with the `janus-idp/backstage-showcase` container image. | string | `"dynamic-plugins.default.yaml"` |
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
@@ -198,6 +197,8 @@ Kubernetes: `>= 1.27.0-0`
 | orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
 | orchestrator.sonataflowPlatform.resources.requests.cpu |  | string | `"250m"` |
 | orchestrator.sonataflowPlatform.resources.requests.memory |  | string | `"64Mi"` |
+| pluginCatalogIndex | Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount. | object | `{"image":"quay.io/rhdh/plugin-catalog-index:1.9"}` |
+| pluginCatalogIndex.image | OCI image for the plugin catalog index. Set to empty string to disable. | string | `"quay.io/rhdh/plugin-catalog-index:1.9"` |
 | route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
 | route.annotations | Route specific annotations | object | `{}` |
 | route.enabled | Enable the creation of the route resource | bool | `true` |
@@ -303,7 +304,7 @@ upstream:
 
 ### Catalog Index Configuration
 
-The chart supports automatic plugin discovery through a catalog index OCI image. This image configured via `global.dynamic.catalogIndex.image` and lets you use a pre-defined set of dynamic plugins.
+The chart supports automatic plugin discovery through a catalog index OCI image. This is configured via `pluginCatalogIndex.image` and lets you use a pre-defined set of dynamic plugins.
 
 For detailed information on configuring the catalog index, including how to override the default image or use a private registry, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
 

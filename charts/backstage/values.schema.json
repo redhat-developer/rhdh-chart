@@ -4634,11 +4634,11 @@
                                         },
                                         {
                                             "name": "CATALOG_INDEX_IMAGE",
-                                            "value": "{{ .Values.global.dynamic.catalogIndex.image }}"
+                                            "value": "{{ .Values.pluginCatalogIndex.image }}"
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",
-                                    "imagePullPolicy": "IfNotPresent",
+                                    "imagePullPolicy": "",
                                     "name": "install-dynamic-plugins",
                                     "resources": {
                                         "limits": {

@@ -18,21 +18,19 @@ The `install-dynamic-plugins.py` script:
 
 ### Overriding the Catalog Index Image
 
-To use a different catalog index image, such as a newer version or a mirrored image, use the `global.dynamic.catalogIndex.image` field in your values file:
+To use a different catalog index image, such as a newer version or a mirrored image, use the `pluginCatalogIndex.image` field in your values file:
 
 ```yaml
 # values.yaml
-global:
-  dynamic:
-    catalogIndex:
-      image: "quay.io/rhdh/plugin-catalog-index:1.9"
+pluginCatalogIndex:
+  image: "quay.io/rhdh/plugin-catalog-index:1.9"
 ```
 
 Alternatively, you can override it via the command line:
 
 ```console
 helm upgrade -i <release_name> redhat-developer/backstage \
-  --set global.dynamic.catalogIndex.image="quay.io/rhdh/plugin-catalog-index:1.9"
+  --set pluginCatalogIndex.image="quay.io/rhdh/plugin-catalog-index:1.9"
 ```
 
 ### Disabling the Catalog Index
@@ -41,10 +39,8 @@ To disable the catalog index feature entirely and not pull any external catalog 
 
 ```yaml
 # values.yaml
-global:
-  dynamic:
-    catalogIndex:
-      image: ""
+pluginCatalogIndex:
+  image: ""
 ```
 
 When disabled, the `install-dynamic-plugins.py` script skips the catalog index extraction and relies solely on the `dynamic-plugins.default.yaml` file bundled within the Backstage container image.
