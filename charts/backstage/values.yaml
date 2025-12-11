@@ -1,13 +1,12 @@
 nameOverride: developer-hub
 
-# -- Catalog index configuration for automatic plugin discovery.
-# The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
-# The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
-pluginCatalogIndex:
-  # -- OCI image for the plugin catalog index. Set to empty string to disable.
-  image: "quay.io/rhdh/plugin-catalog-index:1.9"
-
 global:
+  # -- Catalog index configuration for automatic plugin discovery.
+  # The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
+  # The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
+  pluginCatalogIndex:
+    # -- OCI image for the plugin catalog index. Set to empty string to disable.
+    image: "quay.io/rhdh/plugin-catalog-index:1.9"
   dynamic:
     # -- Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field.
     # Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`).
@@ -222,7 +221,7 @@ upstream:
           - name: MAX_ENTRY_SIZE
             value: "30000000"
           - name: CATALOG_INDEX_IMAGE
-            value: '{{ .Values.pluginCatalogIndex.image }}'
+            value: '{{ .Values.global.pluginCatalogIndex.image }}'
         imagePullPolicy: ""
         volumeMounts:
           - mountPath: /dynamic-plugins-root

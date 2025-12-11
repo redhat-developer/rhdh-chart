@@ -4634,7 +4634,7 @@
                                         },
                                         {
                                             "name": "CATALOG_INDEX_IMAGE",
-                                            "value": "{{ .Values.pluginCatalogIndex.image }}"
+                                            "value": "{{ .Values.global.pluginCatalogIndex.image }}"
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",
