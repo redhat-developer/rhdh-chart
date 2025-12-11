@@ -47,11 +47,11 @@ global:
       image: ""
 ```
 
-When disabled, the `install-dynamic-plugins.py` script will skip the catalog index extraction and rely solely on the `dynamic-plugins.default.yaml` file bundled within the Backstage container image.
+When disabled, the `install-dynamic-plugins.py` script skips the catalog index extraction and relies solely on the `dynamic-plugins.default.yaml` file bundled within the Backstage container image.
 
 ### Using a Private Registry
 
-If your catalog index image is stored in a private registry that requires authentication, you can provide credentials via the `dynamic-plugins-registry-auth` secret.
+If your catalog index image is stored in a private registry that requires authentication, you can provide credentials by using the `dynamic-plugins-registry-auth` secret.
 
 The `auth.json` file is the standard [containers-auth.json(5)](https://github.com/containers/image/blob/main/docs/containers-auth.json.5.md) format used by `skopeo`, `podman`, and other container tools. It stores registry credentials that allow these tools to pull images from authenticated registries.
 
@@ -67,7 +67,7 @@ The `auth.json` file is the standard [containers-auth.json(5)](https://github.co
 }
 ```
 
-The `auth` value is a base64-encoded string of `username:password`. You can generate it with:
+The `auth` value is a base64-encoded string of `username:password`. You can generate it with the following commands:
 
 ```console
 echo -n 'myusername:mypassword' | base64
@@ -81,7 +81,7 @@ kubectl create secret generic <release_name>-dynamic-plugins-registry-auth \
   -n <namespace>
 ```
 
-Or if you prefer a declarative YAML manifest:
+Alternatively, you can use a declarative YAML manifest:
 
 ```yaml
 apiVersion: v1

@@ -15,8 +15,8 @@ global:
     plugins: []
 
     # -- Catalog index configuration for automatic plugin discovery.
-    # The `install-dynamic-plugins.py` script will pull this image if the `CATALOG_INDEX_IMAGE` environment variable is set, extract `dynamic-plugins.default.yaml`,
-    # and write it to `dynamic-plugins-root` volume mount.
+    # The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted
+    # and written to `dynamic-plugins-root` volume mount.
     catalogIndex:
       image: "quay.io/rhdh/plugin-catalog-index:1.9"
 
