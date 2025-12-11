@@ -1,22 +1,10 @@
 # Catalog Index Configuration
 
-The catalog index is an OCI artifact that contains `dynamic-plugins.default.yaml`, which defines the default set of dynamic plugins to be installed. The Helm chart automatically configures the `install-dynamic-plugins` init container to pull and extract this catalog index.
+The Helm chart supports loading default plugin configurations from an OCI container image (catalog index). For general information about how the catalog index works, see [Using a Catalog Index Image for Default Plugin Configurations](https://github.com/redhat-developer/rhdh/blob/main/docs/dynamic-plugins/installing-plugins.md#using-a-catalog-index-image-for-default-plugin-configurations).
 
-By default, the chart sets the `CATALOG_INDEX_IMAGE` environment variable in the `install-dynamic-plugins` init container:
+By default, the chart sets `pluginCatalogIndex.image` to `quay.io/rhdh/plugin-catalog-index:1.9`.
 
-```yaml
-env:
-  - name: CATALOG_INDEX_IMAGE
-    value: "quay.io/rhdh/plugin-catalog-index:1.9"
-```
-
-The `install-dynamic-plugins.py` script:
-1. Pulls the catalog index OCI image using `skopeo`
-2. Extracts the image layers to a temporary directory (`.catalog-index-temp`)
-3. Locates `dynamic-plugins.default.yaml` within the extracted content
-4. Replaces the `dynamic-plugins.default.yaml` reference in your `includes` list with the extracted catalog index version
-
-### Overriding the Catalog Index Image
+## Overriding the Catalog Index Image
 
 To use a different catalog index image, such as a newer version or a mirrored image, use the `pluginCatalogIndex.image` field in your values file:
 
@@ -33,9 +21,9 @@ helm upgrade -i <release_name> redhat-developer/backstage \
   --set pluginCatalogIndex.image="quay.io/rhdh/plugin-catalog-index:1.9"
 ```
 
-### Disabling the Catalog Index
+## Disabling the Catalog Index
 
-To disable the catalog index feature entirely and not pull any external catalog index image, set the image to an empty string:
+To disable the catalog index feature and use only the `dynamic-plugins.default.yaml` bundled in the container image, set the image to an empty string:
 
 ```yaml
 # values.yaml
@@ -43,9 +31,7 @@ pluginCatalogIndex:
   image: ""
 ```
 
-When disabled, the `install-dynamic-plugins.py` script skips the catalog index extraction and relies solely on the `dynamic-plugins.default.yaml` file bundled within the Backstage container image.
-
-### Using a Private Registry
+## Using a Private Registry
 
 If your catalog index image is stored in a private registry that requires authentication, you can provide credentials by using the `dynamic-plugins-registry-auth` secret.
 
