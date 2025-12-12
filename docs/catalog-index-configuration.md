@@ -12,19 +12,6 @@ pluginCatalogIndex:
     tag: "1.9"
 ```
 
-## Disabling the Catalog Index
-
-To disable the catalog index feature and use only the `dynamic-plugins.default.yaml` bundled in the container image, set the image fields to empty strings:
-
-```yaml
-# values.yaml
-pluginCatalogIndex:
-  image:
-    registry: ""
-    repository: ""
-    tag: ""
-```
-
 ## Using a Private Registry
 
 If your catalog index image is stored in a private registry that requires authentication, create a secret named `<release_name>-dynamic-plugins-registry-auth` containing an `auth.json` file with your registry credentials.
