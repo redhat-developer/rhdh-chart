@@ -215,7 +215,7 @@ upstream:
           - name: MAX_ENTRY_SIZE
             value: "30000000"
           - name: CATALOG_INDEX_IMAGE
-            value: '{{ .Values.pluginCatalogIndex.image.registry }}/{{ .Values.pluginCatalogIndex.image.repository }}:{{ .Values.pluginCatalogIndex.image.tag }}'
+            value: '{{ (index .Values "catalog-index").image.registry }}/{{ (index .Values "catalog-index").image.repository }}:{{ (index .Values "catalog-index").image.tag }}'
         imagePullPolicy: ""
         volumeMounts:
           - mountPath: /dynamic-plugins-root
@@ -248,6 +248,14 @@ upstream:
       enabled: false
       path: /metrics
       port: http-metrics
+  # -- Catalog index configuration for automatic plugin discovery.
+  # The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
+  # The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
+  catalog-index:
+    image:
+      registry: quay.io
+      repository: rhdh/plugin-catalog-index
+      tag: "1.9"
   postgresql:
     enabled: true
     postgresqlDataDir: /var/lib/pgsql/data/userdata
@@ -337,15 +345,6 @@ route:
     # --  Indicates the desired behavior for insecure connections to a route.
     # <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled.
     insecureEdgeTerminationPolicy: "Redirect"
-
-# -- Catalog index configuration for automatic plugin discovery.
-# The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
-# The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
-pluginCatalogIndex:
-  image:
-    registry: quay.io
-    repository: rhdh/plugin-catalog-index
-    tag: "1.9"
 
 # -- Test pod parameters
 test:
