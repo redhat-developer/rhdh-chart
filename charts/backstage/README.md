@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 4.8.1](https://img.shields.io/badge/Version-4.8.1-informational?style=flat-square)
+![Version: 4.9.0](https://img.shields.io/badge/Version-4.9.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -30,7 +30,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 4.8.1
+helm install my-backstage redhat-developer/backstage --version 4.9.0
 ```
 
 ## Introduction
@@ -221,6 +221,7 @@ Kubernetes: `>= 1.27.0-0`
 | upstream.backstage.extraVolumes[0] | Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start. | object | `{"ephemeral":{"volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}}}}},"name":"dynamic-plugins-root"}` |
 | upstream.backstage.extraVolumes[0].ephemeral.volumeClaimTemplate.spec.resources.requests.storage | Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins. | string | `"5Gi"` |
 | upstream.backstage.initContainers[0].image | Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount. It could be replaced by a custom image based on this one. | string | `quay.io/janus-idp/backstage-showcase:latest` |
+| upstream.catalog-index | Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount. | object | `{"image":{"registry":"quay.io","repository":"rhdh/plugin-catalog-index","tag":"1.9"}}` |
 
 ## Opinionated Backstage deployment
 
@@ -300,9 +301,15 @@ upstream:
           origin: 'https://{{- include "janus-idp.hostname" . }}'
 ```
 
+### Catalog Index Configuration
+
+The chart supports automatic plugin discovery through a catalog index OCI image. This is configured via `upstream.catalog-index.image` (with `registry`, `repository`, and `tag` fields) and lets you use a pre-defined set of dynamic plugins.
+
+For detailed information on configuring the catalog index, including how to override the default image or use a private registry, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
+
 ### Vanilla Kubernetes compatibility mode
 
-In order to deploy this chart on vanilla Kubernetes or any other non-OCP platform, please make sure to apply the following changes. Note that further customizations may be required, depending on your exact Kubernetes setup:
+To deploy this chart on vanilla Kubernetes or any other non-OCP platform, apply the following changes. Note that further customizations might be required, depending on your exact Kubernetes setup:
 
 ```yaml
 # values.yaml
