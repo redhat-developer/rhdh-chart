@@ -4622,7 +4622,7 @@
                                         },
                                         {
                                             "name": "CATALOG_INDEX_IMAGE",
-                                            "value": "{{ (index .Values \"catalog-index\").image.registry }}/{{ (index .Values \"catalog-index\").image.repository }}:{{ (index .Values \"catalog-index\").image.tag }}"
+                                            "value": "{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}"
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",

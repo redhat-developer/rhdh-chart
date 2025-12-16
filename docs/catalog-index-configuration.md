@@ -2,11 +2,11 @@
 
 The Helm chart supports loading default plugin configurations from an OCI container image (catalog index). For general information about how the catalog index works, see [Using a Catalog Index Image for Default Plugin Configurations](https://github.com/redhat-developer/rhdh/blob/main/docs/dynamic-plugins/installing-plugins.md#using-a-catalog-index-image-for-default-plugin-configurations).
 
-By default, the chart configures the catalog index image using `upstream.catalog-index.image` with `registry`, `repository`, and `tag` fields. You can override these values in your values file to use a different version or a mirrored image:
+By default, the chart configures the catalog index image using `global.catalogIndex.image` with `registry`, `repository`, and `tag` fields. You can override these values in your values file to use a different version or a mirrored image:
 
 ```yaml
-upstream:
-  catalog-index:
+global:
+  catalogIndex:
     image:
       registry: quay.io
       repository: rhdh/plugin-catalog-index

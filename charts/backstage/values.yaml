@@ -31,6 +31,15 @@ global:
       # -- Instead of generating a secret value, use the following value
       value: ""
 
+  # -- Catalog index configuration for automatic plugin discovery.
+  # The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
+  # The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
+  catalogIndex:
+    image:
+      registry: quay.io
+      repository: rhdh/plugin-catalog-index
+      tag: "1.9"
+
 # -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
 # @default -- Use Openshift compatible settings
 upstream:
@@ -215,7 +224,7 @@ upstream:
           - name: MAX_ENTRY_SIZE
             value: "30000000"
           - name: CATALOG_INDEX_IMAGE
-            value: '{{ (index .Values "catalog-index").image.registry }}/{{ (index .Values "catalog-index").image.repository }}:{{ (index .Values "catalog-index").image.tag }}'
+            value: '{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}'
         imagePullPolicy: ""
         volumeMounts:
           - mountPath: /dynamic-plugins-root
@@ -248,14 +257,6 @@ upstream:
       enabled: false
       path: /metrics
       port: http-metrics
-  # -- Catalog index configuration for automatic plugin discovery.
-  # The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
-  # The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
-  catalog-index:
-    image:
-      registry: quay.io
-      repository: rhdh/plugin-catalog-index
-      tag: "1.9"
   postgresql:
     enabled: true
     postgresqlDataDir: /var/lib/pgsql/data/userdata
