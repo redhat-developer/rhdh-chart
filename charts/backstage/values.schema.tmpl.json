@@ -103,6 +103,35 @@
                             }
                         }
                     }
+                },
+                "catalogIndex": {
+                    "title": "Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "image": {
+                            "title": "Catalog index image configuration",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "registry": {
+                                    "title": "Catalog index image registry",
+                                    "type": "string",
+                                    "default": "quay.io"
+                                },
+                                "repository": {
+                                    "title": "Catalog index image repository",
+                                    "type": "string",
+                                    "default": "rhdh/plugin-catalog-index"
+                                },
+                                "tag": {
+                                    "title": "Catalog index image tag",
+                                    "type": "string",
+                                    "default": "1.9"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
