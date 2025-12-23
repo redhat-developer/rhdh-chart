@@ -2158,7 +2158,7 @@ spec:
                                 type: string
                             type: object
                           requests:
-           a                 properties:
+                            properties:
                               cpu:
                                 pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
                                 type: string
