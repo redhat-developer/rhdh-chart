@@ -274,7 +274,7 @@ upstream:
       enabled: true
     image:
       registry: quay.io
-      repository: fedora/postgresql-15
+      repository: fedora/postgresql-16
       tag: latest
     auth:
       secretKeys:
