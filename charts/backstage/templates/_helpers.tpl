@@ -1,7 +1,7 @@
 {{/*
 Returns custom hostname
 */}}
-{{- define "janus-idp.hostname" -}}
+{{- define "rhdh.hostname" -}}
     {{- if .Values.global.host -}}
         {{- .Values.global.host -}}
     {{- else if .Values.global.clusterRouterBase -}}
@@ -14,7 +14,7 @@ Returns custom hostname
 {{/*
 Returns a secret name for service to service auth
 */}}
-{{- define "janus-idp.backend-secret-name" -}}
+{{- define "rhdh.backend-secret-name" -}}
     {{- if .Values.global.auth.backend.existingSecret -}}
         {{- .Values.global.auth.backend.existingSecret -}}
     {{- else -}}
@@ -25,7 +25,7 @@ Returns a secret name for service to service auth
 {{/*
 Sets the secretKeyRef name for Backstage to the PostgreSQL existing secret if it present
 */}}
-{{- define "janus-idp.postgresql.secretName" -}}
+{{- define "rhdh.postgresql.secretName" -}}
     {{- if ((((.Values).global).postgresql).auth).existingSecret -}}
         {{- .Values.global.postgresql.auth.existingSecret -}}
     {{- else if .Values.postgresql.auth.existingSecret -}}

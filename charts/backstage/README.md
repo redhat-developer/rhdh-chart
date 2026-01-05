@@ -294,11 +294,11 @@ upstream:
   backstage:
     appConfig:
       app:
-        baseUrl: 'https://{{- include "janus-idp.hostname" . }}'
+        baseUrl: 'https://{{- include "rhdh.hostname" . }}'
       backend:
-        baseUrl: 'https://{{- include "janus-idp.hostname" . }}'
+        baseUrl: 'https://{{- include "rhdh.hostname" . }}'
         cors:
-          origin: 'https://{{- include "janus-idp.hostname" . }}'
+          origin: 'https://{{- include "rhdh.hostname" . }}'
 ```
 
 ### Catalog Index Configuration

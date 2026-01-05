@@ -23,7 +23,7 @@ spec:
 {{- if $host }}
   host: {{ $host }}
 {{- else }}
-  host: {{ include "janus-idp.hostname" . }}
+  host: {{ include "rhdh.hostname" . }}
 {{- end }}
 {{- if .Values.route.path }}
   path: {{ .Values.route.path }}
