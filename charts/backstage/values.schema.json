@@ -32,6 +32,35 @@
                     "title": "Enable service authentication within Backstage instance",
                     "type": "object"
                 },
+                "catalogIndex": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "image": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "registry": {
+                                    "default": "quay.io",
+                                    "title": "Catalog index image registry",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "default": "rhdh/plugin-catalog-index",
+                                    "title": "Catalog index image repository",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "default": "1.9",
+                                    "title": "Catalog index image tag",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Catalog index image configuration",
+                            "type": "object"
+                        }
+                    },
+                    "title": "Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.",
+                    "type": "object"
+                },
                 "clusterRouterBase": {
                     "default": "apps.example.com",
                     "title": "Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled.",
@@ -4556,7 +4585,7 @@
                                     "type": "string"
                                 },
                                 "pullPolicy": {
-                                    "default": "IfNotPresent",
+                                    "default": "",
                                     "description": "Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
                                     "enum": [
                                         "Always",
@@ -4619,10 +4648,14 @@
                                         {
                                             "name": "MAX_ENTRY_SIZE",
                                             "value": "30000000"
+                                        },
+                                        {
+                                            "name": "CATALOG_INDEX_IMAGE",
+                                            "value": "{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}"
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",
-                                    "imagePullPolicy": "IfNotPresent",
+                                    "imagePullPolicy": "",
                                     "name": "install-dynamic-plugins",
                                     "resources": {
                                         "limits": {

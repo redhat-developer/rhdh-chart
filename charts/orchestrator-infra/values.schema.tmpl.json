@@ -27,7 +27,7 @@
               "type": "object",
               "properties": {
                 "channel": {
-                  "default": "alpha",
+                  "default": "stable",
                   "title": "Channel of an operator package to subscribe to",
                   "type": "string"
                 },
@@ -37,7 +37,7 @@
                   "type": "string"
                 },
                 "name": {
-                  "default": "logic-operator-rhel8",
+                  "default": "logic-operator",
                   "title": "Name of the operator package",
                   "type": "string"
                 },
@@ -52,7 +52,7 @@
                   "type": "string"
                 },
                 "startingCSV": {
-                  "default": "logic-operator-rhel8.v1.35.0",
+                  "default": "logic-operator.v1.37.0",
                   "title": "The initial version of the operator",
                   "type": "string"
                 }

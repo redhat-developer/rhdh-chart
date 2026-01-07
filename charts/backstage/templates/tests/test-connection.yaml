@@ -31,7 +31,7 @@ spec:
           - ls
           - /usr/bin/curl
       image: "{{ .Values.test.image.registry }}/{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
-      imagePullPolicy: IfNotPresent
+      imagePullPolicy: ""
       command: ["/bin/sh", "-c"]
       args:
         - |
