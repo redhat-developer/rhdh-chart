@@ -59,6 +59,7 @@ spec:
     jobService:
       enabled: true
       persistence:
+        dbMigrationStrategy: service
         postgresql:
 {{- if .Values.upstream.postgresql.enabled }}
           secretRef:
@@ -80,6 +81,11 @@ spec:
       podTemplate:
         container:
           image: {{ .Values.orchestrator.sonataflowPlatform.jobServiceImage }}
+          env:
+            - name: QUARKUS_DATASOURCE_REACTIVE_POSTGRESQL_SSL_MODE
+              value: allow
+            - name: QUARKUS_DATASOURCE_REACTIVE_TRUST_ALL
+              value: 'true'
 {{- end }}
 ---
 apiVersion: batch/v1
