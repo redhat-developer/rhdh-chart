@@ -5,7 +5,7 @@
 
 # ⚓️ GitOps Operator Helm Deploy
 
-The GitOps  Helm Chart customizes and deploys the [RedHat GitOps Operator](https://github.com/redhat-developer/gitops-operator) written by Red Hat.
+The GitOps Helm Chart customizes and deploys the [RedHat GitOps Operator](https://github.com/redhat-developer/gitops-operator) written by Red Hat.
 
 ## Installing the chart
 
