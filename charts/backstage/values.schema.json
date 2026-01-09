@@ -2923,7 +2923,7 @@
                                     "name": "dynamic-plugins-root"
                                 },
                                 {
-                                    "mountPath": "/marketplace",
+                                    "mountPath": "/extensions",
                                     "name": "extensions-catalog"
                                 },
                                 {
@@ -4663,7 +4663,7 @@
                                         },
                                         {
                                             "name": "CATALOG_ENTITIES_EXTRACT_DIR",
-                                            "value": "/marketplace"
+                                            "value": "/extensions"
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",
@@ -4720,7 +4720,7 @@
                                             "name": "npmcacache"
                                         },
                                         {
-                                            "mountPath": "/marketplace",
+                                            "mountPath": "/extensions",
                                             "name": "extensions-catalog"
                                         },
                                         {
