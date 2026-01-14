@@ -192,6 +192,8 @@ upstream:
           secretName: '{{ printf "%s-dynamic-plugins-registry-auth" .Release.Name }}'
       - name: npmcacache
         emptyDir: {}
+      # -- Ephemeral volume used by the install-dynamic-plugins init container to extract catalog entities from the catalog index image.
+      # Mounted at the /extensions path in the backstage-backend main container for automatic discovery by the extension catalog backend providers.
       - name: extensions-catalog
         emptyDir: {}
       - name: temp
