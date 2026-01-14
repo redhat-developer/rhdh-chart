@@ -144,9 +144,9 @@ jobs:
         if: steps.list-changed.outputs.backstageChartChanged == 'true'
         run: |
           for crdDir in charts/orchestrator-infra/crds/*; do
-            kubectl apply -f "${crdDir}"
+            kubectl create -f "${crdDir}"
           done
-          kubectl apply -f https://github.com/apache/incubator-kie-kogito-serverless-operator/releases/download/v1.43.1/operator.yaml
+          kubectl create -f https://github.com/apache/incubator-kie-tools/releases/download/10.1.0/apache-kie-10.1.0-incubating-sonataflow-operator.yaml
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
