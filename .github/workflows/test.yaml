@@ -156,4 +156,4 @@ jobs:
             --config ct-install.yaml \
             --upgrade \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-set-args="--set global.catalogIndex.image.tag=1.9-45 --set upstream.ingress.enabled=true --set global.host=rhdh.127.0.0.1.sslip.io"
+            --helm-extra-set-args="--set upstream.backstage.image.tag=next-1.8 --set upstream.ingress.enabled=true --set global.host=rhdh.127.0.0.1.sslip.io"
