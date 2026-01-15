@@ -4,8 +4,6 @@ on:
   pull_request:
     branches:
       - main
-      - rhdh-1.[0-9]+
-      - 1.[0-9]+.x
       - release-1.[0-9]+
 
 concurrency:
@@ -137,23 +135,35 @@ jobs:
       # but the OpenShift Serverless and Serverless Operators installed by this chart are available only on OCP (from the Red Hat Catalog).
       # For the simple testing that we are doing here on a vanilla K8s cluster, we only need both the Knative and SonataFlow CRDs.
       # TODO(rm3l): Update this when/if there is an upstream counterpart installable via OLM.
-      # NOTES:
-      # - Serverless 1.35 corresponds to Knative 1.18
-      # - Serverless Logic 1.35 corresponds to Sonataflow 1.43
       - name: Install Knative and SonataFlow CRDs via the orchestrator-infra-chart as minimum prerequisite for testing the Orchestrator flavor
         if: steps.list-changed.outputs.backstageChartChanged == 'true'
+        env:
+          SONATAFLOW_OPERATOR_VERSION: "10.1.0"
         run: |
           for crdDir in charts/orchestrator-infra/crds/*; do
             kubectl create -f "${crdDir}"
           done
-          kubectl create -f https://github.com/apache/incubator-kie-tools/releases/download/10.1.0/apache-kie-10.1.0-incubating-sonataflow-operator.yaml
+          kubectl create -f "https://github.com/apache/incubator-kie-tools/releases/download/${SONATAFLOW_OPERATOR_VERSION}/apache-kie-${SONATAFLOW_OPERATOR_VERSION}-incubating-sonataflow-operator.yaml"
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
+          EXTRA_ARGS=(
+            "--set upstream.backstage.image.pullPolicy=Always"
+            "--set route.enabled=false"
+            "--set upstream.ingress.enabled=true"
+            "--set global.host=rhdh.127.0.0.1.sslip.io"
+          )
+          if [[ "${{ github.event.pull_request.base.ref }}" == "main" ]]; then
+            # Ensure stability for PRs against main.
+            EXTRA_ARGS+=(
+              "--set upstream.backstage.image.repository=rhdh/rhdh-hub-rhel9"
+              "--set upstream.backstage.image.tag=latest"
+            )
+          fi
           ct install \
             --debug \
             --config ct-install.yaml \
             --upgrade \
             --target-branch "${{ github.event.pull_request.base.ref }}" \
-            --helm-extra-set-args="--set upstream.ingress.enabled=true --set global.host=rhdh.127.0.0.1.sslip.io"
+            --helm-extra-set-args="${EXTRA_ARGS[*]}"
