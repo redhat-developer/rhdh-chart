@@ -1,0 +1,29 @@
+name: Nightly Test Charts
+
+on:
+  schedule:
+    - cron: '38 21 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+
+  test-chart:
+    name: Nightly Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Test charts
+        uses: ./.github/actions/test-charts
+        with:
+          target_branch: main
+          all_charts: 'true'
+          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=next --set upstream.backstage.image.pullPolicy=Always'
