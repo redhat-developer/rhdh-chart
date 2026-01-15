@@ -90,8 +90,6 @@ helm upgrade -i <release_name> redhat-developer/backstage
 
 ### Installing from an OCI Registry
 
-Note: this repo replaces https://github.com/janus-idp/helm-backstage, which has been deprecated in Feb 2024.
-
 Charts are also available in OCI format. The list of available releases can be found [here](https://quay.io/repository/rhdh/chart?tab=tags).
 
 Install one of the available versions:
@@ -162,11 +160,11 @@ This chart defaults to an opinionated deployment of Backstage that provides user
 
 Features enabled by the default chart configuration:
 
-1. Uses [janus-idp/backstage-showcase](https://github.com/janus-idp/backstage-showcase/) that pre-loads a lot of useful plugins and features
+1. Uses [rhdh](https://github.com/redhat-developer/rhdh/) that pre-loads a lot of useful plugins and features
 2. Exposes a `Route` for easy access to the instance
 3. Enables OpenShift-compatible PostgreSQL database storage
 
-For additional instance features please consult the [documentation for `janus-idp/backstage-showcase`](https://github.com/janus-idp/backstage-showcase/tree/main/showcase-docs).
+For additional instance features please consult the [documentation for `rhdh`](https://github.com/redhat-developer/rhdh/tree/main/showcase-docs).
 
 Additional features can be enabled by extending the default configuration at:
 
@@ -181,10 +179,10 @@ upstream:
 
 ## Features
 
-This charts defaults to using the [latest Janus-IDP Backstage Showcase image](https://quay.io/janus-idp/backstage-showcase:latest) that is OpenShift compatible:
+This charts defaults to using the [RHDH image](https://quay.io/rhdh-community/rhdh:next) that is OpenShift compatible:
 
 ```console
-quay.io/janus-idp/backstage-showcase:latest
+quay.io/rhdh-community/rhdh:next
 ```
 
 Additionally this chart enhances the upstream Backstage chart with following OpenShift-specific features:
@@ -227,11 +225,11 @@ upstream:
   backstage:
     appConfig:
       app:
-        baseUrl: 'https://{{"{{"}}- include "janus-idp.hostname" . {{"}}"}}'
+        baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
       backend:
-        baseUrl: 'https://{{"{{"}}- include "janus-idp.hostname" . {{"}}"}}'
+        baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
         cors:
-          origin: 'https://{{"{{"}}- include "janus-idp.hostname" . {{"}}"}}'
+          origin: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
 ```
 
 ### Catalog Index Configuration

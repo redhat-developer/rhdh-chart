@@ -120,12 +120,12 @@ upstream:
         valueFrom:
           secretKeyRef:
             key: backend-secret
-            name: '{{ include "janus-idp.backend-secret-name" $ }}'
+            name: '{{ include "rhdh.backend-secret-name" $ }}'
       - name: POSTGRESQL_ADMIN_PASSWORD
         valueFrom:
           secretKeyRef:
             key: postgres-password
-            name: '{{- include "janus-idp.postgresql.secretName" . }}'
+            name: '{{- include "rhdh.postgresql.secretName" . }}'
       - name: NODE_TLS_REJECT_UNAUTHORIZED
         value: "0" 
 

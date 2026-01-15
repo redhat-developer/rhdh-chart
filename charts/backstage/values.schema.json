@@ -1209,7 +1209,7 @@
                         "appConfig": {
                             "default": {
                                 "app": {
-                                    "baseUrl": "https://{{- include \"janus-idp.hostname\" . }}"
+                                    "baseUrl": "https://{{- include \"rhdh.hostname\" . }}"
                                 },
                                 "auth": {
                                     "providers": {}
@@ -1226,9 +1226,9 @@
                                             }
                                         ]
                                     },
-                                    "baseUrl": "https://{{- include \"janus-idp.hostname\" . }}",
+                                    "baseUrl": "https://{{- include \"rhdh.hostname\" . }}",
                                     "cors": {
-                                        "origin": "https://{{- include \"janus-idp.hostname\" . }}"
+                                        "origin": "https://{{- include \"rhdh.hostname\" . }}"
                                     },
                                     "database": {
                                         "connection": {
@@ -2716,7 +2716,7 @@
                                     "valueFrom": {
                                         "secretKeyRef": {
                                             "key": "backend-secret",
-                                            "name": "{{ include \"janus-idp.backend-secret-name\" $ }}"
+                                            "name": "{{ include \"rhdh.backend-secret-name\" $ }}"
                                         }
                                     }
                                 },
@@ -2725,7 +2725,7 @@
                                     "valueFrom": {
                                         "secretKeyRef": {
                                             "key": "postgres-password",
-                                            "name": "{{- include \"janus-idp.postgresql.secretName\" . }}"
+                                            "name": "{{- include \"rhdh.postgresql.secretName\" . }}"
                                         }
                                     }
                                 }
