@@ -1,0 +1,185 @@
+name: 'Test Charts'
+description: 'Set up environment and run chart testing'
+
+inputs:
+  target_branch:
+    description: 'Target branch for chart-testing'
+    required: true
+  extra_helm_args:
+    description: 'Extra Helm arguments to pass to ct install'
+    required: false
+    default: ''
+  all_charts:
+    description: 'Install all charts instead of only changed ones'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # renovate: tag=v3.5
+      with:
+        version: v3.10.0
+
+    - name: Set up Python
+      uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6
+      with:
+        python-version: 3.14
+
+    - name: Set up chart-testing
+      uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
+      with:
+        version: '3.14.0'
+        yamllint_version: '1.37.1'
+        yamale_version: '6.0.0'
+
+    - name: Run chart-testing (list-changed)
+      id: list-changed
+      shell: bash
+      env:
+        INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
+        INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
+      run: |
+        if [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+        else
+          listChanged=$(ct list-changed --target-branch "$INPUT_TARGET_BRANCH")
+          if [[ -n "$listChanged" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            if grep 'charts/backstage' <<< "$listChanged"; then
+              echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+        fi
+
+    - name: Remove unnecessary files to free up disk space
+      if: steps.list-changed.outputs.changed == 'true'
+      uses: endersonmenezes/free-disk-space@e6ed9b02e683a3b55ed0252f1ee469ce3b39a885 # v3
+      with:
+        remove_android: true
+        remove_dotnet: true
+        remove_haskell: true
+        rm_cmd: "rmz"
+
+    - name: Add Helm Repositories
+      if: steps.list-changed.outputs.changed == 'true'
+      shell: bash
+      run: |
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm repo add backstage https://backstage.github.io/charts
+        helm repo update
+
+    - name: Generate KinD Config
+      if: steps.list-changed.outputs.changed == 'true'
+      shell: bash
+      run: |
+        cat <<EOF > /tmp/kind-config.yaml
+        apiVersion: kind.x-k8s.io/v1alpha4
+        kind: Cluster
+        nodes:
+          - role: control-plane
+            extraPortMappings:
+              - containerPort: 80
+                hostPort: 80
+                protocol: TCP
+              - containerPort: 443
+                hostPort: 443
+                protocol: TCP
+        EOF
+
+    - name: Create KIND Cluster
+      if: steps.list-changed.outputs.changed == 'true'
+      uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
+      with:
+        config: /tmp/kind-config.yaml
+
+    - name: Create custom storage class
+      if: steps.list-changed.outputs.changed == 'true'
+      shell: bash
+      run: |
+        export defaultScProvisioner=$(kubectl get storageclass -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].provisioner}')
+        if [[ -z "$defaultScProvisioner" ]]; then
+          echo "No default storage class found or it has no provisioner. Exiting early because the test using the custom Storage Class will likely fail. Use a cluster that has a default storage class."
+          exit 1
+        fi
+        echo "[INFO] defaultScProvisioner=$defaultScProvisioner"
+
+        cat <<EOF | kubectl apply -f -
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: custom-sc
+        # same provisioner as the one used by the default storage class on the cluster
+        provisioner: $defaultScProvisioner
+        reclaimPolicy: Delete
+        volumeBindingMode: WaitForFirstConsumer
+        EOF
+
+        kubectl get storageclass custom-sc -o yaml
+
+    - name: Install Ingress Controller
+      if: steps.list-changed.outputs.changed == 'true'
+      shell: bash
+      run: |
+        helm install ingress-nginx/ingress-nginx --generate-name \
+          --set controller.service.type='NodePort' \
+          --set controller.admissionWebhooks.enabled=false
+
+    - name: Install Operator Lifecycle Manager (OLM)
+      if: steps.list-changed.outputs.changed == 'true'
+      # In case we need to install additional Operators
+      shell: bash
+      env:
+        OLM_VERSION: "v0.31.0"
+      run: |
+        curl -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
+        chmod +x install-olm.sh
+        ./install-olm.sh "${OLM_VERSION}"
+
+    # https://issues.redhat.com/browse/RHIDP-7469 - minimal testing of the Orchestrator flavor.
+    # The Orchestrator flavor requires installing the orchestrator-infra chart as a prerequisite,
+    # but the OpenShift Serverless and Serverless Operators installed by this chart are available only on OCP (from the Red Hat Catalog).
+    # For the simple testing that we are doing here on a vanilla K8s cluster, we only need both the Knative and SonataFlow CRDs.
+    # TODO(rm3l): Update this when/if there is an upstream counterpart installable via OLM.
+    - name: Install Knative and SonataFlow CRDs
+      if: steps.list-changed.outputs.backstageChartChanged == 'true'
+      shell: bash
+      env:
+        SONATAFLOW_OPERATOR_VERSION: "10.1.0"
+      run: |
+        for crdDir in charts/orchestrator-infra/crds/*; do
+          kubectl create -f "${crdDir}"
+        done
+        kubectl create -f "https://github.com/apache/incubator-kie-tools/releases/download/${SONATAFLOW_OPERATOR_VERSION}/apache-kie-${SONATAFLOW_OPERATOR_VERSION}-incubating-sonataflow-operator.yaml"
+
+    - name: Run chart-testing (install)
+      if: steps.list-changed.outputs.changed == 'true'
+      shell: bash
+      env:
+        INPUT_EXTRA_HELM_ARGS: ${{ inputs.extra_helm_args }}
+        INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
+        INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
+      run: |
+        EXTRA_ARGS=(
+          "--set route.enabled=false"
+          "--set upstream.ingress.enabled=true"
+          "--set global.host=rhdh.127.0.0.1.sslip.io"
+        )
+        if [[ -n "$INPUT_EXTRA_HELM_ARGS" ]]; then
+          IFS=' ' read -ra ADDITIONAL_ARGS <<< "$INPUT_EXTRA_HELM_ARGS"
+          EXTRA_ARGS+=("${ADDITIONAL_ARGS[@]}")
+        fi
+        CT_ARGS=(
+          --debug
+          --config ct-install.yaml
+          --upgrade
+          --target-branch "$INPUT_TARGET_BRANCH"
+          --helm-extra-set-args="${EXTRA_ARGS[*]}"
+        )
+        if [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
+          CT_ARGS+=(--all)
+        fi
+        ct install "${CT_ARGS[@]}"
