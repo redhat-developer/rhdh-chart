@@ -12,7 +12,7 @@
                     "image": {
                         "registry": "quay.io",
                         "repository": "rhdh-community/rhdh",
-                        "tag": "latest",
+                        "tag": "next",
                         "pullPolicy": ""
                     }
                 }
