@@ -153,6 +153,8 @@ upstream:
       # The initContainer below will install dynamic plugins in this volume mount.
       - name: dynamic-plugins-root
         mountPath: /opt/app-root/src/dynamic-plugins-root
+      - name: extensions-catalog
+        mountPath: /extensions
       - name: temp
         mountPath: /tmp
     extraVolumes:
@@ -190,6 +192,10 @@ upstream:
           secretName: '{{ printf "%s-dynamic-plugins-registry-auth" .Release.Name }}'
       - name: npmcacache
         emptyDir: {}
+      # -- Ephemeral volume used by the install-dynamic-plugins init container to extract catalog entities from the catalog index image.
+      # Mounted at the /extensions path in the backstage-backend main container for automatic discovery by the extension catalog backend providers.
+      - name: extensions-catalog
+        emptyDir: {}
       - name: temp
         emptyDir: {}
     initContainers:
@@ -225,6 +231,8 @@ upstream:
             value: "30000000"
           - name: CATALOG_INDEX_IMAGE
             value: '{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}'
+          - name: CATALOG_ENTITIES_EXTRACT_DIR
+            value: '/extensions'
         imagePullPolicy: ""
         volumeMounts:
           - mountPath: /dynamic-plugins-root
@@ -242,6 +250,8 @@ upstream:
             readOnly: true
           - mountPath: /opt/app-root/src/.npm/_cacache
             name: npmcacache
+          - name: extensions-catalog
+            mountPath: /extensions
           - name: temp
             mountPath: /tmp
         workingDir: /opt/app-root/src
