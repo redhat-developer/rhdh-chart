@@ -48,3 +48,32 @@ Referenced from: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/
         {{- printf "%s" (include "common.names.fullname" .) -}}
     {{- end -}}
 {{- end -}}
+
+{{/*
+DEPRECATED: The following templates are deprecated and will be removed in a future release.
+Please use the corresponding "rhdh.*" templates instead.
+*/}}
+
+{{/*
+DEPRECATED: Use "rhdh.hostname" instead.
+Returns custom hostname
+*/}}
+{{- define "janus-idp.hostname" -}}
+    {{- include "rhdh.hostname" . -}}
+{{- end -}}
+
+{{/*
+DEPRECATED: Use "rhdh.backend-secret-name" instead.
+Returns a secret name for service to service auth
+*/}}
+{{- define "janus-idp.backend-secret-name" -}}
+    {{- include "rhdh.backend-secret-name" . -}}
+{{- end -}}
+
+{{/*
+DEPRECATED: Use "rhdh.postgresql.secretName" instead.
+Sets the secretKeyRef name for Backstage to the PostgreSQL existing secret if it present
+*/}}
+{{- define "janus-idp.postgresql.secretName" -}}
+    {{- include "rhdh.postgresql.secretName" . -}}
+{{- end -}}
