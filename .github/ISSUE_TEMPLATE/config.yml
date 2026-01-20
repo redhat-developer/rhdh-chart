@@ -1,5 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-- name: Report Issues on JIRA
-  url: https://issues.redhat.com/browse/RHIDP
-  about: To report issues against this chart, please use JIRA (not GH issues).
