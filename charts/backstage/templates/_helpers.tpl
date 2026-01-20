@@ -50,8 +50,7 @@ Referenced from: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/
 {{- end -}}
 
 {{/*
-DEPRECATED: The following templates are deprecated and will be removed in a future release.
-Please use the corresponding "rhdh.*" templates instead.
+DEPRECATED: The following templates are deprecated. Please use the corresponding "rhdh.*" templates instead.
 */}}
 
 {{/*
