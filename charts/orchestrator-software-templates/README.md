@@ -1,7 +1,7 @@
 
 # Orchestrator Software Templates Chart for Red Hat Developer Hub
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 This Helm chart deploys the Orchestrator Software Templates for Red Hat Developer Hub (RHDH) and other necessary GitOps configurations.
@@ -78,7 +78,7 @@ After configuring all prerequisites, you can install the chart with the followin
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-templates redhat-developer/orchestrator-software-templates --version 0.2.1
+helm install my-orchestrator-templates redhat-developer/orchestrator-software-templates --version 0.3.0
 ```
 
 Now, follow the instruction on the post-installation Notes. They will include the steps to create a custom values.yaml file to allow you to update the backstage chart
