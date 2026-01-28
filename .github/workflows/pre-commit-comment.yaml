@@ -1,0 +1,105 @@
+name: Pre-commit comment
+
+on:
+  workflow_run:
+    workflows: ["Pre-commit"]
+    types:
+      - completed
+
+jobs:
+  comment:
+    name: Comment on PR
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request'
+    permissions:
+      pull-requests: write
+
+    steps:
+
+      - name: Get the PR number from the workflow run
+        id: pr-number
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            // Get PR number from the workflow run event
+            const headRepo = context.payload.workflow_run.head_repository.owner.login;
+            const headBranch = context.payload.workflow_run.head_branch;
+
+            console.log(`Looking for PR with head: ${headRepo}:${headBranch}`);
+
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${headRepo}:${headBranch}`,
+            });
+
+            if (pullRequests.length > 0) {
+              core.setOutput('number', pullRequests[0].number);
+            }
+      - name: Delete previous pre-commit failure comments
+        if: steps.pr-number.outputs.number
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          PR_NUMBER: ${{ steps.pr-number.outputs.number }}
+        with:
+          script: |
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
+
+            // Get all comments on the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            console.log(`Found ${comments.length} total comments on PR #${prNumber}`);
+
+            const botComments = comments.filter(comment => {
+              return comment.user.login === 'github-actions[bot]' && 
+                     comment.body && 
+                     comment.body.includes('⚠️ Pre-commit hook failures');
+            });
+
+            for (const comment of botComments) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: comment.id,
+              });
+            }
+
+      - name: Post comment
+        if: steps.pr-number.outputs.number && github.event.workflow_run.conclusion == 'failure'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          PR_NUMBER: ${{ steps.pr-number.outputs.number }}
+        with:
+          script: |
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
+
+            const body = `
+            ## ⚠️ Pre-commit hook failures
+
+            The pre-commit hooks detected issues that need to be fixed.
+
+            **To fix these issues:**
+
+            1. Install the required dependencies:
+               - [pre-commit](https://pre-commit.com/#install)
+               - [helm-docs](https://github.com/norwoodj/helm-docs#installation)
+
+            2. Run pre-commit on all files:
+               \`\`\`bash
+               pre-commit run --all-files
+               \`\`\`
+
+            3. Commit and push any resulting changes
+            `.trim().replace(/^ {12}/gm, '');
+
+            await github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
