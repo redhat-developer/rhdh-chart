@@ -22,20 +22,13 @@ jobs:
         with:
           script: |
             // Get PR number from the workflow run event
-            const headRepo = context.payload.workflow_run.head_repository.owner.login;
-            const headBranch = context.payload.workflow_run.head_branch;
-
-            console.log(`Looking for PR with head: ${headRepo}:${headBranch}`);
-
-            const { data: pullRequests } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              head: `${headRepo}:${headBranch}`,
-            });
+            const pullRequests = context.payload.workflow_run.pull_requests;
 
             if (pullRequests.length > 0) {
               core.setOutput('number', pullRequests[0].number);
+              console.log(`Found PR number: ${pullRequests[0].number}`);
+            } else {
+              console.log('No associated pull request found.');
             }
       - name: Delete previous pre-commit failure comments
         if: steps.pr-number.outputs.number
