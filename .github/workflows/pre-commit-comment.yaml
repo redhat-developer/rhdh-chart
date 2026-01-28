@@ -55,11 +55,15 @@ jobs:
             });
 
             for (const comment of botComments) {
-              await github.rest.issues.deleteComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: comment.id,
-              });
+              try {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: comment.id,
+                });
+              } catch (error) {
+                console.warn(`Failed to delete comment ${comment.id}:`, error.message);
+              }
             }
 
       - name: Post comment
