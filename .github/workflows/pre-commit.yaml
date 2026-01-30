@@ -10,6 +10,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
+# Revoke all permissions by default, then grant only what is needed
+permissions:
+  contents: read
+
 jobs:
   pre-commit:
     name: Pre-commit
@@ -21,6 +25,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           fetch-depth: 0
+          persist-credentials: false # Avoid token leakage to hooks
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
