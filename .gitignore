@@ -8,3 +8,5 @@
 charts/*/charts/
 **/charts/*.tgz
 output
+
+out/
