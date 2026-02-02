@@ -24,7 +24,7 @@ Detailed instructions may help reviewers test this PR quickly and provide quicke
 ## Checklist
 
 - [ ] For each Chart updated, version bumped in the corresponding `Chart.yaml` according to [Semantic Versioning](http://semver.org/).
-- [ ] For each Chart updated, variables are documented in the `values.yaml` and added to the corresponding README.md. The [pre-commit](https://pre-commit.com/) utility can be used to generate the necessary content. Use `pre-commit run -a` to apply changes. The [pre-commit Workflow](./workflows/pre-commit.yaml) will do this automatically for you if needed.
+- [ ] For each Chart updated, variables are documented in the `values.yaml` and added to the corresponding README.md. The [pre-commit](https://pre-commit.com/) utility can be used to generate the necessary content. Run `pre-commit run --all-files` to run the hooks and then push any resulting changes. The [pre-commit Workflow](./workflows/pre-commit.yaml) will enforce this and warn you if needed.
 - [ ] JSON Schema template updated and re-generated the raw schema via the `pre-commit` hook.
 - [ ] Tests pass using the [Chart Testing](https://github.com/helm/chart-testing) tool and the `ct lint` command.
 - [ ] If you updated the [orchestrator-infra](../charts/orchestrator-infra) chart, make sure the versions of the [Knative CRDs](../charts/orchestrator-infra/crds) are aligned with the versions of the CRDs installed by the OpenShift Serverless operators declared in the [values.yaml](../charts/orchestrator-infra/values.yaml) file. See [Installing Knative Eventing and Knative Serving CRDs](../charts/orchestrator-infra/README.md#installing-knative-eventing-and-knative-serving-crds) for more details.
