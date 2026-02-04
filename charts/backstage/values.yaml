@@ -394,17 +394,17 @@ orchestrator:
     dataIndexImage: ""
   # -- Orchestrator plugins and their configuration
   plugins:
-    - package: 'oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{" }}inherit{{ "}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{" }}inherit{{ "}}" }}'
       disabled: false
       pluginConfig:
         orchestrator:
           dataIndexService:
             url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
-    - package: 'oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{" }}inherit{{ "}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{" }}inherit{{ "}}" }}'
       disabled: false
-    - package: 'oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{" }}inherit{{ "}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{" }}inherit{{ "}}" }}'
       disabled: false
-    - package: 'oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{" }}inherit{{ "}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{" }}inherit{{ "}}" }}'
       disabled: false
       pluginConfig:
         orchestrator:
