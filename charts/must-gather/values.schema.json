@@ -873,11 +873,11 @@
                     "type": "array"
                 },
                 "logLevel": {
-                    "default": "INFO",
+                    "default": "info",
                     "enum": [
-                        "INFO",
-                        "DEBUG",
-                        "TRACE"
+                        "info",
+                        "debug",
+                        "trace"
                     ],
                     "title": "Log level for the gather script.",
                     "type": "string"

@@ -127,11 +127,11 @@
                 "logLevel": {
                     "title": "Log level for the gather script.",
                     "type": "string",
-                    "default": "INFO",
+                    "default": "info",
                     "enum": [
-                        "INFO",
-                        "DEBUG",
-                        "TRACE"
+                        "info",
+                        "debug",
+                        "trace"
                     ]
                 },
                 "cmdTimeout": {
