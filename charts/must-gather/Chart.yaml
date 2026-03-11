@@ -1,0 +1,26 @@
+apiVersion: v2
+name: rhdh-must-gather
+description: A Helm chart for deploying the RHDH Must-Gather diagnostic tool on Kubernetes
+
+type: application
+
+# Chart version - increment for chart changes
+version: 0.1.0
+
+# Application version - matches the must-gather tool version
+appVersion: "1.0.0"
+
+keywords:
+  - rhdh
+  - red-hat-developer-hub
+  - backstage
+  - diagnostics
+  - must-gather
+  - troubleshooting
+
+home: https://github.com/redhat-developer/rhdh-must-gather
+sources:
+  - https://github.com/redhat-developer/rhdh-must-gather
+
+maintainers:
+  - name: Red Hat Developer Hub Team

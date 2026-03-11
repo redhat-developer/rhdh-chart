@@ -1,0 +1,126 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gather
+spec:
+  activeDeadlineSeconds: {{ .Values.job.activeDeadlineSeconds }}
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  {{- if .Values.job.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "rhdh-must-gather.labels" . | nindent 8 }}
+        app.kubernetes.io/component: gather
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }}
+      restartPolicy: Never
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: gather
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: BASE_COLLECTION_PATH
+              value: "/must-gather"
+            - name: LOG_LEVEL
+              value: {{ .Values.gather.logLevel | quote }}
+            - name: CMD_TIMEOUT
+              value: {{ .Values.gather.cmdTimeout | quote }}
+            {{- if .Values.gather.since }}
+            - name: MUST_GATHER_SINCE
+              value: {{ .Values.gather.since | quote }}
+            {{- end }}
+            {{- if .Values.gather.sinceTime }}
+            - name: MUST_GATHER_SINCE_TIME
+              value: {{ .Values.gather.sinceTime | quote }}
+            {{- end }}
+          {{- if or .Values.gather.withSecrets .Values.gather.withHeapDumps .Values.gather.clusterInfo .Values.gather.withoutOperator .Values.gather.withoutOrchestrator .Values.gather.withoutHelm .Values.gather.withoutPlatform .Values.gather.withoutRoute .Values.gather.withoutIngress .Values.gather.withoutNamespaceInspect .Values.gather.namespaces .Values.gather.extraArgs }}
+          args:
+            {{- if .Values.gather.withSecrets }}
+            - "--with-secrets"
+            {{- end }}
+            {{- if .Values.gather.withHeapDumps }}
+            - "--with-heap-dumps"
+            {{- end }}
+            {{- if .Values.gather.clusterInfo }}
+            - "--cluster-info"
+            {{- end }}
+            {{- if .Values.gather.withoutOperator }}
+            - "--without-operator"
+            {{- end }}
+            {{- if .Values.gather.withoutOrchestrator }}
+            - "--without-orchestrator"
+            {{- end }}
+            {{- if .Values.gather.withoutHelm }}
+            - "--without-helm"
+            {{- end }}
+            {{- if .Values.gather.withoutPlatform }}
+            - "--without-platform"
+            {{- end }}
+            {{- if .Values.gather.withoutRoute }}
+            - "--without-route"
+            {{- end }}
+            {{- if .Values.gather.withoutIngress }}
+            - "--without-ingress"
+            {{- end }}
+            {{- if .Values.gather.withoutNamespaceInspect }}
+            - "--without-namespace-inspect"
+            {{- end }}
+            {{- if .Values.gather.namespaces }}
+            - "--namespaces"
+            - {{ .Values.gather.namespaces | quote }}
+            {{- end }}
+            {{- with .Values.gather.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          volumeMounts:
+            - name: output
+              mountPath: /must-gather
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: output
+          persistentVolumeClaim:
+            claimName: {{ include "rhdh-must-gather.fullname" . }}-pvc
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,42 @@
+RHDH Must-Gather has been deployed!
+
+To retrieve the gathered diagnostic data:
+
+1. Wait for the job to complete:
+   kubectl -n {{ .Release.Namespace }} wait --for=condition=complete job/{{ include "rhdh-must-gather.fullname" . }} --timeout={{ .Values.job.activeDeadlineSeconds }}s
+
+{{- if .Values.dataRetriever.enabled }}
+
+2. Wait for the data retriever pod to be ready:
+   kubectl -n {{ .Release.Namespace }} wait --for=condition=ready pod/{{ include "rhdh-must-gather.fullname" . }}-data-retriever --timeout=60s
+
+3. Download the gathered data:
+   kubectl -n {{ .Release.Namespace }} exec {{ include "rhdh-must-gather.fullname" . }}-data-retriever -- tar czf - -C /data . > rhdh-must-gather-output.tar.gz
+
+{{- else }}
+
+2. Find the completed job pod:
+   kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/name={{ include "rhdh-must-gather.name" . }},app.kubernetes.io/component=gather
+
+3. Copy the data from the PVC (you may need to create a temporary pod to access it)
+
+{{- end }}
+
+4. Clean up the must-gather resources:
+   helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+Configuration used:
+  - Log level: {{ .Values.gather.logLevel }}
+  - Job timeout: {{ .Values.job.activeDeadlineSeconds }}s
+  - Storage size: {{ .Values.persistence.size }}
+{{- if .Values.gather.namespaces }}
+  - Target namespaces: {{ .Values.gather.namespaces }}
+{{- end }}
+{{- if .Values.gather.withSecrets }}
+  - Secrets collection: enabled (sanitized)
+{{- end }}
+{{- if .Values.gather.withHeapDumps }}
+  - Heap dump collection: enabled
+{{- end }}
+
+For more information, visit: https://github.com/redhat-developer/rhdh-must-gather

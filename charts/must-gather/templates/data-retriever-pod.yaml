@@ -1,0 +1,50 @@
+{{- if .Values.dataRetriever.enabled -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}-data-retriever
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+    app.kubernetes.io/component: data-retriever
+spec:
+  restartPolicy: Never
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              {{- include "rhdh-must-gather.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: gather
+          topologyKey: kubernetes.io/hostname
+  containers:
+    - name: data-retriever
+      image: "{{ .Values.dataRetriever.image.repository }}:{{ .Values.dataRetriever.image.tag }}"
+      imagePullPolicy: {{ .Values.dataRetriever.image.pullPolicy }}
+      command:
+        - sleep
+        - infinity
+      volumeMounts:
+        - name: must-gather-output
+          mountPath: /data
+          readOnly: true
+      {{- with .Values.dataRetriever.resources }}
+      resources:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumes:
+    - name: must-gather-output
+      persistentVolumeClaim:
+        claimName: {{ include "rhdh-must-gather.fullname" . }}-pvc
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
