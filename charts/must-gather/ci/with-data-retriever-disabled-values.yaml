@@ -1,0 +1,3 @@
+# Data retriever disabled — users retrieve data directly from the PVC
+dataRetriever:
+  enabled: false
