@@ -5,7 +5,7 @@
 # -- Container image configuration
 image:
   repository: quay.io/rhdh-community/rhdh-must-gather
-  pullPolicy: IfNotPresent
+  pullPolicy: ""
   # -- -- Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
@@ -102,7 +102,7 @@ dataRetriever:
   image:
     repository: registry.access.redhat.com/ubi9
     tag: "latest"
-    pullPolicy: IfNotPresent
+    pullPolicy: ""
   # -- Resource configuration
   resources:
     requests:
@@ -120,7 +120,7 @@ test:
   image:
     repository: bitnami/kubectl
     tag: "latest"
-    pullPolicy: IfNotPresent
+    pullPolicy: ""
 
 # -- Pod annotations
 podAnnotations: {}

@@ -88,9 +88,9 @@ The command removes all the Kubernetes resources associated with the chart and d
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | affinity | Affinity rules for pod scheduling | object | `{}` |
-| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"pullPolicy":"IfNotPresent","repository":"registry.access.redhat.com/ubi9","tag":"latest"},"resources":{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}}` |
+| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"},"resources":{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}}` |
 | dataRetriever.enabled | Enable the data retriever pod | bool | `true` |
-| dataRetriever.image | Image for the data retriever pod | object | `{"pullPolicy":"IfNotPresent","repository":"registry.access.redhat.com/ubi9","tag":"latest"}` |
+| dataRetriever.image | Image for the data retriever pod | object | `{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"}` |
 | dataRetriever.resources | Resource configuration | object | `{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
 | gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"INFO","namespaces":"","since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
@@ -102,7 +102,7 @@ The command removes all the Kubernetes resources associated with the chart and d
 | gather.sinceTime | Absolute timestamp for log collection (RFC3339 format) | string | `""` |
 | gather.withSecrets | Optional collection features (disabled by default) | bool | `false` |
 | gather.withoutOperator | Exclusion options (set to true to skip collection) | bool | `false` |
-| image | Container image configuration | object | `{"pullPolicy":"IfNotPresent","repository":"quay.io/rhdh-community/rhdh-must-gather","tag":"latest"}` |
+| image | Container image configuration | object | `{"pullPolicy":"","repository":"quay.io/rhdh-community/rhdh-must-gather","tag":"latest"}` |
 | imagePullSecrets | Secrets for pulling images from a private registry | list | `[]` |
 | job | Job configuration | object | `{"activeDeadlineSeconds":3600,"backoffLimit":3,"ttlSecondsAfterFinished":""}` |
 | job.activeDeadlineSeconds | Job timeout in seconds (default: 1 hour) | int | `3600` |
@@ -126,8 +126,8 @@ The command removes all the Kubernetes resources associated with the chart and d
 | serviceAccount.automount | Automatically mount a ServiceAccount's API credentials | bool | `true` |
 | serviceAccount.create | Specifies whether a service account should be created | bool | `true` |
 | serviceAccount.name | If not set and create is true, a name is generated using the fullname template | string | `""` |
-| test | Helm test configuration | object | `{"enabled":true,"image":{"pullPolicy":"IfNotPresent","repository":"bitnami/kubectl","tag":"latest"}}` |
+| test | Helm test configuration | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"bitnami/kubectl","tag":"latest"}}` |
 | test.enabled | Enable the Helm test | bool | `true` |
-| test.image | Image for the test pod | object | `{"pullPolicy":"IfNotPresent","repository":"bitnami/kubectl","tag":"latest"}` |
+| test.image | Image for the test pod | object | `{"pullPolicy":"","repository":"bitnami/kubectl","tag":"latest"}` |
 | tolerations | Tolerations for pod scheduling | list | `[]` |
 

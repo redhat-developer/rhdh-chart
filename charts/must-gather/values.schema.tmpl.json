@@ -1,0 +1,467 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/redhat-developer/rhdh-chart/main/charts/must-gather/values.schema.json",
+    "type": "object",
+    "title": "Root Schema",
+    "properties": {
+        "image": {
+            "title": "Container image configuration.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "repository": {
+                    "title": "Image repository.",
+                    "type": "string",
+                    "default": "quay.io/rhdh-community/rhdh-must-gather"
+                },
+                "pullPolicy": {
+                    "title": "Image pull policy.",
+                    "type": "string",
+                    "default": "",
+                    "enum": [
+                        "Always",
+                        "IfNotPresent",
+                        "Never",
+                        ""
+                    ]
+                },
+                "tag": {
+                    "title": "Overrides the image tag whose default is the chart appVersion.",
+                    "type": "string",
+                    "default": "latest"
+                }
+            }
+        },
+        "imagePullSecrets": {
+            "title": "Secrets for pulling images from a private registry.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "default": []
+        },
+        "nameOverride": {
+            "title": "Override the chart name.",
+            "type": "string",
+            "default": ""
+        },
+        "fullnameOverride": {
+            "title": "Override the full release name.",
+            "type": "string",
+            "default": ""
+        },
+        "serviceAccount": {
+            "title": "Service account configuration.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "create": {
+                    "title": "Specifies whether a service account should be created.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "automount": {
+                    "title": "Automatically mount a ServiceAccount's API credentials.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "annotations": {
+                    "title": "Annotations to add to the service account.",
+                    "type": "object",
+                    "default": {}
+                },
+                "name": {
+                    "title": "The name of the service account to use. If not set and create is true, a name is generated using the fullname template.",
+                    "type": "string",
+                    "default": ""
+                }
+            }
+        },
+        "rbac": {
+            "title": "RBAC configuration.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "create": {
+                    "title": "Create ClusterRole and ClusterRoleBinding for cluster-wide read access.",
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "job": {
+            "title": "Job configuration.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "activeDeadlineSeconds": {
+                    "title": "Job timeout in seconds.",
+                    "type": "integer",
+                    "default": 3600
+                },
+                "backoffLimit": {
+                    "title": "Number of retries before marking job as failed.",
+                    "type": "integer",
+                    "default": 3
+                },
+                "ttlSecondsAfterFinished": {
+                    "title": "TTL for automatic cleanup after job finishes (seconds). Set to a positive value to enable automatic cleanup.",
+                    "type": [
+                        "integer",
+                        "string"
+                    ],
+                    "default": ""
+                }
+            }
+        },
+        "gather": {
+            "title": "Gather script configuration.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "logLevel": {
+                    "title": "Log level for the gather script.",
+                    "type": "string",
+                    "default": "INFO",
+                    "enum": [
+                        "INFO",
+                        "DEBUG",
+                        "TRACE"
+                    ]
+                },
+                "cmdTimeout": {
+                    "title": "Command timeout for individual kubectl/helm commands (seconds).",
+                    "type": "string",
+                    "default": "30"
+                },
+                "since": {
+                    "title": "Relative time for log collection (e.g., '2h', '30m').",
+                    "type": "string",
+                    "default": ""
+                },
+                "sinceTime": {
+                    "title": "Absolute timestamp for log collection (RFC3339 format).",
+                    "type": "string",
+                    "default": ""
+                },
+                "withSecrets": {
+                    "title": "Enable collection of Secrets (disabled by default).",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withHeapDumps": {
+                    "title": "Enable collection of heap dumps (disabled by default).",
+                    "type": "boolean",
+                    "default": false
+                },
+                "clusterInfo": {
+                    "title": "Enable collection of cluster-wide info (disabled by default).",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withoutOperator": {
+                    "title": "Skip collection of RHDH Operator resources.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withoutOrchestrator": {
+                    "title": "Skip collection of Orchestrator resources.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withoutHelm": {
+                    "title": "Skip collection of Helm release information.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withoutPlatform": {
+                    "title": "Skip collection of platform-level resources.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withoutRoute": {
+                    "title": "Skip collection of OpenShift Route resources.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withoutIngress": {
+                    "title": "Skip collection of Ingress resources.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "withoutNamespaceInspect": {
+                    "title": "Skip namespace-level inspection.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "namespaces": {
+                    "title": "Limit collection to specific namespaces (comma-separated). Example: 'rhdh-prod,rhdh-staging'.",
+                    "type": "string",
+                    "default": ""
+                },
+                "extraArgs": {
+                    "title": "Additional custom arguments to pass to the gather script.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            }
+        },
+        "resources": {
+            "title": "Resource requests and limits for the gather job.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "requests": {
+                    "title": "Resource requests.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "memory": {
+                            "title": "Memory request.",
+                            "type": "string",
+                            "default": "128Mi"
+                        },
+                        "cpu": {
+                            "title": "CPU request.",
+                            "type": "string",
+                            "default": "100m"
+                        }
+                    }
+                },
+                "limits": {
+                    "title": "Resource limits.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "memory": {
+                            "title": "Memory limit.",
+                            "type": "string",
+                            "default": "512Mi"
+                        },
+                        "cpu": {
+                            "title": "CPU limit.",
+                            "type": "string",
+                            "default": "500m"
+                        }
+                    }
+                }
+            }
+        },
+        "persistence": {
+            "title": "Persistent volume configuration for storing gathered data.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "size": {
+                    "title": "Storage size.",
+                    "type": "string",
+                    "default": "1Gi"
+                },
+                "storageClass": {
+                    "title": "Storage class (empty = use cluster default).",
+                    "type": "string",
+                    "default": ""
+                },
+                "accessMode": {
+                    "title": "Access mode.",
+                    "type": "string",
+                    "default": "ReadWriteOnce",
+                    "enum": [
+                        "ReadWriteOnce",
+                        "ReadOnlyMany",
+                        "ReadWriteMany"
+                    ]
+                }
+            }
+        },
+        "dataRetriever": {
+            "title": "Data retriever pod configuration. This pod allows you to retrieve the gathered data after the job completes.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "title": "Enable the data retriever pod.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "image": {
+                    "title": "Image for the data retriever pod.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "repository": {
+                            "title": "Image repository.",
+                            "type": "string",
+                            "default": "registry.access.redhat.com/ubi9"
+                        },
+                        "tag": {
+                            "title": "Image tag.",
+                            "type": "string",
+                            "default": "latest"
+                        },
+                        "pullPolicy": {
+                            "title": "Image pull policy.",
+                            "type": "string",
+                            "default": "",
+                            "enum": [
+                                "Always",
+                                "IfNotPresent",
+                                "Never",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                "resources": {
+                    "title": "Resource configuration for the data retriever pod.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "requests": {
+                            "title": "Resource requests.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "memory": {
+                                    "title": "Memory request.",
+                                    "type": "string",
+                                    "default": "64Mi"
+                                },
+                                "cpu": {
+                                    "title": "CPU request.",
+                                    "type": "string",
+                                    "default": "50m"
+                                }
+                            }
+                        },
+                        "limits": {
+                            "title": "Resource limits.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "memory": {
+                                    "title": "Memory limit.",
+                                    "type": "string",
+                                    "default": "128Mi"
+                                },
+                                "cpu": {
+                                    "title": "CPU limit.",
+                                    "type": "string",
+                                    "default": "100m"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "test": {
+            "title": "Helm test configuration.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "title": "Enable the Helm test.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "image": {
+                    "title": "Image for the test pod.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "repository": {
+                            "title": "Image repository.",
+                            "type": "string",
+                            "default": "bitnami/kubectl"
+                        },
+                        "tag": {
+                            "title": "Image tag.",
+                            "type": "string",
+                            "default": "latest"
+                        },
+                        "pullPolicy": {
+                            "title": "Image pull policy.",
+                            "type": "string",
+                            "default": "",
+                            "enum": [
+                                "Always",
+                                "IfNotPresent",
+                                "Never",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "podAnnotations": {
+            "title": "Pod annotations.",
+            "type": "object",
+            "default": {}
+        },
+        "podLabels": {
+            "title": "Pod labels.",
+            "type": "object",
+            "default": {}
+        },
+        "podSecurityContext": {
+            "title": "Security settings for a Pod.",
+            "description": "The security settings that you specify for a Pod apply to all Containers in the Pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+            "default": {}
+        },
+        "securityContext": {
+            "title": "Security settings for a Container.",
+            "description": "Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+            "default": {}
+        },
+        "nodeSelector": {
+            "title": "Node labels for pod assignment",
+            "description": "Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            },
+            "default": {}
+        },
+        "tolerations": {
+            "title": "Node tolerations for server scheduling to nodes with taints",
+            "description": "Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+            "type": "array",
+            "items": {
+                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration"
+            },
+            "default": []
+        },
+        "affinity": {
+            "default": {},
+            "description": "Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+            "properties": {
+                "nodeAffinity": {
+                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
+                    "description": "Describes node affinity scheduling rules for the pod."
+                },
+                "podAffinity": {
+                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
+                    "description": "Describes pod affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as some other pod(s))."
+                },
+                "podAntiAffinity": {
+                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
+                    "description": "Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone, etc. as some other pod(s))."
+                }
+            },
+            "title": "Affinity for pod assignment",
+            "type": "object"
+        }
+    }
+}
