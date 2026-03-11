@@ -349,6 +349,11 @@
                                     "title": "CPU request.",
                                     "type": "string",
                                     "default": "50m"
+                                },
+                                "ephemeral-storage": {
+                                    "title": "Ephemeral storage request.",
+                                    "type": "string",
+                                    "default": "32Mi"
                                 }
                             }
                         },
@@ -366,6 +371,11 @@
                                     "title": "CPU limit.",
                                     "type": "string",
                                     "default": "100m"
+                                },
+                                "ephemeral-storage": {
+                                    "title": "Ephemeral storage limit.",
+                                    "type": "string",
+                                    "default": "64Mi"
                                 }
                             }
                         }

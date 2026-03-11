@@ -110,9 +110,11 @@ dataRetriever:
     requests:
       memory: "64Mi"
       cpu: "50m"
+      ephemeral-storage: "32Mi"
     limits:
       memory: "128Mi"
       cpu: "100m"
+      ephemeral-storage: "64Mi"
 
 # -- Helm test configuration
 test:

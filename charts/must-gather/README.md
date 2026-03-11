@@ -88,10 +88,10 @@ The command removes all the Kubernetes resources associated with the chart and d
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | affinity | Affinity rules for pod scheduling | object | `{}` |
-| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"},"resources":{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}}` |
+| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"},"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
 | dataRetriever.enabled | Enable the data retriever pod | bool | `true` |
 | dataRetriever.image | Image for the data retriever pod | object | `{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"}` |
-| dataRetriever.resources | Resource configuration | object | `{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}` |
+| dataRetriever.resources | Resource configuration | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
 | gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"INFO","namespaces":"","since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
 | gather.cmdTimeout | Command timeout for individual kubectl/helm commands (seconds) | string | `"30"` |

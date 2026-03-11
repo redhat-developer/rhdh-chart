@@ -1,4 +1,17 @@
 {{- if and .Values.test.enabled .Values.dataRetriever.enabled -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}-test
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "-2"
+automountServiceAccountToken: true
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -18,7 +31,7 @@ rules:
     resources: ["pods"]
     verbs: ["get", "watch", "list"]
   - apiGroups: [""]
-    resources: ["pods/exec"]
+    resources: ["pods/exec"] # NOSONAR - exec is required to retrieve must-gather output from the data-retriever pod during helm test
     verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -38,7 +51,7 @@ roleRef:
   name: {{ include "rhdh-must-gather.fullname" . }}-test
 subjects:
   - kind: ServiceAccount
-    name: {{ include "rhdh-must-gather.serviceAccountName" . }}
+    name: {{ include "rhdh-must-gather.fullname" . }}-test
     namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
@@ -52,8 +65,7 @@ metadata:
     helm.sh/hook: test
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
-  serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }}
-  automountServiceAccountToken: true # NOSONAR - test pod runs kubectl commands; SA is bound via Role/RoleBinding above
+  serviceAccountName: {{ include "rhdh-must-gather.fullname" . }}-test
   restartPolicy: Never
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
@@ -61,7 +73,7 @@ spec:
   {{- end }}
   containers:
     - name: test
-      image: "{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+      image: "{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}" # NOSONAR - tag is user-configurable via Helm values
       imagePullPolicy: {{ .Values.test.image.pullPolicy }}
       env:
         - name: NAMESPACE
@@ -97,9 +109,11 @@ spec:
         requests:
           memory: "64Mi"
           cpu: "50m"
+          ephemeral-storage: "32Mi"
         limits:
           memory: "128Mi"
           cpu: "100m"
+          ephemeral-storage: "64Mi"
   {{- with .Values.nodeSelector }}
   nodeSelector:
     {{- toYaml . | nindent 4 }}

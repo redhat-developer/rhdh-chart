@@ -24,8 +24,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }}
-      automountServiceAccountToken: true # NOSONAR - gather pod requires K8s API access; SA is bound via ClusterRole/ClusterRoleBinding in rbac.yaml
+      serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }} # NOSONAR - SA is bound via ClusterRole/ClusterRoleBinding in rbac.yaml
+      automountServiceAccountToken: true
       restartPolicy: Never
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -37,7 +37,7 @@ spec:
       {{- end }}
       containers:
         - name: gather
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}" # NOSONAR - tag is user-configurable via Helm values; defaults to Chart.AppVersion
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.securityContext }}
           securityContext:

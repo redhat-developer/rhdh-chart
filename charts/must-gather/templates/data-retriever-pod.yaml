@@ -23,7 +23,7 @@ spec:
           topologyKey: kubernetes.io/hostname
   containers:
     - name: data-retriever
-      image: "{{ .Values.dataRetriever.image.repository }}:{{ .Values.dataRetriever.image.tag }}"
+      image: "{{ .Values.dataRetriever.image.repository }}:{{ .Values.dataRetriever.image.tag }}" # NOSONAR - tag is user-configurable via Helm values
       imagePullPolicy: {{ .Values.dataRetriever.image.pullPolicy }}
       command:
         - sleep
