@@ -112,6 +112,16 @@ dataRetriever:
       memory: "128Mi"
       cpu: "100m"
 
+# -- Helm test configuration
+test:
+  # -- Enable the Helm test
+  enabled: true
+  # -- Image for the test pod
+  image:
+    repository: bitnami/kubectl
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
 # -- Pod annotations
 podAnnotations: {}
 

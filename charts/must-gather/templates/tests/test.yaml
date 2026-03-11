@@ -1,0 +1,110 @@
+{{- if and .Values.test.enabled .Values.dataRetriever.enabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}-test
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "-1"
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}-test
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "rhdh-must-gather.fullname" . }}-test
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "rhdh-must-gather.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}-test
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }}
+  restartPolicy: Never
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  containers:
+    - name: test
+      image: "{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+      imagePullPolicy: {{ .Values.test.image.pullPolicy }}
+      env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: JOB_NAME
+          value: {{ include "rhdh-must-gather.fullname" . }}
+        - name: DATA_RETRIEVER_POD
+          value: {{ include "rhdh-must-gather.fullname" . }}-data-retriever
+        - name: JOB_TIMEOUT
+          value: "{{ .Values.job.activeDeadlineSeconds }}"
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          set -e
+          echo "Step 1: Waiting for the gather job to complete..."
+          kubectl -n "$NAMESPACE" wait --for=condition=complete "job/$JOB_NAME" --timeout="${JOB_TIMEOUT}s"
+
+          echo "Step 2: Waiting for the data retriever pod to be ready..."
+          kubectl -n "$NAMESPACE" wait --for=condition=ready "pod/$DATA_RETRIEVER_POD" --timeout=60s
+
+          echo "Step 3: Retrieving gathered data from the data retriever pod..."
+          kubectl -n "$NAMESPACE" exec "$DATA_RETRIEVER_POD" -- tar czf - -C /data . > /tmp/rhdh-must-gather-output.tar.gz
+
+          size=$(stat -c%s /tmp/rhdh-must-gather-output.tar.gz 2>/dev/null || stat -f%z /tmp/rhdh-must-gather-output.tar.gz 2>/dev/null)
+          if [ "$size" -le 0 ] 2>/dev/null; then
+            echo "FAIL: retrieved archive is empty"
+            exit 1
+          fi
+          echo "PASS: gathered data retrieved successfully (${size} bytes)"
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "50m"
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

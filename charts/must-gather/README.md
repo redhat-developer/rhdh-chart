@@ -30,11 +30,13 @@ helm install my-rhdh-must-gather rhdh-must-gather \
   --version 0.1.0
 ```
 
+Then follow the instructions that will be printed to retrieve the gathered data.
+
 > **Tip**: List all releases using `helm list`
 
 ## Testing a Release
 
-Once an Helm Release has been deployed, you can test it using the [`helm test`](https://helm.sh/docs/helm/helm_test/) command:
+Once a Helm Release has been deployed, you can test it using the [`helm test`](https://helm.sh/docs/helm/helm_test/) command:
 
 ```sh
 helm test <release_name>
@@ -124,5 +126,8 @@ The command removes all the Kubernetes resources associated with the chart and d
 | serviceAccount.automount | Automatically mount a ServiceAccount's API credentials | bool | `true` |
 | serviceAccount.create | Specifies whether a service account should be created | bool | `true` |
 | serviceAccount.name | If not set and create is true, a name is generated using the fullname template | string | `""` |
+| test | Helm test configuration | object | `{"enabled":true,"image":{"pullPolicy":"IfNotPresent","repository":"bitnami/kubectl","tag":"latest"}}` |
+| test.enabled | Enable the Helm test | bool | `true` |
+| test.image | Image for the test pod | object | `{"pullPolicy":"IfNotPresent","repository":"bitnami/kubectl","tag":"latest"}` |
 | tolerations | Tolerations for pod scheduling | list | `[]` |
 
