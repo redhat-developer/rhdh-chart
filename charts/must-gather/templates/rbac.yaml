@@ -30,6 +30,9 @@ rules:
   - apiGroups: ["operators.coreos.com"]
     resources: ["subscriptions", "clusterserviceversions", "installplans", "catalogsources", "operatorgroups"]
     verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"] # NOSONAR - exec is required to collect data from the running containers
+    verbs: ["create"]
   # Orchestrator-related permissions
   - apiGroups: ["sonataflow.org"]
     resources: ["sonataflowplatforms", "sonataflows", "sonataflowclusterplatforms", "sonataflowbuilds"]
