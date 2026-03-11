@@ -119,7 +119,7 @@ The command removes all the Kubernetes resources associated with the chart and d
 | podSecurityContext | Pod security context | object | `{}` |
 | rbac | RBAC configuration | object | `{"create":true}` |
 | rbac.create | Create ClusterRole and ClusterRoleBinding for cluster-wide read access | bool | `true` |
-| resources | Resource requests and limits for the gather job | object | `{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
+| resources | Resource requests and limits for the gather job | object | `{"limits":{"cpu":"500m","ephemeral-storage":"128Mi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"}}` |
 | securityContext | Container security context | object | `{}` |
 | serviceAccount | Service account configuration | object | `{"annotations":{},"automount":true,"create":true,"name":""}` |
 | serviceAccount.annotations | Annotations to add to the service account | object | `{}` |
