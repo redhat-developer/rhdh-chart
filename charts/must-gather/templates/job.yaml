@@ -25,6 +25,7 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }}
+      automountServiceAccountToken: true # NOSONAR - gather pod requires K8s API access; SA is bound via ClusterRole/ClusterRoleBinding in rbac.yaml
       restartPolicy: Never
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

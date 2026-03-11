@@ -53,6 +53,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }}
+  automountServiceAccountToken: true # NOSONAR - test pod runs kubectl commands; SA is bound via Role/RoleBinding above
   restartPolicy: Never
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:

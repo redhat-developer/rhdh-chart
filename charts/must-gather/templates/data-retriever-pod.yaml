@@ -7,6 +7,7 @@ metadata:
     {{- include "rhdh-must-gather.labels" . | nindent 4 }}
     app.kubernetes.io/component: data-retriever
 spec:
+  automountServiceAccountToken: false
   restartPolicy: Never
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:

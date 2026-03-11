@@ -80,9 +80,11 @@ resources:
   requests:
     memory: "128Mi"
     cpu: "100m"
+    ephemeral-storage: "64Mi"
   limits:
     memory: "512Mi"
     cpu: "500m"
+    ephemeral-storage: "128Mi"
 
 # -- Persistent volume configuration for storing gathered data
 persistence:

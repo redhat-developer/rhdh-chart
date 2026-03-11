@@ -1226,6 +1226,11 @@
                             "title": "CPU limit.",
                             "type": "string"
                         },
+                        "ephemeral-storage": {
+                            "default": "128Mi",
+                            "title": "Ephemeral storage limit.",
+                            "type": "string"
+                        },
                         "memory": {
                             "default": "512Mi",
                             "title": "Memory limit.",
@@ -1241,6 +1246,11 @@
                         "cpu": {
                             "default": "100m",
                             "title": "CPU request.",
+                            "type": "string"
+                        },
+                        "ephemeral-storage": {
+                            "default": "64Mi",
+                            "title": "Ephemeral storage request.",
                             "type": "string"
                         },
                         "memory": {
