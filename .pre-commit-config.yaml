@@ -18,4 +18,5 @@ repos:
         entry: python .pre-commit/jsonschema-dereference.py
         additional_dependencies: [jsonref, Jinja2, pyyaml]
         language: python
+        pass_filenames: false
         types_or: [yaml, json]
