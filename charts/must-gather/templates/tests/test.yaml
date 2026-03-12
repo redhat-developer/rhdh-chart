@@ -108,8 +108,9 @@ spec:
           kubectl -n "$NAMESPACE" exec "$DATA_RETRIEVER_POD" -- tar czf - -C /data . > /tmp/rhdh-must-gather-output.tar.gz
 
           size=$(stat -c%s /tmp/rhdh-must-gather-output.tar.gz 2>/dev/null || stat -f%z /tmp/rhdh-must-gather-output.tar.gz 2>/dev/null)
-          if [ "$size" -le 0 ] 2>/dev/null; then
-            echo "FAIL: retrieved archive is empty"
+          file_count=$(tar -tzf /tmp/rhdh-must-gather-output.tar.gz | wc -l)
+          if [ "$size" -le 0 ] 2>/dev/null || [ "$file_count" -eq 0 ]; then
+            echo "FAIL: retrieved archive is empty or contains no files"
             exit 1
           fi
           echo "PASS: gathered data retrieved successfully (${size} bytes)"
