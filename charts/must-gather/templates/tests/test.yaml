@@ -81,9 +81,9 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: JOB_NAME
-          value: {{ include "rhdh-must-gather.fullname" . }}
+          value: {{ include "rhdh-must-gather.jobName" . }}
         - name: DATA_RETRIEVER_POD
-          value: {{ include "rhdh-must-gather.fullname" . }}-data-retriever
+          value: {{ include "rhdh-must-gather.dataRetrieverName" . }}
         - name: JOB_TIMEOUT
           value: "{{ .Values.job.activeDeadlineSeconds }}"
       command: ["/bin/sh", "-c"]

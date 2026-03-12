@@ -1,16 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "rhdh-must-gather.fullname" . }}
+  name: {{ include "rhdh-must-gather.jobName" . }}
   labels:
     {{- include "rhdh-must-gather.labels" . | nindent 4 }}
     app.kubernetes.io/component: gather
 spec:
   activeDeadlineSeconds: {{ .Values.job.activeDeadlineSeconds }}
   backoffLimit: {{ .Values.job.backoffLimit }}
-  {{- if .Values.job.ttlSecondsAfterFinished }}
   ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
-  {{- end }}
   template:
     metadata:
       labels:

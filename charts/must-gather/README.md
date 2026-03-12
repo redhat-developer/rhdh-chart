@@ -25,10 +25,12 @@ Kubernetes: `>= 1.27.0-0`
 ## TL;DR
 
 ```console
-helm install my-rhdh-must-gather rhdh-must-gather \
+helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
   --repo https://redhat-developer.github.io/rhdh-chart \
   --version 0.1.0
 ```
+
+Running the command again will automatically replace the previous job and start a new gather.
 
 Then follow the instructions that will be printed to retrieve the gathered data.
 
@@ -104,10 +106,10 @@ The command removes all the Kubernetes resources associated with the chart and d
 | gather.withoutOperator | Exclusion options (set to true to skip collection) | bool | `false` |
 | image | Container image configuration | object | `{"pullPolicy":"","repository":"quay.io/rhdh-community/rhdh-must-gather","tag":"latest"}` |
 | imagePullSecrets | Secrets for pulling images from a private registry | list | `[]` |
-| job | Job configuration | object | `{"activeDeadlineSeconds":3600,"backoffLimit":3,"ttlSecondsAfterFinished":""}` |
+| job | Job configuration | object | `{"activeDeadlineSeconds":3600,"backoffLimit":3,"ttlSecondsAfterFinished":600}` |
 | job.activeDeadlineSeconds | Job timeout in seconds (default: 1 hour) | int | `3600` |
 | job.backoffLimit | Number of retries before marking job as failed | int | `3` |
-| job.ttlSecondsAfterFinished | Set to a positive value to enable automatic cleanup | string | `""` |
+| job.ttlSecondsAfterFinished | TTL for automatic cleanup after job finishes (seconds) | int | `600` |
 | nameOverride | Override the chart name | string | `""` |
 | nodeSelector | Node selector for pod scheduling | object | `{}` |
 | persistence | Persistent volume configuration for storing gathered data | object | `{"accessMode":"ReadWriteOnce","size":"1Gi","storageClass":""}` |

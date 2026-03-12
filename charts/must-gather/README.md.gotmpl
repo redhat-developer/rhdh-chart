@@ -18,10 +18,12 @@
 ## TL;DR
 
 ```console
-helm install my-rhdh-must-gather rhdh-must-gather \
+helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
   --repo https://redhat-developer.github.io/rhdh-chart \
   --version {{ template "chart.version" . }}
 ```
+
+Running the command again will automatically replace the previous job and start a new gather.
 
 Then follow the instructions that will be printed to retrieve the gathered data.
 

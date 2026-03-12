@@ -1,17 +1,21 @@
-RHDH Must-Gather has been deployed!
+-------------------------------------------------------------------
+RHDH Must-Gather job is now running. This might take a few minutes.
 
-To retrieve the gathered diagnostic data:
+To check the job logs:
+   kubectl -n {{ .Release.Namespace }} logs -f job/{{ include "rhdh-must-gather.jobName" . }}
+
+To retrieve the gathered diagnostic data once the job completes:
 
 1. Wait for the job to complete:
-   kubectl -n {{ .Release.Namespace }} wait --for=condition=complete job/{{ include "rhdh-must-gather.fullname" . }} --timeout={{ .Values.job.activeDeadlineSeconds }}s
+   kubectl -n {{ .Release.Namespace }} wait --for=condition=complete job/{{ include "rhdh-must-gather.jobName" . }} --timeout={{ .Values.job.activeDeadlineSeconds }}s
 
 {{- if .Values.dataRetriever.enabled }}
 
 2. Wait for the data retriever pod to be ready:
-   kubectl -n {{ .Release.Namespace }} wait --for=condition=ready pod/{{ include "rhdh-must-gather.fullname" . }}-data-retriever --timeout=60s
+   kubectl -n {{ .Release.Namespace }} wait --for=condition=ready pod/{{ include "rhdh-must-gather.dataRetrieverName" . }} --timeout=60s
 
 3. Download the gathered data:
-   kubectl -n {{ .Release.Namespace }} exec {{ include "rhdh-must-gather.fullname" . }}-data-retriever -- tar czf - -C /data . > rhdh-must-gather-output.tar.gz
+   kubectl -n {{ .Release.Namespace }} exec {{ include "rhdh-must-gather.dataRetrieverName" . }} -- tar czf - -C /data . > rhdh-must-gather-output.tar.gz
 
 {{- else }}
 
@@ -22,7 +26,7 @@ To retrieve the gathered diagnostic data:
 
 {{- end }}
 
-4. Clean up the must-gather resources:
+To clean up the must-gather resources:
    helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
 
 Configuration used:
@@ -40,3 +44,4 @@ Configuration used:
 {{- end }}
 
 For more information, visit: https://github.com/redhat-developer/rhdh-must-gather
+-------------------------------------------------------------------

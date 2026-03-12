@@ -40,8 +40,7 @@ job:
   # -- Number of retries before marking job as failed
   backoffLimit: 3
   # -- TTL for automatic cleanup after job finishes (seconds)
-  # -- Set to a positive value to enable automatic cleanup
-  ttlSecondsAfterFinished: ""
+  ttlSecondsAfterFinished: 600
 
 # -- Gather script configuration
 gather:

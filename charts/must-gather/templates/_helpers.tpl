@@ -60,3 +60,28 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Unique run ID based on the current timestamp (YYYYMMDDHHMMSS).
+Appended to Job and data-retriever names so each helm install/upgrade
+creates new resources, working around Kubernetes Job immutability.
+*/}}
+{{- define "rhdh-must-gather.runId" -}}
+{{- now | date "20060102150405" }}
+{{- end }}
+
+{{/*
+Job name with unique run ID suffix.
+Base name is truncated to 48 chars to stay within the 63-char DNS limit.
+*/}}
+{{- define "rhdh-must-gather.jobName" -}}
+{{- printf "%s-%s" (include "rhdh-must-gather.fullname" . | trunc 48 | trimSuffix "-") (include "rhdh-must-gather.runId" .) }}
+{{- end }}
+
+{{/*
+Data retriever pod name with unique run ID suffix.
+Base name is truncated to 32 chars to stay within the 63-char DNS limit.
+*/}}
+{{- define "rhdh-must-gather.dataRetrieverName" -}}
+{{- printf "%s-data-retriever-%s" (include "rhdh-must-gather.fullname" . | trunc 32 | trimSuffix "-") (include "rhdh-must-gather.runId" .) }}
+{{- end }}

@@ -1001,7 +1001,7 @@
                     "type": "integer"
                 },
                 "ttlSecondsAfterFinished": {
-                    "default": "",
+                    "default": 600,
                     "title": "TTL for automatic cleanup after job finishes (seconds). Set to a positive value to enable automatic cleanup.",
                     "type": [
                         "integer",

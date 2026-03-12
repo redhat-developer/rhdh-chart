@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ include "rhdh-must-gather.fullname" . }}-data-retriever
+  name: {{ include "rhdh-must-gather.dataRetrieverName" . }}
   labels:
     {{- include "rhdh-must-gather.labels" . | nindent 4 }}
     app.kubernetes.io/component: data-retriever
