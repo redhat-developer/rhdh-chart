@@ -49,7 +49,7 @@ spec:
             - name: BASE_COLLECTION_PATH
               value: "/must-gather"
             - name: LOG_LEVEL
-              value: {{ .Values.gather.logLevel | quote }}
+              value: {{ .Values.gather.logLevel | lower | quote }}
             - name: CMD_TIMEOUT
               value: {{ .Values.gather.cmdTimeout | quote }}
             {{- if .Values.gather.since }}

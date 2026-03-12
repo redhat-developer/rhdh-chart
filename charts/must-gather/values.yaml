@@ -44,7 +44,7 @@ job:
 
 # -- Gather script configuration
 gather:
-  # -- Log level: info, debug, trace
+  # -- Log level: info, INFO, debug, DEBUG, trace, TRACE
   logLevel: "info"
   # -- Command timeout for individual kubectl/helm commands (seconds)
   cmdTimeout: "30"

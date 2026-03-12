@@ -130,8 +130,12 @@
                     "default": "info",
                     "enum": [
                         "info",
+                        "INFO",
                         "debug",
-                        "trace"
+                        "DEBUG",
+                        "trace",
+                        "TRACE",
+                        ""
                     ]
                 },
                 "cmdTimeout": {

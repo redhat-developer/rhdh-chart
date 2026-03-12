@@ -876,8 +876,12 @@
                     "default": "info",
                     "enum": [
                         "info",
+                        "INFO",
                         "debug",
-                        "trace"
+                        "DEBUG",
+                        "trace",
+                        "TRACE",
+                        ""
                     ],
                     "title": "Log level for the gather script.",
                     "type": "string"

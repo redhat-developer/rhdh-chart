@@ -5,3 +5,4 @@ gather:
   withoutHelm: true
   withoutRoute: true
   withoutIngress: true
+  logLevel: "TRACE"

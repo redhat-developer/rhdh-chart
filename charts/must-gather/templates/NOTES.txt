@@ -30,7 +30,7 @@ To clean up the must-gather resources:
    helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
 
 Configuration used:
-  - Log level: {{ .Values.gather.logLevel }}
+  - Log level: {{ .Values.gather.logLevel | lower }}
   - Job timeout: {{ .Values.job.activeDeadlineSeconds }}s
   - Storage size: {{ .Values.persistence.size }}
 {{- if .Values.gather.namespaces }}
