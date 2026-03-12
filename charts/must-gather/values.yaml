@@ -99,10 +99,10 @@ persistence:
 dataRetriever:
   # -- Enable the data retriever pod
   enabled: true
-  # -- Image for the data retriever pod
+  # -- Image for the data retriever pod (defaults to the main must-gather image)
   image:
-    repository: registry.access.redhat.com/ubi9
-    tag: "latest"
+    repository: ""
+    tag: ""
     pullPolicy: ""
   # -- Resource configuration
   resources:
@@ -132,17 +132,19 @@ podAnnotations: {}
 podLabels: {}
 
 # -- Pod security context
-podSecurityContext: {}
-  # -- fsGroup: 2000
+# -- On OCP, the SCC may override fsGroup with a value from the namespace's allowed range.
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
 
 # -- Container security context
-securityContext: {}
-  # -- capabilities:
-  # --   drop:
-  # --   - ALL
-  # -- readOnlyRootFilesystem: true
-  # -- runAsNonRoot: true
-  # -- runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 
 # -- Node selector for pod scheduling
 nodeSelector: {}

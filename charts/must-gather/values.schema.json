@@ -778,17 +778,17 @@
                             "type": "string"
                         },
                         "repository": {
-                            "default": "registry.access.redhat.com/ubi9",
-                            "title": "Image repository.",
+                            "default": "",
+                            "title": "Image repository. Empty defaults to the main must-gather image.",
                             "type": "string"
                         },
                         "tag": {
-                            "default": "latest",
-                            "title": "Image tag.",
+                            "default": "",
+                            "title": "Image tag. Empty defaults to the main must-gather image tag.",
                             "type": "string"
                         }
                     },
-                    "title": "Image for the data retriever pod.",
+                    "title": "Image for the data retriever pod. Defaults to the main must-gather image if not set.",
                     "type": "object"
                 },
                 "resources": {

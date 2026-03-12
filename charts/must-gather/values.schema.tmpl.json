@@ -310,19 +310,19 @@
                     "default": true
                 },
                 "image": {
-                    "title": "Image for the data retriever pod.",
+                    "title": "Image for the data retriever pod. Defaults to the main must-gather image if not set.",
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
                         "repository": {
-                            "title": "Image repository.",
+                            "title": "Image repository. Empty defaults to the main must-gather image.",
                             "type": "string",
-                            "default": "registry.access.redhat.com/ubi9"
+                            "default": ""
                         },
                         "tag": {
-                            "title": "Image tag.",
+                            "title": "Image tag. Empty defaults to the main must-gather image tag.",
                             "type": "string",
-                            "default": "latest"
+                            "default": ""
                         },
                         "pullPolicy": {
                             "title": "Image pull policy.",
@@ -444,13 +444,24 @@
             "title": "Security settings for a Pod.",
             "description": "The security settings that you specify for a Pod apply to all Containers in the Pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
             "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-            "default": {}
+            "default": {
+                "runAsNonRoot": true,
+                "fsGroup": 1001,
+                "seccompProfile": {
+                    "type": "RuntimeDefault"
+                }
+            }
         },
         "securityContext": {
             "title": "Security settings for a Container.",
             "description": "Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
             "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-            "default": {}
+            "default": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                    "drop": ["ALL"]
+                }
+            }
         },
         "nodeSelector": {
             "title": "Node labels for pod assignment",

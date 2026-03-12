@@ -90,9 +90,9 @@ The command removes all the Kubernetes resources associated with the chart and d
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | affinity | Affinity rules for pod scheduling | object | `{}` |
-| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"},"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
+| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
 | dataRetriever.enabled | Enable the data retriever pod | bool | `true` |
-| dataRetriever.image | Image for the data retriever pod | object | `{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"}` |
+| dataRetriever.image | Image for the data retriever pod (defaults to the main must-gather image) | object | `{"pullPolicy":"","repository":"","tag":""}` |
 | dataRetriever.resources | Resource configuration | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
 | gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
@@ -118,11 +118,11 @@ The command removes all the Kubernetes resources associated with the chart and d
 | persistence.storageClass | Storage class (empty = use cluster default) | string | `""` |
 | podAnnotations | Pod annotations | object | `{}` |
 | podLabels | Pod labels | object | `{}` |
-| podSecurityContext | Pod security context | object | `{}` |
+| podSecurityContext | On OCP, the SCC may override fsGroup with a value from the namespace's allowed range. | object | `{"fsGroup":1001,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
 | rbac | RBAC configuration | object | `{"create":true}` |
 | rbac.create | Create ClusterRole and ClusterRoleBinding for cluster-wide read access | bool | `true` |
 | resources | Resource requests and limits for the gather job | object | `{"limits":{"cpu":"500m","ephemeral-storage":"128Mi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"}}` |
-| securityContext | Container security context | object | `{}` |
+| securityContext | Container security context | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}` |
 | serviceAccount | Service account configuration | object | `{"annotations":{},"automount":true,"create":true,"name":""}` |
 | serviceAccount.annotations | Annotations to add to the service account | object | `{}` |
 | serviceAccount.automount | Automatically mount a ServiceAccount's API credentials | bool | `true` |

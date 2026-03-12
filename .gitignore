@@ -4,6 +4,8 @@
 .LSOverride
 .idea
 
+*.tar.gz
+
 # helm chart dependencies
 charts/*/charts/
 **/charts/*.tgz
