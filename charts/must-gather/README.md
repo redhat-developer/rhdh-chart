@@ -95,11 +95,11 @@ The command removes all the Kubernetes resources associated with the chart and d
 | dataRetriever.image | Image for the data retriever pod | object | `{"pullPolicy":"","repository":"registry.access.redhat.com/ubi9","tag":"latest"}` |
 | dataRetriever.resources | Resource configuration | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
-| gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":"","since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
+| gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
 | gather.cmdTimeout | Command timeout for individual kubectl/helm commands (seconds) | string | `"30"` |
 | gather.extraArgs | Additional custom arguments to pass to the gather script | list | `[]` |
 | gather.logLevel | Log level: info, INFO, debug, DEBUG, trace, TRACE | string | `"info"` |
-| gather.namespaces | Example: "rhdh-prod,rhdh-staging" | string | `""` |
+| gather.namespaces | Example: ["rhdh-prod", "rhdh-staging"] | list | `[]` |
 | gather.since | Relative time for log collection (e.g., "2h", "30m") | string | `""` |
 | gather.sinceTime | Absolute timestamp for log collection (RFC3339 format) | string | `""` |
 | gather.withSecrets | Optional collection features (disabled by default) | bool | `false` |

@@ -67,9 +67,9 @@ gather:
   withoutIngress: false
   withoutNamespaceInspect: false
 
-  # -- Limit collection to specific namespaces (comma-separated)
-  # -- Example: "rhdh-prod,rhdh-staging"
-  namespaces: ""
+  # -- Limit collection to specific namespaces
+  # -- Example: ["rhdh-prod", "rhdh-staging"]
+  namespaces: []
 
   # -- Additional custom arguments to pass to the gather script
   extraArgs: []

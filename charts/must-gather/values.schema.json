@@ -887,9 +887,12 @@
                     "type": "string"
                 },
                 "namespaces": {
-                    "default": "",
-                    "title": "Limit collection to specific namespaces (comma-separated). Example: 'rhdh-prod,rhdh-staging'.",
-                    "type": "string"
+                    "default": [],
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "Limit collection to specific namespaces. Example: ['rhdh-prod', 'rhdh-staging'].",
+                    "type": "array"
                 },
                 "since": {
                     "default": "",

@@ -34,7 +34,7 @@ Configuration used:
   - Job timeout: {{ .Values.job.activeDeadlineSeconds }}s
   - Storage size: {{ .Values.persistence.size }}
 {{- if .Values.gather.namespaces }}
-  - Target namespaces: {{ .Values.gather.namespaces }}
+  - Target namespaces: {{ .Values.gather.namespaces | join ", " }}
 {{- end }}
 {{- if .Values.gather.withSecrets }}
   - Secrets collection: enabled (sanitized)

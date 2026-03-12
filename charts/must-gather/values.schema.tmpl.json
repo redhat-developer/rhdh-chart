@@ -204,9 +204,12 @@
                     "default": false
                 },
                 "namespaces": {
-                    "title": "Limit collection to specific namespaces (comma-separated). Example: 'rhdh-prod,rhdh-staging'.",
-                    "type": "string",
-                    "default": ""
+                    "title": "Limit collection to specific namespaces. Example: ['rhdh-prod', 'rhdh-staging'].",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
                 },
                 "extraArgs": {
                     "title": "Additional custom arguments to pass to the gather script.",

@@ -94,7 +94,7 @@ spec:
             {{- end }}
             {{- if .Values.gather.namespaces }}
             - "--namespaces"
-            - {{ .Values.gather.namespaces | quote }}
+            - {{ .Values.gather.namespaces | join "," | quote }}
             {{- end }}
             {{- with .Values.gather.extraArgs }}
             {{- toYaml . | nindent 12 }}
