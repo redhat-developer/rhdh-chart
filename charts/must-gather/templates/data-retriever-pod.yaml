@@ -27,8 +27,13 @@ spec:
           topologyKey: kubernetes.io/hostname
   containers:
     - name: data-retriever
-      image: "{{ .Values.dataRetriever.image.repository | default .Values.image.repository }}:{{ .Values.dataRetriever.image.tag | default .Values.image.tag | default .Chart.AppVersion }}" # NOSONAR
-      imagePullPolicy: {{ .Values.dataRetriever.image.pullPolicy | default .Values.image.pullPolicy }}
+      {{- $drImage := deepCopy .Values.image }}
+      {{- if .Values.dataRetriever.image.registry }}{{ $_ := set $drImage "registry" .Values.dataRetriever.image.registry }}{{- end }}
+      {{- if .Values.dataRetriever.image.repository }}{{ $_ := set $drImage "repository" .Values.dataRetriever.image.repository }}{{- end }}
+      {{- if .Values.dataRetriever.image.tag }}{{ $_ := set $drImage "tag" .Values.dataRetriever.image.tag }}{{- end }}
+      {{- if .Values.dataRetriever.image.digest }}{{ $_ := set $drImage "digest" .Values.dataRetriever.image.digest }}{{- end }}
+      image: {{ include "rhdh-must-gather.image" (dict "image" $drImage "defaultTag" .Chart.AppVersion) | quote }} # NOSONAR
+      imagePullPolicy: {{ .Values.dataRetriever.image.pullPolicy | default .Values.image.pullPolicy | default "IfNotPresent" }}
       {{- with .Values.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}

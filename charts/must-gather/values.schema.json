@@ -766,6 +766,11 @@
                 "image": {
                     "additionalProperties": false,
                     "properties": {
+                        "digest": {
+                            "default": "",
+                            "title": "Image digest. Empty defaults to the main must-gather image digest.",
+                            "type": "string"
+                        },
                         "pullPolicy": {
                             "default": "",
                             "enum": [
@@ -775,6 +780,11 @@
                                 ""
                             ],
                             "title": "Image pull policy.",
+                            "type": "string"
+                        },
+                        "registry": {
+                            "default": "",
+                            "title": "Image registry. Empty defaults to the main must-gather image registry.",
                             "type": "string"
                         },
                         "repository": {
@@ -956,6 +966,11 @@
         "image": {
             "additionalProperties": false,
             "properties": {
+                "digest": {
+                    "default": "",
+                    "title": "Image digest (e.g., sha256:abc123...). Can be used with or without tag.",
+                    "type": "string"
+                },
                 "pullPolicy": {
                     "default": "",
                     "enum": [
@@ -967,8 +982,13 @@
                     "title": "Image pull policy.",
                     "type": "string"
                 },
+                "registry": {
+                    "default": "quay.io",
+                    "title": "Image registry.",
+                    "type": "string"
+                },
                 "repository": {
-                    "default": "quay.io/rhdh-community/rhdh-must-gather",
+                    "default": "rhdh-community/rhdh-must-gather",
                     "title": "Image repository.",
                     "type": "string"
                 },
@@ -1471,6 +1491,11 @@
                 "image": {
                     "additionalProperties": false,
                     "properties": {
+                        "digest": {
+                            "default": "",
+                            "title": "Image digest (e.g., sha256:abc123...). Can be used with or without tag.",
+                            "type": "string"
+                        },
                         "pullPolicy": {
                             "default": "",
                             "enum": [
@@ -1480,6 +1505,11 @@
                                 ""
                             ],
                             "title": "Image pull policy.",
+                            "type": "string"
+                        },
+                        "registry": {
+                            "default": "docker.io",
+                            "title": "Image registry.",
                             "type": "string"
                         },
                         "repository": {

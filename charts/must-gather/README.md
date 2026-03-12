@@ -90,9 +90,9 @@ The command removes all the Kubernetes resources associated with the chart and d
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | affinity | Affinity rules for pod scheduling | object | `{}` |
-| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
+| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"","registry":"","repository":"","tag":""},"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
 | dataRetriever.enabled | Enable the data retriever pod | bool | `true` |
-| dataRetriever.image | Image for the data retriever pod (defaults to the main must-gather image) | object | `{"pullPolicy":"","repository":"","tag":""}` |
+| dataRetriever.image | Image for the data retriever pod (defaults to the main must-gather image) | object | `{"digest":"","pullPolicy":"","registry":"","repository":"","tag":""}` |
 | dataRetriever.resources | Resource configuration | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
 | gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
@@ -104,7 +104,9 @@ The command removes all the Kubernetes resources associated with the chart and d
 | gather.sinceTime | Absolute timestamp for log collection (RFC3339 format) | string | `""` |
 | gather.withSecrets | Optional collection features (disabled by default) | bool | `false` |
 | gather.withoutOperator | Exclusion options (set to true to skip collection) | bool | `false` |
-| image | Container image configuration | object | `{"pullPolicy":"","repository":"quay.io/rhdh-community/rhdh-must-gather","tag":"latest"}` |
+| image | Container image configuration | object | `{"digest":"","pullPolicy":"","registry":"quay.io","repository":"rhdh-community/rhdh-must-gather","tag":"latest"}` |
+| image.digest | Image digest (e.g., sha256:abc123...). Can be used with or without tag. | string | `""` |
+| image.tag | Overrides the image tag whose default is the chart appVersion. | string | `"latest"` |
 | imagePullSecrets | Secrets for pulling images from a private registry | list | `[]` |
 | job | Job configuration | object | `{"activeDeadlineSeconds":3600,"backoffLimit":3,"ttlSecondsAfterFinished":600}` |
 | job.activeDeadlineSeconds | Job timeout in seconds (default: 1 hour) | int | `3600` |
@@ -128,8 +130,8 @@ The command removes all the Kubernetes resources associated with the chart and d
 | serviceAccount.automount | Automatically mount a ServiceAccount's API credentials | bool | `true` |
 | serviceAccount.create | Specifies whether a service account should be created | bool | `true` |
 | serviceAccount.name | If not set and create is true, a name is generated using the fullname template | string | `""` |
-| test | Helm test configuration | object | `{"enabled":true,"image":{"pullPolicy":"","repository":"bitnami/kubectl","tag":"latest"}}` |
+| test | Helm test configuration | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"","registry":"docker.io","repository":"bitnami/kubectl","tag":"latest"}}` |
 | test.enabled | Enable the Helm test | bool | `true` |
-| test.image | Image for the test pod | object | `{"pullPolicy":"","repository":"bitnami/kubectl","tag":"latest"}` |
+| test.image | Image for the test pod | object | `{"digest":"","pullPolicy":"","registry":"docker.io","repository":"bitnami/kubectl","tag":"latest"}` |
 | tolerations | Tolerations for pod scheduling | list | `[]` |
 

@@ -9,10 +9,15 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+                "registry": {
+                    "title": "Image registry.",
+                    "type": "string",
+                    "default": "quay.io"
+                },
                 "repository": {
                     "title": "Image repository.",
                     "type": "string",
-                    "default": "quay.io/rhdh-community/rhdh-must-gather"
+                    "default": "rhdh-community/rhdh-must-gather"
                 },
                 "pullPolicy": {
                     "title": "Image pull policy.",
@@ -29,6 +34,11 @@
                     "title": "Overrides the image tag whose default is the chart appVersion.",
                     "type": "string",
                     "default": "latest"
+                },
+                "digest": {
+                    "title": "Image digest (e.g., sha256:abc123...). Can be used with or without tag.",
+                    "type": "string",
+                    "default": ""
                 }
             }
         },
@@ -314,6 +324,11 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "registry": {
+                            "title": "Image registry. Empty defaults to the main must-gather image registry.",
+                            "type": "string",
+                            "default": ""
+                        },
                         "repository": {
                             "title": "Image repository. Empty defaults to the main must-gather image.",
                             "type": "string",
@@ -321,6 +336,11 @@
                         },
                         "tag": {
                             "title": "Image tag. Empty defaults to the main must-gather image tag.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "digest": {
+                            "title": "Image digest. Empty defaults to the main must-gather image digest.",
                             "type": "string",
                             "default": ""
                         },
@@ -405,6 +425,11 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "registry": {
+                            "title": "Image registry.",
+                            "type": "string",
+                            "default": "docker.io"
+                        },
                         "repository": {
                             "title": "Image repository.",
                             "type": "string",
@@ -414,6 +439,11 @@
                             "title": "Image tag.",
                             "type": "string",
                             "default": "latest"
+                        },
+                        "digest": {
+                            "title": "Image digest (e.g., sha256:abc123...). Can be used with or without tag.",
+                            "type": "string",
+                            "default": ""
                         },
                         "pullPolicy": {
                             "title": "Image pull policy.",

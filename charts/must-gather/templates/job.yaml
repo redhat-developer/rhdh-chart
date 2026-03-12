@@ -35,7 +35,7 @@ spec:
       {{- end }}
       containers:
         - name: gather
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}" # NOSONAR - tag is user-configurable via Helm values; defaults to Chart.AppVersion
+          image: {{ include "rhdh-must-gather.image" (dict "image" .Values.image "defaultTag" .Chart.AppVersion) | quote }} # NOSONAR
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.securityContext }}
           securityContext:

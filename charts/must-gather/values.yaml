@@ -4,10 +4,13 @@
 
 # -- Container image configuration
 image:
-  repository: quay.io/rhdh-community/rhdh-must-gather
+  registry: quay.io
+  repository: rhdh-community/rhdh-must-gather
   pullPolicy: ""
-  # -- -- Overrides the image tag whose default is the chart appVersion.
+  # -- Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+  # -- Image digest (e.g., sha256:abc123...). Can be used with or without tag.
+  digest: ""
 
 # -- Secrets for pulling images from a private registry
 imagePullSecrets: []
@@ -101,8 +104,10 @@ dataRetriever:
   enabled: true
   # -- Image for the data retriever pod (defaults to the main must-gather image)
   image:
+    registry: ""
     repository: ""
     tag: ""
+    digest: ""
     pullPolicy: ""
   # -- Resource configuration
   resources:
@@ -121,8 +126,10 @@ test:
   enabled: true
   # -- Image for the test pod
   image:
+    registry: docker.io
     repository: bitnami/kubectl
     tag: "latest"
+    digest: ""
     pullPolicy: ""
 
 # -- Pod annotations

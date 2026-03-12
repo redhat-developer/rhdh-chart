@@ -77,7 +77,7 @@ spec:
   {{- end }}
   containers:
     - name: test
-      image: "{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}" # NOSONAR - tag is user-configurable via Helm values
+      image: {{ include "rhdh-must-gather.image" (dict "image" .Values.test.image "defaultTag" "latest") | quote }} # NOSONAR
       imagePullPolicy: {{ .Values.test.image.pullPolicy }}
       {{- with .Values.securityContext }}
       securityContext:

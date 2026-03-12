@@ -79,6 +79,30 @@ Base name is truncated to 48 chars to stay within the 63-char DNS limit.
 {{- end }}
 
 {{/*
+Build a full image reference from registry, repository, and tag.
+Usage: {{ include "rhdh-must-gather.image" (dict "image" .Values.image "defaultTag" .Chart.AppVersion) }}
+*/}}
+{{- define "rhdh-must-gather.image" -}}
+{{- $registry := .image.registry | default "" -}}
+{{- $repository := .image.repository -}}
+{{- $tag := .image.tag | default .defaultTag | default "" -}}
+{{- $digest := .image.digest | default "" -}}
+{{- $ref := "" -}}
+{{- if and $tag $digest -}}
+{{- $ref = printf ":%s@%s" $tag $digest -}}
+{{- else if $digest -}}
+{{- $ref = printf "@%s" $digest -}}
+{{- else if $tag -}}
+{{- $ref = printf ":%s" $tag -}}
+{{- end -}}
+{{- if $registry -}}
+{{- printf "%s/%s%s" $registry $repository $ref -}}
+{{- else -}}
+{{- printf "%s%s" $repository $ref -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Data retriever pod name with unique run ID suffix.
 Base name is truncated to 32 chars to stay within the 63-char DNS limit.
 */}}
