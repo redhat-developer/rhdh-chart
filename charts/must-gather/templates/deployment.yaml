@@ -30,7 +30,7 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }} # NOSONAR - SA is bound via ClusterRole/ClusterRoleBinding in rbac.yaml
-      automountServiceAccountToken: true
+      automountServiceAccountToken: false
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -116,6 +116,9 @@ spec:
           volumeMounts:
             - name: output
               mountPath: /must-gather
+            - name: kube-api-access
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -142,6 +145,23 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
+        - name: kube-api-access
+          projected:
+            defaultMode: 0444
+            sources:
+              - serviceAccountToken:
+                  expirationSeconds: {{ .Values.serviceAccount.tokenExpirationSeconds | default 3600 }}
+                  path: token
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        fieldPath: metadata.namespace
         - name: output
           ephemeral:
             volumeClaimTemplate:

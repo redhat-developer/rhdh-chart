@@ -10,7 +10,7 @@ metadata:
     helm.sh/hook: test
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook-weight: "-2"
-automountServiceAccountToken: true
+automountServiceAccountToken: false
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -66,6 +66,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   serviceAccountName: {{ include "rhdh-must-gather.fullname" . }}-test
+  automountServiceAccountToken: false
   restartPolicy: Never
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
@@ -85,6 +86,10 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumeMounts:
+        - name: kube-api-access
+          mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          readOnly: true
       env:
         - name: NAMESPACE
           valueFrom:
@@ -120,6 +125,24 @@ spec:
           memory: "128Mi"
           cpu: "100m"
           ephemeral-storage: "64Mi"
+  volumes:
+    - name: kube-api-access
+      projected:
+        defaultMode: 0444
+        sources:
+          - serviceAccountToken:
+              expirationSeconds: {{ .Values.serviceAccount.tokenExpirationSeconds | default 3600 }}
+              path: token
+          - configMap:
+              name: kube-root-ca.crt
+              items:
+                - key: ca.crt
+                  path: ca.crt
+          - downwardAPI:
+              items:
+                - path: namespace
+                  fieldRef:
+                    fieldPath: metadata.namespace
   {{- with .Values.nodeSelector }}
   nodeSelector:
     {{- toYaml . | nindent 4 }}

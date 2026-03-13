@@ -138,11 +138,10 @@ The command removes all the Kubernetes resources associated with the chart and d
 | rbac.create | Create RBAC resources (Role/ClusterRole and bindings) | bool | `true` |
 | resources | Resource requests and limits for the gather container | object | `{"limits":{"cpu":"500m","ephemeral-storage":"128Mi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"}}` |
 | securityContext | Container security context | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}` |
-| serviceAccount | Service account configuration | object | `{"annotations":{},"automount":true,"create":true,"name":""}` |
+| serviceAccount | Service account configuration | object | `{"annotations":{},"name":"","tokenExpirationSeconds":3600}` |
 | serviceAccount.annotations | Annotations to add to the service account | object | `{}` |
-| serviceAccount.automount | Automatically mount a ServiceAccount's API credentials | bool | `true` |
-| serviceAccount.create | Specifies whether a service account should be created | bool | `true` |
-| serviceAccount.name | If not set and create is true, a name is generated using the fullname template | string | `""` |
+| serviceAccount.name | If not set, a name is generated using the fullname template. | string | `""` |
+| serviceAccount.tokenExpirationSeconds | into the gather init container (minimum 600). | int | `3600` |
 | strategy | Deployment strategy | object | `{"type":"Recreate"}` |
 | test | Helm test configuration | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"","registry":"docker.io","repository":"bitnami/kubectl","tag":"latest"}}` |
 | test.enabled | Enable the Helm test | bool | `true` |

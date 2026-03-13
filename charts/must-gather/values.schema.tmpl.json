@@ -70,15 +70,11 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "create": {
-                    "title": "Specifies whether a service account should be created.",
-                    "type": "boolean",
-                    "default": true
-                },
-                "automount": {
-                    "title": "Automatically mount a ServiceAccount's API credentials.",
-                    "type": "boolean",
-                    "default": true
+                "tokenExpirationSeconds": {
+                    "title": "Expiration (in seconds) for the bound service account token projected into the gather init container.",
+                    "type": "integer",
+                    "default": 3600,
+                    "minimum": 600
                 },
                 "annotations": {
                     "title": "Annotations to add to the service account.",
@@ -86,7 +82,7 @@
                     "default": {}
                 },
                 "name": {
-                    "title": "The name of the service account to use. If not set and create is true, a name is generated using the fullname template.",
+                    "title": "The name of the service account to use. If not set, a name is generated using the fullname template.",
                     "type": "string",
                     "default": ""
                 }

@@ -54,11 +54,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "rhdh-must-gather.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
 {{- default (include "rhdh-must-gather.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
 {{- end }}
 
 
