@@ -98,35 +98,33 @@
             "additionalProperties": false,
             "properties": {
                 "create": {
-                    "title": "Create ClusterRole and ClusterRoleBinding for cluster-wide read access.",
+                    "title": "Create RBAC resources (Role/ClusterRole and bindings).",
                     "type": "boolean",
                     "default": true
+                },
+                "scope": {
+                    "title": "Scope of the RBAC role.",
+                    "description": "'cluster' creates a ClusterRole with cluster-wide read access. 'namespace' creates a namespace-scoped Role; the release namespace is always included in --namespaces automatically, alongside any extra namespaces in gather.namespaces.",
+                    "type": "string",
+                    "default": "cluster",
+                    "enum": ["cluster", "namespace"]
                 }
             }
         },
-        "job": {
-            "title": "Job configuration.",
+        "strategy": {
+            "title": "Deployment strategy.",
+            "description": "Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy",
             "type": "object",
-            "additionalProperties": false,
             "properties": {
-                "activeDeadlineSeconds": {
-                    "title": "Job timeout in seconds.",
-                    "type": "integer",
-                    "default": 3600
-                },
-                "backoffLimit": {
-                    "title": "Number of retries before marking job as failed.",
-                    "type": "integer",
-                    "default": 3
-                },
-                "ttlSecondsAfterFinished": {
-                    "title": "TTL for automatic cleanup after job finishes (seconds). Set to a positive value to enable automatic cleanup.",
-                    "type": [
-                        "integer",
-                        "string"
-                    ],
-                    "default": ""
+                "type": {
+                    "title": "Strategy type.",
+                    "type": "string",
+                    "default": "Recreate",
+                    "enum": ["Recreate", "RollingUpdate"]
                 }
+            },
+            "default": {
+                "type": "Recreate"
             }
         },
         "gather": {
@@ -232,7 +230,7 @@
             }
         },
         "resources": {
-            "title": "Resource requests and limits for the gather job.",
+            "title": "Resource requests and limits for the gather container.",
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -309,56 +307,13 @@
                 }
             }
         },
-        "dataRetriever": {
-            "title": "Data retriever pod configuration. This pod allows you to retrieve the gathered data after the job completes.",
+        "dataHolder": {
+            "title": "Data holder container configuration. Stays alive after the gather init container completes so you can exec in and retrieve the output.",
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "enabled": {
-                    "title": "Enable the data retriever pod.",
-                    "type": "boolean",
-                    "default": true
-                },
-                "image": {
-                    "title": "Image for the data retriever pod. Defaults to the main must-gather image if not set.",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "registry": {
-                            "title": "Image registry. Empty defaults to the main must-gather image registry.",
-                            "type": "string",
-                            "default": ""
-                        },
-                        "repository": {
-                            "title": "Image repository. Empty defaults to the main must-gather image.",
-                            "type": "string",
-                            "default": ""
-                        },
-                        "tag": {
-                            "title": "Image tag. Empty defaults to the main must-gather image tag.",
-                            "type": "string",
-                            "default": ""
-                        },
-                        "digest": {
-                            "title": "Image digest. Empty defaults to the main must-gather image digest.",
-                            "type": "string",
-                            "default": ""
-                        },
-                        "pullPolicy": {
-                            "title": "Image pull policy.",
-                            "type": "string",
-                            "default": "",
-                            "enum": [
-                                "Always",
-                                "IfNotPresent",
-                                "Never",
-                                ""
-                            ]
-                        }
-                    }
-                },
                 "resources": {
-                    "title": "Resource configuration for the data retriever pod.",
+                    "title": "Resource requests and limits for the data holder container.",
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {

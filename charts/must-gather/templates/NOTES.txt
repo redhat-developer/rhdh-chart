@@ -1,37 +1,22 @@
 -------------------------------------------------------------------
-RHDH Must-Gather job is now running. This might take a few minutes.
+RHDH Must-Gather is now running. This might take a few minutes.
 
-To check the job logs:
-   kubectl -n {{ .Release.Namespace }} logs -f job/{{ include "rhdh-must-gather.jobName" . }}
+To check the gather logs:
+   kubectl -n {{ .Release.Namespace }} logs -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=gather -c gather -f
 
-To retrieve the gathered diagnostic data once the job completes:
+To retrieve the gathered diagnostic data once the gather completes:
 
-1. Wait for the job to complete:
-   kubectl -n {{ .Release.Namespace }} wait --for=condition=complete job/{{ include "rhdh-must-gather.jobName" . }} --timeout={{ .Values.job.activeDeadlineSeconds }}s
+1. Wait for the pod to be ready (gather init container completed):
+   kubectl -n {{ .Release.Namespace }} wait --for=condition=ready pod -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=gather --timeout=3600s
 
-{{- if .Values.dataRetriever.enabled }}
-
-2. Wait for the data retriever pod to be ready:
-   kubectl -n {{ .Release.Namespace }} wait --for=condition=ready pod/{{ include "rhdh-must-gather.dataRetrieverName" . }} --timeout=60s
-
-3. Download the gathered data:
-   kubectl -n {{ .Release.Namespace }} exec {{ include "rhdh-must-gather.dataRetrieverName" . }} -- tar czf - -C /data . > rhdh-must-gather-output.tar.gz
-
-{{- else }}
-
-2. Find the completed job pod:
-   kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/name={{ include "rhdh-must-gather.name" . }},app.kubernetes.io/component=gather
-
-3. Copy the data from the PVC (you may need to create a temporary pod to access it)
-
-{{- end }}
+2. Download the gathered data from the data-holder container:
+   kubectl -n {{ .Release.Namespace }} exec deploy/{{ include "rhdh-must-gather.fullname" . }} -c data-holder -- tar czf - -C /must-gather . > rhdh-must-gather-output.tar.gz
 
 To clean up the must-gather resources:
    helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
 
 Configuration used:
   - Log level: {{ .Values.gather.logLevel | lower }}
-  - Job timeout: {{ .Values.job.activeDeadlineSeconds }}s
   - Storage size: {{ .Values.persistence.size }}
 {{- if .Values.gather.namespaces }}
   - Target namespaces: {{ .Values.gather.namespaces | join ", " }}

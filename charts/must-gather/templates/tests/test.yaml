@@ -1,4 +1,4 @@
-{{- if and .Values.test.enabled .Values.dataRetriever.enabled -}}
+{{- if .Values.test.enabled -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -24,14 +24,11 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook-weight: "-1"
 rules:
-  - apiGroups: ["batch"]
-    resources: ["jobs"]
-    verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "watch", "list"]
   - apiGroups: [""]
-    resources: ["pods/exec"] # NOSONAR - exec is required to retrieve must-gather output from the data-retriever pod during helm test
+    resources: ["pods/exec"] # NOSONAR - exec is required to retrieve must-gather output from the data-holder container during helm test
     verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -90,24 +87,19 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: JOB_NAME
-          value: {{ include "rhdh-must-gather.jobName" . }}
-        - name: DATA_RETRIEVER_POD
-          value: {{ include "rhdh-must-gather.dataRetrieverName" . }}
-        - name: JOB_TIMEOUT
-          value: "{{ .Values.job.activeDeadlineSeconds }}"
+        - name: DEPLOY_NAME
+          value: {{ include "rhdh-must-gather.fullname" . }}
+        - name: POD_SELECTOR
+          value: "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=gather"
       command: ["/bin/sh", "-c"]
       args:
         - |
           set -e
-          echo "Step 1: Waiting for the gather job to complete..."
-          kubectl -n "$NAMESPACE" wait --for=condition=complete "job/$JOB_NAME" --timeout="${JOB_TIMEOUT}s"
+          echo "Step 1: Waiting for the gather pod to be ready (init container completed)..."
+          kubectl -n "$NAMESPACE" wait --for=condition=ready pod -l "$POD_SELECTOR" --timeout=3600s
 
-          echo "Step 2: Waiting for the data retriever pod to be ready..."
-          kubectl -n "$NAMESPACE" wait --for=condition=ready "pod/$DATA_RETRIEVER_POD" --timeout=60s
-
-          echo "Step 3: Retrieving gathered data from the data retriever pod..."
-          kubectl -n "$NAMESPACE" exec "$DATA_RETRIEVER_POD" -- tar czf - -C /data . > /tmp/rhdh-must-gather-output.tar.gz
+          echo "Step 2: Retrieving gathered data from the data-holder container..."
+          kubectl -n "$NAMESPACE" exec "deploy/$DEPLOY_NAME" -c data-holder -- tar czf - -C /must-gather . > /tmp/rhdh-must-gather-output.tar.gz
 
           size=$(stat -c%s /tmp/rhdh-must-gather-output.tar.gz 2>/dev/null || stat -f%z /tmp/rhdh-must-gather-output.tar.gz 2>/dev/null)
           file_count=$(tar -tzf /tmp/rhdh-must-gather-output.tar.gz | wc -l)

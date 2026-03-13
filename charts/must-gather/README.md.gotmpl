@@ -23,7 +23,7 @@ helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
   --version {{ template "chart.version" . }}
 ```
 
-Running the command again will automatically replace the previous job and start a new gather.
+Running the command again will automatically replace the previous pod and start a new gather.
 
 Then follow the instructions that will be printed to retrieve the gathered data.
 

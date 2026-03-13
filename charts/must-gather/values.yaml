@@ -33,17 +33,16 @@ serviceAccount:
 
 # -- RBAC configuration
 rbac:
-  # -- Create ClusterRole and ClusterRoleBinding for cluster-wide read access
+  # -- Create RBAC resources (Role/ClusterRole and bindings)
   create: true
+  # -- Scope of the RBAC role: "cluster" creates a ClusterRole with cluster-wide read access;
+  # -- "namespace" creates a namespace-scoped Role (the release namespace is always included
+  # -- in --namespaces automatically, alongside any extra namespaces in gather.namespaces)
+  scope: cluster
 
-# -- Job configuration
-job:
-  # -- Job timeout in seconds (default: 1 hour)
-  activeDeadlineSeconds: 3600
-  # -- Number of retries before marking job as failed
-  backoffLimit: 3
-  # -- TTL for automatic cleanup after job finishes (seconds)
-  ttlSecondsAfterFinished: 600
+# -- Deployment strategy
+strategy:
+  type: Recreate
 
 # -- Gather script configuration
 gather:
@@ -77,7 +76,7 @@ gather:
   # -- Additional custom arguments to pass to the gather script
   extraArgs: []
 
-# -- Resource requests and limits for the gather job
+# -- Resource requests and limits for the gather container
 resources:
   requests:
     memory: "128Mi"
@@ -97,19 +96,10 @@ persistence:
   # -- Access mode
   accessMode: ReadWriteOnce
 
-# -- Data retriever pod configuration
-# -- This pod allows you to retrieve the gathered data after the job completes
-dataRetriever:
-  # -- Enable the data retriever pod
-  enabled: true
-  # -- Image for the data retriever pod (defaults to the main must-gather image)
-  image:
-    registry: ""
-    repository: ""
-    tag: ""
-    digest: ""
-    pullPolicy: ""
-  # -- Resource configuration
+# -- Data holder container configuration
+# -- Runs alongside the gather container and stays alive so you can exec in and retrieve the output.
+dataHolder:
+  # -- Resource requests and limits for the data-holder container
   resources:
     requests:
       memory: "64Mi"

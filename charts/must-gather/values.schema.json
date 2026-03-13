@@ -755,52 +755,9 @@
             "title": "Affinity for pod assignment",
             "type": "object"
         },
-        "dataRetriever": {
+        "dataHolder": {
             "additionalProperties": false,
             "properties": {
-                "enabled": {
-                    "default": true,
-                    "title": "Enable the data retriever pod.",
-                    "type": "boolean"
-                },
-                "image": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "digest": {
-                            "default": "",
-                            "title": "Image digest. Empty defaults to the main must-gather image digest.",
-                            "type": "string"
-                        },
-                        "pullPolicy": {
-                            "default": "",
-                            "enum": [
-                                "Always",
-                                "IfNotPresent",
-                                "Never",
-                                ""
-                            ],
-                            "title": "Image pull policy.",
-                            "type": "string"
-                        },
-                        "registry": {
-                            "default": "",
-                            "title": "Image registry. Empty defaults to the main must-gather image registry.",
-                            "type": "string"
-                        },
-                        "repository": {
-                            "default": "",
-                            "title": "Image repository. Empty defaults to the main must-gather image.",
-                            "type": "string"
-                        },
-                        "tag": {
-                            "default": "",
-                            "title": "Image tag. Empty defaults to the main must-gather image tag.",
-                            "type": "string"
-                        }
-                    },
-                    "title": "Image for the data retriever pod. Defaults to the main must-gather image if not set.",
-                    "type": "object"
-                },
                 "resources": {
                     "additionalProperties": false,
                     "properties": {
@@ -849,11 +806,11 @@
                             "type": "object"
                         }
                     },
-                    "title": "Resource configuration for the data retriever pod.",
+                    "title": "Resource requests and limits for the data holder container.",
                     "type": "object"
                 }
             },
-            "title": "Data retriever pod configuration. This pod allows you to retrieve the gathered data after the job completes.",
+            "title": "Data holder container configuration. Stays alive after the gather init container completes so you can exec in and retrieve the output.",
             "type": "object"
         },
         "fullnameOverride": {
@@ -1013,31 +970,6 @@
             },
             "title": "Secrets for pulling images from a private registry.",
             "type": "array"
-        },
-        "job": {
-            "additionalProperties": false,
-            "properties": {
-                "activeDeadlineSeconds": {
-                    "default": 3600,
-                    "title": "Job timeout in seconds.",
-                    "type": "integer"
-                },
-                "backoffLimit": {
-                    "default": 3,
-                    "title": "Number of retries before marking job as failed.",
-                    "type": "integer"
-                },
-                "ttlSecondsAfterFinished": {
-                    "default": 600,
-                    "title": "TTL for automatic cleanup after job finishes (seconds). Set to a positive value to enable automatic cleanup.",
-                    "type": [
-                        "integer",
-                        "string"
-                    ]
-                }
-            },
-            "title": "Job configuration.",
-            "type": "object"
         },
         "nameOverride": {
             "default": "",
@@ -1245,8 +1177,18 @@
             "properties": {
                 "create": {
                     "default": true,
-                    "title": "Create ClusterRole and ClusterRoleBinding for cluster-wide read access.",
+                    "title": "Create RBAC resources (Role/ClusterRole and bindings).",
                     "type": "boolean"
+                },
+                "scope": {
+                    "default": "cluster",
+                    "description": "'cluster' creates a ClusterRole with cluster-wide read access. 'namespace' creates a namespace-scoped Role; the release namespace is always included in --namespaces automatically, alongside any extra namespaces in gather.namespaces.",
+                    "enum": [
+                        "cluster",
+                        "namespace"
+                    ],
+                    "title": "Scope of the RBAC role.",
+                    "type": "string"
                 }
             },
             "title": "RBAC configuration.",
@@ -1300,7 +1242,7 @@
                     "type": "object"
                 }
             },
-            "title": "Resource requests and limits for the gather job.",
+            "title": "Resource requests and limits for the gather container.",
             "type": "object"
         },
         "securityContext": {
@@ -1478,6 +1420,25 @@
                 }
             },
             "title": "Service account configuration.",
+            "type": "object"
+        },
+        "strategy": {
+            "default": {
+                "type": "Recreate"
+            },
+            "description": "Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy",
+            "properties": {
+                "type": {
+                    "default": "Recreate",
+                    "enum": [
+                        "Recreate",
+                        "RollingUpdate"
+                    ],
+                    "title": "Strategy type.",
+                    "type": "string"
+                }
+            },
+            "title": "Deployment strategy.",
             "type": "object"
         },
         "test": {

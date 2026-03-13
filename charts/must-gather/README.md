@@ -30,7 +30,7 @@ helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
   --version 0.1.0
 ```
 
-Running the command again will automatically replace the previous job and start a new gather.
+Running the command again will automatically replace the previous pod and start a new gather.
 
 Then follow the instructions that will be printed to retrieve the gathered data.
 
@@ -109,10 +109,8 @@ The command removes all the Kubernetes resources associated with the chart and d
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | affinity | Affinity rules for pod scheduling | object | `{}` |
-| dataRetriever | This pod allows you to retrieve the gathered data after the job completes | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"","registry":"","repository":"","tag":""},"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
-| dataRetriever.enabled | Enable the data retriever pod | bool | `true` |
-| dataRetriever.image | Image for the data retriever pod (defaults to the main must-gather image) | object | `{"digest":"","pullPolicy":"","registry":"","repository":"","tag":""}` |
-| dataRetriever.resources | Resource configuration | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
+| dataHolder | Runs alongside the gather container and stays alive so you can exec in and retrieve the output. | object | `{"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
+| dataHolder.resources | Resource requests and limits for the data-holder container | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
 | gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
 | gather.cmdTimeout | Command timeout for individual kubectl/helm commands (seconds) | string | `"30"` |
@@ -127,10 +125,6 @@ The command removes all the Kubernetes resources associated with the chart and d
 | image.digest | Image digest (e.g., sha256:abc123...). Can be used with or without tag. | string | `""` |
 | image.tag | Overrides the image tag whose default is the chart appVersion. | string | `"latest"` |
 | imagePullSecrets | Secrets for pulling images from a private registry | list | `[]` |
-| job | Job configuration | object | `{"activeDeadlineSeconds":3600,"backoffLimit":3,"ttlSecondsAfterFinished":600}` |
-| job.activeDeadlineSeconds | Job timeout in seconds (default: 1 hour) | int | `3600` |
-| job.backoffLimit | Number of retries before marking job as failed | int | `3` |
-| job.ttlSecondsAfterFinished | TTL for automatic cleanup after job finishes (seconds) | int | `600` |
 | nameOverride | Override the chart name | string | `""` |
 | nodeSelector | Node selector for pod scheduling | object | `{}` |
 | persistence | Persistent volume configuration for storing gathered data | object | `{"accessMode":"ReadWriteOnce","size":"1Gi","storageClass":""}` |
@@ -140,15 +134,16 @@ The command removes all the Kubernetes resources associated with the chart and d
 | podAnnotations | Pod annotations | object | `{}` |
 | podLabels | Pod labels | object | `{}` |
 | podSecurityContext | On OCP, the SCC may override fsGroup with a value from the namespace's allowed range. | object | `{"fsGroup":1001,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
-| rbac | RBAC configuration | object | `{"create":true}` |
-| rbac.create | Create ClusterRole and ClusterRoleBinding for cluster-wide read access | bool | `true` |
-| resources | Resource requests and limits for the gather job | object | `{"limits":{"cpu":"500m","ephemeral-storage":"128Mi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"}}` |
+| rbac | RBAC configuration | object | `{"create":true,"scope":"cluster"}` |
+| rbac.create | Create RBAC resources (Role/ClusterRole and bindings) | bool | `true` |
+| resources | Resource requests and limits for the gather container | object | `{"limits":{"cpu":"500m","ephemeral-storage":"128Mi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"}}` |
 | securityContext | Container security context | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}` |
 | serviceAccount | Service account configuration | object | `{"annotations":{},"automount":true,"create":true,"name":""}` |
 | serviceAccount.annotations | Annotations to add to the service account | object | `{}` |
 | serviceAccount.automount | Automatically mount a ServiceAccount's API credentials | bool | `true` |
 | serviceAccount.create | Specifies whether a service account should be created | bool | `true` |
 | serviceAccount.name | If not set and create is true, a name is generated using the fullname template | string | `""` |
+| strategy | Deployment strategy | object | `{"type":"Recreate"}` |
 | test | Helm test configuration | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"","registry":"docker.io","repository":"bitnami/kubectl","tag":"latest"}}` |
 | test.enabled | Enable the Helm test | bool | `true` |
 | test.image | Image for the test pod | object | `{"digest":"","pullPolicy":"","registry":"docker.io","repository":"bitnami/kubectl","tag":"latest"}` |
