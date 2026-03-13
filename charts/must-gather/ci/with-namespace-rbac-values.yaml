@@ -1,0 +1,6 @@
+# Namespace-scoped RBAC — creates a Role instead of a ClusterRole
+rbac:
+  scope: namespace
+gather:
+  namespaces:
+    - "kube-system"

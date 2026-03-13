@@ -1,0 +1,32 @@
+-------------------------------------------------------------------
+RHDH Must-Gather is now running. This might take a few minutes.
+
+To check the gather logs:
+   kubectl -n {{ .Release.Namespace }} logs -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=gather -c gather -f
+
+To retrieve the gathered diagnostic data once the gather completes:
+
+1. Wait for the pod to be ready (gather init container completed):
+   kubectl -n {{ .Release.Namespace }} wait --for=condition=ready pod -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=gather --timeout=3600s
+
+2. Download the gathered data from the data-holder container:
+   kubectl -n {{ .Release.Namespace }} exec deploy/{{ include "rhdh-must-gather.fullname" . }} -c data-holder -- tar czf - -C /must-gather . > rhdh-must-gather-output.tar.gz
+
+To clean up the must-gather resources:
+   helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+Configuration used:
+  - Log level: {{ .Values.gather.logLevel | lower }}
+  - Storage size: {{ .Values.persistence.size }}
+{{- if .Values.gather.namespaces }}
+  - Target namespaces: {{ .Values.gather.namespaces | join ", " }}
+{{- end }}
+{{- if .Values.gather.withSecrets }}
+  - Secrets collection: enabled (sanitized)
+{{- end }}
+{{- if .Values.gather.withHeapDumps }}
+  - Heap dump collection: enabled
+{{- end }}
+
+For more information, visit: https://github.com/redhat-developer/rhdh-must-gather
+-------------------------------------------------------------------

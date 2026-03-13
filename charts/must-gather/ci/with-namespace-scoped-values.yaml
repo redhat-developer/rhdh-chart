@@ -1,0 +1,6 @@
+# Scope collection to specific namespaces
+gather:
+  namespaces:
+    - "rhdh-prod"
+    - "rhdh-staging"
+  since: "2h"
