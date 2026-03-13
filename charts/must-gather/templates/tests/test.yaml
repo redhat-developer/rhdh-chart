@@ -78,7 +78,9 @@ spec:
   containers:
     - name: test
       image: {{ include "rhdh-must-gather.image" (dict "image" .Values.test.image "defaultTag" "latest") | quote }} # NOSONAR
-      imagePullPolicy: {{ .Values.test.image.pullPolicy }}
+      {{- with .Values.test.image.pullPolicy }}
+      imagePullPolicy: {{ . }}
+      {{- end }}
       {{- with .Values.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
