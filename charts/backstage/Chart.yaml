@@ -24,7 +24,7 @@ dependencies:
       - bitnami-common
     version: "2.36.0"
   - name: backstage
-    repository: https://backstage.github.io/charts
+    repository: "file://./vendor/backstage/charts/backstage/"
     version: "2.6.3"
     alias: upstream
 home: https://red.ht/rhdh
@@ -47,4 +47,4 @@ sources: []
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 # Note that when this chart is published to https://github.com/openshift-helm-charts/charts
 # it will follow the RHDH versioning 1.y.z
-version: 5.4.0
+version: 5.5.0

@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 5.4.0](https://img.shields.io/badge/Version-5.4.0-informational?style=flat-square)
+![Version: 5.5.0](https://img.shields.io/badge/Version-5.5.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -27,10 +27,9 @@ For the **Generally Available** version of this chart, see:
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 5.4.0
+helm install my-backstage redhat-developer/backstage --version 5.5.0
 ```
 
 ## Introduction
@@ -61,7 +60,6 @@ The following command can be used to add the chart repository:
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 ```
 
@@ -158,7 +156,7 @@ Kubernetes: `>= 1.27.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://backstage.github.io/charts | upstream(backstage) | 2.6.3 |
+| file://./vendor/backstage/charts/backstage/ | upstream(backstage) | 2.6.3 |
 | https://charts.bitnami.com/bitnami | common | 2.36.0 |
 
 ## Values
@@ -342,7 +340,6 @@ Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the sam
 1. Have an admin install the [orchestrator-infra Helm Chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/orchestrator-infra#readme), which will install the prerequisites required to deploy the Orchestrator-flavored RHDH. This process will include installing cluster-wide resources, so should be done with admin privileges:
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
 helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra
