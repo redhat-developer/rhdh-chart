@@ -128,10 +128,8 @@ podAnnotations: {}
 podLabels: {}
 
 # -- Pod security context
-# -- On OCP, the SCC may override fsGroup with a value from the namespace's allowed range.
 podSecurityContext:
   runAsNonRoot: true
-  fsGroup: 1001
   seccompProfile:
     type: RuntimeDefault
 

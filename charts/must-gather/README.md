@@ -36,24 +36,15 @@ Then follow the instructions that will be printed to retrieve the gathered data.
 
 ## Running on OpenShift
 
-This chart is optimized for running out of the box on Kubernetes.
+This chart works on both Kubernetes and OpenShift.
 
-For OpenShift, we recommend using the `oc adm must-gather` command, like so:
+But for OpenShift, we recommend using the `oc adm must-gather` command, like so:
 
 ```sh
 oc adm must-gather --image=quay.io/rhdh-community/rhdh-must-gather
 ```
 
 See the [must-gather tool README](https://github.com/redhat-developer/rhdh-must-gather#for-openshift-clusters) for more details.
-
-But if you still want to use this chart on OpenShift, you will need to unset the `podSecurityContext.fsGroup` value (or set it to a value aligned with your Security Context Constraints).
-
-```sh
-helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
-  --repo https://redhat-developer.github.io/rhdh-chart \
-  --version 0.1.0 \
-  --set podSecurityContext.fsGroup=null
-```
 
 ## Testing a Release
 
@@ -133,7 +124,7 @@ The command removes all the Kubernetes resources associated with the chart and d
 | persistence.storageClass | Storage class (empty = use cluster default) | string | `""` |
 | podAnnotations | Pod annotations | object | `{}` |
 | podLabels | Pod labels | object | `{}` |
-| podSecurityContext | On OCP, the SCC may override fsGroup with a value from the namespace's allowed range. | object | `{"fsGroup":1001,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| podSecurityContext | Pod security context | object | `{"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
 | rbac | RBAC configuration | object | `{"create":true,"scope":"cluster"}` |
 | rbac.create | Create RBAC resources (Role/ClusterRole and bindings) | bool | `true` |
 | resources | Resource requests and limits for the gather container | object | `{"limits":{"cpu":"500m","ephemeral-storage":"128Mi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"}}` |
