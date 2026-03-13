@@ -27,7 +27,26 @@ Running the command again will automatically replace the previous job and start 
 
 Then follow the instructions that will be printed to retrieve the gathered data.
 
-> **Tip**: List all releases using `helm list`
+## Running on OpenShift
+
+This chart is optimized for running out of the box on Kubernetes.
+
+For OpenShift, we recommend using the `oc adm must-gather` command, like so:
+
+```sh
+oc adm must-gather --image=quay.io/rhdh-community/rhdh-must-gather
+```
+
+See the [must-gather tool README](https://github.com/redhat-developer/rhdh-must-gather#for-openshift-clusters) for more details.
+
+But if you still want to use this chart on OpenShift, you will need to unset the `podSecurityContext.fsGroup` value (or set it to a value aligned with your Security Context Constraints).
+
+```sh
+helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
+  --repo https://redhat-developer.github.io/rhdh-chart \
+  --version {{ template "chart.version" . }} \
+  --set podSecurityContext.fsGroup=null
+```
 
 ## Testing a Release
 
