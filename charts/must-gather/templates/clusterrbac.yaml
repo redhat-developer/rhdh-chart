@@ -7,8 +7,13 @@ metadata:
     {{- include "rhdh-must-gather.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
-    resources: ["pods", "pods/log", "services", "endpoints", "configmaps", "secrets", "events", "persistentvolumeclaims", "serviceaccounts", "replicationcontrollers", "resourcequotas", "limitranges"]
+    resources: ["pods", "pods/log", "services", "endpoints", "configmaps", "events", "persistentvolumeclaims", "serviceaccounts", "replicationcontrollers", "resourcequotas", "limitranges"]
     verbs: ["get", "list"]
+  {{- if or .Values.gather.withSecrets (not .Values.gather.withoutHelm) }}
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  {{- end }}
   - apiGroups: [""]
     resources: ["namespaces", "nodes"]
     verbs: ["get", "list"]
