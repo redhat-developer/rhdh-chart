@@ -35,8 +35,8 @@ rbac:
   # -- Create RBAC resources (Role/ClusterRole and bindings)
   create: true
   # -- Scope of the RBAC role: "cluster" creates a ClusterRole with cluster-wide read access;
-  # -- "namespace" creates a namespace-scoped Role (the release namespace is always included
-  # -- in --namespaces automatically, alongside any extra namespaces in gather.namespaces)
+  # -- "namespace" creates a namespace-scoped Role limited to the release namespace only
+  # -- (gather.namespaces is ignored; collection is restricted to the release namespace)
   scope: cluster
 
 # -- Deployment strategy
@@ -68,7 +68,8 @@ gather:
   withIngress: true
   withNamespaceInspect: true
 
-  # -- Limit collection to specific namespaces
+  # -- Limit collection to specific namespaces (only effective when rbac.scope is "cluster").
+  # -- Ignored when rbac.scope is "namespace" (collection is restricted to the release namespace).
   # -- Example: ["rhdh-prod", "rhdh-staging"]
   namespaces: []
 

@@ -71,6 +71,7 @@ spec:
           {{- $nsScope := ne (.Values.rbac.scope | default "cluster") "cluster" }}
           {{- $effectiveNamespaces := .Values.gather.namespaces | default list }}
           {{- if $nsScope }}
+          {{- /* Namespace-scoped RBAC: override to release namespace only (gather.namespaces is ignored) */ -}}
           {{- $effectiveNamespaces = list .Release.Namespace }}
           {{- end }}
           {{- if or $nsScope .Values.gather.withSecrets .Values.gather.withHeapDumps .Values.gather.clusterInfo (not .Values.gather.withOperator) (not .Values.gather.withOrchestrator) (not .Values.gather.withHelm) (not .Values.gather.withPlatform) (not .Values.gather.withRoute) (not .Values.gather.withIngress) (not .Values.gather.withNamespaceInspect) $effectiveNamespaces .Values.gather.extraArgs }}

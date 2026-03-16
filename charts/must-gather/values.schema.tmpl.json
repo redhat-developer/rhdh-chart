@@ -100,7 +100,7 @@
                 },
                 "scope": {
                     "title": "Scope of the RBAC role.",
-                    "description": "'cluster' creates a ClusterRole with cluster-wide read access. 'namespace' creates a namespace-scoped Role; the release namespace is always included in --namespaces automatically, alongside any extra namespaces in gather.namespaces.",
+                    "description": "'cluster' creates a ClusterRole with cluster-wide read access. 'namespace' creates a namespace-scoped Role limited to the release namespace only (gather.namespaces is ignored; collection is restricted to the release namespace).",
                     "type": "string",
                     "default": "cluster",
                     "enum": ["cluster", "namespace"]
@@ -208,7 +208,7 @@
                     "default": true
                 },
                 "namespaces": {
-                    "title": "Limit collection to specific namespaces. Example: ['rhdh-prod', 'rhdh-staging'].",
+                    "title": "Limit collection to specific namespaces (only effective when rbac.scope is 'cluster'). Ignored when rbac.scope is 'namespace'. Example: ['rhdh-prod', 'rhdh-staging'].",
                     "type": "array",
                     "items": {
                         "type": "string"
