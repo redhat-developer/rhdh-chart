@@ -68,8 +68,8 @@ spec:
             - name: MUST_GATHER_SINCE_TIME
               value: {{ .Values.gather.sinceTime | quote }}
             {{- end }}
-          {{- $nsScope := ne (.Values.rbac.scope | default "cluster") "cluster" }}
-          {{- $effectiveNamespaces := .Values.gather.namespaces | default list }}
+          {{- $nsScope := ne .Values.rbac.scope "cluster" }}
+          {{- $effectiveNamespaces := .Values.gather.namespaces }}
           {{- if $nsScope }}
           {{- /* Namespace-scoped RBAC: override to release namespace only (gather.namespaces is ignored) */ -}}
           {{- $effectiveNamespaces = list .Release.Namespace }}
@@ -151,7 +151,7 @@ spec:
             defaultMode: 0444
             sources:
               - serviceAccountToken:
-                  expirationSeconds: {{ .Values.serviceAccount.tokenExpirationSeconds | default 3600 }}
+                  expirationSeconds: {{ .Values.serviceAccount.tokenExpirationSeconds }}
                   path: token
               - configMap:
                   name: kube-root-ca.crt

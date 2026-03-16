@@ -63,10 +63,10 @@ Build a full image reference from registry, repository, and tag.
 Usage: {{ include "rhdh-must-gather.image" (dict "image" .Values.image "defaultTag" .Chart.AppVersion) }}
 */}}
 {{- define "rhdh-must-gather.image" -}}
-{{- $registry := .image.registry | default "" -}}
+{{- $registry := .image.registry -}}
 {{- $repository := .image.repository -}}
 {{- $tag := .image.tag | default .defaultTag | default "" -}}
-{{- $digest := .image.digest | default "" -}}
+{{- $digest := .image.digest -}}
 {{- $ref := "" -}}
 {{- if and $tag $digest -}}
 {{- $ref = printf ":%s@%s" $tag $digest -}}

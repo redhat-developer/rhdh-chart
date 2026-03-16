@@ -131,7 +131,7 @@ spec:
         defaultMode: 0444
         sources:
           - serviceAccountToken:
-              expirationSeconds: {{ .Values.serviceAccount.tokenExpirationSeconds | default 3600 }}
+              expirationSeconds: {{ .Values.serviceAccount.tokenExpirationSeconds }}
               path: token
           - configMap:
               name: kube-root-ca.crt
