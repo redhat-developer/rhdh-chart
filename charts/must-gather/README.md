@@ -80,7 +80,9 @@ helm install <release_name> <repo> \
 
 ```sh
 helm install <release_name> <repo> \
-  --set test.image=<image>
+  --set test.image.registry=docker.io \
+  --set test.image.repository=bitnami/kubectl \
+  --set test.image.tag=1.30.0
 ```
 
 </details>
