@@ -876,44 +876,44 @@
                     "title": "Enable collection of heap dumps (disabled by default).",
                     "type": "boolean"
                 },
+                "withHelm": {
+                    "default": true,
+                    "title": "Enable collection of Helm release information.",
+                    "type": "boolean"
+                },
+                "withIngress": {
+                    "default": true,
+                    "title": "Enable collection of Ingress resources.",
+                    "type": "boolean"
+                },
+                "withNamespaceInspect": {
+                    "default": true,
+                    "title": "Enable namespace-level inspection.",
+                    "type": "boolean"
+                },
+                "withOperator": {
+                    "default": true,
+                    "title": "Enable collection of RHDH Operator resources.",
+                    "type": "boolean"
+                },
+                "withOrchestrator": {
+                    "default": true,
+                    "title": "Enable collection of Orchestrator resources.",
+                    "type": "boolean"
+                },
+                "withPlatform": {
+                    "default": true,
+                    "title": "Enable collection of platform-level resources.",
+                    "type": "boolean"
+                },
+                "withRoute": {
+                    "default": true,
+                    "title": "Enable collection of OpenShift Route resources.",
+                    "type": "boolean"
+                },
                 "withSecrets": {
                     "default": false,
                     "title": "Enable collection of Secrets (disabled by default).",
-                    "type": "boolean"
-                },
-                "withoutHelm": {
-                    "default": false,
-                    "title": "Skip collection of Helm release information.",
-                    "type": "boolean"
-                },
-                "withoutIngress": {
-                    "default": false,
-                    "title": "Skip collection of Ingress resources.",
-                    "type": "boolean"
-                },
-                "withoutNamespaceInspect": {
-                    "default": false,
-                    "title": "Skip namespace-level inspection.",
-                    "type": "boolean"
-                },
-                "withoutOperator": {
-                    "default": false,
-                    "title": "Skip collection of RHDH Operator resources.",
-                    "type": "boolean"
-                },
-                "withoutOrchestrator": {
-                    "default": false,
-                    "title": "Skip collection of Orchestrator resources.",
-                    "type": "boolean"
-                },
-                "withoutPlatform": {
-                    "default": false,
-                    "title": "Skip collection of platform-level resources.",
-                    "type": "boolean"
-                },
-                "withoutRoute": {
-                    "default": false,
-                    "title": "Skip collection of OpenShift Route resources.",
                     "type": "boolean"
                 }
             },

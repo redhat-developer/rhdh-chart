@@ -73,7 +73,7 @@ spec:
           {{- if $nsScope }}
           {{- $effectiveNamespaces = list .Release.Namespace }}
           {{- end }}
-          {{- if or $nsScope .Values.gather.withSecrets .Values.gather.withHeapDumps .Values.gather.clusterInfo .Values.gather.withoutOperator .Values.gather.withoutOrchestrator .Values.gather.withoutHelm .Values.gather.withoutPlatform .Values.gather.withoutRoute .Values.gather.withoutIngress .Values.gather.withoutNamespaceInspect $effectiveNamespaces .Values.gather.extraArgs }}
+          {{- if or $nsScope .Values.gather.withSecrets .Values.gather.withHeapDumps .Values.gather.clusterInfo (not .Values.gather.withOperator) (not .Values.gather.withOrchestrator) (not .Values.gather.withHelm) (not .Values.gather.withPlatform) (not .Values.gather.withRoute) (not .Values.gather.withIngress) (not .Values.gather.withNamespaceInspect) $effectiveNamespaces .Values.gather.extraArgs }}
           args:
             {{- if .Values.gather.withSecrets }}
             - "--with-secrets"
@@ -84,25 +84,25 @@ spec:
             {{- if .Values.gather.clusterInfo }}
             - "--cluster-info"
             {{- end }}
-            {{- if .Values.gather.withoutOperator }}
+            {{- if not .Values.gather.withOperator }}
             - "--without-operator"
             {{- end }}
-            {{- if .Values.gather.withoutOrchestrator }}
+            {{- if not .Values.gather.withOrchestrator }}
             - "--without-orchestrator"
             {{- end }}
-            {{- if .Values.gather.withoutHelm }}
+            {{- if not .Values.gather.withHelm }}
             - "--without-helm"
             {{- end }}
-            {{- if or .Values.gather.withoutPlatform $nsScope }}
+            {{- if or (not .Values.gather.withPlatform) $nsScope }}
             - "--without-platform"
             {{- end }}
-            {{- if .Values.gather.withoutRoute }}
+            {{- if not .Values.gather.withRoute }}
             - "--without-route"
             {{- end }}
-            {{- if .Values.gather.withoutIngress }}
+            {{- if not .Values.gather.withIngress }}
             - "--without-ingress"
             {{- end }}
-            {{- if .Values.gather.withoutNamespaceInspect }}
+            {{- if not .Values.gather.withNamespaceInspect }}
             - "--without-namespace-inspect"
             {{- end }}
             {{- if $effectiveNamespaces }}

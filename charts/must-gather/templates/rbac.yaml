@@ -10,7 +10,7 @@ rules:
   - apiGroups: [""]
     resources: ["pods", "pods/log", "services", "endpoints", "configmaps", "events", "persistentvolumeclaims", "serviceaccounts", "replicationcontrollers", "resourcequotas", "limitranges"]
     verbs: ["get", "list"]
-  {{- if or .Values.gather.withSecrets (not .Values.gather.withoutHelm) }}
+  {{- if or .Values.gather.withSecrets .Values.gather.withHelm }}
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get", "list"]

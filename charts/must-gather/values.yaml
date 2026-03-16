@@ -59,14 +59,14 @@ gather:
   withHeapDumps: false
   clusterInfo: false
 
-  # -- Exclusion options (set to true to skip collection)
-  withoutOperator: false
-  withoutOrchestrator: false
-  withoutHelm: false
-  withoutPlatform: false
-  withoutRoute: false
-  withoutIngress: false
-  withoutNamespaceInspect: false
+  # -- Collection features (enabled by default; set to false to skip)
+  withOperator: true
+  withOrchestrator: true
+  withHelm: true
+  withPlatform: true
+  withRoute: true
+  withIngress: true
+  withNamespaceInspect: true
 
   # -- Limit collection to specific namespaces
   # -- Example: ["rhdh-prod", "rhdh-staging"]

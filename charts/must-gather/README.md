@@ -103,15 +103,15 @@ The command removes all the Kubernetes resources associated with the chart and d
 | dataHolder | Runs alongside the gather container and stays alive so you can exec in and retrieve the output. | object | `{"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
 | dataHolder.resources | Resource requests and limits for the data-holder container | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
-| gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withSecrets":false,"withoutHelm":false,"withoutIngress":false,"withoutNamespaceInspect":false,"withoutOperator":false,"withoutOrchestrator":false,"withoutPlatform":false,"withoutRoute":false}` |
+| gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withHelm":true,"withIngress":true,"withNamespaceInspect":true,"withOperator":true,"withOrchestrator":true,"withPlatform":true,"withRoute":true,"withSecrets":false}` |
 | gather.cmdTimeout | Command timeout for individual kubectl/helm commands (seconds) | string | `"30"` |
 | gather.extraArgs | Additional custom arguments to pass to the gather script | list | `[]` |
 | gather.logLevel | Log level: info, INFO, debug, DEBUG, trace, TRACE | string | `"info"` |
 | gather.namespaces | Example: ["rhdh-prod", "rhdh-staging"] | list | `[]` |
 | gather.since | Relative time for log collection (e.g., "2h", "30m") | string | `""` |
 | gather.sinceTime | Absolute timestamp for log collection (RFC3339 format) | string | `""` |
+| gather.withOperator | Collection features (enabled by default; set to false to skip) | bool | `true` |
 | gather.withSecrets | Optional collection features (disabled by default) | bool | `false` |
-| gather.withoutOperator | Exclusion options (set to true to skip collection) | bool | `false` |
 | image | Container image configuration | object | `{"digest":"","pullPolicy":"","registry":"quay.io","repository":"rhdh-community/rhdh-must-gather","tag":"latest"}` |
 | image.digest | Image digest (e.g., sha256:abc123...). Can be used with or without tag. | string | `""` |
 | image.tag | Overrides the image tag whose default is the chart appVersion. | string | `"latest"` |

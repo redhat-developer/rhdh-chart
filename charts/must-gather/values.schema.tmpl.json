@@ -172,40 +172,40 @@
                     "type": "boolean",
                     "default": false
                 },
-                "withoutOperator": {
-                    "title": "Skip collection of RHDH Operator resources.",
+                "withOperator": {
+                    "title": "Enable collection of RHDH Operator resources.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
-                "withoutOrchestrator": {
-                    "title": "Skip collection of Orchestrator resources.",
+                "withOrchestrator": {
+                    "title": "Enable collection of Orchestrator resources.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
-                "withoutHelm": {
-                    "title": "Skip collection of Helm release information.",
+                "withHelm": {
+                    "title": "Enable collection of Helm release information.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
-                "withoutPlatform": {
-                    "title": "Skip collection of platform-level resources.",
+                "withPlatform": {
+                    "title": "Enable collection of platform-level resources.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
-                "withoutRoute": {
-                    "title": "Skip collection of OpenShift Route resources.",
+                "withRoute": {
+                    "title": "Enable collection of OpenShift Route resources.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
-                "withoutIngress": {
-                    "title": "Skip collection of Ingress resources.",
+                "withIngress": {
+                    "title": "Enable collection of Ingress resources.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
-                "withoutNamespaceInspect": {
-                    "title": "Skip namespace-level inspection.",
+                "withNamespaceInspect": {
+                    "title": "Enable namespace-level inspection.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
                 "namespaces": {
                     "title": "Limit collection to specific namespaces. Example: ['rhdh-prod', 'rhdh-staging'].",
