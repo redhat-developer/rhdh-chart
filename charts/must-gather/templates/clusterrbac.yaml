@@ -20,8 +20,16 @@ rules:
   - apiGroups: ["apps"]
     resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
     verbs: ["get", "list"]
+  # Platform detection (gather_platform): clusterversions, infrastructures
+  - apiGroups: ["config.openshift.io"]
+    resources: ["clusterversions", "infrastructures"]
+    verbs: ["get", "list"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses", "networkpolicies", "ingressclasses"]
+    verbs: ["get", "list"]
+  # Route collection (gather_route)
+  - apiGroups: ["route.openshift.io"]
+    resources: ["routes"]
     verbs: ["get", "list"]
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
