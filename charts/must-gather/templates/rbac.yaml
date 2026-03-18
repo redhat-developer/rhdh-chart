@@ -1,0 +1,79 @@
+{{- if and .Values.rbac.create (ne .Values.rbac.scope "cluster") -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log", "services", "endpoints", "configmaps", "events", "persistentvolumeclaims", "serviceaccounts", "replicationcontrollers", "resourcequotas", "limitranges"]
+    verbs: ["get", "list"]
+  {{- if or .Values.gather.withSecrets .Values.gather.withHelm }}
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  {{- end }}
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    verbs: ["get", "list"]
+  {{- if .Values.rbac.rules.ingresses }}
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses", "networkpolicies"]
+    verbs: ["get", "list"]
+  {{- end }}
+  {{- if .Values.rbac.rules.routes }}
+  - apiGroups: ["route.openshift.io"]
+    resources: ["routes"]
+    verbs: ["get", "list"]
+  {{- end }}
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings"]
+    verbs: ["get", "list"]
+  {{- if .Values.rbac.rules.backstages }}
+  - apiGroups: ["rhdh.redhat.com"]
+    resources: ["backstages"]
+    verbs: ["get", "list"]
+  {{- end }}
+  {{- if .Values.rbac.rules.olm }}
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["subscriptions", "clusterserviceversions", "installplans", "catalogsources", "operatorgroups"]
+    verbs: ["get", "list"]
+  {{- end }}
+  - apiGroups: [""]
+    resources: ["pods/exec"] # NOSONAR - exec is required to collect data from the running containers
+    verbs: ["create"]
+  {{- if .Values.rbac.rules.sonataflow }}
+  - apiGroups: ["sonataflow.org"]
+    resources: ["sonataflowplatforms", "sonataflows", "sonataflowbuilds"]
+    verbs: ["get", "list"]
+  {{- end }}
+  {{- if .Values.rbac.rules.knative }}
+  - apiGroups: ["operator.knative.dev"]
+    resources: ["knativeservings", "knativeeventings"]
+    verbs: ["get", "list"]
+  - apiGroups: ["operator.serverless.openshift.io"]
+    resources: ["knativekafkas"]
+    verbs: ["get", "list"]
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "rhdh-must-gather.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "rhdh-must-gather.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

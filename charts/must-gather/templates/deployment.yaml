@@ -1,0 +1,192 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rhdh-must-gather.fullname" . }}
+  labels:
+    {{- include "rhdh-must-gather.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gather
+spec:
+  replicas: 1
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rhdh-must-gather.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: gather
+  template:
+    metadata:
+      labels:
+        {{- include "rhdh-must-gather.labels" . | nindent 8 }}
+        app.kubernetes.io/component: gather
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        rhdh-must-gather/run-timestamp: {{ now | date "2006-01-02T15:04:05Z" | quote }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "rhdh-must-gather.serviceAccountName" . }} # NOSONAR - SA is bound via ClusterRole/ClusterRoleBinding in rbac.yaml
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: gather
+          image: {{ include "rhdh-must-gather.image" (dict "image" .Values.image "defaultTag" .Chart.AppVersion) | quote }} # NOSONAR
+          {{- with .Values.image.pullPolicy }}
+          imagePullPolicy: {{ . }}
+          {{- end }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: BASE_COLLECTION_PATH
+              value: "/must-gather"
+            - name: LOG_LEVEL
+              value: {{ .Values.gather.logLevel | lower | quote }}
+            - name: CMD_TIMEOUT
+              value: {{ .Values.gather.cmdTimeout | quote }}
+            {{- if .Values.gather.since }}
+            - name: MUST_GATHER_SINCE
+              value: {{ .Values.gather.since | quote }}
+            {{- end }}
+            {{- if .Values.gather.sinceTime }}
+            - name: MUST_GATHER_SINCE_TIME
+              value: {{ .Values.gather.sinceTime | quote }}
+            {{- end }}
+          {{- $nsScope := ne .Values.rbac.scope "cluster" }}
+          {{- $effectiveNamespaces := .Values.gather.namespaces }}
+          {{- if $nsScope }}
+          {{- /* Namespace-scoped RBAC: override to release namespace only (gather.namespaces is ignored) */ -}}
+          {{- $effectiveNamespaces = list .Release.Namespace }}
+          {{- end }}
+          {{- if or $nsScope .Values.gather.withSecrets .Values.gather.withHeapDumps .Values.gather.clusterInfo (not .Values.gather.withOperator) (not .Values.gather.withOrchestrator) (not .Values.gather.withHelm) (not .Values.gather.withPlatform) (not .Values.gather.withRoute) (not .Values.gather.withIngress) (not .Values.gather.withNamespaceInspect) $effectiveNamespaces .Values.gather.extraArgs }}
+          args:
+            {{- if .Values.gather.withSecrets }}
+            - "--with-secrets"
+            {{- end }}
+            {{- if .Values.gather.withHeapDumps }}
+            - "--with-heap-dumps"
+            {{- end }}
+            {{- if .Values.gather.clusterInfo }}
+            - "--cluster-info"
+            {{- end }}
+            {{- if not .Values.gather.withOperator }}
+            - "--without-operator"
+            {{- end }}
+            {{- if not .Values.gather.withOrchestrator }}
+            - "--without-orchestrator"
+            {{- end }}
+            {{- if not .Values.gather.withHelm }}
+            - "--without-helm"
+            {{- end }}
+            {{- if or (not .Values.gather.withPlatform) $nsScope }}
+            - "--without-platform"
+            {{- end }}
+            {{- if not .Values.gather.withRoute }}
+            - "--without-route"
+            {{- end }}
+            {{- if not .Values.gather.withIngress }}
+            - "--without-ingress"
+            {{- end }}
+            {{- if not .Values.gather.withNamespaceInspect }}
+            - "--without-namespace-inspect"
+            {{- end }}
+            {{- if $effectiveNamespaces }}
+            - "--namespaces"
+            - {{ $effectiveNamespaces | join "," | quote }}
+            {{- end }}
+            {{- with .Values.gather.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          volumeMounts:
+            - name: output
+              mountPath: /must-gather
+            - name: kube-api-access
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      containers:
+        - name: data-holder
+          image: {{ include "rhdh-must-gather.image" (dict "image" .Values.image "defaultTag" .Chart.AppVersion) | quote }} # NOSONAR
+          {{- with .Values.image.pullPolicy }}
+          imagePullPolicy: {{ . }}
+          {{- end }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - sleep
+            - infinity
+          volumeMounts:
+            - name: output
+              mountPath: /must-gather
+              readOnly: true
+          {{- with .Values.dataHolder.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: kube-api-access
+          projected:
+            defaultMode: 0444
+            sources:
+              - serviceAccountToken:
+                  expirationSeconds: {{ .Values.serviceAccount.tokenExpirationSeconds }}
+                  path: token
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        fieldPath: metadata.namespace
+        - name: output
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                labels:
+                  {{- include "rhdh-must-gather.labels" . | nindent 18 }}
+              spec:
+                accessModes:
+                  - {{ .Values.persistence.accessMode }}
+                {{- if .Values.persistence.storageClass }}
+                storageClassName: {{ .Values.persistence.storageClass | quote }}
+                {{- end }}
+                resources:
+                  requests:
+                    storage: {{ .Values.persistence.size | quote }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

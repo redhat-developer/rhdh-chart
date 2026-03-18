@@ -1,0 +1,171 @@
+# -- Default values for rhdh-must-gather.
+# -- This is a YAML-formatted file.
+# -- Declare variables to be passed into your templates.
+
+# -- Container image configuration
+image:
+  registry: quay.io
+  repository: rhdh-community/rhdh-must-gather
+  pullPolicy: ""
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+  # -- Image digest (e.g., sha256:abc123...). Can be used with or without tag.
+  digest: ""
+
+# -- Secrets for pulling images from a private registry
+imagePullSecrets: []
+
+# -- Override the chart name
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Service account configuration
+serviceAccount:
+  # -- Expiration (in seconds) for the bound service account token projected
+  # -- into the gather init container (minimum 600).
+  tokenExpirationSeconds: 3600
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  # -- If not set, a name is generated using the fullname template.
+  name: ""
+
+# -- RBAC configuration
+rbac:
+  # -- Create RBAC resources (Role/ClusterRole and bindings)
+  create: true
+  # -- Scope of the RBAC role: "cluster" creates a ClusterRole with cluster-wide read access;
+  # -- "namespace" creates a namespace-scoped Role limited to the release namespace only
+  # -- (gather.namespaces is ignored; collection is restricted to the release namespace)
+  scope: cluster
+  # -- Control which API-group rules are included in the Role/ClusterRole.
+  # -- Disable a rule if the installing user cannot grant those permissions
+  # -- (Kubernetes requires you to already hold any permission you grant).
+  # -- The gather script handles missing permissions gracefully, so disabling
+  # -- a rule here does not require disabling the corresponding gather.with* flag.
+  rules:
+    # -- rhdh.redhat.com — Backstage custom resources
+    backstages: true
+    # -- operators.coreos.com — OLM resources (subscriptions, CSVs, etc.)
+    olm: true
+    # -- route.openshift.io — OpenShift Routes
+    routes: true
+    # -- sonataflow.org — SonataFlow custom resources
+    sonataflow: true
+    # -- operator.knative.dev, operator.serverless.openshift.io — Knative/Serverless
+    knative: true
+    # -- networking.k8s.io — Ingresses, NetworkPolicies
+    ingresses: true
+    # -- config.openshift.io — ClusterVersions, Infrastructures (cluster scope only)
+    platform: true
+
+# -- Deployment strategy
+strategy:
+  type: Recreate
+
+# -- Gather script configuration
+gather:
+  # -- Log level: info, INFO, debug, DEBUG, trace, TRACE
+  logLevel: "info"
+  # -- Command timeout for individual kubectl/helm commands (seconds)
+  cmdTimeout: "30"
+  # -- Relative time for log collection (e.g., "2h", "30m")
+  since: ""
+  # -- Absolute timestamp for log collection (RFC3339 format)
+  sinceTime: ""
+
+  # -- Optional collection features (disabled by default)
+  withSecrets: false
+  withHeapDumps: false
+  clusterInfo: false
+
+  # -- Collection features (enabled by default; set to false to skip)
+  withOperator: true
+  withOrchestrator: true
+  withHelm: true
+  withPlatform: true
+  withRoute: true
+  withIngress: true
+  withNamespaceInspect: true
+
+  # -- Limit collection to specific namespaces (only effective when rbac.scope is "cluster").
+  # -- Ignored when rbac.scope is "namespace" (collection is restricted to the release namespace).
+  # -- Example: ["rhdh-prod", "rhdh-staging"]
+  namespaces: []
+
+  # -- Additional custom arguments to pass to the gather script
+  extraArgs: []
+
+# -- Resource requests and limits for the gather container
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+    ephemeral-storage: "64Mi"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+    ephemeral-storage: "128Mi"
+
+# -- Persistent volume configuration for storing gathered data
+persistence:
+  # -- Storage size
+  size: 1Gi
+  # -- Storage class (empty = use cluster default)
+  storageClass: ""
+  # -- Access mode
+  accessMode: ReadWriteOnce
+
+# -- Data holder container configuration
+# -- Runs alongside the gather container and stays alive so you can exec in and retrieve the output.
+dataHolder:
+  # -- Resource requests and limits for the data-holder container
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+      ephemeral-storage: "32Mi"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+      ephemeral-storage: "64Mi"
+
+# -- Helm test configuration
+test:
+  # -- Enable the Helm test
+  enabled: true
+  # -- Image for the test pod
+  image:
+    registry: docker.io
+    repository: bitnami/kubectl
+    tag: "latest"
+    digest: ""
+    pullPolicy: ""
+
+# -- Pod annotations
+podAnnotations: {}
+
+# -- Pod labels
+podLabels: {}
+
+# -- Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# -- Node selector for pod scheduling
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling
+tolerations: []
+
+# -- Affinity rules for pod scheduling
+affinity: {}

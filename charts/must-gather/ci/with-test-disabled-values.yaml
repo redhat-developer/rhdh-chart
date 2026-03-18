@@ -1,0 +1,3 @@
+# Helm test disabled
+test:
+  enabled: false

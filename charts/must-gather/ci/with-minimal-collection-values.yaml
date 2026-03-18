@@ -1,0 +1,8 @@
+# Minimal collection — skip optional components to speed up gathering
+gather:
+  withOperator: false
+  withOrchestrator: false
+  withHelm: false
+  withRoute: false
+  withIngress: false
+  logLevel: "TRACE"
