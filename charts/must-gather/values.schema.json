@@ -1180,6 +1180,49 @@
                     "title": "Create RBAC resources (Role/ClusterRole and bindings).",
                     "type": "boolean"
                 },
+                "rules": {
+                    "additionalProperties": false,
+                    "description": "Disable a rule if the installing user cannot grant those permissions (Kubernetes requires you to already hold any permission you grant). The gather script handles missing permissions gracefully.",
+                    "properties": {
+                        "backstages": {
+                            "default": true,
+                            "title": "rhdh.redhat.com \u2014 Backstage custom resources.",
+                            "type": "boolean"
+                        },
+                        "ingresses": {
+                            "default": true,
+                            "title": "networking.k8s.io \u2014 Ingresses, NetworkPolicies.",
+                            "type": "boolean"
+                        },
+                        "knative": {
+                            "default": true,
+                            "title": "operator.knative.dev, operator.serverless.openshift.io \u2014 Knative/Serverless.",
+                            "type": "boolean"
+                        },
+                        "olm": {
+                            "default": true,
+                            "title": "operators.coreos.com \u2014 OLM resources (subscriptions, CSVs, etc.).",
+                            "type": "boolean"
+                        },
+                        "platform": {
+                            "default": true,
+                            "title": "config.openshift.io \u2014 ClusterVersions, Infrastructures (cluster scope only).",
+                            "type": "boolean"
+                        },
+                        "routes": {
+                            "default": true,
+                            "title": "route.openshift.io \u2014 OpenShift Routes.",
+                            "type": "boolean"
+                        },
+                        "sonataflow": {
+                            "default": true,
+                            "title": "sonataflow.org \u2014 SonataFlow custom resources.",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "Toggle individual API-group rules in the Role/ClusterRole.",
+                    "type": "object"
+                },
                 "scope": {
                     "default": "cluster",
                     "description": "'cluster' creates a ClusterRole with cluster-wide read access. 'namespace' creates a namespace-scoped Role limited to the release namespace only (gather.namespaces is ignored; collection is restricted to the release namespace).",

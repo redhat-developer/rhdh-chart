@@ -38,6 +38,26 @@ rbac:
   # -- "namespace" creates a namespace-scoped Role limited to the release namespace only
   # -- (gather.namespaces is ignored; collection is restricted to the release namespace)
   scope: cluster
+  # -- Control which API-group rules are included in the Role/ClusterRole.
+  # -- Disable a rule if the installing user cannot grant those permissions
+  # -- (Kubernetes requires you to already hold any permission you grant).
+  # -- The gather script handles missing permissions gracefully, so disabling
+  # -- a rule here does not require disabling the corresponding gather.with* flag.
+  rules:
+    # -- rhdh.redhat.com — Backstage custom resources
+    backstages: true
+    # -- operators.coreos.com — OLM resources (subscriptions, CSVs, etc.)
+    olm: true
+    # -- route.openshift.io — OpenShift Routes
+    routes: true
+    # -- sonataflow.org — SonataFlow custom resources
+    sonataflow: true
+    # -- operator.knative.dev, operator.serverless.openshift.io — Knative/Serverless
+    knative: true
+    # -- networking.k8s.io — Ingresses, NetworkPolicies
+    ingresses: true
+    # -- config.openshift.io — ClusterVersions, Infrastructures (cluster scope only)
+    platform: true
 
 # -- Deployment strategy
 strategy:

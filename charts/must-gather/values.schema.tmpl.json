@@ -104,6 +104,49 @@
                     "type": "string",
                     "default": "cluster",
                     "enum": ["cluster", "namespace"]
+                },
+                "rules": {
+                    "title": "Toggle individual API-group rules in the Role/ClusterRole.",
+                    "description": "Disable a rule if the installing user cannot grant those permissions (Kubernetes requires you to already hold any permission you grant). The gather script handles missing permissions gracefully.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "backstages": {
+                            "title": "rhdh.redhat.com — Backstage custom resources.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "olm": {
+                            "title": "operators.coreos.com — OLM resources (subscriptions, CSVs, etc.).",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "routes": {
+                            "title": "route.openshift.io — OpenShift Routes.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "sonataflow": {
+                            "title": "sonataflow.org — SonataFlow custom resources.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "knative": {
+                            "title": "operator.knative.dev, operator.serverless.openshift.io — Knative/Serverless.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "ingresses": {
+                            "title": "networking.k8s.io — Ingresses, NetworkPolicies.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "platform": {
+                            "title": "config.openshift.io — ClusterVersions, Infrastructures (cluster scope only).",
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
                 }
             }
         },

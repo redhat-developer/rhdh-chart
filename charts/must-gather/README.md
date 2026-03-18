@@ -127,8 +127,16 @@ The command removes all the Kubernetes resources associated with the chart and d
 | podAnnotations | Pod annotations | object | `{}` |
 | podLabels | Pod labels | object | `{}` |
 | podSecurityContext | Pod security context | object | `{"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
-| rbac | RBAC configuration | object | `{"create":true,"scope":"cluster"}` |
+| rbac | RBAC configuration | object | `{"create":true,"rules":{"backstages":true,"ingresses":true,"knative":true,"olm":true,"platform":true,"routes":true,"sonataflow":true},"scope":"cluster"}` |
 | rbac.create | Create RBAC resources (Role/ClusterRole and bindings) | bool | `true` |
+| rbac.rules | a rule here does not require disabling the corresponding gather.with* flag. | object | `{"backstages":true,"ingresses":true,"knative":true,"olm":true,"platform":true,"routes":true,"sonataflow":true}` |
+| rbac.rules.backstages | rhdh.redhat.com — Backstage custom resources | bool | `true` |
+| rbac.rules.ingresses | networking.k8s.io — Ingresses, NetworkPolicies | bool | `true` |
+| rbac.rules.knative | operator.knative.dev, operator.serverless.openshift.io — Knative/Serverless | bool | `true` |
+| rbac.rules.olm | operators.coreos.com — OLM resources (subscriptions, CSVs, etc.) | bool | `true` |
+| rbac.rules.platform | config.openshift.io — ClusterVersions, Infrastructures (cluster scope only) | bool | `true` |
+| rbac.rules.routes | route.openshift.io — OpenShift Routes | bool | `true` |
+| rbac.rules.sonataflow | sonataflow.org — SonataFlow custom resources | bool | `true` |
 | resources | Resource requests and limits for the gather container | object | `{"limits":{"cpu":"500m","ephemeral-storage":"128Mi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"}}` |
 | securityContext | Container security context | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}` |
 | serviceAccount | Service account configuration | object | `{"annotations":{},"name":"","tokenExpirationSeconds":3600}` |
