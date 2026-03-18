@@ -35,7 +35,6 @@ jobs:
       - name: Render Templates for ${{ matrix.chartConfig.name }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add backstage https://backstage.github.io/charts
           helm repo update
 
           helm dependency build ./charts/${{ matrix.chartConfig.path }}
