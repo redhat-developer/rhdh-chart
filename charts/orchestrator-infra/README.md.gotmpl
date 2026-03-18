@@ -86,7 +86,7 @@ After installing the openshift-serverless subscription, more Knative CRDs will b
 The versions of the CRDs present in the chart and the ones in the subscription must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
 ```bash
-export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.37.1
+export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.37.2
 podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > crds/knative-eventing/knative-eventing-crd.yaml
 
 podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > crds/knative-serving/knative-serving-crd.yaml
