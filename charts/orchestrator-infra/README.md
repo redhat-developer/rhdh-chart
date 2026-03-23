@@ -10,7 +10,7 @@ Helm chart to deploy the Orchestrator solution's required infrastructure suite o
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Red Hat Developer Hub Team |  | https://github.com/redhat-developer/rhdh-chart |
+| Red Hat Developer Hub Team |  | <https://github.com/redhat-developer/rhdh-chart> |
 
 ## Source Code
 
