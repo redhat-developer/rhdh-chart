@@ -10,7 +10,7 @@ A Helm chart to install Openshift GitOps and Openshift Pipelines, which are requ
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Red Hat Developer Hub Team |  | <https://github.com/redhat-developer/rhdh-chart> |
+| Red Hat Developer Hub Team |  | https://github.com/redhat-developer/rhdh-chart |
 
 ## Source Code
 
