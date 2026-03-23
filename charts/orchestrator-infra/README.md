@@ -1,7 +1,7 @@
 
 # Orchestrator Infra Chart for OpenShift
 
-![Version: 0.5.2](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square)
+![Version: 0.5.3](https://img.shields.io/badge/Version-0.5.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless Logic Operator, both required to configure Red Hat Developer Hub to use the Orchestrator.
@@ -25,7 +25,7 @@ Kubernetes: `>= 1.25.0-0`
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.5.2
+helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.5.3
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -90,7 +90,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.name | name of the operator package | string | `"logic-operator"` |
 | serverlessLogicOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
 | serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
-| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.37.1"` |
+| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.37.2"` |
 | serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
 | serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
@@ -111,7 +111,7 @@ After installing the openshift-serverless subscription, more Knative CRDs will b
 The versions of the CRDs present in the chart and the ones in the subscription must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
 ```bash
-export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.37.1
+export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.37.2
 podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > crds/knative-eventing/knative-eventing-crd.yaml
 
 podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > crds/knative-serving/knative-serving-crd.yaml

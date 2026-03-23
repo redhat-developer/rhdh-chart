@@ -1,9 +1,9 @@
 dependencies:
 - name: common
   repository: https://charts.bitnami.com/bitnami
-  version: 2.36.0
+  version: 2.37.0
 - name: backstage
   repository: file://./vendor/backstage/charts/backstage/
   version: 2.6.3
-digest: sha256:d50dcc92de5c36c3b5a5b135461d7a3351b3d7aaf0901b7e158257894c04a0a4
-generated: "2026-03-08T23:31:23.566143041+01:00"
+digest: sha256:5cc66e4f82c4857af892fc464007a8d01931c1432ecd100e838e6433b7284729
+generated: "2026-03-23T13:22:31.418706052Z"
