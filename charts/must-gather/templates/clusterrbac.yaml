@@ -58,8 +58,13 @@ rules:
     verbs: ["get", "list"]
   {{- end }}
   - apiGroups: [""]
-    resources: ["pods/exec"] # NOSONAR - exec is required to collect data from the running containers
+    resources: ["pods/exec"] # NOSONAR - required for data collection
     verbs: ["create"]
+  {{- if .Values.gather.withHeapDumps }}
+  - apiGroups: [""]
+    resources: ["pods/portforward"]
+    verbs: ["create"]
+  {{- end }}
   {{- if .Values.rbac.rules.sonataflow }}
   - apiGroups: ["sonataflow.org"]
     resources: ["sonataflowplatforms", "sonataflows", "sonataflowbuilds", "sonataflowclusterplatforms"]
