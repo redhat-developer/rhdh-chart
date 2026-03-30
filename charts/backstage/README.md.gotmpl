@@ -25,7 +25,6 @@ For the **Generally Available** version of this chart, see:
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
 helm install my-backstage redhat-developer/backstage --version {{ template "chart.version" . }}
@@ -59,7 +58,6 @@ The following command can be used to add the chart repository:
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 ```
 
@@ -274,7 +272,6 @@ Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the sam
 1. Have an admin install the [orchestrator-infra Helm Chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/orchestrator-infra#readme), which will install the prerequisites required to deploy the Orchestrator-flavored RHDH. This process will include installing cluster-wide resources, so should be done with admin privileges:
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
 helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra

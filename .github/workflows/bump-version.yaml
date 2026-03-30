@@ -64,7 +64,7 @@ jobs:
         with:
           python-version: 3.14
 
-      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         if: steps.command.outputs.command-name == 'bump'
         with:
           go-version: ^1
@@ -120,7 +120,7 @@ jobs:
 
       - name: Setup Gitsign
         if: steps.command.outputs.command-name == 'bump'
-        uses: chainguard-dev/actions/setup-gitsign@8bb24c24be6871bee44f19be55ea11e3b2aea3dd # main
+        uses: chainguard-dev/actions/setup-gitsign@f73e9b459c4ea0886233ca0899880d87525c6816 # main
 
       - name: Commit pre-commit changes
         if: steps.command.outputs.command-name == 'bump'

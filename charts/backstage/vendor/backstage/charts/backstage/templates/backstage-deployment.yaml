@@ -1,0 +1,188 @@
+{{- $imageRepository := .Values.backstage.image.repository | required "The repository name of the image is required (e.g. my-backstage:tag | docker.io/my-backstage:tag) !" -}}
+{{- $imageTag := .Values.backstage.image.tag | required "The image tag is required (e.g my-backstage:tag | docker.io/my-backstage:tag) !" -}}
+{{- $installDir := .Values.backstage.installDir -}}
+---
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{ include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: backstage
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.backstage.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.annotations "context" $) | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if not .Values.backstage.autoscaling.enabled }}
+  replicas: {{ .Values.backstage.replicas }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.backstage.revisionHistoryLimit }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backstage
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: backstage
+        {{- if .Values.backstage.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/app-config: {{ include "common.tplvalues.render" ( dict "value" .Values.backstage.appConfig "context" $) | sha256sum }}
+        {{- if .Values.backstage.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.podAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "backstage.serviceAccountName" . }}
+      {{- if .Values.backstage.podSecurityContext }}
+      securityContext:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.podSecurityContext "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.backstage.affinity }}
+      affinity:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.affinity "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.backstage.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.topologySpreadConstraints "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.backstage.nodeSelector }}
+      nodeSelector:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.backstage.tolerations }}
+      tolerations:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.tolerations "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.backstage.hostAliases }}
+      hostAliases:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if (or .Values.backstage.extraAppConfig (and .Values.backstage.extraVolumeMounts .Values.backstage.extraVolumes)) }}
+        {{- range .Values.backstage.extraAppConfig }}
+        - name: {{ .configMapRef }}
+          configMap:
+            name: {{ .configMapRef }}
+        {{- end }}
+        {{- if .Values.backstage.extraVolumes }}
+          {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraVolumes "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.backstage.appConfig }}
+        - name: backstage-app-config
+          configMap:
+            name: {{ include "common.names.fullname" . }}-app-config
+        {{- end }}
+      {{- include "backstage.renderImagePullSecrets" . | nindent 6 }}
+      {{- if .Values.backstage.initContainers }}
+      initContainers:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.initContainers "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: backstage-backend
+          image: {{ include "backstage.image" . }}
+          imagePullPolicy: {{ .Values.backstage.image.pullPolicy | quote -}}
+          {{- if .Values.backstage.containerSecurityContext }}
+          securityContext:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.backstage.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.backstage.command "context" $) | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else }}
+          args:
+          {{- range .Values.backstage.args }}
+            - {{ . | quote }}
+          {{- end }}
+          {{- if .Values.backstage.extraAppConfig }}
+          {{- range .Values.backstage.extraAppConfig }}
+            - "--config"
+            - "{{ $installDir }}/{{ .filename }}"
+          {{- end }}
+          {{- end }}
+          {{- if .Values.backstage.appConfig }}
+            - "--config"
+            - "{{ $installDir }}/app-config-from-configmap.yaml"
+          {{- end }}
+          {{- end }}
+          {{- if .Values.backstage.resources }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.backstage.resources "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.backstage.readinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.backstage.readinessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.backstage.livenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.backstage.livenessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.backstage.startupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.backstage.startupProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if (or .Values.backstage.extraEnvVarsCM .Values.backstage.extraEnvVarsSecrets) }}
+          envFrom:
+            {{- range .Values.backstage.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ . }}
+            {{- end }}
+            {{- range .Values.backstage.extraEnvVarsSecrets }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+          {{- end }}
+          env:
+            - name: APP_CONFIG_backend_listen_port
+              value: {{ .Values.backstage.containerPorts.backend | quote }}
+            {{- if .Values.postgresql.enabled }}
+            - name: POSTGRES_HOST
+              value: {{ include "backstage.postgresql.host" . }}
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.auth.username }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "backstage.postgresql.databaseSecretName" . }}
+                  key: {{ include "backstage.postgresql.databaseSecretKey" . }}
+            {{- end }}
+            {{- if .Values.backstage.extraEnvVars }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: backend
+              containerPort: {{ .Values.backstage.containerPorts.backend }}
+              protocol: TCP
+            {{- if .Values.backstage.extraPorts }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraPorts "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if (or .Values.backstage.extraAppConfig .Values.backstage.appConfig (and .Values.backstage.extraVolumeMounts .Values.backstage.extraVolumes)) }}
+          volumeMounts:
+            {{- range .Values.backstage.extraAppConfig }}
+            - name: {{ .configMapRef }}
+              mountPath: "{{ $installDir }}/{{ .filename }}"
+              subPath: {{ .filename }}
+            {{- end }}
+            {{- if .Values.backstage.appConfig }}
+            - name: backstage-app-config
+              mountPath: "{{ $installDir }}/app-config-from-configmap.yaml"
+              subPath: app-config.yaml
+            {{- end }}
+            {{- if .Values.backstage.extraVolumeMounts }}
+              {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraVolumeMounts "context" $ ) | nindent 12 }}
+            {{- end }}
+          {{- end }}
+        {{- if .Values.backstage.extraContainers }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraContainers "context" $) | nindent 8 }}
+        {{- end }}

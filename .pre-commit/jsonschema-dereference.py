@@ -15,6 +15,8 @@ JSONSCHEMA_NAME = "values.schema.json"
 VALUES_FILE = "values.yaml"
 CHART_YAML = "Chart.yaml"
 
+CHARTS_DIR = Path("charts")
+
 def read_yaml(file_path: Path):
     """Open and load Chart.yaml file."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -71,9 +73,8 @@ def save(chart_dir: Path, my_schema: Any):
         json.dump(my_schema, f, indent=4, sort_keys=True)
 
 if __name__ == '__main__':
-    charts = [p.parent for p in Path(".").rglob(CHART_YAML)]
-
-    errors: List[BaseException] = []
+    charts = [p.parent for p in CHARTS_DIR.glob(f"*/{CHART_YAML}")]
+    errors: List[Exception] = []
     for chart in charts:
         try:
             chart_yaml = read_yaml(chart / CHART_YAML)
@@ -85,7 +86,7 @@ if __name__ == '__main__':
             schema = tidy_schema(schema, values)
 
             save(chart, schema)
-        except BaseException as e:
+        except Exception as e:
             print(f"Could not process schema for '{chart}': {e}")
             errors.append(e)
     if errors:

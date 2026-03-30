@@ -1,0 +1,16 @@
+backstage:
+  appConfig:
+    techdocs:
+      builder: "local"
+    app:
+      # Let's test that everything is fine with comments
+      title: The very best Backstage Helm Chart! :D
+      baseUrl: https://somedomain.tl
+    backend:
+      baseUrl: https://somedomain.tl
+      listen:
+        port: 12345
+      auth:
+        keys:
+          # Is just a random b64 string for test purposes
+          - secret: N4+P+zJrErWRUGm0ZbVVhX1ZC81aSP81
