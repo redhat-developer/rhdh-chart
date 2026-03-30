@@ -11,7 +11,7 @@ description: |
 type: application
 
 # Application version - matches the must-gather tool version
-appVersion: "1.0.0"
+appVersion: "0.2.0"
 
 keywords:
   - rhdh
