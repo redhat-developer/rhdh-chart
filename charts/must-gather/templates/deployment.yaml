@@ -68,6 +68,9 @@ spec:
             - name: MUST_GATHER_SINCE_TIME
               value: {{ .Values.gather.sinceTime | quote }}
             {{- end }}
+            {{- with .Values.gather.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- $nsScope := ne .Values.rbac.scope "cluster" }}
           {{- $effectiveNamespaces := .Values.gather.namespaces }}
           {{- if $nsScope }}

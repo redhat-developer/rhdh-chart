@@ -96,6 +96,10 @@ gather:
   # -- Additional custom arguments to pass to the gather script
   extraArgs: []
 
+  # -- Additional environment variables to pass to the gather init container.<br/>
+  # See [Define Environment variables for a container](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/#define-an-environment-variable-for-a-container).
+  extraEnvVars: []
+
 # -- Resource requests and limits for the gather container
 resources:
   requests:

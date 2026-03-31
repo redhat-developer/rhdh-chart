@@ -265,6 +265,14 @@
                         "type": "string"
                     },
                     "default": []
+                },
+                "extraEnvVars": {
+                    "title": "Additional environment variables to pass to the gather init container.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar"
+                    },
+                    "default": []
                 }
             }
         },

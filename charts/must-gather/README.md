@@ -1,7 +1,7 @@
 
 # Must Gather Chart for Red Hat Developer Hub (RHDH)
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying the RHDH Must-Gather diagnostic tool on Kubernetes
@@ -27,7 +27,7 @@ Kubernetes: `>= 1.27.0-0`
 ```console
 helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
   --repo https://redhat-developer.github.io/rhdh-chart \
-  --version 0.1.0
+  --version 0.2.0
 ```
 
 Running the command again will automatically replace the previous pod and start a new gather.
@@ -105,9 +105,10 @@ The command removes all the Kubernetes resources associated with the chart and d
 | dataHolder | Runs alongside the gather container and stays alive so you can exec in and retrieve the output. | object | `{"resources":{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}}` |
 | dataHolder.resources | Resource requests and limits for the data-holder container | object | `{"limits":{"cpu":"100m","ephemeral-storage":"64Mi","memory":"128Mi"},"requests":{"cpu":"50m","ephemeral-storage":"32Mi","memory":"64Mi"}}` |
 | fullnameOverride |  | string | `""` |
-| gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withHelm":true,"withIngress":true,"withNamespaceInspect":true,"withOperator":true,"withOrchestrator":true,"withPlatform":true,"withRoute":true,"withSecrets":false}` |
+| gather | Gather script configuration | object | `{"clusterInfo":false,"cmdTimeout":"30","extraArgs":[],"extraEnvVars":[],"logLevel":"info","namespaces":[],"since":"","sinceTime":"","withHeapDumps":false,"withHelm":true,"withIngress":true,"withNamespaceInspect":true,"withOperator":true,"withOrchestrator":true,"withPlatform":true,"withRoute":true,"withSecrets":false}` |
 | gather.cmdTimeout | Command timeout for individual kubectl/helm commands (seconds) | string | `"30"` |
 | gather.extraArgs | Additional custom arguments to pass to the gather script | list | `[]` |
+| gather.extraEnvVars | Additional environment variables to pass to the gather init container.<br/> See [Define Environment variables for a container](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/#define-an-environment-variable-for-a-container). | list | `[]` |
 | gather.logLevel | Log level: info, INFO, debug, DEBUG, trace, TRACE | string | `"info"` |
 | gather.namespaces | Example: ["rhdh-prod", "rhdh-staging"] | list | `[]` |
 | gather.since | Relative time for log collection (e.g., "2h", "30m") | string | `""` |
