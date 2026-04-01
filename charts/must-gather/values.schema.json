@@ -957,6 +957,48 @@
                     "title": "Additional environment variables to pass to the gather init container.",
                     "type": "array"
                 },
+                "heapDump": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "bufferSize": {
+                            "default": "",
+                            "title": "WebSocket buffer size in bytes for inspector method.",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "default": false,
+                            "title": "Enable collection of heap dumps (disabled by default).",
+                            "type": "boolean"
+                        },
+                        "instances": {
+                            "default": "",
+                            "title": "Filter for specific heap dump instances (comma-separated pod names or patterns).",
+                            "type": "string"
+                        },
+                        "method": {
+                            "default": "",
+                            "enum": [
+                                "",
+                                "inspector",
+                                "sigusr2"
+                            ],
+                            "title": "Method for heap dump collection: 'inspector' or 'sigusr2'.",
+                            "type": "string"
+                        },
+                        "remoteDir": {
+                            "default": "",
+                            "title": "Directory in container where heap dumps are written for SIGUSR2 method.",
+                            "type": "string"
+                        },
+                        "timeout": {
+                            "default": "",
+                            "title": "Timeout in seconds for heap dump collection.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Heap dump collection configuration.",
+                    "type": "object"
+                },
                 "logLevel": {
                     "default": "info",
                     "enum": [
@@ -988,11 +1030,6 @@
                     "default": "",
                     "title": "Absolute timestamp for log collection (RFC3339 format).",
                     "type": "string"
-                },
-                "withHeapDumps": {
-                    "default": false,
-                    "title": "Enable collection of heap dumps (disabled by default).",
-                    "type": "boolean"
                 },
                 "withHelm": {
                     "default": true,

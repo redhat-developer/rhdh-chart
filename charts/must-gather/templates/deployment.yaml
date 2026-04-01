@@ -68,6 +68,18 @@ spec:
             - name: MUST_GATHER_SINCE_TIME
               value: {{ .Values.gather.sinceTime | quote }}
             {{- end }}
+            {{- if and .Values.gather.heapDump.enabled .Values.gather.heapDump.timeout }}
+            - name: HEAP_DUMP_TIMEOUT
+              value: {{ .Values.gather.heapDump.timeout | quote }}
+            {{- end }}
+            {{- if and .Values.gather.heapDump.enabled .Values.gather.heapDump.bufferSize }}
+            - name: HEAP_DUMP_BUFFER_SIZE
+              value: {{ .Values.gather.heapDump.bufferSize | quote }}
+            {{- end }}
+            {{- if and .Values.gather.heapDump.enabled .Values.gather.heapDump.remoteDir }}
+            - name: HEAP_DUMP_REMOTE_DIR
+              value: {{ .Values.gather.heapDump.remoteDir | quote }}
+            {{- end }}
             {{- with .Values.gather.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -77,13 +89,21 @@ spec:
           {{- /* Namespace-scoped RBAC: override to release namespace only (gather.namespaces is ignored) */ -}}
           {{- $effectiveNamespaces = list .Release.Namespace }}
           {{- end }}
-          {{- if or $nsScope .Values.gather.withSecrets .Values.gather.withHeapDumps .Values.gather.clusterInfo (not .Values.gather.withOperator) (not .Values.gather.withOrchestrator) (not .Values.gather.withHelm) (not .Values.gather.withPlatform) (not .Values.gather.withRoute) (not .Values.gather.withIngress) (not .Values.gather.withNamespaceInspect) $effectiveNamespaces .Values.gather.extraArgs }}
+          {{- if or $nsScope .Values.gather.withSecrets .Values.gather.heapDump.enabled .Values.gather.clusterInfo (not .Values.gather.withOperator) (not .Values.gather.withOrchestrator) (not .Values.gather.withHelm) (not .Values.gather.withPlatform) (not .Values.gather.withRoute) (not .Values.gather.withIngress) (not .Values.gather.withNamespaceInspect) $effectiveNamespaces .Values.gather.extraArgs }}
           args:
             {{- if .Values.gather.withSecrets }}
             - "--with-secrets"
             {{- end }}
-            {{- if .Values.gather.withHeapDumps }}
+            {{- if .Values.gather.heapDump.enabled }}
             - "--with-heap-dumps"
+            {{- end }}
+            {{- if and .Values.gather.heapDump.enabled .Values.gather.heapDump.method }}
+            - "--heap-dump-method"
+            - {{ .Values.gather.heapDump.method | quote }}
+            {{- end }}
+            {{- if and .Values.gather.heapDump.enabled .Values.gather.heapDump.instances }}
+            - "--heap-dump-instances"
+            - {{ .Values.gather.heapDump.instances | quote }}
             {{- end }}
             {{- if .Values.gather.clusterInfo }}
             - "--cluster-info"

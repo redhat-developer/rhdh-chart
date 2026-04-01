@@ -24,7 +24,7 @@ Configuration used:
 {{- if .Values.gather.withSecrets }}
   - Secrets collection: enabled (sanitized)
 {{- end }}
-{{- if .Values.gather.withHeapDumps }}
+{{- if .Values.gather.heapDump.enabled }}
   - Heap dump collection: enabled
 {{- end }}
 

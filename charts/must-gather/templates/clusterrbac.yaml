@@ -60,7 +60,7 @@ rules:
   - apiGroups: [""]
     resources: ["pods/exec"] # NOSONAR - required for data collection
     verbs: ["create"]
-  {{- if .Values.gather.withHeapDumps }}
+  {{- if .Values.gather.heapDump.enabled }}
   - apiGroups: [""]
     resources: ["pods/portforward"]
     verbs: ["create"]
