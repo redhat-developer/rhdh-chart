@@ -12,18 +12,38 @@ concurrency:
 jobs:
 
   test-chart:
-    name: Nightly Test
+    name: Nightly Test (${{ matrix.branch }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        branch:
+          - main
+          - release-1.9
+          - release-1.8
 
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          ref: ${{ matrix.branch }}
           fetch-depth: 0
+
+      - name: Compute image tag
+        id: image
+        run: |
+          if [[ "${{ matrix.branch }}" == "main" ]]; then
+            echo "tag=next" >> "$GITHUB_OUTPUT"
+          else
+            # release-x.y -> next-x.y
+            echo "tag=next-${BRANCH#release-}" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          BRANCH: ${{ matrix.branch }}
 
       - name: Test charts
         uses: ./.github/actions/test-charts
         with:
-          target_branch: main
+          target_branch: ${{ matrix.branch }}
           all_charts: 'true'
-          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=next --set upstream.backstage.image.pullPolicy=Always'
+          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=${{ steps.image.outputs.tag }} --set upstream.backstage.image.pullPolicy=Always'
