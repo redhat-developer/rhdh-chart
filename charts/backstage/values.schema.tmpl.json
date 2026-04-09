@@ -132,6 +132,125 @@
                             }
                         }
                     }
+                },
+                "lightspeed": {
+                    "title": "Built-in Lightspeed feature configuration.",
+                    "type": [
+                        "boolean",
+                        "object"
+                    ],
+                    "default": {},
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "title": "Enable or disable the built-in Lightspeed feature.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "plugins": {
+                            "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "package": {
+                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
+                                        "type": "string"
+                                    },
+                                    "integrity": {
+                                        "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                        "type": "string"
+                                    },
+                                    "pluginConfig": {
+                                        "title": "Optional plugin-specific app-config YAML fragment.",
+                                        "type": "object"
+                                    },
+                                    "disabled": {
+                                        "title": "Disable the plugin.",
+                                        "type": "boolean",
+                                        "default": false
+                                    }
+                                },
+                                "required": [
+                                    "package"
+                                ]
+                            }
+                        },
+                        "images": {
+                            "title": "Images used by the Lightspeed pod wiring.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "ragInit": {
+                                    "title": "Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.",
+                                    "type": "string",
+                                    "default": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05"
+                                },
+                                "lightspeedCore": {
+                                    "title": "Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.",
+                                    "type": "string",
+                                    "default": "quay.io/lightspeed-core/lightspeed-stack:0.5.0"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "title": "Resource requests/limits for Lightspeed containers.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "ragInit": {
+                                    "title": "Resource requests/limits for the Lightspeed RAG bootstrap init container.",
+                                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+                                    "default": {}
+                                },
+                                "lightspeedCore": {
+                                    "title": "Resource requests/limits for the Lightspeed Core sidecar.",
+                                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+                                    "default": {}
+                                }
+                            }
+                        },
+                        "runtimeVolume": {
+                            "title": "Runtime data volume configuration for the Lightspeed Core sidecar.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "type": {
+                                    "title": "Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.",
+                                    "type": "string",
+                                    "default": "emptyDir",
+                                    "enum": [
+                                        "emptyDir",
+                                        "persistentVolumeClaim"
+                                    ]
+                                },
+                                "emptyDir": {
+                                    "title": "`emptyDir` configuration for the Lightspeed runtime data volume when `runtimeVolume.type=emptyDir`.",
+                                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.EmptyDirVolumeSource",
+                                    "default": {}
+                                },
+                                "persistentVolumeClaim": {
+                                    "title": "Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.",
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "claimName": {
+                                            "title": "Name of the existing PVC to mount for Lightspeed runtime data.",
+                                            "type": "string",
+                                            "default": ""
+                                        },
+                                        "readOnly": {
+                                            "title": "Whether the existing PVC should be mounted read-only.",
+                                            "type": "boolean",
+                                            "default": false
+                                        }
+                                    },
+                                    "default": {}
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
