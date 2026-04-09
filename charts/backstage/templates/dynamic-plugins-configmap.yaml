@@ -4,6 +4,7 @@ metadata:
   name: {{ printf "%s-dynamic-plugins" .Release.Name }}
 data:
   dynamic-plugins.yaml: |
+    {{- $lightspeed := include "rhdh.lightspeed" . | fromYaml }}
     {{- $dynamic := deepCopy .Values.global.dynamic }}
     {{- $plugins := list }}
 
@@ -13,6 +14,12 @@ data:
 
     {{- if .Values.orchestrator.enabled }}
       {{- range .Values.orchestrator.plugins }}
+        {{- $plugins = append $plugins . }}
+      {{- end }}
+    {{- end }}
+
+    {{- if $lightspeed.enabled }}
+      {{- range $lightspeed.plugins }}
         {{- $plugins = append $plugins . }}
       {{- end }}
     {{- end }}
