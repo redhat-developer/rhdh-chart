@@ -82,7 +82,7 @@ print_diff() {
   local fetched_file=$2
   local relative_path=$3
 
-  if [ -f "${existing_file}" ]; then
+  if [[ -f "${existing_file}" ]]; then
     diff -u \
       --label "${relative_path}" \
       --label "${relative_path}" \
@@ -99,10 +99,10 @@ repo="${DEFAULT_REPO}"
 ref="${DEFAULT_REF}"
 check_only=false
 
-while [ $# -gt 0 ]; do
+while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo)
-      if [ $# -lt 2 ]; then
+      if [[ $# -lt 2 ]]; then
         echo "error: --repo requires a value" >&2
         usage
         exit 1
@@ -111,7 +111,7 @@ while [ $# -gt 0 ]; do
       shift 2
       ;;
     --ref)
-      if [ $# -lt 2 ]; then
+      if [[ $# -lt 2 ]]; then
         echo "error: --ref requires a value" >&2
         usage
         exit 1
@@ -153,12 +153,12 @@ for target in "${TARGETS[@]}"; do
   fetch_file "${upstream_url}" "${fetched_file}"
   "${transform_function}" "${fetched_file}" "${rendered_file}"
 
-  if [ -f "${destination_path}" ] && cmp -s "${destination_path}" "${rendered_file}"; then
+  if [[ -f "${destination_path}" ]] && cmp -s "${destination_path}" "${rendered_file}"; then
     echo "up to date: ${relative_destination}"
     continue
   fi
 
-  if [ "${check_only}" = true ]; then
+  if [[ "${check_only}" == true ]]; then
     print_diff "${destination_path}" "${rendered_file}" "${relative_destination}"
   else
     mv "${rendered_file}" "${destination_path}"
@@ -168,8 +168,8 @@ for target in "${TARGETS[@]}"; do
   changed_count=$((changed_count + 1))
 done
 
-if [ "${check_only}" = true ]; then
-  if [ "${changed_count}" -gt 0 ]; then
+if [[ "${check_only}" == true ]]; then
+  if [[ "${changed_count}" -gt 0 ]]; then
     echo "lightspeed config sync is required for ${changed_count} file(s)" >&2
     exit 1
   fi
