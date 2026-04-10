@@ -166,6 +166,9 @@ runs:
           "--set route.enabled=false"
           "--set upstream.ingress.enabled=true"
           "--set global.host=rhdh.127.0.0.1.sslip.io"
+          "--set upstream.backstage.podSecurityContext.runAsUser=1001"
+          "--set upstream.backstage.podSecurityContext.runAsGroup=1001"
+          "--set upstream.backstage.podSecurityContext.fsGroup=1001"
         )
         if [[ -n "$INPUT_EXTRA_HELM_ARGS" ]]; then
           IFS=' ' read -ra ADDITIONAL_ARGS <<< "$INPUT_EXTRA_HELM_ARGS"
