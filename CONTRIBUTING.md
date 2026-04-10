@@ -64,7 +64,8 @@ Verify the vendored files are already in sync without writing changes:
 ./hack/sync-lightspeed-configs.sh --ref main --check
 ```
 
-The script copies the upstream files as-is, so choose the upstream branch or tag that matches the Lightspeed release you want to vendor.
+The script copies the upstream config files directly, except it renders `secret.yaml` from upstream `env/default-values.env` by dropping comment lines plus `LIGHTSPEED_CORE_IMAGE` and `RAG_CONTENT_IMAGE`, then converting each remaining `KEY=value` line into the chart's YAML secret payload.
+Choose the upstream branch or tag that matches the Lightspeed release you want to vendor.
 
 **Important:** After any change to the dependency structure or version of the vendored chart, you must rebuild the lock file and local subchart dependencies:
 
