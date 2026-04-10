@@ -116,6 +116,398 @@
                     "default": "",
                     "title": "Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`",
                     "type": "string"
+                },
+                "lightspeed": {
+                    "additionalProperties": false,
+                    "default": {
+                        "enabled": true,
+                        "images": {
+                            "lightspeedCore": "quay.io/lightspeed-core/lightspeed-stack:0.5.0",
+                            "ragInit": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05"
+                        },
+                        "plugins": [
+                            {
+                                "disabled": false,
+                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed",
+                                "pluginConfig": {
+                                    "dynamicPlugins": {
+                                        "frontend": {
+                                            "red-hat-developer-hub.backstage-plugin-lightspeed": {
+                                                "dynamicRoutes": [
+                                                    {
+                                                        "importName": "LightspeedPage",
+                                                        "path": "/lightspeed"
+                                                    }
+                                                ],
+                                                "mountPoints": [
+                                                    {
+                                                        "importName": "LightspeedFAB",
+                                                        "mountPoint": "application/listener"
+                                                    },
+                                                    {
+                                                        "importName": "LightspeedDrawerProvider",
+                                                        "mountPoint": "application/provider"
+                                                    },
+                                                    {
+                                                        "config": {
+                                                            "id": "lightspeed"
+                                                        },
+                                                        "importName": "LightspeedDrawerStateExposer",
+                                                        "mountPoint": "application/internal/drawer-state"
+                                                    },
+                                                    {
+                                                        "config": {
+                                                            "id": "lightspeed",
+                                                            "priority": 100
+                                                        },
+                                                        "importName": "LightspeedChatContainer",
+                                                        "mountPoint": "application/internal/drawer-content"
+                                                    }
+                                                ],
+                                                "translationResources": [
+                                                    {
+                                                        "importName": "lightspeedTranslations",
+                                                        "module": "Alpha",
+                                                        "ref": "lightspeedTranslationRef"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "disabled": false,
+                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
+                            },
+                            {
+                                "disabled": false,
+                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/backstage-plugin-mcp-actions-backend:bs_1.45.3__0.1.5"
+                            },
+                            {
+                                "disabled": false,
+                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-tool:bs_1.45.3__0.4.1"
+                            },
+                            {
+                                "disabled": false,
+                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-techdocs-mcp-tool:bs_1.45.3__0.3.2"
+                            }
+                        ],
+                        "resources": {
+                            "lightspeedCore": {},
+                            "ragInit": {}
+                        },
+                        "runtimeVolume": {
+                            "emptyDir": {},
+                            "persistentVolumeClaim": {},
+                            "type": "emptyDir"
+                        }
+                    },
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "Enable or disable the built-in Lightspeed feature.",
+                            "type": "boolean"
+                        },
+                        "images": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "lightspeedCore": {
+                                    "default": "quay.io/lightspeed-core/lightspeed-stack:0.5.0",
+                                    "title": "Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.",
+                                    "type": "string"
+                                },
+                                "ragInit": {
+                                    "default": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05",
+                                    "title": "Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Images used by the Lightspeed pod wiring.",
+                            "type": "object"
+                        },
+                        "plugins": {
+                            "default": [
+                                {
+                                    "disabled": false,
+                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed",
+                                    "pluginConfig": {
+                                        "dynamicPlugins": {
+                                            "frontend": {
+                                                "red-hat-developer-hub.backstage-plugin-lightspeed": {
+                                                    "dynamicRoutes": [
+                                                        {
+                                                            "importName": "LightspeedPage",
+                                                            "path": "/lightspeed"
+                                                        }
+                                                    ],
+                                                    "mountPoints": [
+                                                        {
+                                                            "importName": "LightspeedFAB",
+                                                            "mountPoint": "application/listener"
+                                                        },
+                                                        {
+                                                            "importName": "LightspeedDrawerProvider",
+                                                            "mountPoint": "application/provider"
+                                                        },
+                                                        {
+                                                            "config": {
+                                                                "id": "lightspeed"
+                                                            },
+                                                            "importName": "LightspeedDrawerStateExposer",
+                                                            "mountPoint": "application/internal/drawer-state"
+                                                        },
+                                                        {
+                                                            "config": {
+                                                                "id": "lightspeed",
+                                                                "priority": 100
+                                                            },
+                                                            "importName": "LightspeedChatContainer",
+                                                            "mountPoint": "application/internal/drawer-content"
+                                                        }
+                                                    ],
+                                                    "translationResources": [
+                                                        {
+                                                            "importName": "lightspeedTranslations",
+                                                            "module": "Alpha",
+                                                            "ref": "lightspeedTranslationRef"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "disabled": false,
+                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
+                                },
+                                {
+                                    "disabled": false,
+                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/backstage-plugin-mcp-actions-backend:bs_1.45.3__0.1.5"
+                                },
+                                {
+                                    "disabled": false,
+                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-tool:bs_1.45.3__0.4.1"
+                                },
+                                {
+                                    "disabled": false,
+                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-techdocs-mcp-tool:bs_1.45.3__0.3.2"
+                                }
+                            ],
+                            "items": {
+                                "properties": {
+                                    "disabled": {
+                                        "default": false,
+                                        "title": "Disable the plugin.",
+                                        "type": "boolean"
+                                    },
+                                    "integrity": {
+                                        "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                        "type": "string"
+                                    },
+                                    "package": {
+                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
+                                        "type": "string"
+                                    },
+                                    "pluginConfig": {
+                                        "title": "Optional plugin-specific app-config YAML fragment.",
+                                        "type": "object"
+                                    }
+                                },
+                                "required": [
+                                    "package"
+                                ],
+                                "type": "object"
+                            },
+                            "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
+                            "type": "array"
+                        },
+                        "resources": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "lightspeedCore": {
+                                    "description": "ResourceRequirements describes the compute resource requirements.",
+                                    "properties": {
+                                        "claims": {
+                                            "description": "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.",
+                                            "items": {
+                                                "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
+                                                "properties": {
+                                                    "name": {
+                                                        "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
+                                                        "type": "string"
+                                                    },
+                                                    "request": {
+                                                        "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name"
+                                                ],
+                                                "type": "object"
+                                            },
+                                            "type": "array",
+                                            "x-kubernetes-list-map-keys": [
+                                                "name"
+                                            ],
+                                            "x-kubernetes-list-type": "map"
+                                        },
+                                        "limits": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        },
+                                        "requests": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "ragInit": {
+                                    "description": "ResourceRequirements describes the compute resource requirements.",
+                                    "properties": {
+                                        "claims": {
+                                            "description": "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.",
+                                            "items": {
+                                                "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
+                                                "properties": {
+                                                    "name": {
+                                                        "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
+                                                        "type": "string"
+                                                    },
+                                                    "request": {
+                                                        "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name"
+                                                ],
+                                                "type": "object"
+                                            },
+                                            "type": "array",
+                                            "x-kubernetes-list-map-keys": [
+                                                "name"
+                                            ],
+                                            "x-kubernetes-list-type": "map"
+                                        },
+                                        "limits": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        },
+                                        "requests": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "title": "Resource requests/limits for Lightspeed containers.",
+                            "type": "object"
+                        },
+                        "runtimeVolume": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "emptyDir": {
+                                    "description": "Represents an empty directory for a pod. Empty directory volumes support ownership management and SELinux relabeling.",
+                                    "properties": {
+                                        "medium": {
+                                            "description": "medium represents what type of storage medium should back this directory. The default is \"\" which means to use the node's default medium. Must be an empty string (default) or Memory. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir",
+                                            "type": "string"
+                                        },
+                                        "sizeLimit": {
+                                            "oneOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "number"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "persistentVolumeClaim": {
+                                    "additionalProperties": false,
+                                    "default": {},
+                                    "properties": {
+                                        "claimName": {
+                                            "default": "",
+                                            "title": "Name of the existing PVC to mount for Lightspeed runtime data.",
+                                            "type": "string"
+                                        },
+                                        "readOnly": {
+                                            "default": false,
+                                            "title": "Whether the existing PVC should be mounted read-only.",
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "title": "Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.",
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "default": "emptyDir",
+                                    "enum": [
+                                        "emptyDir",
+                                        "persistentVolumeClaim"
+                                    ],
+                                    "title": "Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Runtime data volume configuration for the Lightspeed Core sidecar.",
+                            "type": "object"
+                        }
+                    },
+                    "title": "Built-in Lightspeed feature configuration.",
+                    "type": [
+                        "boolean",
+                        "object"
+                    ]
                 }
             },
             "type": "object"
@@ -6143,7 +6535,7 @@
                                 "type": "string"
                             },
                             "default": {
-                                "checksum/dynamic-plugins": "{{- include \"common.tplvalues.render\" ( dict \"value\" .Values.global.dynamic \"context\" $) | sha256sum }}"
+                                "checksum/dynamic-plugins": "{{- $lightspeed := include \"rhdh.lightspeed\" . | fromYaml -}} {{- include \"common.tplvalues.render\" ( dict \"value\" (dict \"dynamic\" .Values.global.dynamic \"lightspeed\" (dict \"enabled\" $lightspeed.enabled \"plugins\" $lightspeed.plugins)) \"context\" $) | sha256sum }}"
                             },
                             "title": "Annotations to add to the backend deployment pods",
                             "type": "object"

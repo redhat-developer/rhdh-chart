@@ -35,6 +35,65 @@ global:
       registry: quay.io
       repository: rhdh/plugin-catalog-index
       tag: "1.10"
+  # -- Built-in Lightspeed feature configuration.
+  lightspeed:
+    # -- Enable or disable the built-in Lightspeed feature.
+    enabled: true
+    # -- Lightspeed plugins and their configuration. Override package references for disconnected environments.
+    plugins:
+      - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed
+        disabled: false
+        pluginConfig:
+          dynamicPlugins:
+            frontend:
+              red-hat-developer-hub.backstage-plugin-lightspeed:
+                translationResources:
+                  - importName: lightspeedTranslations
+                    module: Alpha
+                    ref: lightspeedTranslationRef
+                dynamicRoutes:
+                  - path: /lightspeed
+                    importName: LightspeedPage
+                mountPoints:
+                  - mountPoint: application/listener
+                    importName: LightspeedFAB
+                  - mountPoint: application/provider
+                    importName: LightspeedDrawerProvider
+                  - mountPoint: application/internal/drawer-state
+                    importName: LightspeedDrawerStateExposer
+                    config:
+                      id: lightspeed
+                  - mountPoint: application/internal/drawer-content
+                    importName: LightspeedChatContainer
+                    config:
+                      id: lightspeed
+                      priority: 100
+      - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend
+        disabled: false
+      - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/backstage-plugin-mcp-actions-backend:bs_1.45.3__0.1.5
+        disabled: false
+      - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-tool:bs_1.45.3__0.4.1
+        disabled: false
+      - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-techdocs-mcp-tool:bs_1.45.3__0.3.2
+        disabled: false
+    images:
+      # -- Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.
+      ragInit: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
+      # -- Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.
+      lightspeedCore: quay.io/lightspeed-core/lightspeed-stack:0.5.0
+    resources:
+      # -- Resource requests/limits for the Lightspeed RAG bootstrap init container.
+      ragInit: {}
+      # -- Resource requests/limits for the Lightspeed Core sidecar.
+      lightspeedCore: {}
+    runtimeVolume:
+      # -- Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.
+      # Supported values: `emptyDir`, `persistentVolumeClaim`.
+      type: emptyDir
+      # -- `emptyDir` configuration for the Lightspeed runtime data volume when `runtimeVolume.type=emptyDir`.
+      emptyDir: {}
+      # -- Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.
+      persistentVolumeClaim: {}
 # -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
 # @default -- Use Openshift compatible settings
 upstream:
@@ -253,7 +312,8 @@ upstream:
     installDir: /opt/app-root/src
     podAnnotations:
       checksum/dynamic-plugins: >-
-        {{- include "common.tplvalues.render" ( dict "value" .Values.global.dynamic "context" $) | sha256sum }}
+        {{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+        {{- include "common.tplvalues.render" ( dict "value" (dict "dynamic" .Values.global.dynamic "lightspeed" (dict "enabled" $lightspeed.enabled "plugins" $lightspeed.plugins)) "context" $) | sha256sum }}
   ingress:
     host: "{{ .Values.global.host }}"
   metrics:
