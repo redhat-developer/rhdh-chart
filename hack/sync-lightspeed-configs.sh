@@ -9,11 +9,49 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 LIGHTSPEED_DIR="${REPO_ROOT}/charts/backstage/vendor/backstage/charts/backstage/files/lightspeed"
 
+# Format: upstream_path|destination_path|transform_function
 TARGETS=(
-  "lightspeed-core-configs/lightspeed-stack.yaml:${LIGHTSPEED_DIR}/lightspeed-stack.yaml"
-  "llama-stack-configs/config.yaml:${LIGHTSPEED_DIR}/config.yaml"
-  "lightspeed-core-configs/rhdh-profile.py:${LIGHTSPEED_DIR}/rhdh-profile.py"
+  "lightspeed-core-configs/lightspeed-stack.yaml|${LIGHTSPEED_DIR}/lightspeed-stack.yaml|copy_fetched_file"
+  "llama-stack-configs/config.yaml|${LIGHTSPEED_DIR}/config.yaml|copy_fetched_file"
+  "lightspeed-core-configs/rhdh-profile.py|${LIGHTSPEED_DIR}/rhdh-profile.py|copy_fetched_file"
+  "env/default-values.env|${LIGHTSPEED_DIR}/secret.yaml|render_secret_yaml_from_env"
 )
+
+copy_fetched_file() {
+  local source_file=$1
+  local destination_file=$2
+
+  cp "${source_file}" "${destination_file}"
+}
+
+render_secret_yaml_from_env() {
+  local source_file=$1
+  local destination_file=$2
+
+  awk '
+    /^[[:space:]]*$/ { next }
+    # Skip comments from the upstream .env file.
+    /^[[:space:]]*#/ { next }
+    {
+      separator = index($0, "=")
+      if (separator == 0) {
+        printf "error: unsupported env line: %s\n", $0 > "/dev/stderr"
+        exit 1
+      }
+
+      key = substr($0, 1, separator - 1)
+      # These image settings are intentionally not part of the chart-managed secret payload.
+      if (key == "LIGHTSPEED_CORE_IMAGE" || key == "RAG_CONTENT_IMAGE") {
+        next
+      }
+
+      value = substr($0, separator + 1)
+      gsub(/\\/, "\\\\", value)
+      gsub(/"/, "\\\"", value)
+      printf "%s: \"%s\"\n", key, value
+    }
+  ' "${source_file}" > "${destination_file}"
+}
 
 usage() {
   cat <<EOF
@@ -106,23 +144,24 @@ trap cleanup EXIT
 changed_count=0
 
 for target in "${TARGETS[@]}"; do
-  source_path=${target%%:*}
-  destination_path=${target#*:}
+  IFS='|' read -r source_path destination_path transform_function <<< "${target}"
   relative_destination=${destination_path#"${REPO_ROOT}/"}
   upstream_url="https://raw.githubusercontent.com/${repo}/${ref}/${source_path}"
-  fetched_file="${tmpdir}/$(basename "${destination_path}")"
+  fetched_file="${tmpdir}/$(basename "${destination_path}").upstream"
+  rendered_file="${tmpdir}/$(basename "${destination_path}")"
 
   fetch_file "${upstream_url}" "${fetched_file}"
+  "${transform_function}" "${fetched_file}" "${rendered_file}"
 
-  if [ -f "${destination_path}" ] && cmp -s "${destination_path}" "${fetched_file}"; then
+  if [ -f "${destination_path}" ] && cmp -s "${destination_path}" "${rendered_file}"; then
     echo "up to date: ${relative_destination}"
     continue
   fi
 
   if [ "${check_only}" = true ]; then
-    print_diff "${destination_path}" "${fetched_file}" "${relative_destination}"
+    print_diff "${destination_path}" "${rendered_file}" "${relative_destination}"
   else
-    mv "${fetched_file}" "${destination_path}"
+    mv "${rendered_file}" "${destination_path}"
     echo "updated: ${relative_destination} <- ${upstream_url}"
   fi
 
