@@ -7,7 +7,3 @@
 # helm chart dependencies
 charts/*/charts/
 **/charts/*.tgz
-output
-
-# Vendored charts need to be updated manually with `helm dependency update`
-!charts/*/vendor/**/charts/*.tgz

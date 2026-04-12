@@ -1,35 +1,39 @@
 
-# RHDH Backstage Helm Chart for OpenShift
+# Backstage Helm Chart
 
-![Version: 5.6.0](https://img.shields.io/badge/Version-5.6.0-informational?style=flat-square)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/backstage)](https://artifacthub.io/packages/search?repo=backstage)
+![Version: 2.6.3](https://img.shields.io/badge/Version-2.6.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
+A Helm chart for deploying a Backstage application
 
-The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.6/html-single/telemetry_data_collection_and_analysis/index
-
-**Homepage:** <https://red.ht/rhdh>
-
-## Productized RHDH
-
-This repository now provides the productized RHDH chart.
-For the **Generally Available** version of this chart, see:
-
-* https://github.com/openshift-helm-charts/charts - official releases to https://charts.openshift.io/
+**Homepage:** <https://backstage.io>
 
 ## Maintainers
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Red Hat |  | <https://redhat.com> |
+| Backstage |  | <https://backstage.io> |
+
+## Source Code
+
+* <https://github.com/backstage/charts>
+* <https://github.com/backstage/backstage>
+
+---
+
+[Backstage](https://backstage.io) is an open platform for building developer portals. Powered by a centralized software catalog, Backstage restores order to your microservices and infrastructure and enables your product teams to ship high-quality code quickly — without compromising autonomy.
+
+Backstage unifies all your infrastructure tooling, services, and documentation to create a streamlined development environment from end to end.
+
+> Disclaimer: This Helm chart deploys a pre-packaged container image which contains a vanilla Backstage instance for demo purposes. This image is probably not suitable for use in production. For further customization of the Backstage instance (plugin installation, UI changes, etc.) please create your own custom instance and container image. For details please consult the [Backstage documentation](https://backstage.io/docs)
 
 ## TL;DR
 
 ```console
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
+helm repo add backstage https://backstage.github.io/charts
 
-helm install my-backstage redhat-developer/backstage --version 5.6.0
+helm install my-release backstage/backstage
 ```
 
 ## Introduction
@@ -38,107 +42,52 @@ This chart bootstraps a [Backstage](https://backstage.io/docs/deployment/docker)
 
 ## Prerequisites
 
-- Kubernetes 1.27+ ([OpenShift 4.14+](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html-single/release_notes/index#ocp-4-14-about-this-release))
-- Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
+- Kubernetes 1.25+
+- Helm 3.10+ minimum, 3.14+ recommended
 - PV provisioner support in the underlying infrastructure
 - [Backstage container image](https://backstage.io/docs/deployment/docker)
 
+## Scope
+
+This chart focuses on providing users the same experience and functionality no matter what flavor of Kubernetes they use. This chart will support only patterns that are either customary for all Kubernetes flavors, are commonly used in the Bitnami charts ecosystem, and recognized as Backstage official patterns.
+
+We welcome other, more specialized, charts to use this canonical chart as a direct dependency, expanding the feature set further, beyond this scope.
+
+A list of derived charts:
+- OpenShift specialized chart: [Janus Backstage Helm chart](https://github.com/janus-idp/helm-backstage/tree/main/charts/backstage)
+
 ## Usage
 
-Charts are available in the following formats:
+Chart is available in the following formats:
 
 - [Chart Repository](https://helm.sh/docs/topics/chart_repository/)
 - [OCI Artifacts](https://helm.sh/docs/topics/registries/)
-
-### Note
-
-Up-to-date instructions on installing RHDH through the chart can be found in the [installation docs](https://github.com/redhat-developer/rhdh-chart/tree/main/.rhdh/docs/installation-ci-charts.adoc).
 
 ### Installing from the Chart Repository
 
 The following command can be used to add the chart repository:
 
 ```console
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
+helm repo add backstage https://backstage.github.io/charts
 ```
 
-Once the chart has been added, install this chart. However before doing so, please review the default `values.yaml` and adjust as needed.
-
-- To get proper connection between frontend and backend of Backstage please update the `apps.example.com` to match your cluster host:
-
-   ```yaml
-   global:
-     clusterRouterBase: apps.example.com
-   ```
-
-   > Tip: you can use `helm upgrade -i --set global.clusterRouterBase=apps.example.com ...` instead of a value file
-
-- If your cluster doesn't provide PVCs, you should disable PostgreSQL persistence via:
-
-   ```yaml
-   upstream:
-     postgresql:
-       primary:
-         persistence:
-           enabled: false
-   ```
+Once the chart has been added, install one of the available charts:
 
 ```console
-helm upgrade -i <release_name> redhat-developer/backstage
+helm upgrade -i <release_name> backstage/backstage
 ```
 
 ### Installing from an OCI Registry
 
-Charts are also available in OCI format. The list of available releases can be found [here](https://quay.io/repository/rhdh/chart?tab=tags).
+Chart is also available in OCI format. The list of available releases can be found [here](https://github.com/backstage/charts/pkgs/container/charts%2Fbackstage).
 
 Install one of the available versions:
 
 ```shell
-helm upgrade -i <release_name> oci://quay.io/rhdh/chart --version=<version>
+helm upgrade -i oci://ghcr.io/backstage/charts/backstage --version=<version>
 ```
 
 > **Tip**: List all releases using `helm list`
-
-### Testing a Release
-
-Once an Helm Release has been deployed, you can test it using the [`helm test`](https://helm.sh/docs/helm/helm_test/) command:
-
-```sh
-helm test <release_name>
-```
-
-This will run a simple Pod in the cluster to check that the application deployed is up and running.
-
-You can control whether to disable this test pod or you can also customize the image it leverages.
-See the `test.enabled` and `test.image` parameters in the [`values.yaml`](./values.yaml) file.
-
-> **Tip**: Disabling the test pod will not prevent the `helm test` command from passing later on. It will simply report that no test suite is available.
-
-Below are a few examples:
-
-<details>
-
-<summary>Disabling the test pod</summary>
-
-```sh
-helm install <release_name> <repo_or_oci_registry> \
-  --set test.enabled=false
-```
-
-</details>
-
-<details>
-
-<summary>Customizing the test pod image</summary>
-
-```sh
-helm install <release_name> <repo_or_oci_registry> \
-  --set test.image.repository=curl/curl-base \
-  --set test.image.tag=8.11.1
-```
-
-</details>
 
 ### Uninstalling the Chart
 
@@ -152,247 +101,253 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Requirements
 
-Kubernetes: `>= 1.27.0-0`
+Kubernetes: `>= 1.19.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://./vendor/backstage/charts/backstage/ | upstream(backstage) | 2.6.3 |
-| https://charts.bitnami.com/bitnami | common | 2.37.0 |
+| oci://registry-1.docker.io/bitnamicharts | common | 2.10.0 |
+| oci://registry-1.docker.io/bitnamicharts | postgresql | 12.10.0 |
 
 ## Values
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
-| global.auth | Enable service authentication within Backstage instance | object | `{"backend":{"enabled":true,"existingSecret":"","value":""}}` |
-| global.auth.backend | Backend service to service authentication <br /> Ref: https://backstage.io/docs/auth/service-to-service-auth/ | object | `{"enabled":true,"existingSecret":"","value":""}` |
-| global.auth.backend.enabled | Enable backend service to service authentication, unless configured otherwise it generates a secret value | bool | `true` |
-| global.auth.backend.existingSecret | Instead of generating a secret value, refer to existing secret | string | `""` |
-| global.auth.backend.value | Instead of generating a secret value, use the following value | string | `""` |
-| global.catalogIndex | Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount. | object | `{"image":{"registry":"quay.io","repository":"rhdh/plugin-catalog-index","tag":"1.10"}}` |
-| global.clusterRouterBase | Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled. | string | `"apps.example.com"` |
-| global.dynamic.includes | Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field. Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
-| global.dynamic.includes[0] | List of dynamic plugins included inside the `rhdh` container image, some of which are disabled by default. This file ONLY works with the `rhdh` container image. | string | `"dynamic-plugins.default.yaml"` |
-| global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
-| global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
-| nameOverride |  | string | `"developer-hub"` |
-| orchestrator.enabled |  | bool | `false` |
-| orchestrator.plugins | Orchestrator plugins and their configuration | list | `[{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ \"{{inherit}}\" }}"},{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ \"{{inherit}}\" }}"},{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ \"{{inherit}}\" }}"},{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ \"{{inherit}}\" }}"}]` |
-| orchestrator.serverlessLogicOperator.enabled |  | bool | `true` |
-| orchestrator.serverlessOperator.enabled |  | bool | `true` |
-| orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
-| orchestrator.sonataflowPlatform.dataIndexImage | Image for the container used by the sonataflow data index, optional and used for disconnected environments | string | `""` |
-| orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
-| orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
-| orchestrator.sonataflowPlatform.externalDBHost | Host for the user-configured external Database | string | `""` |
-| orchestrator.sonataflowPlatform.externalDBName | Name for the user-configured external Database | string | `""` |
-| orchestrator.sonataflowPlatform.externalDBPort | Port for the user-configured external Database | string | `""` |
-| orchestrator.sonataflowPlatform.externalDBsecretRef | Secret name for the user-created secret to connect an external DB | string | `""` |
-| orchestrator.sonataflowPlatform.initContainerImage | Image for the init container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
-| orchestrator.sonataflowPlatform.jobServiceImage | Image for the container used by the sonataflow jobs service, optional and used for disconnected environments | string | `""` |
-| orchestrator.sonataflowPlatform.monitoring.enabled |  | bool | `true` |
-| orchestrator.sonataflowPlatform.resources.limits.cpu |  | string | `"500m"` |
-| orchestrator.sonataflowPlatform.resources.limits.memory |  | string | `"1Gi"` |
-| orchestrator.sonataflowPlatform.resources.requests.cpu |  | string | `"250m"` |
-| orchestrator.sonataflowPlatform.resources.requests.memory |  | string | `"64Mi"` |
-| route | OpenShift Route parameters | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.global.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
-| route.annotations | Route specific annotations | object | `{}` |
-| route.enabled | Enable the creation of the route resource | bool | `true` |
-| route.host | Set the host attribute to a custom value. If not set, OpenShift will generate it, please make sure to match your baseUrl | string | `"{{ .Values.global.host }}"` |
-| route.path | Path that the router watches for, to route traffic for to the service. | string | `"/"` |
-| route.tls | Route TLS parameters <br /> Ref: https://docs.openshift.com/container-platform/4.9/networking/routes/secured-routes.html | object | `{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"}` |
-| route.tls.caCertificate | Cert authority certificate contents. Optional | string | `""` |
-| route.tls.certificate | Certificate contents | string | `""` |
-| route.tls.destinationCACertificate | Contents of the ca certificate of the final destination. <br /> When using reencrypt termination this file should be provided in order to have routers use it for health checks on the secure connection. If this field is not specified, the router may provide its own destination CA and perform hostname validation using the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically verify. | string | `""` |
-| route.tls.enabled | Enable TLS configuration for the host defined at `route.host` parameter | bool | `true` |
-| route.tls.insecureEdgeTerminationPolicy | Indicates the desired behavior for insecure connections to a route. <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled. | string | `"Redirect"` |
-| route.tls.key | Key file contents | string | `""` |
-| route.tls.termination | Specify TLS termination. | string | `"edge"` |
-| route.wildcardPolicy | Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed. | string | `"None"` |
-| test | Test pod parameters | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"curl/curl","tag":"latest"},"injectTestNpmrcSecret":false}` |
-| test.enabled | Whether to enable the test-connection pod used for testing the Release using `helm test`. | bool | `true` |
-| test.image.registry | Test connection pod image registry | string | `"quay.io"` |
-| test.image.repository | Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"curl/curl"` |
-| test.image.tag | Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"latest"` |
-| test.injectTestNpmrcSecret | Whether to inject a fake dynamic plugins npmrc secret. <br />See RHDHBUGS-1893 and RHDHBUGS-1464 for the motivation behind this. <br />This is only used for testing purposes and should not be used in production. <br />Only relevant when `test.enabled` field is set to `true`. | bool | `false` |
-| upstream | Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml) | object | Use Openshift compatible settings |
-| upstream.backstage.extraVolumes[0] | Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start. | object | `{"ephemeral":{"volumeClaimTemplate":{"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}}}}},"name":"dynamic-plugins-root"}` |
-| upstream.backstage.extraVolumes[0].ephemeral.volumeClaimTemplate.spec.resources.requests.storage | Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins. | string | `"5Gi"` |
-| upstream.backstage.extraVolumes[5] | Ephemeral volume used by the install-dynamic-plugins init container to extract catalog entities from the catalog index image. Mounted at the /extensions path in the backstage-backend main container for automatic discovery by the extension catalog backend providers. | object | `{"emptyDir":{},"name":"extensions-catalog"}` |
-| upstream.backstage.initContainers[0].image | Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount. It could be replaced by a custom image based on this one. | string | `quay.io/rhdh-community/rhdh:next` |
+| backstage | Backstage parameters | object | See below |
+| backstage.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
+| backstage.annotations | Additional custom annotations for the `Deployment` resource | object | `{}` |
+| backstage.appConfig | Generates ConfigMap and configures it in the Backstage pods | object | `{}` |
+| backstage.args | Backstage container command arguments | list | `[]` |
+| backstage.autoscaling | Autoscaling configuration. <br /> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
+| backstage.command | Backstage container command | list | `["node","packages/backend"]` |
+| backstage.containerPorts | Container ports on the Deployment | object | `{"backend":7007}` |
+| backstage.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
+| backstage.extraAppConfig | Extra app configuration files to inline into command arguments | list | `[]` |
+| backstage.extraContainers | Deployment sidecars | list | `[]` |
+| backstage.extraEnvVars | Backstage container environment variables | list | `[]` |
+| backstage.extraEnvVarsCM | Backstage container environment variables from existing ConfigMaps | list | `[]` |
+| backstage.extraEnvVarsSecrets | Backstage container environment variables from existing Secrets | list | `[]` |
+| backstage.extraPorts | Backstage container additional ports | list | `[]` |
+| backstage.extraVolumeMounts | Backstage container additional volume mounts | list | `[]` |
+| backstage.extraVolumes | Backstage container additional volumes | list | `[]` |
+| backstage.hostAliases | Host Aliases for the pod <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/ | list | `[]` |
+| backstage.image.digest | Backstage image digest (digest takes precedence over image tag) | string | `""` |
+| backstage.image.pullPolicy | Specify a imagePullPolicy. Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent' <br /> Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | string | `""` |
+| backstage.image.pullSecrets | Optionally specify an array of imagePullSecrets.  Secrets must be manually created in the namespace. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ <br /> E.g: `pullSecrets: [myRegistryKeySecretName]` | list | `[]` |
+| backstage.image.registry | Backstage image registry | string | `"ghcr.io"` |
+| backstage.image.repository | Backstage image repository | string | `"backstage/backstage"` |
+| backstage.image.tag | Backstage image tag (immutable tags are recommended) | string | `"latest"` |
+| backstage.initContainers | Backstage container init containers | list | `[]` |
+| backstage.installDir | Directory containing the backstage installation | string | `"/app"` |
+| backstage.livenessProbe | Liveness Probe Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes <!-- E.g. livenessProbe:   failureThreshold: 3   httpGet:     path: /.backstage/health/v1/liveness     port: 7007     scheme: HTTP   initialDelaySeconds: 60   periodSeconds: 10   successThreshold: 1   timeoutSeconds: 2 | object | `{"httpGet":{"path":"/.backstage/health/v1/liveness","port":7007,"scheme":"HTTP"}}` |
+| backstage.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
+| backstage.pdb | Pod Disruption Budget configuration ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/ | object | `{"create":false,"maxUnavailable":"","minAvailable":""}` |
+| backstage.podAnnotations | Annotations to add to the backend deployment pods | object | `{}` |
+| backstage.podLabels | Labels to add to the backend deployment pods | object | `{}` |
+| backstage.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
+| backstage.readinessProbe | Readiness Probe Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes <!-- E.g. readinessProbe:   failureThreshold: 3   httpGet:     path: /.backstage/health/v1/readiness     port: 7007     scheme: HTTP   initialDelaySeconds: 30   periodSeconds: 10   successThreshold: 2   timeoutSeconds: 2 | object | `{"httpGet":{"path":"/.backstage/health/v1/readiness","port":7007,"scheme":"HTTP"}}` |
+| backstage.replicas | Number of deployment replicas | int | `1` |
+| backstage.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container <!-- E.g. resources:   limits:     memory: 1Gi     cpu: 1000m   requests:     memory: 250Mi     cpu: 100m --> | object | `{}` |
+| backstage.revisionHistoryLimit | Define the [count of deployment revisions](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#clean-up-policy) to be kept. May be set to 0 in case of GitOps deployment approach. | int | `10` |
+| backstage.startupProbe | Startup Probe Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes <!-- E.g. startupProbe:   failureThreshold: 3   httpGet:     path: /.backstage/health/v1/liveness     port: 7007     scheme: HTTP   initialDelaySeconds: 60   periodSeconds: 10   successThreshold: 1   timeoutSeconds: 2 | object | `{"httpGet":{"path":"/.backstage/health/v1/liveness","port":7007,"scheme":"HTTP"}}` |
+| backstage.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[]` |
+| backstage.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
+| clusterDomain | Default Kubernetes cluster domain | string | `"cluster.local"` |
+| commonAnnotations | Annotations to add to all deployed objects | object | `{}` |
+| commonLabels | Labels to add to all deployed objects | object | `{}` |
+| diagnosticMode | Enable diagnostic mode in the Deployment | object | `{"args":["infinity"],"command":["sleep"],"enabled":false}` |
+| diagnosticMode.args | Args to override all containers in the Deployment | list | `["infinity"]` |
+| diagnosticMode.command | Command to override all containers in the Deployment | list | `["sleep"]` |
+| diagnosticMode.enabled | Enable diagnostic mode (all probes will be disabled and the command will be overridden) | bool | `false` |
+| extraDeploy | Array of extra objects to deploy with the release | list | `[]` |
+| fullnameOverride | String to fully override common.names.fullname | string | `""` |
+| global | Global parameters Global Docker image parameters Please, note that this will override the image parameters, including dependencies, configured to use the global value Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass | object | See below |
+| global.imagePullSecrets | Global Docker registry secret names as an array </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]` | list | `[]` |
+| global.imageRegistry | Global Docker image registry | string | `""` |
+| ingress | Ingress parameters | object | `{"annotations":{},"className":"","enabled":false,"extraHosts":[],"extraTls":[],"host":"","path":"/","tls":{"enabled":false,"secretName":""}}` |
+| ingress.annotations | Additional annotations for the Ingress resource | object | `{}` |
+| ingress.className | Name of the IngressClass cluster resource which defines which controller will implement the resource (e.g nginx) | string | `""` |
+| ingress.enabled | Enable the creation of the ingress resource | bool | `false` |
+| ingress.extraHosts | List of additional hostnames to be covered with this ingress record (e.g. a CNAME) <!-- E.g. extraHosts:   - name: backstage.env.example.com     path: / (Optional)     pathType: Prefix (Optional)     port: 7007 (Optional) --> | list | `[]` |
+| ingress.extraTls | The TLS configuration for additional hostnames to be covered with this ingress record. <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls <!-- E.g. extraTls:   - hosts:     - backstage.env.example.com     secretName: backstage-env --> | list | `[]` |
+| ingress.host | Hostname to be used to expose the route to access the backstage application (e.g: backstage.IP.nip.io) | string | `""` |
+| ingress.path | Path to be used to expose the full route to access the backstage application (e.g: IP.nip.io/backstage) | string | `"/"` |
+| ingress.tls | Ingress TLS parameters | object | `{"enabled":false,"secretName":""}` |
+| ingress.tls.enabled | Enable TLS configuration for the host defined at `ingress.host` parameter | bool | `false` |
+| ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
+| kubeVersion | Override Kubernetes version | string | `""` |
+| metrics | Metrics configuration | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":null,"labels":{},"path":"/metrics","port":"http-backend"}}` |
+| metrics.serviceMonitor | ServiceMonitor configuration <br /> Allows configuring your backstage instance as a scrape target for [Prometheus](https://github.com/prometheus/prometheus) using a ServiceMonitor custom resource that [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator) can understand. | object | `{"annotations":{},"enabled":false,"interval":null,"labels":{},"path":"/metrics","port":"http-backend"}` |
+| metrics.serviceMonitor.annotations | ServiceMonitor annotations | object | `{}` |
+| metrics.serviceMonitor.enabled | If enabled, a ServiceMonitor resource for Prometheus Operator is created <br /> Prometheus Operator must be installed in your cluster prior to enabling. | bool | `false` |
+| metrics.serviceMonitor.interval | ServiceMonitor scrape interval | string | `nil` |
+| metrics.serviceMonitor.labels | Additional ServiceMonitor labels | object | `{}` |
+| metrics.serviceMonitor.path | ServiceMonitor endpoint path <br /> Note that the /metrics endpoint is NOT present in a freshly scaffolded Backstage app. To setup, follow the [Prometheus metrics tutorial](https://github.com/backstage/backstage/blob/master/contrib/docs/tutorials/prometheus-metrics.md). | string | `"/metrics"` |
+| metrics.serviceMonitor.port | ServiceMonitor endpoint port <br /> The port where the metrics are exposed. If using OpenTelemetry as [documented here](https://backstage.io/docs/tutorials/setup-opentelemetry/), then the port needs to be explicitly specified. OpenTelemetry's default port is 9464. | string | `"http-backend"` |
+| nameOverride | String to partially override common.names.fullname | string | `""` |
+| networkPolicy.egressRules.customRules | Additional custom egress rules | list | `[]` |
+| networkPolicy.egressRules.denyConnectionsToExternal | Deny external connections. Should not be enabled when working with an external database. | bool | `false` |
+| networkPolicy.enabled | Specifies whether a NetworkPolicy should be created | bool | `false` |
+| networkPolicy.ingressRules.customRules | Additional custom ingress rules | list | `[]` |
+| networkPolicy.ingressRules.namespaceSelector | Namespace selector label allowed to access the Backstage instance | object | `{}` |
+| networkPolicy.ingressRules.podSelector | Pod selector label allowed to access the Backstage instance | object | `{}` |
+| postgresql | PostgreSQL [chart configuration](https://github.com/bitnami/charts/blob/master/bitnami/postgresql/values.yaml) | object | See below |
+| postgresql.architecture | PostgreSQL architecture (`standalone` or `replication`) | string | `"standalone"` |
+| postgresql.auth | The authentication details of the Postgres database | object | `{"existingSecret":"","password":"","secretKeys":{"adminPasswordKey":"admin-password","replicationPasswordKey":"replication-password","userPasswordKey":"user-password"},"username":"bn_backstage"}` |
+| postgresql.auth.existingSecret | Name of existing secret to use for PostgreSQL credentials | string | `""` |
+| postgresql.auth.password | Password for the custom user to create | string | `""` |
+| postgresql.auth.secretKeys | The secret keys Postgres will look for to retrieve the relevant password | object | `{"adminPasswordKey":"admin-password","replicationPasswordKey":"replication-password","userPasswordKey":"user-password"}` |
+| postgresql.auth.secretKeys.adminPasswordKey | The key in which Postgres will look for, for the admin password, in the existing Secret | string | `"admin-password"` |
+| postgresql.auth.secretKeys.replicationPasswordKey | The key in which Postgres will look for, for the replication password, in the existing Secret | string | `"replication-password"` |
+| postgresql.auth.secretKeys.userPasswordKey | The key in which Postgres will look for, for the user password, in the existing Secret | string | `"user-password"` |
+| postgresql.auth.username | Name for a custom user to create | string | `"bn_backstage"` |
+| postgresql.enabled | Switch to enable or disable the PostgreSQL helm chart | bool | `false` |
+| postgresql.image | Change default PostgreSQL image location (workaround for https://github.com/bitnami/charts/issues/35164) | object | `{"registry":"docker.io","repository":"bitnamilegacy/postgresql"}` |
+| service | Service parameters | object | See below |
+| service.annotations | Additional custom annotations for Backstage service | object | `{}` |
+| service.clusterIP | Backstage service Cluster IP  <br /> E.g `clusterIP: None` | string | `""` |
+| service.externalTrafficPolicy | Backstage service external traffic policy  Ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip | string | `"Cluster"` |
+| service.extraPorts | Extra ports to expose in the Backstage service (normally used with the `sidecar` value) | list | `[]` |
+| service.ipFamilies | IP Families  <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack | list | `[]` |
+| service.ipFamilyPolicy | IP Family Policy  <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack | string | `""` |
+| service.loadBalancerIP | Backstage service Load Balancer IP  <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer | string | `""` |
+| service.loadBalancerSourceRanges | Load Balancer sources  <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer <br /> E.g `loadBalancerSourceRanges: [10.10.10.0/24]` | list | `[]` |
+| service.nodePorts | Node port for the Backstage client connections Choose port between `30000-32767` | object | `{"backend":""}` |
+| service.ports | Backstage svc port for client connections | object | `{"backend":7007,"name":"http-backend","targetPort":"backend"}` |
+| service.ports.name | Backstage svc port name | string | `"http-backend"` |
+| service.ports.targetPort | Backstage svc target port referencing receiving pod container port | string | `"backend"` |
+| service.sessionAffinity | Control where client requests go, to the same pod or round-robin (values: `ClientIP` or `None`) <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/service/#session-stickiness | string | `"None"` |
+| service.type | Kubernetes Service type | string | `"ClusterIP"` |
+| serviceAccount | Service Account Configuration | object | See below |
+| serviceAccount.annotations | Additional custom annotations for the ServiceAccount. | object | `{}` |
+| serviceAccount.automountServiceAccountToken | Auto-mount the service account token in the pod | bool | `true` |
+| serviceAccount.create | Enable the creation of a ServiceAccount for Backstage pods | bool | `false` |
+| serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
+| serviceAccount.name | Name of the ServiceAccount to use If not set and `serviceAccount.create` is true, a name is generated | string | `""` |
 
-## Opinionated Backstage deployment
+## Configure your Backstage instance
 
-This chart defaults to an opinionated deployment of Backstage that provides user with a usable Backstage instance out of the box.
+The Backstage Chart makes it possible to configure your backstage instance by passing extra environment variables or static configuration files, without rebuilding the docker image.
 
-Features enabled by the default chart configuration:
+### Environment variables
 
-1. Uses [rhdh](https://github.com/redhat-developer/rhdh/) that pre-loads a lot of useful plugins and features
-2. Exposes a `Route` for easy access to the instance
-3. Enables OpenShift-compatible PostgreSQL database storage
+Use `backstage.extraEnvVars` to pass extra environment variables. **This is used for environment variables containing non sensitive information:**
 
-For additional instance features please consult the [documentation for `rhdh`](https://github.com/redhat-developer/rhdh/tree/main/showcase-docs).
-
-Additional features can be enabled by extending the default configuration at:
-
-```yaml
-upstream:
+```diff
   backstage:
-    appConfig:
-      # Inline app-config.yaml for the instance
++   extraEnvVars:
++     - name: MY_PLUGIN_HOST
++       value: http://my-plugin-host
+```
+
+It is possible to override values defined in your `app-config.yaml` by appending the `APP_CONFIG` prefix to each environment variable, as described in the [official documentation](https://backstage.io/docs/conf/#supplying-configuration).
+For example, to override the `backend.cache.store` property defined in your `app-config.yaml`, do:
+
+```diff
+  backstage:
     extraEnvVars:
-      # Additional environment variables
++     - name: APP_CONFIG_backend_cache_store
++       value: memory
 ```
 
-## Features
+### Sensitive environment variables
 
-This charts defaults to using the [RHDH image](https://quay.io/rhdh-community/rhdh:next) that is OpenShift compatible:
+In case your environment variables contain sensitive information, such as `BACKEND_SECRET` or `POSTGRES_PASSWORD` it is recommended store them in a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/).
 
-```console
-quay.io/rhdh-community/rhdh:next
-```
-
-Additionally this chart enhances the upstream Backstage chart with following OpenShift-specific features:
-
-### OpenShift Routes
-
-This chart offers a drop-in replacement for the `Ingress` resource already provided by the upstream chart via an OpenShift `Route`.
-
-OpenShift routes are enabled by default. In order to use the chart without it, please set `route.enabled` to `false` and switch to the `Ingress` resource via `upstream.ingress` values.
-
-Routes can be further configured via the `route` field.
-
-To manually provide the Backstage pod with the right context, please add the following value:
+Create a new file named `my-backstage-secrets.yaml` containing the secrets you want to store:
 
 ```yaml
-# values.yaml
-global:
-  clusterRouterBase: apps.example.com
+# my-backstage-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-backstage-secrets
+type: Opaque
+data:
+  BACKEND_SECRET: YmFja3N0YWdl
+  POSTGRES_PASSWORD: aHVudGVyMg==
 ```
 
-> Tip: you can use `helm upgrade -i --set global.clusterRouterBase=apps.example.com ...` instead of a value file
+Make sure to customize the name of the secret by changing `metadata.name` properly.
 
-Custom hosts are also supported via the following shorthand:
+Now create the new secret in your Kubernetes cluster by running the following command:
 
-```yaml
-# values.yaml
-global:
-  host: backstage.example.com
-```
-
-> Note: Setting either `global.host` or `global.clusterRouterBase` will disable the automatic hostname discovery.
-        When both fields are set, `global.host` will take precedence.
-        These are just templating shorthands. For full manual configuration please pay attention to values under the `route` key.
-
-Any custom modifications to how backstage is being exposed may require additional changes to the `values.yaml`:
-
-```yaml
-# values.yaml
-upstream:
-  backstage:
-    appConfig:
-      app:
-        baseUrl: 'https://{{- include "rhdh.hostname" . }}'
-      backend:
-        baseUrl: 'https://{{- include "rhdh.hostname" . }}'
-        cors:
-          origin: 'https://{{- include "rhdh.hostname" . }}'
-```
-
-### Catalog Index Configuration
-
-The chart supports automatic plugin discovery through a catalog index OCI image. This is configured via `global.catalogIndex.image` (with `registry`, `repository`, and `tag` fields) and lets you use a pre-defined set of dynamic plugins.
-
-For detailed information on configuring the catalog index, including how to override the default image or use a private registry, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
-
-### Vanilla Kubernetes compatibility mode
-
-To deploy this chart on vanilla Kubernetes or any other non-OCP platform, apply the following changes. Note that further customizations might be required, depending on your exact Kubernetes setup:
-
-```yaml
-# values.yaml
-global:
-  host: # Specify your own Ingress host
-route:
-  enabled: false  # OpenShift Routes do not exist on vanilla Kubernetes
-upstream:
-  ingress:
-    enabled: true  # Use Kubernetes Ingress instead of OpenShift Route
-  backstage:
-    podSecurityContext:  # Vanilla Kubernetes doesn't feature OpenShift default SCCs with dynamic UIDs, adjust accordingly to the deployed image
-      runAsUser: 1001
-      runAsGroup: 1001
-      fsGroup: 1001
-  postgresql:
-    primary:
-      podSecurityContext:
-        enabled: true
-        fsGroup: 26
-        runAsUser: 26
-    volumePermissions:
-      enabled: true
-```
-
-## Installing RHDH with Orchestrator on OpenShift
-
-Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, onboarding developers, and user-made workflows of Backstage actions or external systems.
-Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the same namespace and in the following way:
-
-1. Have an admin install the [orchestrator-infra Helm Chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/orchestrator-infra#readme), which will install the prerequisites required to deploy the Orchestrator-flavored RHDH. This process will include installing cluster-wide resources, so should be done with admin privileges:
-```
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
-
-helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra
-```
-2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed. To do so, follow the post-install notes given by the chart, or see them [here](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/orchestrator-infra/templates/NOTES.txt)
-3. Install the `backstage` chart with Helm, enabling orchestrator, like so:
-
-```
-helm install <release_name> redhat-developer/backstage --set orchestrator.enabled=true
-```
-Note that serverlessLogicOperator, and serverlessOperator are enabled by default. They can be disabled together or seperately by passing the following flags:
-`--set orchestrator.serverlessLogicOperator.enabled=false --set orchestrator.serverlessOperator.enabled=false`
-
-### Enablement of Notifications Plugin
-
-Workflows running with Orchestrator may use the Notifications plugin.
-For this, you must enable the Notifications and Signals plugins.
-To do so, you would need to edit the [default Helm values.yaml](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml) file, and add the plugins listed below to the global.dynamic.plugins list.
-Do this before installing the Helm Chart, or upgrade the Helm release with the new values file.
-
-```yaml
-- disabled: false
-  package: "./dynamic-plugins/dist/backstage-plugin-notifications"
-- disabled: false
-  package: "./dynamic-plugins/dist/backstage-plugin-signals"
-- disabled: false
-  package: "./dynamic-plugins/dist/backstage-plugin-notifications-backend-dynamic"
-- disabled: false
-  package: "./dynamic-plugins/dist/backstage-plugin-signals-backend-dynamic"
-```
-Enabling these plugins will allow you to recieve notifications from workflows running with Orchestrator.
-
-### Using Orchestrator while configuring an ExternalDB
-
-To use orchestrator with an external DB, please follow the instructions in [our documentation](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)
-and populate the following values in the values.yaml:
 ```bash
-    externalDBsecretRef: <cred-secret>
-    externalDBName: ""
-    externalDBHost: ""
-    externalDBPort: ""
+$ kubectl apply -f my-backstage-secrets.yaml`
 ```
-The values for externalDBHost and externalDBPort should match the ones configured in the cred-secret.
 
-Please note that `externalDBName` is the name of the user-configured existing database, not the database that the orchestrator and sonataflow resources will use.
-A Job will run to create the 'sonataflow' database in the external database for the workflows to use.
+Once the secret has been created, pass the secret's reference to your backstage instance by adding the following lines to your `values.yaml`:
 
-Finally, install the Helm Chart (including [setting up the external DB](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)):
+```diff
+  backstage:
++   extraEnvVarsSecrets:
++     - my-backstage-secrets
 ```
-helm install <release_name> redhat-developer/backstage \
-  --set orchestrator.enabled=true \
-  --set orchestrator.sonataflowPlatform.externalDBsecretRef=<cred-secret> \
-  --set orchestrator.sonataflowPlatform.externalDBName=example \
-  --set orchestrator.sonataflowPlatform.externalDBHost=example \
-  --set orchestrator.sonataflowPlatform.externalDBPort=example
+
+The chart will make sure to pass the secrets to your Backstage instance.
+
+### Pass extra configuration files
+
+A generated Backstage docker image contains some static configuration files, such as `app-config.yaml` and `app-config.production.yaml`.
+It is possible to pass extra configuration files by defining them as [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), without rebuilding the Docker image.
+
+To do so, run:
+
+```bash
+$ kubectl create configmap my-app-config --from-file=app-config.extra.yaml=./local/path/to/your/app-config.extra.yaml`
 ```
+
+This command parses your local `app-config.extra.yaml` and creates a new ConfigMap called `my-app-config` which internally contains a file called `app-config.extra.yaml` with the content of the parsed file.
+
+Now that the ConfigMap has been created on your Kubernetes cluster, you can reference the ConfigMap:
+
+```diff
+  backstage:
++   extraAppConfig:
++     - filename: app-config.extra.yaml
++       configMapRef: my-app-config
+```
+
+The chart will mount the content of the ConfigMap as a new `app-config.extra.yaml` file and automatically pass the extra configuration to your instance.
+
+### Pass configuration to be stored in a ConfigMap
+
+> :warning: In case of using both appConfig and extraAppConfig, appConfig will have higher priority over extraAppConfig. For more information you can check the [Backstage docs](https://backstage.io/docs/conf/writing#configuration-files) and how this [Helm Chart configures the Backstage arguments](templates/backstage-deployment.yaml)
+
+In addition to following the [previous step "Pass extra configuration files"](#pass-extra-configuration-files), you can get the Config Map automatically deployed with this Helm Chart by defining the key `appConfig`:
+
+```diff
+  backstage:
++   appConfig:
++     app:
++       baseUrl: https://somedomain.tld
+```
+
+The chart will mount the content of the ConfigMap as a new `app-config-from-configmap.yaml` file and automatically pass the extra configuration to your instance.
+
+### Configuring Chart PostgreSQL
+
+With the Backstage Helm Chart, it offers - as a subchart - a Bitnami PostgreSQL database. This can be enabled by switching `postgresql.enabled` to true (it is `false` by default). If switched on, the Helm Chart, on deployment, will automatically deploy a PostgreSQL instance and configure it with the credentials you specify. There are multiple ways of doing this that will be detailed below.
+
+#### Automatic Database Credential Creation
+
+This is the easiest of the configuration options. Here, the credentials for both the Admin and Database users will be automatically generated and put into a Kubernetes secret. This will then be automatically used by Backstage. In order to use this method, ensure the following:
+
+- Keep `postgresql.auth.existingSecret` & `postgresql.auth.password` empty.
+
+#### Specifying Password for PostgreSQL to Use
+
+Here, you can specify the password that you want PostgreSQL to use for its Database User (The user that Backstage will use to connect to the database). In order to use this method, ensure the following:
+
+- Keep `postgresql.auth.existingSecret` empty.
+- Set `postgresql.auth.password` to your desired User password value.
+
+> **_NOTE:_** Be careful that you provide this value securely.
+
+#### Specifying Existing Secret for PostgreSQL to Use
+
+Here, you can specify an existing Kubernetes secret that you have created which contains the Password that you want PostgreSQL to use. The secret must be in the same namespace as where you are deploying the Helm Chart. In order to use this method, ensure the following:
+
+- Create the Kubernetes secret with the Password inside.
+- Set `postgresql.auth.existingSecret` to the name of the Secret
+- PostgreSQL by default will look for the relevant Password keys that are set by default here `postgresql.auth.secretKeys`. So make sure that the Keys in the Secret match the default `secretKeys` values. More information [here](https://artifacthub.io/packages/helm/bitnami/postgresql)
+- For example, if you want PostgreSQL to use an existing Secret called `my-user-secret` that has the User password that you want to use inside it: make sure that you create a Key inside that secret called `user-password` (this key can be found here `postgresql.auth.secretKeys.userPasswordKey`). i.e. `user-password=Password123`.

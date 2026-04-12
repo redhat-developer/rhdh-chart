@@ -2,17 +2,10 @@ name: Pre-commit
 
 on:
   pull_request:
-    branches:
-      - main
-      - release-1.[0-9]+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
-
-# Revoke all permissions by default, then grant only what is needed
-permissions:
-  contents: read
 
 jobs:
   pre-commit:
@@ -25,25 +18,19 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
-          persist-credentials: false # Avoid token leakage to hooks
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # pin@v4
         with:
-          python-version: 3.14
+          python-version: 3.12
 
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # pin@v3
         with:
           go-version: ^1
-
-      - name: Set up Helm
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
-        with:
-          version: v3.17.0
 
       - name: Setup helm-docs
         run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 
       - name: Run pre-commit
-        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # pin@v3.0.1
         with:
           extra_args: --verbose --all-files --show-diff-on-failure
