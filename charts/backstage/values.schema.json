@@ -194,8 +194,26 @@
                             }
                         ],
                         "resources": {
-                            "lightspeedCore": {},
-                            "ragInit": {}
+                            "lightspeedCore": {
+                                "limits": {
+                                    "cpu": "1000m",
+                                    "memory": "2Gi"
+                                },
+                                "requests": {
+                                    "cpu": "100m",
+                                    "memory": "512Mi"
+                                }
+                            },
+                            "ragInit": {
+                                "limits": {
+                                    "cpu": "100m",
+                                    "memory": "500Mi"
+                                },
+                                "requests": {
+                                    "cpu": "50m",
+                                    "memory": "150Mi"
+                                }
+                            }
                         },
                         "runtimeVolume": {
                             "emptyDir": {},

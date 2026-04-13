@@ -83,9 +83,21 @@ global:
       lightspeedCore: quay.io/lightspeed-core/lightspeed-stack:0.5.0
     resources:
       # -- Resource requests/limits for the Lightspeed RAG bootstrap init container.
-      ragInit: {}
+      ragInit:
+        requests:
+          cpu: 50m
+          memory: 150Mi
+        limits:
+          cpu: 100m
+          memory: 500Mi
       # -- Resource requests/limits for the Lightspeed Core sidecar.
-      lightspeedCore: {}
+      lightspeedCore:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 2Gi
     runtimeVolume:
       # -- Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.
       # Supported values: `emptyDir`, `persistentVolumeClaim`.
