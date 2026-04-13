@@ -102,8 +102,20 @@ images:
   ragInit: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
   lightspeedCore: quay.io/lightspeed-core/lightspeed-stack:0.5.0
 resources:
-  ragInit: {}
-  lightspeedCore: {}
+  ragInit:
+    requests:
+      cpu: 50m
+      memory: 150Mi
+    limits:
+      cpu: 100m
+      memory: 500Mi
+  lightspeedCore:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
 runtimeVolume:
   name: lightspeed-data
   mountPath: /tmp
@@ -153,7 +165,13 @@ initContainer:
       cp -r /rag/embeddings_model /rag-content/ &&
       echo 'Copy complete.'
   env: []
-  resources: {}
+  resources:
+    requests:
+      cpu: 50m
+      memory: 150Mi
+    limits:
+      cpu: 100m
+      memory: 500Mi
   securityContext:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
@@ -171,7 +189,13 @@ sidecar:
   command: []
   args: []
   env: []
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
   securityContext:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false

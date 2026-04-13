@@ -202,12 +202,30 @@
                                 "ragInit": {
                                     "title": "Resource requests/limits for the Lightspeed RAG bootstrap init container.",
                                     "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                                    "default": {}
+                                    "default": {
+                                        "requests": {
+                                            "cpu": "50m",
+                                            "memory": "150Mi"
+                                        },
+                                        "limits": {
+                                            "cpu": "100m",
+                                            "memory": "500Mi"
+                                        }
+                                    }
                                 },
                                 "lightspeedCore": {
                                     "title": "Resource requests/limits for the Lightspeed Core sidecar.",
                                     "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                                    "default": {}
+                                    "default": {
+                                        "requests": {
+                                            "cpu": "100m",
+                                            "memory": "512Mi"
+                                        },
+                                        "limits": {
+                                            "cpu": "1000m",
+                                            "memory": "2Gi"
+                                        }
+                                    }
                                 }
                             }
                         },
