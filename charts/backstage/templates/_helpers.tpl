@@ -61,150 +61,9 @@ Return the Lightspeed defaults as YAML so upgrades from charts that predate
 the feature can still render when values are reused.
 */}}
 {{- define "rhdh.lightspeed.defaults" -}}
-enabled: true
-plugins:
-  - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed
-    disabled: false
-    pluginConfig:
-      dynamicPlugins:
-        frontend:
-          red-hat-developer-hub.backstage-plugin-lightspeed:
-            translationResources:
-              - importName: lightspeedTranslations
-                module: Alpha
-                ref: lightspeedTranslationRef
-            dynamicRoutes:
-              - path: /lightspeed
-                importName: LightspeedPage
-            mountPoints:
-              - mountPoint: application/listener
-                importName: LightspeedFAB
-              - mountPoint: application/provider
-                importName: LightspeedDrawerProvider
-              - mountPoint: application/internal/drawer-state
-                importName: LightspeedDrawerStateExposer
-                config:
-                  id: lightspeed
-              - mountPoint: application/internal/drawer-content
-                importName: LightspeedChatContainer
-                config:
-                  id: lightspeed
-                  priority: 100
-  - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend
-    disabled: false
-  - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/backstage-plugin-mcp-actions-backend:bs_1.45.3__0.1.5
-    disabled: false
-  - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-software-catalog-mcp-tool:bs_1.45.3__0.4.1
-    disabled: false
-  - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-techdocs-mcp-tool:bs_1.45.3__0.3.2
-    disabled: false
-images:
-  ragInit: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
-  lightspeedCore: quay.io/lightspeed-core/lightspeed-stack:0.5.0
-resources:
-  ragInit:
-    requests:
-      cpu: 50m
-      memory: 150Mi
-    limits:
-      cpu: 100m
-      memory: 500Mi
-  lightspeedCore:
-    requests:
-      cpu: 100m
-      memory: 512Mi
-    limits:
-      cpu: 1000m
-      memory: 2Gi
-runtimeVolume:
-  name: lightspeed-data
-  mountPath: /tmp
-  type: emptyDir
-  emptyDir: {}
-  persistentVolumeClaim: {}
-ragVolume:
-  name: lightspeed-rag
-  initMountPath: /rag-content
-  mountPath: /rag-content
-  emptyDir: {}
-configMaps:
-  - name: stack
-    nameOverride: ""
-    mountPath: /app-root/lightspeed-stack.yaml
-    subPath: lightspeed-stack.yaml
-    sourceFile: lightspeed-stack.yaml
-    optional: false
-  - name: config
-    nameOverride: ""
-    mountPath: /app-root/config.yaml
-    subPath: config.yaml
-    sourceFile: config.yaml
-    optional: false
-  - name: rhdh-profile
-    nameOverride: ""
-    mountPath: /app-root/rhdh-profile.py
-    subPath: rhdh-profile.py
-    sourceFile: rhdh-profile.py
-    optional: false
-secret:
-  create: true
-  name: ""
-  optional: false
-  sourceFile: secret.yaml
-initContainer:
-  name: lightspeed-rag-init
-  imagePullPolicy: IfNotPresent
-  command:
-    - sh
-    - -c
-  args:
-    - >-
-      mkdir -p /tmp/data &&
-      echo 'Copying Lightspeed RAG data...' &&
-      cp -r /rag/vector_db /rag-content/ &&
-      cp -r /rag/embeddings_model /rag-content/ &&
-      echo 'Copy complete.'
-  env: []
-  resources:
-    requests:
-      cpu: 50m
-      memory: 150Mi
-    limits:
-      cpu: 100m
-      memory: 500Mi
-  securityContext:
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    runAsNonRoot: true
-    seccompProfile:
-      type: "RuntimeDefault"
-sidecar:
-  name: lightspeed-core
-  imagePullPolicy: IfNotPresent
-  portName: http-lightspeed
-  containerPort: 8080
-  command: []
-  args: []
-  env: []
-  resources:
-    requests:
-      cpu: 100m
-      memory: 512Mi
-    limits:
-      cpu: 1000m
-      memory: 2Gi
-  securityContext:
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    runAsNonRoot: true
-    seccompProfile:
-      type: "RuntimeDefault"
+{{- $file := "defaults.yaml" -}}
+{{- $content := include "rhdh.lightspeed.fileContent" (dict "context" . "file" $file) -}}
+{{- required (printf "missing Lightspeed defaults file %s" (include "rhdh.lightspeed.filePath" $file)) $content -}}
 {{- end -}}
 
 {{/*
@@ -349,7 +208,12 @@ Return the relative path for a Lightspeed payload file.
 Return rendered content of a Lightspeed payload file.
 */}}
 {{- define "rhdh.lightspeed.fileContent" -}}
-{{- .context.Files.Get (include "rhdh.lightspeed.filePath" .file) -}}
+{{- $path := include "rhdh.lightspeed.filePath" .file -}}
+{{- $content := .context.Files.Get $path -}}
+{{- if and (empty $content) .context.Subcharts (hasKey .context.Subcharts "upstream") -}}
+  {{- $content = .context.Subcharts.upstream.Files.Get $path -}}
+{{- end -}}
+{{- $content -}}
 {{- end -}}
 
 {{/*
