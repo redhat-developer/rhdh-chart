@@ -5,6 +5,6 @@
 .idea
 
 # helm chart dependencies
-charts/*/charts/
 # For RHDH use case only since this chart is vendored, we need to track its dependencies manually with `helm dependency update`
+charts/*/charts/*
 !charts/*/charts/*.tgz
