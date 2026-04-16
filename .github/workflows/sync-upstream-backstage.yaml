@@ -59,6 +59,36 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Apply RHDH-specific changes to vendored chart
+        if: steps.sync.outputs.has_changes == 'true'
+        run: |
+          VENDOR_GITIGNORE="charts/backstage/vendor/backstage/.gitignore"
+          RHDH_MARKER="# RHDH: track vendored chart dependencies"
+
+          # Fix directory ignore pattern: "charts/*/charts/" ignores the directory itself,
+          # which prevents un-ignoring files inside it. Change to "charts/*/charts/*" to
+          # ignore contents instead, allowing the negation pattern to work.
+          sed -i 's|^charts/\*/charts/$|charts/*/charts/*|' "${VENDOR_GITIGNORE}"
+
+          # Ensure the .gitignore has the RHDH-specific exception to track tgz files
+          if ! grep -q "${RHDH_MARKER}" "${VENDOR_GITIGNORE}"; then
+            cat >> "${VENDOR_GITIGNORE}" << 'EOF'
+
+          # RHDH: track vendored chart dependencies
+          # Since this chart is vendored, we commit its dependencies rather than fetching them at install time
+          !charts/*/charts/*.tgz
+          EOF
+          fi
+
+          # Rebuild vendored chart dependencies to restore tgz files
+          helm dependency update charts/backstage/vendor/backstage/charts/backstage
+
+          git add "${VENDOR_GITIGNORE}"
+          git add charts/backstage/vendor/backstage/charts/backstage/charts/*.tgz
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: apply RHDH-specific changes to vendored Backstage chart"
+          fi
+
       - name: Align dependency version and open PR
         if: steps.sync.outputs.has_changes == 'true'
         env:
