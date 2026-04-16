@@ -6,6 +6,5 @@
 
 # helm chart dependencies
 charts/*/charts/
-**/charts/*.tgz
 # For RHDH use case only since this chart is vendored, we need to track its dependencies manually with `helm dependency update`
 !charts/*/charts/*.tgz
