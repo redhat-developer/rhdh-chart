@@ -23,7 +23,7 @@ copy_fetched_file() {
 
   cp "${source_file}" "${destination_file}"
 }
-
+# add mcp to LCORE config
 render_lightspeed_stack_yaml() {
   local source_file=$1
   local destination_file=$2
