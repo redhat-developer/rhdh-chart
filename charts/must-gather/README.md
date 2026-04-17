@@ -1,7 +1,7 @@
 
 # Must Gather Chart for Red Hat Developer Hub (RHDH)
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square)
+![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for running the RHDH Must-Gather diagnostic tool on Kubernetes
@@ -27,12 +27,18 @@ Kubernetes: `>= 1.27.0-0`
 ```console
 helm upgrade --install my-rhdh-must-gather redhat-developer-hub-must-gather \
   --repo https://redhat-developer.github.io/rhdh-chart \
-  --version 0.4.0
+  --version 0.5.0 \
+  [--wait --timeout=$duration]
 ```
 
 Running the command again will automatically replace the previous pod and start a new gather.
 
 Then follow the instructions that will be printed to retrieve the gathered data.
+
+When using `--wait`, the `helm` command will return only when the `gather` init container has finished or the specified timeout has elapsed.
+
+Note that the default Helm timeout when using `--wait` is **5m** (5 minutes), which may be too short for the RHDH must-gather to finish collecting diagnostic data.
+Feel free to adjust accordingly.
 
 ## Running on OpenShift
 
