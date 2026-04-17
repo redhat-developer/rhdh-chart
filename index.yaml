@@ -7728,6 +7728,37 @@ entries:
     urls:
     - https://github.com/redhat-developer/rhdh-chart/releases/download/orchestrator-software-templates-infra-0.1.0/orchestrator-software-templates-infra-0.1.0.tgz
     version: 0.1.0
+  redhat-developer-hub-must-gather:
+  - annotations:
+      charts.openshift.io/archs: x86_64
+      charts.openshift.io/name: Red Hat Developer Hub Must Gather
+      charts.openshift.io/provider: Red Hat
+      charts.openshift.io/supportURL: https://access.redhat.com/support
+    apiVersion: v2
+    appVersion: latest
+    created: "2026-04-17T16:20:00.64153592Z"
+    description: 'A Helm chart for running the RHDH Must-Gather diagnostic tool on
+      Kubernetes '
+    digest: 60d2aa5146e0061ca379c169e4ecf208992a0399a04a3fc4d101aa2854dd4e12
+    home: https://github.com/redhat-developer/rhdh-must-gather
+    keywords:
+    - rhdh
+    - red-hat-developer-hub
+    - backstage
+    - diagnostics
+    - must-gather
+    - troubleshooting
+    kubeVersion: '>= 1.27.0-0'
+    maintainers:
+    - name: Red Hat
+      url: https://redhat.com
+    name: redhat-developer-hub-must-gather
+    sources:
+    - https://github.com/redhat-developer/rhdh-must-gather
+    type: application
+    urls:
+    - https://github.com/redhat-developer/rhdh-chart/releases/download/redhat-developer-hub-must-gather-0.4.0/redhat-developer-hub-must-gather-0.4.0.tgz
+    version: 0.4.0
   redhat-developer-hub-orchestrator-infra:
   - annotations:
       charts.openshift.io/name: Orchestrator Infrastructure for Red Hat Developer
@@ -8211,4 +8242,4 @@ entries:
     urls:
     - https://github.com/redhat-developer/rhdh-chart/releases/download/rhdh-must-gather-0.1.0/rhdh-must-gather-0.1.0.tgz
     version: 0.1.0
-generated: "2026-04-16T23:38:21.497996964Z"
+generated: "2026-04-17T16:20:00.641965032Z"
