@@ -206,12 +206,26 @@ Return the relative path for a Lightspeed payload file.
 
 {{/*
 Return rendered content of a Lightspeed payload file.
+
+When optional=false is passed, fail fast if the referenced payload file is missing.
 */}}
 {{- define "rhdh.lightspeed.fileContent" -}}
 {{- $path := include "rhdh.lightspeed.filePath" .file -}}
 {{- $content := .context.Files.Get $path -}}
-{{- if and (empty $content) .context.Subcharts (hasKey .context.Subcharts "upstream") -}}
-  {{- $content = .context.Subcharts.upstream.Files.Get $path -}}
+{{- $exists := gt (len (.context.Files.Glob $path)) 0 -}}
+{{- if and .context.Subcharts (hasKey .context.Subcharts "upstream") -}}
+  {{- $upstreamExists := gt (len (.context.Subcharts.upstream.Files.Glob $path)) 0 -}}
+  {{- if and (empty $content) $upstreamExists -}}
+    {{- $content = .context.Subcharts.upstream.Files.Get $path -}}
+  {{- end -}}
+  {{- $exists = or $exists $upstreamExists -}}
+{{- end -}}
+{{- if and (hasKey . "optional") (not .optional) -}}
+  {{- $message := printf "missing required Lightspeed payload file %s" $path -}}
+  {{- if hasKey . "ref" -}}
+    {{- $message = printf "%s referenced by %s" $message .ref -}}
+  {{- end -}}
+  {{- $_ := required $message (ternary $path "" $exists) -}}
 {{- end -}}
 {{- $content -}}
 {{- end -}}
@@ -225,7 +239,11 @@ Return the stringData map for the Lightspeed Secret.
   {{- $context = get . "context" -}}
 {{- end -}}
 {{- $lightspeed := include "rhdh.lightspeed.resolve" (dict "context" $context "input" .) | fromYaml -}}
-{{- include "rhdh.lightspeed.fileContent" (dict "context" $context "file" $lightspeed.secret.sourceFile) | fromYaml | toYaml -}}
+{{- if not $lightspeed.secret.create -}}
+{{- dict | toYaml -}}
+{{- else -}}
+{{- include "rhdh.lightspeed.fileContent" (dict "context" $context "file" $lightspeed.secret.sourceFile "optional" $lightspeed.secret.optional "ref" "global.lightspeed.secret.sourceFile") | fromYaml | toYaml -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -246,7 +264,7 @@ Return the Lightspeed ConfigMap payloads for checksum calculation.
       "subPath" .subPath
       "sourceFile" .sourceFile
       "optional" .optional
-      "content" (include "rhdh.lightspeed.fileContent" (dict "context" $context "file" .sourceFile))
+      "content" (include "rhdh.lightspeed.fileContent" (dict "context" $context "file" .sourceFile "optional" .optional "ref" (printf "global.lightspeed.configMaps[%s].sourceFile" .name)))
     ) -}}
 {{- end -}}
 {{- toJson $configMaps -}}
