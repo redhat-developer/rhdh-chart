@@ -236,6 +236,18 @@ The chart supports automatic plugin discovery through a catalog index OCI image.
 
 For detailed information on configuring the catalog index, including how to override the default image or use a private registry, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
 
+### Lightspeed
+
+Use `global.lightspeed.enabled` to enable or disable the built-in Lightspeed feature.
+
+When enabled, the chart adds the default Lightspeed dynamic plugins, a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, a chart-generated Secret, and separate runtime and RAG data volumes. Override `global.lightspeed.plugins` or the `global.lightspeed.images.ragInit` and `global.lightspeed.images.lightspeedCore` full image references for disconnected environments.
+
+Use `global.lightspeed.resources` to set resource requests and limits for the Lightspeed init container and sidecar. Use `global.lightspeed.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
+
+When using the built-in Lightspeed feature, do not also keep Lightspeed plugin packages in `global.dynamic.plugins`. Existing installations that previously configured Lightspeed there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `global.lightspeed.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate Lightspeed plugin entries.
+
+The Lightspeed Core sidecar loads the chart-created Lightspeed Secret as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
+
 ### Vanilla Kubernetes compatibility mode
 
 To deploy this chart on vanilla Kubernetes or any other non-OCP platform, apply the following changes. Note that further customizations might be required, depending on your exact Kubernetes setup:

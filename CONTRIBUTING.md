@@ -41,6 +41,32 @@ It is important to use `--squash` to avoid pulling the entire commit history of 
 
 *Note: If merge conflicts occur, resolve them in your editor, then `git add` and `git commit` the resolution as a normal merge.*
 
+### Sync Lightspeed vendored config files
+
+The vendored Lightspeed config files under [`charts/backstage/vendor/backstage/charts/backstage/files/lightspeed`](./charts/backstage/vendor/backstage/charts/backstage/files/lightspeed) are synced separately from the Backstage subtree by [`hack/sync-lightspeed-configs.sh`](./hack/sync-lightspeed-configs.sh).
+
+Use the default upstream branch:
+
+```bash
+./hack/sync-lightspeed-configs.sh
+```
+
+Sync from a release branch or a tag:
+
+```bash
+./hack/sync-lightspeed-configs.sh --ref release-1.9
+./hack/sync-lightspeed-configs.sh --ref v0.5.0
+```
+
+Verify the vendored files are already in sync without writing changes:
+
+```bash
+./hack/sync-lightspeed-configs.sh --ref main --check
+```
+
+The script copies the upstream config files directly, except it appends the chart-managed `mcp_servers` block to `lightspeed-stack.yaml` and renders `secret.yaml` from upstream `env/default-values.env` by dropping comment lines plus `LIGHTSPEED_CORE_IMAGE` and `RAG_CONTENT_IMAGE`, then converting each remaining `KEY=value` line into the chart's YAML secret payload.
+Choose the upstream branch or tag that matches the Lightspeed release you want to vendor.
+
 **Important:** After any change to the dependency structure or version of the vendored chart, you must rebuild the lock file and local subchart dependencies:
 
 ```bash
