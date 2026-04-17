@@ -11,6 +11,6 @@ metadata:
   namespace: {{ $.Release.Namespace | quote }}
 data:
   {{ $configMap.subPath }}: |
-{{ include "rhdh.lightspeed.fileContent" (dict "context" $ "file" $configMap.sourceFile) | nindent 4 }}
+{{ include "rhdh.lightspeed.fileContent" (dict "context" $ "file" $configMap.sourceFile "optional" $configMap.optional "ref" (printf "global.lightspeed.configMaps[%s].sourceFile" $configMap.name)) | nindent 4 }}
 {{- end }}
 {{- end }}
