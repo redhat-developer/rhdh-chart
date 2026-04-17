@@ -4,14 +4,14 @@ annotations:
   charts.openshift.io/archs: x86_64
   charts.openshift.io/supportURL: https://access.redhat.com/support
 apiVersion: v2
-name: rhdh-must-gather
+name: redhat-developer-hub-must-gather
 description: |
-  A Helm chart for deploying the RHDH Must-Gather diagnostic tool on Kubernetes
+  A Helm chart for running the RHDH Must-Gather diagnostic tool on Kubernetes
 
 type: application
 
 # Application version - matches the must-gather tool version
-appVersion: "0.2.0"
+appVersion: "latest"
 
 keywords:
   - rhdh
@@ -35,4 +35,4 @@ maintainers:
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 # Note that when this chart is published to https://github.com/openshift-helm-charts/charts
 # it will follow the RHDH versioning 1.y.z
-version: 0.3.0
+version: 0.4.0

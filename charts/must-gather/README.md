@@ -1,10 +1,10 @@
 
 # Must Gather Chart for Red Hat Developer Hub (RHDH)
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart for deploying the RHDH Must-Gather diagnostic tool on Kubernetes
+A Helm chart for running the RHDH Must-Gather diagnostic tool on Kubernetes
 
 **Homepage:** <https://github.com/redhat-developer/rhdh-must-gather>
 
@@ -25,9 +25,9 @@ Kubernetes: `>= 1.27.0-0`
 ## TL;DR
 
 ```console
-helm upgrade --install my-rhdh-must-gather rhdh-must-gather \
+helm upgrade --install my-rhdh-must-gather redhat-developer-hub-must-gather \
   --repo https://redhat-developer.github.io/rhdh-chart \
-  --version 0.3.0
+  --version 0.4.0
 ```
 
 Running the command again will automatically replace the previous pod and start a new gather.
