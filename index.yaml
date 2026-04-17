@@ -7736,6 +7736,36 @@ entries:
       charts.openshift.io/supportURL: https://access.redhat.com/support
     apiVersion: v2
     appVersion: latest
+    created: "2026-04-17T16:57:23.098142307Z"
+    description: 'A Helm chart for running the RHDH Must-Gather diagnostic tool on
+      Kubernetes '
+    digest: 2f3055de132b2e2856284a8bc83bcc1116745cb243909dbf17b9b84c9f3063ba
+    home: https://github.com/redhat-developer/rhdh-must-gather
+    keywords:
+    - rhdh
+    - red-hat-developer-hub
+    - backstage
+    - diagnostics
+    - must-gather
+    - troubleshooting
+    kubeVersion: '>= 1.27.0-0'
+    maintainers:
+    - name: Red Hat
+      url: https://redhat.com
+    name: redhat-developer-hub-must-gather
+    sources:
+    - https://github.com/redhat-developer/rhdh-must-gather
+    type: application
+    urls:
+    - https://github.com/redhat-developer/rhdh-chart/releases/download/redhat-developer-hub-must-gather-0.5.0/redhat-developer-hub-must-gather-0.5.0.tgz
+    version: 0.5.0
+  - annotations:
+      charts.openshift.io/archs: x86_64
+      charts.openshift.io/name: Red Hat Developer Hub Must Gather
+      charts.openshift.io/provider: Red Hat
+      charts.openshift.io/supportURL: https://access.redhat.com/support
+    apiVersion: v2
+    appVersion: latest
     created: "2026-04-17T16:20:00.64153592Z"
     description: 'A Helm chart for running the RHDH Must-Gather diagnostic tool on
       Kubernetes '
@@ -8242,4 +8272,4 @@ entries:
     urls:
     - https://github.com/redhat-developer/rhdh-chart/releases/download/rhdh-must-gather-0.1.0/rhdh-must-gather-0.1.0.tgz
     version: 0.1.0
-generated: "2026-04-17T16:20:00.641965032Z"
+generated: "2026-04-17T16:57:23.098580756Z"
