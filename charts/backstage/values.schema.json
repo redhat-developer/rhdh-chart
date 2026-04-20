@@ -6528,9 +6528,7 @@
                             "additionalProperties": {
                                 "type": "string"
                             },
-                            "default": {
-                                "checksum/dynamic-plugins": "{{- $lightspeed := include \"rhdh.lightspeed\" . | fromYaml -}} {{- include \"common.tplvalues.render\" ( dict \"value\" (dict \"dynamic\" .Values.global.dynamic \"lightspeed\" (dict \"enabled\" $lightspeed.enabled \"plugins\" $lightspeed.plugins)) \"context\" $) | sha256sum }}"
-                            },
+                            "default": {},
                             "title": "Annotations to add to the backend deployment pods",
                             "type": "object"
                         },

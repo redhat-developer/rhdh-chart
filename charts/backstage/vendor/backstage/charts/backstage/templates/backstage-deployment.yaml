@@ -41,6 +41,7 @@ spec:
         {{- end }}
       annotations:
         checksum/app-config: {{ include "common.tplvalues.render" ( dict "value" .Values.backstage.appConfig "context" $) | sha256sum }}
+        checksum/dynamic-plugins: {{ include "common.tplvalues.render" ( dict "value" (dict "dynamic" .Values.global.dynamic "lightspeed" (dict "enabled" $lightspeed.enabled "plugins" $lightspeed.plugins)) "context" $) | sha256sum }}
         {{- if $lightspeed.enabled }}
         checksum/lightspeed-configmaps: {{ include "rhdh.lightspeed.configMapsChecksum" (dict "context" $ "lightspeed" $lightspeed) | sha256sum }}
         checksum/lightspeed-secret: {{ include "rhdh.lightspeed.secretChecksum" (dict "context" $ "lightspeed" $lightspeed) | sha256sum }}

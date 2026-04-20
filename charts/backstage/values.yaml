@@ -316,10 +316,6 @@ upstream:
             mountPath: /tmp
         workingDir: /opt/app-root/src
     installDir: /opt/app-root/src
-    podAnnotations:
-      checksum/dynamic-plugins: >-
-        {{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
-        {{- include "common.tplvalues.render" ( dict "value" (dict "dynamic" .Values.global.dynamic "lightspeed" (dict "enabled" $lightspeed.enabled "plugins" $lightspeed.plugins)) "context" $) | sha256sum }}
   ingress:
     host: "{{ .Values.global.host }}"
   metrics:
