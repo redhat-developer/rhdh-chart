@@ -386,16 +386,6 @@
                         "runtimeVolume": {
                             "additionalProperties": false,
                             "properties": {
-                                "name": {
-                                    "default": "lightspeed-data",
-                                    "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
-                                    "type": "string"
-                                },
-                                "mountPath": {
-                                    "default": "/tmp",
-                                    "title": "Mount path inside the container for Lightspeed runtime storage.",
-                                    "type": "string"
-                                },
                                 "emptyDir": {
                                     "description": "Represents an empty directory for a pod. Empty directory volumes support ownership management and SELinux relabeling.",
                                     "properties": {
@@ -415,6 +405,16 @@
                                         }
                                     },
                                     "type": "object"
+                                },
+                                "mountPath": {
+                                    "default": "/tmp",
+                                    "title": "Mount path inside the container for Lightspeed runtime storage.",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "default": "lightspeed-data",
+                                    "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
+                                    "type": "string"
                                 },
                                 "persistentVolumeClaim": {
                                     "additionalProperties": false,
