@@ -11,7 +11,7 @@ LIGHTSPEED_DIR="${REPO_ROOT}/charts/backstage/files/lightspeed"
 
 # Format: upstream_path|destination_path|transform_function
 TARGETS=(
-  "lightspeed-core-configs/lightspeed-stack.yaml|${LIGHTSPEED_DIR}/lightspeed-stack.yaml|render_lightspeed_stack_yaml"
+  "lightspeed-core-configs/lightspeed-stack.yaml|${LIGHTSPEED_DIR}/lightspeed-stack.yaml|copy_fetched_file"
   "llama-stack-configs/config.yaml|${LIGHTSPEED_DIR}/config.yaml|copy_fetched_file"
   "lightspeed-core-configs/rhdh-profile.py|${LIGHTSPEED_DIR}/rhdh-profile.py|copy_fetched_file"
   "env/default-values.env|${LIGHTSPEED_DIR}/secret.yaml|render_secret_yaml_from_env"
@@ -23,22 +23,6 @@ copy_fetched_file() {
 
   cp "${source_file}" "${destination_file}"
 }
-# add mcp to LCORE config
-render_lightspeed_stack_yaml() {
-  local source_file=$1
-  local destination_file=$2
-
-  cp "${source_file}" "${destination_file}"
-  cat <<'EOF' >> "${destination_file}"
-mcp_servers:
-  - name: mcp-integration-tools
-    provider_id: "model-context-protocol"
-    url: "http://localhost:7007/api/mcp-actions/v1"
-    authorization_headers:
-      Authorization: "client"
-EOF
-}
-
 render_secret_yaml_from_env() {
   local source_file=$1
   local destination_file=$2
