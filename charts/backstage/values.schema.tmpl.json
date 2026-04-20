@@ -182,6 +182,16 @@
                             "type": "object",
                             "additionalProperties": false,
                             "properties": {
+                                "name": {
+                                    "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
+                                    "type": "string",
+                                    "default": "lightspeed-data"
+                                },
+                                "mountPath": {
+                                    "title": "Mount path inside the container for Lightspeed runtime storage.",
+                                    "type": "string",
+                                    "default": "/tmp"
+                                },
                                 "type": {
                                     "title": "Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.",
                                     "type": "string",
