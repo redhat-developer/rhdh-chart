@@ -140,7 +140,7 @@
                         "object"
                     ],
                     "default": {},
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                         "enabled": {
                             "title": "Enable or disable the built-in Lightspeed feature.",
@@ -175,58 +175,6 @@
                                 "required": [
                                     "package"
                                 ]
-                            }
-                        },
-                        "images": {
-                            "title": "Images used by the Lightspeed pod wiring.",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "ragInit": {
-                                    "title": "Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.",
-                                    "type": "string",
-                                    "default": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05"
-                                },
-                                "lightspeedCore": {
-                                    "title": "Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.",
-                                    "type": "string",
-                                    "default": "quay.io/lightspeed-core/lightspeed-stack:0.5.0"
-                                }
-                            }
-                        },
-                        "resources": {
-                            "title": "Resource requests/limits for Lightspeed containers.",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "ragInit": {
-                                    "title": "Resource requests/limits for the Lightspeed RAG bootstrap init container.",
-                                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                                    "default": {
-                                        "requests": {
-                                            "cpu": "50m",
-                                            "memory": "150Mi"
-                                        },
-                                        "limits": {
-                                            "cpu": "100m",
-                                            "memory": "500Mi"
-                                        }
-                                    }
-                                },
-                                "lightspeedCore": {
-                                    "title": "Resource requests/limits for the Lightspeed Core sidecar.",
-                                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                                    "default": {
-                                        "requests": {
-                                            "cpu": "100m",
-                                            "memory": "512Mi"
-                                        },
-                                        "limits": {
-                                            "cpu": "1000m",
-                                            "memory": "2Gi"
-                                        }
-                                    }
-                                }
                             }
                         },
                         "runtimeVolume": {

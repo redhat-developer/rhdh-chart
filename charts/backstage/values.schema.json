@@ -120,7 +120,69 @@
                 "lightspeed": {
                     "additionalProperties": true,
                     "default": {
+                        "configMaps": [
+                            {
+                                "mountPath": "/app-root/lightspeed-stack.yaml",
+                                "name": "stack",
+                                "nameOverride": "",
+                                "optional": false,
+                                "sourceFile": "lightspeed-stack.yaml",
+                                "subPath": "lightspeed-stack.yaml"
+                            },
+                            {
+                                "mountPath": "/app-root/config.yaml",
+                                "name": "config",
+                                "nameOverride": "",
+                                "optional": false,
+                                "sourceFile": "config.yaml",
+                                "subPath": "config.yaml"
+                            },
+                            {
+                                "mountPath": "/app-root/rhdh-profile.py",
+                                "name": "rhdh-profile",
+                                "nameOverride": "",
+                                "optional": false,
+                                "sourceFile": "rhdh-profile.py",
+                                "subPath": "rhdh-profile.py"
+                            }
+                        ],
                         "enabled": true,
+                        "initContainer": {
+                            "args": [
+                                "mkdir -p /tmp/data && echo 'Copying Lightspeed RAG data...' && cp -r /rag/vector_db /rag-content/ && cp -r /rag/embeddings_model /rag-content/ && echo 'Copy complete.'"
+                            ],
+                            "command": [
+                                "sh",
+                                "-c"
+                            ],
+                            "env": [],
+                            "image": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05",
+                            "imagePullPolicy": "IfNotPresent",
+                            "name": "lightspeed-rag-init",
+                            "resources": {
+                                "limits": {
+                                    "cpu": "100m",
+                                    "memory": "500Mi"
+                                },
+                                "requests": {
+                                    "cpu": "50m",
+                                    "memory": "150Mi"
+                                }
+                            },
+                            "securityContext": {
+                                "allowPrivilegeEscalation": false,
+                                "capabilities": {
+                                    "drop": [
+                                        "ALL"
+                                    ]
+                                },
+                                "readOnlyRootFilesystem": true,
+                                "runAsNonRoot": true,
+                                "seccompProfile": {
+                                    "type": "RuntimeDefault"
+                                }
+                            }
+                        },
                         "plugins": [
                             {
                                 "disabled": false,
@@ -177,12 +239,57 @@
                                 "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
                             }
                         ],
+                        "ragVolume": {
+                            "emptyDir": {},
+                            "initMountPath": "/rag-content",
+                            "mountPath": "/rag-content",
+                            "name": "lightspeed-rag"
+                        },
                         "runtimeVolume": {
                             "emptyDir": {},
-                            "name": "lightspeed-data",
                             "mountPath": "/tmp",
+                            "name": "lightspeed-data",
                             "persistentVolumeClaim": {},
                             "type": "emptyDir"
+                        },
+                        "secret": {
+                            "create": true,
+                            "name": "",
+                            "optional": false,
+                            "sourceFile": "secret.yaml"
+                        },
+                        "sidecar": {
+                            "args": [],
+                            "command": [],
+                            "containerPort": 8080,
+                            "env": [],
+                            "image": "quay.io/lightspeed-core/lightspeed-stack:0.5.0",
+                            "imagePullPolicy": "IfNotPresent",
+                            "name": "lightspeed-core",
+                            "portName": "http-lightspeed",
+                            "resources": {
+                                "limits": {
+                                    "cpu": "1000m",
+                                    "memory": "2Gi"
+                                },
+                                "requests": {
+                                    "cpu": "100m",
+                                    "memory": "512Mi"
+                                }
+                            },
+                            "securityContext": {
+                                "allowPrivilegeEscalation": false,
+                                "capabilities": {
+                                    "drop": [
+                                        "ALL"
+                                    ]
+                                },
+                                "readOnlyRootFilesystem": true,
+                                "runAsNonRoot": true,
+                                "seccompProfile": {
+                                    "type": "RuntimeDefault"
+                                }
+                            }
                         }
                     },
                     "properties": {
@@ -279,16 +386,6 @@
                         "runtimeVolume": {
                             "additionalProperties": false,
                             "properties": {
-                                "name": {
-                                    "default": "lightspeed-data",
-                                    "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
-                                    "type": "string"
-                                },
-                                "mountPath": {
-                                    "default": "/tmp",
-                                    "title": "Mount path inside the container for Lightspeed runtime storage.",
-                                    "type": "string"
-                                },
                                 "emptyDir": {
                                     "description": "Represents an empty directory for a pod. Empty directory volumes support ownership management and SELinux relabeling.",
                                     "properties": {
