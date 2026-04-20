@@ -50,23 +50,6 @@ Referenced from: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/
 {{- end -}}
 
 {{/*
-Render a Lightspeed container image reference string.
-*/}}
-{{- define "rhdh.lightspeed.image" -}}
-{{- include "common.tplvalues.render" (dict "value" .image "context" .context) -}}
-{{- end -}}
-
-{{/*
-Return the Lightspeed defaults as YAML so upgrades from charts that predate
-the feature can still render when values are reused.
-*/}}
-{{- define "rhdh.lightspeed.defaults" -}}
-{{- $file := "defaults.yaml" -}}
-{{- $content := include "rhdh.lightspeed.fileContent" (dict "context" . "file" $file) -}}
-{{- required (printf "missing Lightspeed defaults file %s" (include "rhdh.lightspeed.filePath" $file)) $content -}}
-{{- end -}}
-
-{{/*
 Return the configured Lightspeed runtime volume type and validate the required
 source block is present.
 */}}
@@ -93,42 +76,17 @@ source block is present.
 {{- end -}}
 
 {{/*
-Return Lightspeed values merged with upgrade-safe defaults.
+Return resolved Lightspeed values from global.lightspeed with legacy key migration.
 */}}
 {{- define "rhdh.lightspeed" -}}
-{{- $defaults := include "rhdh.lightspeed.defaults" . | fromYaml -}}
-{{- $lightspeed := deepCopy $defaults -}}
 {{- $global := default dict .Values.global -}}
+{{- $lightspeed := dict -}}
 {{- if hasKey $global "lightspeed" -}}
   {{- $raw := get $global "lightspeed" -}}
   {{- if kindIs "bool" $raw -}}
     {{- $_ := set $lightspeed "enabled" $raw -}}
   {{- else if kindIs "map" $raw -}}
-    {{- $lightspeed = mergeOverwrite $lightspeed $raw -}}
-    {{- if hasKey $raw "images" -}}
-      {{- $rawImages := get $raw "images" -}}
-      {{- if kindIs "map" $rawImages -}}
-        {{- if hasKey $rawImages "init" -}}
-          {{- $legacyInit := get $rawImages "init" -}}
-          {{- $_ := set $lightspeed.images "ragInit" $legacyInit -}}
-        {{- end -}}
-        {{- if hasKey $rawImages "sidecar" -}}
-          {{- $legacySidecar := get $rawImages "sidecar" -}}
-          {{- $_ := set $lightspeed.images "lightspeedCore" $legacySidecar -}}
-        {{- end -}}
-      {{- end -}}
-    {{- end -}}
-    {{- if hasKey $raw "resources" -}}
-      {{- $rawResources := get $raw "resources" -}}
-      {{- if kindIs "map" $rawResources -}}
-        {{- if hasKey $rawResources "ragInit" -}}
-          {{- $_ := set $lightspeed.initContainer "resources" (get $rawResources "ragInit") -}}
-        {{- end -}}
-        {{- if hasKey $rawResources "lightspeedCore" -}}
-          {{- $_ := set $lightspeed.sidecar "resources" (get $rawResources "lightspeedCore") -}}
-        {{- end -}}
-      {{- end -}}
-    {{- end -}}
+    {{- $lightspeed = deepCopy $raw -}}
     {{- if hasKey $raw "runtimeVolume" -}}
       {{- $rawRuntimeVolume := get $raw "runtimeVolume" -}}
       {{- if and (kindIs "map" $rawRuntimeVolume) (not (hasKey $rawRuntimeVolume "type")) -}}
@@ -213,13 +171,6 @@ When optional=false is passed, fail fast if the referenced payload file is missi
 {{- $path := include "rhdh.lightspeed.filePath" .file -}}
 {{- $content := .context.Files.Get $path -}}
 {{- $exists := gt (len (.context.Files.Glob $path)) 0 -}}
-{{- if and .context.Subcharts (hasKey .context.Subcharts "upstream") -}}
-  {{- $upstreamExists := gt (len (.context.Subcharts.upstream.Files.Glob $path)) 0 -}}
-  {{- if and (empty $content) $upstreamExists -}}
-    {{- $content = .context.Subcharts.upstream.Files.Get $path -}}
-  {{- end -}}
-  {{- $exists = or $exists $upstreamExists -}}
-{{- end -}}
 {{- if and (hasKey . "optional") (not .optional) -}}
   {{- $message := printf "missing required Lightspeed payload file %s" $path -}}
   {{- if hasKey . "ref" -}}
@@ -247,7 +198,9 @@ Return the stringData map for the Lightspeed Secret.
 {{- end -}}
 
 {{/*
-Return the Lightspeed ConfigMap payloads for checksum calculation.
+Return the Lightspeed ConfigMap configuration for checksum calculation.
+This checksums the resolved configMaps values; payload file content is baked
+into the chart archive so changes are captured by chart version bumps.
 */}}
 {{- define "rhdh.lightspeed.configMapsChecksum" -}}
 {{- $context := . -}}
@@ -264,14 +217,15 @@ Return the Lightspeed ConfigMap payloads for checksum calculation.
       "subPath" .subPath
       "sourceFile" .sourceFile
       "optional" .optional
-      "content" (include "rhdh.lightspeed.fileContent" (dict "context" $context "file" .sourceFile "optional" .optional "ref" (printf "global.lightspeed.configMaps[%s].sourceFile" .name)))
     ) -}}
 {{- end -}}
 {{- toJson $configMaps -}}
 {{- end -}}
 
 {{/*
-Return the Lightspeed Secret payload for checksum calculation.
+Return the Lightspeed Secret configuration for checksum calculation.
+This checksums the resolved secret values; payload file content is baked
+into the chart archive so changes are captured by chart version bumps.
 */}}
 {{- define "rhdh.lightspeed.secretChecksum" -}}
 {{- $context := . -}}
@@ -284,7 +238,6 @@ Return the Lightspeed Secret payload for checksum calculation.
     "name" $lightspeed.secret.name
     "optional" $lightspeed.secret.optional
     "sourceFile" $lightspeed.secret.sourceFile
-    "stringData" (include "rhdh.lightspeed.secretStringData" (dict "context" $context "lightspeed" $lightspeed) | fromYaml)
   | toJson -}}
 {{- end -}}
 

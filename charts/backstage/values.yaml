@@ -70,29 +70,11 @@ global:
                       priority: 100
       - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend
         disabled: false
-    images:
-      # -- Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.
-      ragInit: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
-      # -- Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.
-      lightspeedCore: quay.io/lightspeed-core/lightspeed-stack:0.5.0
-    resources:
-      # -- Resource requests/limits for the Lightspeed RAG bootstrap init container.
-      ragInit:
-        requests:
-          cpu: 50m
-          memory: 150Mi
-        limits:
-          cpu: 100m
-          memory: 500Mi
-      # -- Resource requests/limits for the Lightspeed Core sidecar.
-      lightspeedCore:
-        requests:
-          cpu: 100m
-          memory: 512Mi
-        limits:
-          cpu: 1000m
-          memory: 2Gi
     runtimeVolume:
+      # -- Name of the Kubernetes volume used for writable Lightspeed runtime storage.
+      name: lightspeed-data
+      # -- Mount path inside the container for Lightspeed runtime storage.
+      mountPath: /tmp
       # -- Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.
       # Supported values: `emptyDir`, `persistentVolumeClaim`.
       type: emptyDir
@@ -100,6 +82,103 @@ global:
       emptyDir: {}
       # -- Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.
       persistentVolumeClaim: {}
+    ragVolume:
+      # -- Name of the Kubernetes volume used for Lightspeed RAG data.
+      name: lightspeed-rag
+      # -- Mount path inside the init container for seeding RAG data.
+      initMountPath: /rag-content
+      # -- Mount path inside the sidecar container for serving RAG data.
+      mountPath: /rag-content
+      # -- `emptyDir` configuration for the RAG data volume.
+      emptyDir: {}
+    configMaps:
+      - name: stack
+        nameOverride: ""
+        mountPath: /app-root/lightspeed-stack.yaml
+        subPath: lightspeed-stack.yaml
+        sourceFile: lightspeed-stack.yaml
+        optional: false
+      - name: config
+        nameOverride: ""
+        mountPath: /app-root/config.yaml
+        subPath: config.yaml
+        sourceFile: config.yaml
+        optional: false
+      - name: rhdh-profile
+        nameOverride: ""
+        mountPath: /app-root/rhdh-profile.py
+        subPath: rhdh-profile.py
+        sourceFile: rhdh-profile.py
+        optional: false
+    secret:
+      # -- Whether to create a Lightspeed Secret from the bundled source file.
+      create: true
+      # -- Name of an existing Secret to use instead. Required when `create` is false.
+      name: ""
+      # -- Whether the Secret reference is optional in the pod spec.
+      optional: false
+      # -- Bundled file used to populate the Secret's `stringData` keys.
+      sourceFile: secret.yaml
+    initContainer:
+      name: lightspeed-rag-init
+      # -- Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.
+      image: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+      args:
+        - >-
+          mkdir -p /tmp/data &&
+          echo 'Copying Lightspeed RAG data...' &&
+          cp -r /rag/vector_db /rag-content/ &&
+          cp -r /rag/embeddings_model /rag-content/ &&
+          echo 'Copy complete.'
+      env: []
+      # -- Resource requests/limits for the Lightspeed RAG bootstrap init container.
+      resources:
+        requests:
+          cpu: 50m
+          memory: 150Mi
+        limits:
+          cpu: 100m
+          memory: 500Mi
+      securityContext:
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
+    sidecar:
+      name: lightspeed-core
+      # -- Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.
+      image: quay.io/lightspeed-core/lightspeed-stack:0.5.0
+      imagePullPolicy: IfNotPresent
+      portName: http-lightspeed
+      containerPort: 8080
+      command: []
+      args: []
+      env: []
+      # -- Resource requests/limits for the Lightspeed Core sidecar.
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 2Gi
+      securityContext:
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
 # -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
 # @default -- Use Openshift compatible settings
 upstream:

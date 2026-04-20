@@ -118,7 +118,7 @@ spec:
         {{- end }}
         {{- if $lightspeed.enabled }}
         - name: {{ $lightspeed.initContainer.name }}
-          image: {{ include "rhdh.lightspeed.image" (dict "image" $lightspeed.images.ragInit "context" $) }}
+          image: {{ include "common.tplvalues.render" (dict "value" $lightspeed.initContainer.image "context" $) }}
           imagePullPolicy: {{ $lightspeed.initContainer.imagePullPolicy | quote }}
           {{- if $lightspeed.initContainer.securityContext }}
           securityContext:
@@ -242,7 +242,7 @@ spec:
           {{- end }}
         {{- if $lightspeed.enabled }}
         - name: {{ $lightspeed.sidecar.name }}
-          image: {{ include "rhdh.lightspeed.image" (dict "image" $lightspeed.images.lightspeedCore "context" $) }}
+          image: {{ include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.image "context" $) }}
           imagePullPolicy: {{ $lightspeed.sidecar.imagePullPolicy | quote }}
           {{- if $lightspeed.sidecar.securityContext }}
           securityContext:

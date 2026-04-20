@@ -118,13 +118,9 @@
                     "type": "string"
                 },
                 "lightspeed": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "default": {
                         "enabled": true,
-                        "images": {
-                            "lightspeedCore": "quay.io/lightspeed-core/lightspeed-stack:0.5.0",
-                            "ragInit": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05"
-                        },
                         "plugins": [
                             {
                                 "disabled": false,
@@ -181,30 +177,10 @@
                                 "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
                             }
                         ],
-                        "resources": {
-                            "lightspeedCore": {
-                                "limits": {
-                                    "cpu": "1000m",
-                                    "memory": "2Gi"
-                                },
-                                "requests": {
-                                    "cpu": "100m",
-                                    "memory": "512Mi"
-                                }
-                            },
-                            "ragInit": {
-                                "limits": {
-                                    "cpu": "100m",
-                                    "memory": "500Mi"
-                                },
-                                "requests": {
-                                    "cpu": "50m",
-                                    "memory": "150Mi"
-                                }
-                            }
-                        },
                         "runtimeVolume": {
                             "emptyDir": {},
+                            "name": "lightspeed-data",
+                            "mountPath": "/tmp",
                             "persistentVolumeClaim": {},
                             "type": "emptyDir"
                         }
@@ -214,23 +190,6 @@
                             "default": true,
                             "title": "Enable or disable the built-in Lightspeed feature.",
                             "type": "boolean"
-                        },
-                        "images": {
-                            "additionalProperties": false,
-                            "properties": {
-                                "lightspeedCore": {
-                                    "default": "quay.io/lightspeed-core/lightspeed-stack:0.5.0",
-                                    "title": "Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.",
-                                    "type": "string"
-                                },
-                                "ragInit": {
-                                    "default": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05",
-                                    "title": "Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.",
-                                    "type": "string"
-                                }
-                            },
-                            "title": "Images used by the Lightspeed pod wiring.",
-                            "type": "object"
                         },
                         "plugins": {
                             "default": [
@@ -317,134 +276,19 @@
                             "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
                             "type": "array"
                         },
-                        "resources": {
-                            "additionalProperties": false,
-                            "properties": {
-                                "lightspeedCore": {
-                                    "description": "ResourceRequirements describes the compute resource requirements.",
-                                    "properties": {
-                                        "claims": {
-                                            "description": "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.",
-                                            "items": {
-                                                "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
-                                                "properties": {
-                                                    "name": {
-                                                        "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
-                                                        "type": "string"
-                                                    },
-                                                    "request": {
-                                                        "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "name"
-                                                ],
-                                                "type": "object"
-                                            },
-                                            "type": "array",
-                                            "x-kubernetes-list-map-keys": [
-                                                "name"
-                                            ],
-                                            "x-kubernetes-list-type": "map"
-                                        },
-                                        "limits": {
-                                            "additionalProperties": {
-                                                "oneOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    }
-                                                ]
-                                            },
-                                            "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                                            "type": "object"
-                                        },
-                                        "requests": {
-                                            "additionalProperties": {
-                                                "oneOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    }
-                                                ]
-                                            },
-                                            "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                "ragInit": {
-                                    "description": "ResourceRequirements describes the compute resource requirements.",
-                                    "properties": {
-                                        "claims": {
-                                            "description": "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.",
-                                            "items": {
-                                                "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
-                                                "properties": {
-                                                    "name": {
-                                                        "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
-                                                        "type": "string"
-                                                    },
-                                                    "request": {
-                                                        "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "name"
-                                                ],
-                                                "type": "object"
-                                            },
-                                            "type": "array",
-                                            "x-kubernetes-list-map-keys": [
-                                                "name"
-                                            ],
-                                            "x-kubernetes-list-type": "map"
-                                        },
-                                        "limits": {
-                                            "additionalProperties": {
-                                                "oneOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    }
-                                                ]
-                                            },
-                                            "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                                            "type": "object"
-                                        },
-                                        "requests": {
-                                            "additionalProperties": {
-                                                "oneOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    }
-                                                ]
-                                            },
-                                            "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            },
-                            "title": "Resource requests/limits for Lightspeed containers.",
-                            "type": "object"
-                        },
                         "runtimeVolume": {
                             "additionalProperties": false,
                             "properties": {
+                                "name": {
+                                    "default": "lightspeed-data",
+                                    "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
+                                    "type": "string"
+                                },
+                                "mountPath": {
+                                    "default": "/tmp",
+                                    "title": "Mount path inside the container for Lightspeed runtime storage.",
+                                    "type": "string"
+                                },
                                 "emptyDir": {
                                     "description": "Represents an empty directory for a pod. Empty directory volumes support ownership management and SELinux relabeling.",
                                     "properties": {
