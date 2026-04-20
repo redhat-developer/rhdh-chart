@@ -7,7 +7,7 @@ DEFAULT_REF="main"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-LIGHTSPEED_DIR="${REPO_ROOT}/charts/backstage/vendor/backstage/charts/backstage/files/lightspeed"
+LIGHTSPEED_DIR="${REPO_ROOT}/charts/backstage/files/lightspeed"
 
 # Format: upstream_path|destination_path|transform_function
 TARGETS=(
