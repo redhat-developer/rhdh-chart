@@ -1,34 +1,4 @@
 enabled: true
-plugins:
-  - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed
-    disabled: false
-    pluginConfig:
-      dynamicPlugins:
-        frontend:
-          red-hat-developer-hub.backstage-plugin-lightspeed:
-            translationResources:
-              - importName: lightspeedTranslations
-                module: Alpha
-                ref: lightspeedTranslationRef
-            dynamicRoutes:
-              - path: /lightspeed
-                importName: LightspeedPage
-            mountPoints:
-              - mountPoint: application/listener
-                importName: LightspeedFAB
-              - mountPoint: application/provider
-                importName: LightspeedDrawerProvider
-              - mountPoint: application/internal/drawer-state
-                importName: LightspeedDrawerStateExposer
-                config:
-                  id: lightspeed
-              - mountPoint: application/internal/drawer-content
-                importName: LightspeedChatContainer
-                config:
-                  id: lightspeed
-                  priority: 100
-  - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend
-    disabled: false
 images:
   ragInit: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
   lightspeedCore: quay.io/lightspeed-core/lightspeed-stack:0.5.0
