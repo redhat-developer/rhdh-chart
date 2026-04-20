@@ -19,4 +19,4 @@
 /README.md   @redhat-developer/RHDH-content
 
 # Lightspeed:
-/charts/backstage/vendor/backstage/charts/backstage/files/lightspeed/defaults.yaml @redhat-developer/rhdh-ai
+/charts/backstage/files/lightspeed/ @redhat-developer/rhdh-ai

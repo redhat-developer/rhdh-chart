@@ -43,7 +43,7 @@ It is important to use `--squash` to avoid pulling the entire commit history of 
 
 ### Sync Lightspeed vendored config files
 
-The vendored Lightspeed config files under [`charts/backstage/vendor/backstage/charts/backstage/files/lightspeed`](./charts/backstage/vendor/backstage/charts/backstage/files/lightspeed) are synced separately from the Backstage subtree by [`hack/sync-lightspeed-configs.sh`](./hack/sync-lightspeed-configs.sh).
+The Lightspeed config files under [`charts/backstage/files/lightspeed`](./charts/backstage/files/lightspeed) are synced separately from the Backstage subtree by [`hack/sync-lightspeed-configs.sh`](./hack/sync-lightspeed-configs.sh).
 
 Use the default upstream branch:
 
