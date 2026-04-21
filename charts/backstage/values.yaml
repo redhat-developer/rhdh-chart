@@ -94,21 +94,36 @@ global:
       emptyDir: {}
     configMaps:
       - name: stack
+        # -- Whether to create this ConfigMap from the bundled source file.
+        # Set to false and provide `nameOverride` to use a pre-existing ConfigMap.
+        create: true
+        # -- Name of an existing ConfigMap to use instead. Required when `create` is false.
         nameOverride: ""
         mountPath: /app-root/lightspeed-stack.yaml
         subPath: lightspeed-stack.yaml
+        # -- Bundled file used to populate the ConfigMap data when `create` is true.
         sourceFile: lightspeed-stack.yaml
         optional: false
       - name: config
+        # -- Whether to create this ConfigMap from the bundled source file.
+        # Set to false and provide `nameOverride` to use a pre-existing ConfigMap.
+        create: true
+        # -- Name of an existing ConfigMap to use instead. Required when `create` is false.
         nameOverride: ""
         mountPath: /app-root/config.yaml
         subPath: config.yaml
+        # -- Bundled file used to populate the ConfigMap data when `create` is true.
         sourceFile: config.yaml
         optional: false
       - name: rhdh-profile
+        # -- Whether to create this ConfigMap from the bundled source file.
+        # Set to false and provide `nameOverride` to use a pre-existing ConfigMap.
+        create: true
+        # -- Name of an existing ConfigMap to use instead. Required when `create` is false.
         nameOverride: ""
         mountPath: /app-root/rhdh-profile.py
         subPath: rhdh-profile.py
+        # -- Bundled file used to populate the ConfigMap data when `create` is true.
         sourceFile: rhdh-profile.py
         optional: false
     secret:

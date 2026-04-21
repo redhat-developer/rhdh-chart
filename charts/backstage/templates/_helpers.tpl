@@ -212,6 +212,7 @@ into the chart archive so changes are captured by chart version bumps.
 {{- range $lightspeed.configMaps -}}
   {{- $configMaps = append $configMaps (dict
       "name" .name
+      "create" (not (and (hasKey . "create") (not .create)))
       "nameOverride" .nameOverride
       "mountPath" .mountPath
       "subPath" .subPath
@@ -265,10 +266,13 @@ Return the Lightspeed ConfigMap name.
 {{- define "rhdh.lightspeed.configMapName" -}}
 {{- $root := .root -}}
 {{- $configMap := .configMap -}}
+{{- $create := not (and (hasKey $configMap "create") (not $configMap.create)) -}}
     {{- if $configMap.nameOverride -}}
         {{- $configMap.nameOverride -}}
-    {{- else -}}
+    {{- else if $create -}}
         {{- printf "%s-lightspeed-%s" $root.Release.Name $configMap.name | trunc 63 | trimSuffix "-" -}}
+    {{- else -}}
+        {{- fail (printf "global.lightspeed.configMaps[%s].nameOverride must be set when create=false" $configMap.name) -}}
     {{- end -}}
 {{- end -}}
 

@@ -122,14 +122,16 @@
                     "default": {
                         "configMaps": [
                             {
+                                "create": false,
                                 "mountPath": "/app-root/lightspeed-stack.yaml",
                                 "name": "stack",
-                                "nameOverride": "",
+                                "nameOverride": "test-stack",
                                 "optional": false,
                                 "sourceFile": "lightspeed-stack.yaml",
                                 "subPath": "lightspeed-stack.yaml"
                             },
                             {
+                                "create": true,
                                 "mountPath": "/app-root/config.yaml",
                                 "name": "config",
                                 "nameOverride": "",
@@ -138,6 +140,7 @@
                                 "subPath": "config.yaml"
                             },
                             {
+                                "create": true,
                                 "mountPath": "/app-root/rhdh-profile.py",
                                 "name": "rhdh-profile",
                                 "nameOverride": "",
