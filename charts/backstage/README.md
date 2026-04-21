@@ -175,8 +175,8 @@ Kubernetes: `>= 1.27.0-0`
 | global.dynamic.plugins | List of dynamic plugins, possibly overriding the plugins listed in `includes` files. Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec), an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description). | list | `[]` |
 | global.host | Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`. | string | `""` |
 | global.lightspeed | Built-in Lightspeed feature configuration. | object | Use Lightspeed compatible settings / configurations. |
-| global.lightspeed.configMaps[0].create | Whether to create this ConfigMap from the bundled source file. Set to false and provide `nameOverride` to use a pre-existing ConfigMap. | bool | `false` |
-| global.lightspeed.configMaps[0].nameOverride | Name of an existing ConfigMap to use instead. Required when `create` is false. | string | `"test-stack"` |
+| global.lightspeed.configMaps[0].create | Whether to create this ConfigMap from the bundled source file. Set to false and provide `nameOverride` to use a pre-existing ConfigMap. | bool | `true` |
+| global.lightspeed.configMaps[0].nameOverride | Name of an existing ConfigMap to use instead. Required when `create` is false. | string | `""` |
 | global.lightspeed.configMaps[0].sourceFile | Bundled file used to populate the ConfigMap data when `create` is true. | string | `"lightspeed-stack.yaml"` |
 | global.lightspeed.configMaps[1].create | Whether to create this ConfigMap from the bundled source file. Set to false and provide `nameOverride` to use a pre-existing ConfigMap. | bool | `true` |
 | global.lightspeed.configMaps[1].nameOverride | Name of an existing ConfigMap to use instead. Required when `create` is false. | string | `""` |

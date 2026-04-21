@@ -122,10 +122,10 @@
                     "default": {
                         "configMaps": [
                             {
-                                "create": false,
+                                "create": true,
                                 "mountPath": "/app-root/lightspeed-stack.yaml",
                                 "name": "stack",
-                                "nameOverride": "test-stack",
+                                "nameOverride": "",
                                 "optional": false,
                                 "sourceFile": "lightspeed-stack.yaml",
                                 "subPath": "lightspeed-stack.yaml"
