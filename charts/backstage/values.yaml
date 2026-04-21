@@ -36,6 +36,7 @@ global:
       repository: rhdh/plugin-catalog-index
       tag: "1.10"
   # -- Built-in Lightspeed feature configuration.
+  # @default -- Use Lightspeed compatible settings / configurations.
   lightspeed:
     # -- Enable or disable the built-in Lightspeed feature.
     enabled: true
