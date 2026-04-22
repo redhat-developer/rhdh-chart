@@ -13,6 +13,31 @@ global:
       tag: "1.9"
 ```
 
+## Extra Catalog Index Images
+
+You can configure additional catalog index images alongside the primary one using `global.catalogIndex.extraImages`. Each extra image contributes catalog entities only to the Extensions UI — only the primary `CATALOG_INDEX_IMAGE` is used for extracting and handling the `dynamic-plugins.default.yaml`.
+
+```yaml
+global:
+  catalogIndex:
+    image:
+      registry: quay.io
+      repository: rhdh/plugin-catalog-index
+      tag: "1.10"
+    extraImages:
+      - name: community
+        registry: ghcr.io
+        repository: redhat-developer/rhdh-plugin-community-index
+        tag: "1.10"
+      - registry: my-registry.example.com
+        repository: my-org/my-rhdh-internal-plugin-catalog
+        tag: "1.2.3"
+```
+
+Each entry requires `registry`, `repository`, and `tag` fields. The optional `name` field produces cleaner extraction directory names (e.g., `/extensions/extra/community/`); when omitted, the name is auto-derived from the image reference.
+
+The chart constructs the `EXTRA_CATALOG_INDEX_IMAGES` environment variable for the `install-dynamic-plugins` init container as a comma-separated list. Named entries use the format `name=registry/repository:tag`, while unnamed entries use `registry/repository:tag`.
+
 ## Using a Private Registry
 
 If your catalog index image is stored in a private registry that requires authentication, create a secret named `<release_name>-dynamic-plugins-registry-auth` containing an `auth.json` file with your registry credentials.

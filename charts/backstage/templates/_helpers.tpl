@@ -284,6 +284,23 @@ Return the Lightspeed ConfigMap volume name.
 {{- end -}}
 
 {{/*
+Return the computed EXTRA_CATALOG_INDEX_IMAGES env var value from
+global.catalogIndex.extraImages.  Returns an empty string when no extra
+images are configured.
+*/}}
+{{- define "rhdh.catalogIndex.extraImagesEnvValue" -}}
+{{- $imgs := list -}}
+{{- range (.Values.global.catalogIndex.extraImages | default list) -}}
+  {{- $ref := printf "%s/%s:%s" .registry .repository .tag -}}
+  {{- if .name -}}
+    {{- $ref = printf "%s=%s" .name $ref -}}
+  {{- end -}}
+  {{- $imgs = append $imgs $ref -}}
+{{- end -}}
+{{- join "," $imgs -}}
+{{- end -}}
+
+{{/*
 DEPRECATED: The following templates are deprecated. Please use the corresponding "rhdh.*" templates instead.
 */}}
 

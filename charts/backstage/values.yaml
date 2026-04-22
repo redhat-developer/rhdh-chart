@@ -35,6 +35,18 @@ global:
       registry: quay.io
       repository: rhdh/plugin-catalog-index
       tag: "1.10"
+    # -- Extra catalog index images for additional plugin discovery in the Extensions UI.
+    # Each item must include `registry`, `repository`, and `tag` fields; `name` is optional.
+    # Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling).
+    # @default -- `[]`
+    extraImages: []
+    # - name: community
+    #   registry: ghcr.io
+    #   repository: redhat-developer/rhdh-plugin-community-index
+    #   tag: "1.10"
+    # - registry: my-registry.example.com
+    #   repository: my-org/my-rhdh-internal-plugin-catalog
+    #   tag: "1.2.3"
   # -- Built-in Lightspeed feature configuration.
   # @default -- Use Lightspeed compatible settings / configurations.
   lightspeed:

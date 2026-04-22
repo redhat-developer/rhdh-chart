@@ -6,6 +6,7 @@
 {{- if $lightspeed.enabled -}}
 {{- $lightspeedRuntimeVolumeType = include "rhdh.lightspeed.runtimeVolumeType" (dict "volume" $lightspeed.runtimeVolume "path" "global.lightspeed.runtimeVolume") -}}
 {{- end -}}
+{{- $extraCatalogImages := include "rhdh.catalogIndex.extraImagesEnvValue" . | trim -}}
 ---
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
@@ -114,7 +115,13 @@ spec:
       {{- if or .Values.backstage.initContainers $lightspeed.enabled }}
       initContainers:
         {{- if .Values.backstage.initContainers }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.initContainers "context" $) | nindent 8 }}
+        {{- range .Values.backstage.initContainers }}
+        {{- $container := include "common.tplvalues.render" (dict "value" . "context" $) | fromYaml }}
+        {{- if and $extraCatalogImages (eq (index $container "name") "install-dynamic-plugins") }}
+        {{- $_ := set $container "env" (append (default list (index $container "env")) (dict "name" "EXTRA_CATALOG_INDEX_IMAGES" "value" $extraCatalogImages)) }}
+        {{- end }}
+        - {{ $container | toYaml | nindent 10 | trim }}
+        {{- end }}
         {{- end }}
         {{- if $lightspeed.enabled }}
         - name: {{ $lightspeed.initContainer.name }}
