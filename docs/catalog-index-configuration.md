@@ -13,7 +13,7 @@ global:
       tag: "1.9"
 ```
 
-## Extra Catalog Index Images
+## Extra catalog index images
 
 You can configure additional catalog index images alongside the primary one using `global.catalogIndex.extraImages`. Each extra image contributes catalog entities only to the Extensions UI — only the primary `CATALOG_INDEX_IMAGE` is used for extracting and handling the `dynamic-plugins.default.yaml`.
 
