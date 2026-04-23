@@ -222,7 +222,7 @@
                         "plugins": [
                             {
                                 "disabled": false,
-                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed",
+                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.49.4__2.1.0!red-hat-developer-hub-backstage-plugin-lightspeed",
                                 "pluginConfig": {
                                     "dynamicPlugins": {
                                         "frontend": {
@@ -272,7 +272,7 @@
                             },
                             {
                                 "disabled": false,
-                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
+                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.49.4__2.1.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
                             }
                         ],
                         "ragVolume": {
@@ -338,7 +338,7 @@
                             "default": [
                                 {
                                     "disabled": false,
-                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed",
+                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:bs_1.49.4__2.1.0!red-hat-developer-hub-backstage-plugin-lightspeed",
                                     "pluginConfig": {
                                         "dynamicPlugins": {
                                             "frontend": {
@@ -388,7 +388,7 @@
                                 },
                                 {
                                     "disabled": false,
-                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.45.3__1.4.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
+                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:bs_1.49.4__2.1.0!red-hat-developer-hub-backstage-plugin-lightspeed-backend"
                                 }
                             ],
                             "items": {
