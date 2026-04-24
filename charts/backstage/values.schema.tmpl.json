@@ -145,6 +145,7 @@
                                 ],
                                 "properties": {
                                     "name": {
+                                        "pattern": "^[A-Za-z0-9._-]+$",
                                         "title": "Optional name for the extra catalog index image. Produces cleaner extraction directory names (e.g., /extra/community/).",
                                         "type": "string"
                                     },

@@ -289,11 +289,16 @@ global.catalogIndex.extraImages.  Returns an empty string when no extra
 images are configured.
 */}}
 {{- define "rhdh.catalogIndex.extraImagesEnvValue" -}}
+{{- $root := . -}}
 {{- $imgs := list -}}
 {{- range (.Values.global.catalogIndex.extraImages | default list) -}}
-  {{- $ref := printf "%s/%s:%s" .registry .repository .tag -}}
-  {{- if .name -}}
-    {{- $ref = printf "%s=%s" .name $ref -}}
+  {{- $item := include "common.tplvalues.render" (dict "value" . "context" $root) | fromYaml -}}
+  {{- $ref := printf "%s/%s:%s" $item.registry $item.repository $item.tag -}}
+  {{- if $item.name -}}
+    {{- if or (contains "," $item.name) (contains "=" $item.name) -}}
+      {{- fail (printf "global.catalogIndex.extraImages[].name %q must not contain ',' or '='" $item.name) -}}
+    {{- end -}}
+    {{- $ref = printf "%s=%s" $item.name $ref -}}
   {{- end -}}
   {{- $imgs = append $imgs $ref -}}
 {{- end -}}

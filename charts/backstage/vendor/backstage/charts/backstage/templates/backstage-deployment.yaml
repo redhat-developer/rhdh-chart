@@ -118,7 +118,13 @@ spec:
         {{- range .Values.backstage.initContainers }}
         {{- $container := include "common.tplvalues.render" (dict "value" . "context" $) | fromYaml }}
         {{- if and $extraCatalogImages (eq (index $container "name") "install-dynamic-plugins") }}
+        {{- $hasExisting := false }}
+        {{- range (default list (index $container "env")) }}
+          {{- if eq (default "" .name) "EXTRA_CATALOG_INDEX_IMAGES" }}{{ $hasExisting = true }}{{ end }}
+        {{- end }}
+        {{- if not $hasExisting }}
         {{- $_ := set $container "env" (append (default list (index $container "env")) (dict "name" "EXTRA_CATALOG_INDEX_IMAGES" "value" $extraCatalogImages)) }}
+        {{- end }}
         {{- end }}
         - {{ $container | toYaml | nindent 10 | trim }}
         {{- end }}
