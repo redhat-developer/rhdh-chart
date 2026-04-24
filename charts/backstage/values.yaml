@@ -395,7 +395,7 @@ upstream:
             value: /opt/app-root/src/.npmrc.dynamic-plugins
             # This following variable is required for orchestrator to startup properly.
           - name: MAX_ENTRY_SIZE
-            value: "30000000"
+            value: "40000000"
           - name: CATALOG_INDEX_IMAGE
             value: '{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}'
           - name: CATALOG_ENTITIES_EXTRACT_DIR
