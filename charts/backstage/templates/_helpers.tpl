@@ -1,78 +1,74 @@
 {{/*
-Returns custom hostname
+Return the proper image name
 */}}
-{{- define "rhdh.hostname" -}}
-    {{- if .Values.global.host -}}
-        {{- .Values.global.host -}}
-    {{- else if .Values.global.clusterRouterBase -}}
-        {{- printf "%s-%s.%s" (include "common.names.fullname" .) .Release.Namespace .Values.global.clusterRouterBase -}}
+{{- define "backstage.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.backstage.image "global" .Values.global) }}
+{{- end -}}
+
+{{/*
+Return the proper Docker Image Registry Secret Names
+*/}}
+{{- define "backstage.renderImagePullSecrets" -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.backstage.image) "context" $) -}}
+{{- end -}}
+
+{{/*
+ Create the name of the service account to use
+ */}}
+{{- define "backstage.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "backstage.postgresql.fullname" -}}
+{{- include "common.names.dependency.fullname" (dict "chartName" "postgresql" "chartValues" .Values.postgresql "context" $) -}}
+{{- end -}}
+
+{{/*
+Return the Postgres Database hostname
+*/}}
+{{- define "backstage.postgresql.host" -}}
+{{- if eq .Values.postgresql.architecture "replication" }}
+{{- include "backstage.postgresql.fullname" . -}}-primary
+{{- else -}}
+{{- include "backstage.postgresql.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the Postgres Database Secret Name
+*/}}
+{{- define "backstage.postgresql.databaseSecretName" -}}
+{{- if ((((.Values).global).postgresql).auth).existingSecret }}
+    {{- tpl .Values.global.postgresql.auth.existingSecret $ -}}
+{{- else if .Values.postgresql.auth.existingSecret }}
+    {{- tpl .Values.postgresql.auth.existingSecret $ -}}
+{{- else -}}
+    {{- default (include "backstage.postgresql.fullname" .) (tpl .Values.postgresql.auth.existingSecret $) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the Postgres databaseSecret key to retrieve credentials for database
+*/}}
+{{- define "backstage.postgresql.databaseSecretKey" -}}
+{{- $defaultDatabaseSecretKey := "password" -}}
+{{- if (or ((((.Values).global).postgresql).auth).existingSecret .Values.postgresql.auth.existingSecret) }}
+    {{- if (((((.Values).global).postgresql).auth).secretKeys).userPasswordKey -}}
+        {{- .Values.global.postgresql.auth.secretKeys.userPasswordKey  -}}
+    {{- else if ((((.Values).postgresql).auth).secretKeys).userPasswordKey -}}
+        {{- .Values.postgresql.auth.secretKeys.userPasswordKey  -}}
     {{- else -}}
-        {{ fail "Unable to generate hostname" }}
+        {{- print $defaultDatabaseSecretKey -}}
     {{- end -}}
+{{- else -}}
+    {{- print $defaultDatabaseSecretKey -}}
 {{- end -}}
-
-{{/*
-Returns a secret name for service to service auth
-*/}}
-{{- define "rhdh.backend-secret-name" -}}
-    {{- if .Values.global.auth.backend.existingSecret -}}
-        {{- .Values.global.auth.backend.existingSecret -}}
-    {{- else -}}
-        {{- printf "%s-auth" .Release.Name -}}
-    {{- end -}}
-{{- end -}}
-
-{{/*
-Sets the secretKeyRef name for Backstage to the PostgreSQL existing secret if it present
-*/}}
-{{- define "rhdh.postgresql.secretName" -}}
-    {{- if ((((.Values).global).postgresql).auth).existingSecret -}}
-        {{- .Values.global.postgresql.auth.existingSecret -}}
-    {{- else if .Values.postgresql.auth.existingSecret -}}
-        {{- .Values.postgresql.auth.existingSecret -}}
-    {{- else -}}
-        {{- printf "%s-%s" .Release.Name "postgresql" -}}
-    {{- end -}}
-{{- end -}}
-
-{{/*
-Get the password secret.
-Referenced from: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/templates/_helpers.tpl#L94-L105
-*/}}
-{{- define "postgresql.v1.secretName" -}}
-    {{- if .Values.global.postgresql.auth.existingSecret -}}
-        {{- printf "%s" (tpl .Values.global.postgresql.auth.existingSecret $) -}}
-    {{- else if .Values.auth.existingSecret -}}
-        {{- printf "%s" (tpl .Values.auth.existingSecret $) -}}
-    {{- else -}}
-        {{- printf "%s" (include "common.names.fullname" .) -}}
-    {{- end -}}
-{{- end -}}
-
-{{/*
-DEPRECATED: The following templates are deprecated. Please use the corresponding "rhdh.*" templates instead.
-*/}}
-
-{{/*
-DEPRECATED: Use "rhdh.hostname" instead.
-Returns custom hostname
-*/}}
-{{- define "janus-idp.hostname" -}}
-    {{- include "rhdh.hostname" . -}}
-{{- end -}}
-
-{{/*
-DEPRECATED: Use "rhdh.backend-secret-name" instead.
-Returns a secret name for service to service auth
-*/}}
-{{- define "janus-idp.backend-secret-name" -}}
-    {{- include "rhdh.backend-secret-name" . -}}
-{{- end -}}
-
-{{/*
-DEPRECATED: Use "rhdh.postgresql.secretName" instead.
-Sets the secretKeyRef name for Backstage to the PostgreSQL existing secret if it present
-*/}}
-{{- define "janus-idp.postgresql.secretName" -}}
-    {{- include "rhdh.postgresql.secretName" . -}}
 {{- end -}}

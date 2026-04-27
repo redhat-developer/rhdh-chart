@@ -1,18 +1,55 @@
+# Backstage Helm Chart
 
-# UPDATE
+[Backstage](https://backstage.io) is an open platform for building developer portals. Powered by a centralized software catalog, Backstage restores order to your microservices and infrastructure and enables your product teams to ship high-quality code quickly — without compromising autonomy.
 
-This repository now houses the only RHDH CI Helm chart after merging with the now deprecated repository: https://github.com/rhdh-bot/openshift-helm-charts/. 
+Backstage unifies all your infrastructure tooling, services, and documentation to create a streamlined development environment from end to end.
 
-See:  https://issues.redhat.com/browse/RHIDP-1477
+> [!CAUTION]
+> This Helm chart deploys a pre-packaged container image which contains a vanilla Backstage instance for demo purposes. This image is probably not suitable for use in production. For further customization of the Backstage instance (plugin installation, UI changes, etc.) please create your own custom instance and container image. For details please consult the [Backstage documentation](https://backstage.io/docs)
 
-# RHDH Helm Chart for OpenShift
+## Scope
 
-See [charts/backstage/README.md](charts/backstage/README.md).
+This chart focuses on providing users the same experience and functionality no matter what flavor of Kubernetes they use. This chart will support only patterns that are either customary for all Kubernetes flavors, are commonly used in the Bitnami charts ecosystem, and recognized as Backstage official patterns.
 
-# RHDH orchestrator infra Helm chart for Openshift
+We welcome other, more specialized, charts to use this canonical chart as a direct dependency, expanding the feature set further, beyond this scope.
 
-See [charts/orchestrator-infra/README.md](charts/orchestrator-infra/README.md)
+A list of derived charts:
+- OpenShift specialized chart: [Red Hat Developer Hub Helm chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/backstage)
 
-## Contributing and reporting issues
+## Usage
 
-To report issues against this chart, please use JIRA (not GH issues): https://issues.redhat.com/browse/RHIDP
+> [!NOTE]
+> Documentation for the Backstage chart can be found [here](charts/backstage)
+
+Charts are available in the following formats:
+
+* [Chart Repository](https://helm.sh/docs/topics/chart_repository/)
+* [OCI Artifacts](https://helm.sh/docs/topics/registries/)
+
+### Installing from the Chart Repository
+
+The following command can be used to add the chart repository:
+
+```console
+helm repo add backstage https://backstage.github.io/charts
+```
+
+Once the chart has been added, install one of the available charts:
+
+```console
+helm upgrade -i <release_name> backstage/backstage
+```
+
+### Installing from an OCI Registry
+
+Charts are also available in OCI format. The list of available charts can be found [here](https://github.com/orgs/backstage/packages?repo_name=charts).
+
+Install one of the available charts:
+
+```shell
+helm upgrade -i <release_name> oci://ghcr.io/backstage/charts/backstage --version=<version>
+```
+
+## Backstage Chart
+
+More information can be found by inspecting the [backstage chart](charts/backstage).

@@ -1,404 +1,504 @@
-nameOverride: developer-hub
+# Default values for the Backstage chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Global parameters
+# Global Docker image parameters
+# Please, note that this will override the image parameters, including dependencies, configured to use the global value
+# Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+# @default -- See below
 global:
-  dynamic:
-    # -- Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field.
-    # Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`).
-    includes:
-      # -- List of dynamic plugins included inside the `rhdh` container image, some of which are disabled by default.
-      # This file ONLY works with the `rhdh` container image.
-      - "dynamic-plugins.default.yaml"
-    # -- List of dynamic plugins, possibly overriding the plugins listed in `includes` files.
-    # Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec),
-    # an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin
-    # listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description).
-    plugins: []
-  # -- Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled.
-  clusterRouterBase: "apps.example.com"
-  # -- Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`.
-  host: ""
-  # -- Enable service authentication within Backstage instance
-  auth:
-    # -- Backend service to service authentication
-    # <br /> Ref: https://backstage.io/docs/auth/service-to-service-auth/
-    backend:
-      # -- Enable backend service to service authentication, unless configured otherwise it generates a secret value
-      enabled: true
-      # -- Instead of generating a secret value, refer to existing secret
-      existingSecret: ""
-      # -- Instead of generating a secret value, use the following value
-      value: ""
-  # -- Catalog index configuration for automatic plugin discovery.
-  # The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
-  # The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
-  catalogIndex:
-    image:
-      registry: quay.io
-      repository: rhdh/plugin-catalog-index
-      tag: "1.10"
-# -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
-# @default -- Use Openshift compatible settings
-upstream:
-  nameOverride: developer-hub
-  backstage:
-    image:
-      registry: quay.io
-      repository: rhdh-community/rhdh
-      tag: next
-      pullPolicy: ""
-    command: []
-    # FIXME (tumido): USE POSTGRES_PASSWORD and POSTGRES_USER instead of POSTGRES_ADMIN_PASSWORD
-    # This is a hack. In {fedora,rhel}/postgresql images, regular user is forbidden
-    # from creating DBs in runtime. A single DB can be created ahead of time via
-    # POSTGRESQL_DATABASE env variable (in this case via
-    # upstream.postgresql.primary.extraEnvVars value), but this doesn't allow us to
-    # create multiple DBs. Since Backstage requires by default 5 different DBs, we
-    # can't accommodate that properly.
-    appConfig:
-      auth:
-        providers: {}
-      app:
-        # Please update to match host in case you don't want to configure hostname via `global.clusterRouterBase` or `global.host` if not deploying on an openshift cluster.
-        baseUrl: 'https://{{- include "rhdh.hostname" . }}'
-      backend:
-        baseUrl: 'https://{{- include "rhdh.hostname" . }}'
-        cors:
-          origin: 'https://{{- include "rhdh.hostname" . }}'
-        database:
-          connection:
-            password: ${POSTGRESQL_ADMIN_PASSWORD}
-            user: postgres
-        auth:
-          externalAccess:
-            - type: legacy
-              options:
-                subject: legacy-default-config
-                secret: ${BACKEND_SECRET}
-    containerSecurityContext:
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop: ["ALL"]
-      runAsNonRoot: true
-      seccompProfile:
-        type: "RuntimeDefault"
-    resources:
-      requests:
-        cpu: 250m
-        memory: 1Gi
-      limits:
-        cpu: 1000m
-        memory: 2.5Gi
-        ephemeral-storage: 5Gi
-    startupProbe:
-      # This gives enough time upon container startup before the liveness and readiness probes are triggered.
-      # Giving (120s = initialDelaySeconds + failureThreshold * periodSeconds) to account for the worst case scenario.
-      httpGet:
-        path: /.backstage/health/v1/liveness
-        port: backend
-        scheme: HTTP
-      initialDelaySeconds: 30
-      timeoutSeconds: 4
-      periodSeconds: 20
-      successThreshold: 1
-      failureThreshold: 3
-    readinessProbe:
-      failureThreshold: 3
-      httpGet:
-        path: /.backstage/health/v1/readiness
-        port: backend
-        scheme: HTTP
-      # Both liveness and readiness probes won't be triggered until the startup probe is successful.
-      # The startup probe is already configured to give enough time for the application to be started.
-      # So removing the additional delay here allows the readiness probe to be checked right away after the startup probe,
-      # which helps make the application available faster to the end-user.
-      # initialDelaySeconds: 30
-      periodSeconds: 10
-      successThreshold: 2
-      timeoutSeconds: 4
-    livenessProbe:
-      failureThreshold: 3
-      httpGet:
-        path: /.backstage/health/v1/liveness
-        port: backend
-        scheme: HTTP
-      # Both liveness and readiness probes won't be triggered until the startup probe is successful.
-      # The startup probe is already configured to give enough time for the application to be started.
-      # So removing the additional delay here allows the liveness probe to be checked right away after the startup probe,
-      # which helps make the application available faster to the end-user.
-      # initialDelaySeconds: 60
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 4
-    extraEnvVars:
-      - name: BACKEND_SECRET
-        valueFrom:
-          secretKeyRef:
-            key: backend-secret
-            name: '{{ include "rhdh.backend-secret-name" $ }}'
-      - name: POSTGRESQL_ADMIN_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            key: postgres-password
-            name: '{{- include "rhdh.postgresql.secretName" . }}'
-    args:
-      # This additional `app-config`` file is generated by the initContainer below, and contains the merged configuration of installed dynamic plugins.
-      - "--config"
-      - dynamic-plugins-root/app-config.dynamic-plugins.yaml
-    extraVolumeMounts:
-      # The initContainer below will install dynamic plugins in this volume mount.
-      - name: dynamic-plugins-root
-        mountPath: /opt/app-root/src/dynamic-plugins-root
-      - name: extensions-catalog
-        mountPath: /extensions
-      - name: temp
-        mountPath: /tmp
-    extraVolumes:
-      # -- Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start.
-      - name: dynamic-plugins-root
-        ephemeral:
-          volumeClaimTemplate:
-            spec:
-              accessModes:
-                - ReadWriteOnce
-              resources:
-                requests:
-                  # -- Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins.
-                  storage: 5Gi
-      # Volume that will expose the `dynamic-plugins.yaml` file from the `dynamic-plugins` config map.
-      # The `dynamic-plugins` config map is created by the helm chart from the content of the `global.dynamic` field.
-      - name: dynamic-plugins
-        configMap:
-          defaultMode: 420
-          name: '{{ printf "%s-dynamic-plugins" .Release.Name }}'
-          optional: true
-      # Optional volume that allows exposing the `.npmrc` file (through a `dynamic-plugins-npmrc` secret)
-      # to be used when running `npm pack` during the dynamic plugins installation by the initContainer.
-      - name: dynamic-plugins-npmrc
-        secret:
-          defaultMode: 420
-          optional: true
-          secretName: '{{ printf "%s-dynamic-plugins-npmrc" .Release.Name }}'
-      # Optional volume that allows adding a container registry `auth.json` file (through a `dynamic-plugins-registry-auth` secret)
-      # to be used when installing plugins from secure container registries during the dynamic plugins installation by the initContainer.
-      - name: dynamic-plugins-registry-auth
-        secret:
-          defaultMode: 416
-          optional: true
-          secretName: '{{ printf "%s-dynamic-plugins-registry-auth" .Release.Name }}'
-      - name: npmcacache
-        emptyDir: {}
-      # -- Ephemeral volume used by the install-dynamic-plugins init container to extract catalog entities from the catalog index image.
-      # Mounted at the /extensions path in the backstage-backend main container for automatic discovery by the extension catalog backend providers.
-      - name: extensions-catalog
-        emptyDir: {}
-      - name: temp
-        emptyDir: {}
-    initContainers:
-      - name: install-dynamic-plugins
-        resources:
-          requests:
-            cpu: 250m
-            memory: 256Mi
-          limits:
-            cpu: 1000m
-            memory: 2.5Gi
-            ephemeral-storage: 5Gi
-        securityContext:
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop: ["ALL"]
-          runAsNonRoot: true
-          seccompProfile:
-            type: "RuntimeDefault"
-        # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
-        # It could be replaced by a custom image based on this one.
-        # @default -- `quay.io/rhdh-community/rhdh:next`
-        image: '{{ include "backstage.image" . }}'
-        command:
-          - ./install-dynamic-plugins.sh
-          - /dynamic-plugins-root
-        env:
-          - name: NPM_CONFIG_USERCONFIG
-            value: /opt/app-root/src/.npmrc.dynamic-plugins
-            # This following variable is required for orchestrator to startup properly.
-          - name: MAX_ENTRY_SIZE
-            value: "30000000"
-          - name: CATALOG_INDEX_IMAGE
-            value: '{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}'
-          - name: CATALOG_ENTITIES_EXTRACT_DIR
-            value: '/extensions'
-        imagePullPolicy: ""
-        volumeMounts:
-          - mountPath: /dynamic-plugins-root
-            name: dynamic-plugins-root
-          - mountPath: /opt/app-root/src/dynamic-plugins.yaml
-            name: dynamic-plugins
-            readOnly: true
-            subPath: dynamic-plugins.yaml
-          - mountPath: /opt/app-root/src/.npmrc.dynamic-plugins
-            name: dynamic-plugins-npmrc
-            readOnly: true
-            subPath: .npmrc
-          - mountPath: /opt/app-root/src/.config/containers
-            name: dynamic-plugins-registry-auth
-            readOnly: true
-          - mountPath: /opt/app-root/src/.npm/_cacache
-            name: npmcacache
-          - name: extensions-catalog
-            mountPath: /extensions
-          - name: temp
-            mountPath: /tmp
-        workingDir: /opt/app-root/src
-    installDir: /opt/app-root/src
-    podAnnotations:
-      checksum/dynamic-plugins: >-
-        {{- include "common.tplvalues.render" ( dict "value" .Values.global.dynamic "context" $) | sha256sum }}
-  ingress:
-    host: "{{ .Values.global.host }}"
-  metrics:
-    serviceMonitor:
-      enabled: false
-      path: /metrics
-      port: http-metrics
-  postgresql:
-    enabled: true
-    postgresqlDataDir: /var/lib/pgsql/data/userdata
-    serviceBindings:
-      enabled: true
-    image:
-      registry: quay.io
-      repository: fedora/postgresql-15
-      tag: latest
-    auth:
-      secretKeys:
-        adminPasswordKey: postgres-password
-        userPasswordKey: password
-    primary:
-      # TODO: https://issues.redhat.com/browse/RHIDP-2645
-      podSecurityContext:
-        enabled: false
-      containerSecurityContext:
-        enabled: false
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
-      resources:
-        requests:
-          cpu: 250m
-          memory: 256Mi
-        limits:
-          cpu: 250m
-          memory: 1024Mi
-          ephemeral-storage: 20Mi
-      persistence:
-        enabled: true
-        size: 1Gi
-        mountPath: /var/lib/pgsql/data
-      extraEnvVars:
-        - name: POSTGRESQL_ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              key: postgres-password
-              name: '{{- include "postgresql.v1.secretName" . }}'
-  service:
-    extraPorts:
-      - name: http-metrics
-        port: 9464
-        targetPort: 9464
-# -- OpenShift Route parameters
-route:
-  # -- Route specific annotations
-  annotations: {}
-  # -- Enable the creation of the route resource
-  enabled: true
-  # -- Set the host attribute to a custom value. If not set, OpenShift will generate it, please make sure to match your baseUrl
-  host: "{{ .Values.global.host }}"
-  # -- Path that the router watches for, to route traffic for to the service.
-  path: "/"
-  # -- Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed.
-  wildcardPolicy: None
-  # -- Route TLS parameters
-  # <br /> Ref: https://docs.openshift.com/container-platform/4.9/networking/routes/secured-routes.html
-  tls:
-    # -- Enable TLS configuration for the host defined at `route.host` parameter
-    enabled: true
-    # -- Specify TLS termination.
-    termination: "edge"
-    # -- Certificate contents
-    certificate: ""
-    # -- Key file contents
-    key: ""
-    # -- Cert authority certificate contents. Optional
-    caCertificate: ""
-    # -- Contents of the ca certificate of the final destination.
-    # <br /> When using reencrypt termination this file should be provided in order to have routers use it for health checks on the secure connection. If this field is not specified, the router may provide its own destination CA and perform hostname validation using the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically verify.
-    destinationCACertificate: ""
-    # --  Indicates the desired behavior for insecure connections to a route.
-    # <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled.
-    insecureEdgeTerminationPolicy: "Redirect"
-# -- Test pod parameters
-test:
-  # -- Whether to enable the test-connection pod used for testing the Release using `helm test`.
-  enabled: true
-  image:
-    # -- Test connection pod image registry
-    registry: quay.io
-    # -- Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it.
-    repository: curl/curl
-    # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
-    tag: latest
-  # -- Whether to inject a fake dynamic plugins npmrc secret.
-  # <br />See RHDHBUGS-1893 and RHDHBUGS-1464 for the motivation behind this.
-  # <br />This is only used for testing purposes and should not be used in production.
-  # <br />Only relevant when `test.enabled` field is set to `true`.
-  injectTestNpmrcSecret: false
-orchestrator:
+  # -- Global Docker image registry
+  imageRegistry: ""
+
+  # -- Global Docker registry secret names as an array
+  # </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]`
+  imagePullSecrets: []
+
+# -- Common parameters
+
+# -- Override Kubernetes version
+kubeVersion: ""
+
+# -- String to partially override common.names.fullname
+nameOverride: ""
+
+# -- String to fully override common.names.fullname
+fullnameOverride: ""
+
+# -- Default Kubernetes cluster domain
+clusterDomain: cluster.local
+
+# -- Labels to add to all deployed objects
+commonLabels: {}
+
+# -- Annotations to add to all deployed objects
+commonAnnotations: {}
+
+# -- Array of extra objects to deploy with the release
+extraDeploy: []
+
+# -- Enable diagnostic mode in the Deployment
+diagnosticMode:
+
+  # -- Enable diagnostic mode (all probes will be disabled and the command will be overridden)
   enabled: false
-  #  Disable Serverless Logic Operator if it already exists on the cluster
-  serverlessLogicOperator:
-    enabled: true
-  #  Disable Serverless Operator if it already exists on the cluster
-  serverlessOperator:
-    enabled: true
-  sonataflowPlatform:
-    monitoring:
-      enabled: true
-    eventing:
-      broker:
-        name: ""
-        namespace: ""
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "1Gi"
-        cpu: "500m"
-    # -- Secret name for the user-created secret to connect an external DB
-    externalDBsecretRef: ""
-    # -- Name for the user-configured external Database
-    externalDBName: ""
-    # -- Host for the user-configured external Database
-    externalDBHost: ""
-    # -- Port for the user-configured external Database
-    externalDBPort: ""
-    # -- Image for the init container used by the create-db job
-    initContainerImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
-    # -- Image for the container used by the create-db job
-    createDBJobImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
-    # -- Image for the container used by the sonataflow jobs service, optional and used for disconnected environments
-    jobServiceImage: ""
-    # -- Image for the container used by the sonataflow data index, optional and used for disconnected environments
-    dataIndexImage: ""
-  # -- Orchestrator plugins and their configuration
-  plugins:
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{inherit}}" }}'
-      disabled: false
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{inherit}}" }}'
-      disabled: false
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{inherit}}" }}'
-      disabled: false
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{inherit}}" }}'
-      disabled: false
+
+  # -- Command to override all containers in the Deployment
+  command:
+    - sleep
+
+  # -- Args to override all containers in the Deployment
+  args:
+    - infinity
+
+# -- Ingress parameters
+ingress:
+
+  # -- Enable the creation of the ingress resource
+  enabled: false
+
+  # -- Name of the IngressClass cluster resource which defines which controller will implement the resource (e.g nginx)
+  className: ""
+
+  # -- Additional annotations for the Ingress resource
+  annotations: {}
+
+  # -- Hostname to be used to expose the route to access the backstage application (e.g: backstage.IP.nip.io)
+  host: ""
+
+  # -- List of additional hostnames to be covered with this ingress record (e.g. a CNAME)
+  # <!-- E.g.
+  # extraHosts:
+  #   - name: backstage.env.example.com
+  #     path: / (Optional)
+  #     pathType: Prefix (Optional)
+  #     port: 7007 (Optional) -->
+  extraHosts: []
+
+  # -- Path to be used to expose the full route to access the backstage application (e.g: IP.nip.io/backstage)
+  path: "/"
+
+  # -- Ingress TLS parameters
+  tls:
+
+    # -- Enable TLS configuration for the host defined at `ingress.host` parameter
+    enabled: false
+
+    # -- The name to which the TLS Secret will be called
+    secretName: ""
+
+  # -- The TLS configuration for additional hostnames to be covered with this ingress record.
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  # <!-- E.g.
+  # extraTls:
+  #   - hosts:
+  #     - backstage.env.example.com
+  #     secretName: backstage-env -->
+  extraTls: []
+
+# -- Backstage parameters
+# @default -- See below
+backstage:
+
+  # -- Number of deployment replicas
+  replicas: 1
+
+  # -- Define the [count of deployment revisions](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#clean-up-policy) to be kept.
+  # May be set to 0 in case of GitOps deployment approach.
+  revisionHistoryLimit: 10
+
+  image:
+
+    # -- Backstage image registry
+    registry: ghcr.io
+
+    # -- Backstage image repository
+    repository: backstage/backstage
+
+    # -- Backstage image tag (immutable tags are recommended)
+    tag: latest
+
+    # -- Backstage image digest (digest takes precedence over image tag)
+    digest: ""
+
+    # -- Specify a imagePullPolicy.
+    # Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    # <br /> Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+    pullPolicy: ""
+
+    # -- Optionally specify an array of imagePullSecrets.
+    #  Secrets must be manually created in the namespace.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    # <br /> E.g: `pullSecrets: [myRegistryKeySecretName]`
+    pullSecrets: []
+
+  # -- Pod Disruption Budget configuration
+  # ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  pdb:
+    create: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+  # -- Autoscaling configuration.
+  # <br /> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # -- Container ports on the Deployment
+  containerPorts:
+    backend: 7007
+
+  # -- Backstage container command
+  command: ["node", "packages/backend"]
+
+  # -- Backstage container command arguments
+  args: []
+
+  # -- Extra app configuration files to inline into command arguments
+  extraAppConfig: []
+
+  # -- Deployment sidecars
+  extraContainers: []
+
+  # -- Backstage container environment variables
+  extraEnvVars: []
+
+  # -- Backstage container environment variables from existing ConfigMaps
+  extraEnvVarsCM: []
+
+  # -- Backstage container environment variables from existing Secrets
+  extraEnvVarsSecrets: []
+
+  # -- Backstage container additional ports
+  extraPorts: []
+
+  # -- Backstage container additional volume mounts
+  extraVolumeMounts: []
+
+  # -- Backstage container additional volumes
+  extraVolumes: []
+
+  # -- Backstage container init containers
+  initContainers: []
+
+  # -- Directory containing the backstage installation
+  installDir: /app
+
+  # -- Resource requests/limits
+  # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container
+  # <!-- E.g.
+  # resources:
+  #   limits:
+  #     memory: 1Gi
+  #     cpu: 1000m
+  #   requests:
+  #     memory: 250Mi
+  #     cpu: 100m -->
+  resources: {}
+
+  # -- Readiness Probe
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes
+  # <!-- E.g.
+  # readinessProbe:
+  #   failureThreshold: 3
+  #   httpGet:
+  #     path: /.backstage/health/v1/readiness
+  #     port: 7007
+  #     scheme: HTTP
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+  #   successThreshold: 2
+  #   timeoutSeconds: 2
+  readinessProbe:
+    httpGet:
+      path: /.backstage/health/v1/readiness
+      port: 7007
+      scheme: HTTP
+
+  # -- Liveness Probe
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes
+  # <!-- E.g.
+  # livenessProbe:
+  #   failureThreshold: 3
+  #   httpGet:
+  #     path: /.backstage/health/v1/liveness
+  #     port: 7007
+  #     scheme: HTTP
+  #   initialDelaySeconds: 60
+  #   periodSeconds: 10
+  #   successThreshold: 1
+  #   timeoutSeconds: 2
+  livenessProbe:
+    httpGet:
+      path: /.backstage/health/v1/liveness
+      port: 7007
+      scheme: HTTP
+
+  # -- Startup Probe
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes
+  # <!-- E.g.
+  # startupProbe:
+  #   failureThreshold: 3
+  #   httpGet:
+  #     path: /.backstage/health/v1/liveness
+  #     port: 7007
+  #     scheme: HTTP
+  #   initialDelaySeconds: 60
+  #   periodSeconds: 10
+  #   successThreshold: 1
+  #   timeoutSeconds: 2
+  startupProbe:
+    httpGet:
+      path: /.backstage/health/v1/liveness
+      port: 7007
+      scheme: HTTP
+
+  # -- Security settings for a Pod.
+  #  The security settings that you specify for a Pod apply to all Containers in the Pod.
+  # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext: {}
+
+  # -- Security settings for a Container.
+  # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext: {}
+
+  # Allows to define the appConfig as a multiline string that generates a ConfigMap
+  # automatically, not requiring to have it pre provisioned as with the extraAppConfig key.
+  # DO NOT USE if you need to put sensitive data in the appConfig.
+  # E.g:
+  # appConfig:
+  #   app:
+  #     baseUrl: https://somedomain.tld
+  # -- Generates ConfigMap and configures it in the Backstage pods
+  appConfig: {}
+
+  # -- Affinity for pod assignment
+  # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  # -- Topology Spread Constraints for pod assignment
+  # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints
+  topologySpreadConstraints: []
+
+  # -- Node labels for pod assignment
+  # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  # -- Node tolerations for server scheduling to nodes with taints
+  # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  tolerations: []
+  #  - key: "key"
+  #    operator: "Equal|Exists"
+  #    value: "value"
+  #    effect: "NoSchedule|PreferNoSchedule|NoExecute"
+
+  # -- Host Aliases for the pod
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  hostAliases: []
+
+  # -- Annotations to add to the backend deployment pods
+  podAnnotations: {}
+
+  # -- Labels to add to the backend deployment pods
+  podLabels: {}
+
+  # -- Additional custom annotations for the `Deployment` resource
+  annotations: {}
+
+## @section Traffic Exposure parameters
+
+## Service parameters
+##
+# -- Service parameters
+# @default -- See below
+service:
+
+  # -- Kubernetes Service type
+  type: ClusterIP
+
+  # -- Backstage svc port for client connections
+  ports:
+    backend: 7007
+
+    # -- Backstage svc port name
+    name: http-backend
+
+    # -- Backstage svc target port referencing receiving pod container port
+    targetPort: backend
+
+  # -- Node port for the Backstage client connections
+  # Choose port between `30000-32767`
+  nodePorts:
+    backend: ""
+
+  # -- Control where client requests go, to the same pod or round-robin
+  # (values: `ClientIP` or `None`)
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/service/#session-stickiness
+  sessionAffinity: None
+
+  # -- Backstage service Cluster IP
+  #
+  # <br /> E.g `clusterIP: None`
+  clusterIP: ""
+
+  # -- Backstage service Load Balancer IP
+  #
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer
+  loadBalancerIP: ""
+
+  # -- Load Balancer sources
+  #
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer
+  # <br /> E.g `loadBalancerSourceRanges: [10.10.10.0/24]`
+  loadBalancerSourceRanges: []
+
+  # -- Backstage service external traffic policy
+  #
+  # Ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  externalTrafficPolicy: Cluster
+
+  # -- Additional custom annotations for Backstage service
+  annotations: {}
+
+  # -- Extra ports to expose in the Backstage service (normally used with the `sidecar` value)
+  extraPorts: []
+
+  # -- IP Family Policy
+  #
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack
+  ipFamilyPolicy: ""
+
+  # -- IP Families
+  #
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack
+  ipFamilies: []
+
+## @section NetworkPolicy parameters
+##
+networkPolicy:
+  # -- Specifies whether a NetworkPolicy should be created
+  enabled: false
+
+  ## Ingress Rules
+  ##
+  ingressRules:
+
+    # -- Namespace selector label allowed to access the Backstage instance
+    namespaceSelector: {}
+
+    # -- Pod selector label allowed to access the Backstage instance
+    podSelector: {}
+
+    # -- Additional custom ingress rules
+    customRules: []
+    #   - to:
+    #       - namespaceSelector:
+    #           matchLabels:
+    #             label: example
+
+  ## Egress Rules
+  ##
+  egressRules:
+
+    # -- Deny external connections. Should not be enabled when working with an external database.
+    denyConnectionsToExternal: false
+
+    # -- Additional custom egress rules
+    customRules: []
+    #   - to:
+    #       - namespaceSelector:
+    #           matchLabels:
+    #             label: example
+
+
+# -- PostgreSQL [chart configuration](https://github.com/bitnami/charts/blob/master/bitnami/postgresql/values.yaml)
+# @default -- See below
+postgresql:
+
+  # -- Switch to enable or disable the PostgreSQL helm chart
+  enabled: false
+
+  # -- Change default PostgreSQL image location (workaround for https://github.com/bitnami/charts/issues/35164)
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+
+  # -- The authentication details of the Postgres database
+  auth:
+
+    # -- Name for a custom user to create
+    username: bn_backstage
+
+    # -- Password for the custom user to create
+    password: ""
+
+    # -- Name of existing secret to use for PostgreSQL credentials
+    existingSecret: ""
+
+    # -- The secret keys Postgres will look for to retrieve the relevant password
+    secretKeys:
+
+      # -- The key in which Postgres will look for, for the admin password, in the existing Secret
+      adminPasswordKey: admin-password
+
+      # -- The key in which Postgres will look for, for the user password, in the existing Secret
+      userPasswordKey: user-password
+
+      # -- The key in which Postgres will look for, for the replication password, in the existing Secret
+      replicationPasswordKey: replication-password
+
+  # -- PostgreSQL architecture (`standalone` or `replication`)
+  architecture: standalone
+
+# -- Service Account Configuration
+# @default -- See below
+serviceAccount:
+
+  # -- Enable the creation of a ServiceAccount for Backstage pods
+  create: false
+
+  # -- Name of the ServiceAccount to use
+  # If not set and `serviceAccount.create` is true, a name is generated
+  name: ""
+
+  # -- Additional custom labels to the service ServiceAccount.
+  labels: {}
+
+  # -- Additional custom annotations for the ServiceAccount.
+  annotations: {}
+
+  # -- Auto-mount the service account token in the pod
+  automountServiceAccountToken: true
+
+# -- Metrics configuration
+metrics:
+
+  # -- ServiceMonitor configuration
+  # <br /> Allows configuring your backstage instance as a scrape target for [Prometheus](https://github.com/prometheus/prometheus) using a ServiceMonitor custom resource that [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator) can understand.
+  serviceMonitor:
+
+    # -- If enabled, a ServiceMonitor resource for Prometheus Operator is created
+    # <br /> Prometheus Operator must be installed in your cluster prior to enabling.
+    enabled: false
+
+    # -- ServiceMonitor annotations
+    annotations: {}
+
+    # -- Additional ServiceMonitor labels
+    labels: {}
+
+    # -- ServiceMonitor scrape interval
+    interval: null
+
+    # -- ServiceMonitor endpoint path
+    # <br /> Note that the /metrics endpoint is NOT present in a freshly scaffolded Backstage app. To setup, follow the [Prometheus metrics tutorial](https://github.com/backstage/backstage/blob/master/contrib/docs/tutorials/prometheus-metrics.md).
+    path: /metrics
+
+    # -- ServiceMonitor endpoint port
+    # <br /> The port where the metrics are exposed. If using OpenTelemetry as [documented here](https://backstage.io/docs/tutorials/setup-opentelemetry/), then the port needs to be explicitly specified. OpenTelemetry's default port is 9464.
+    port: http-backend

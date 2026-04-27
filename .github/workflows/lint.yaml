@@ -2,45 +2,28 @@ name: Lint Charts
 
 on:
   pull_request:
-    branches:
-      - main
-      - rhdh-1.[0-9]+
-      - 1.[0-9]+.x
-      - release-1.[0-9]+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
 jobs:
-
-  lint-chart:
-    name: Lint Metadata
+  lint:
     runs-on: ubuntu-latest
     env:
       GO111MODULE: on
-
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
-      - name: Set up Helm
-        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # renovate: tag=v3.5
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # pin@v4
         with:
-          version: v3.10.0
-
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
-        with:
-          python-version: 3.14
+          python-version: 3.12
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
-        with:
-          version: '3.14.0'
-          yamllint_version: '1.37.1'
-          yamale_version: '6.0.0'
+        uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # pin@v2.3.0
 
       - name: Run chart-testing (list-changed)
         id: list-changed
@@ -50,16 +33,12 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Add Helm Repositories
+      - name: "Add NGINX Ingress and Bitnami Repository"
         if: steps.list-changed.outputs.changed == 'true'
         run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add ingress-nginx "https://kubernetes.github.io/ingress-nginx"
           helm repo update
 
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
-        run: |
-          ct lint \
-            --debug \
-            --config ct-lint.yaml \
-            --target-branch "${{ github.event.pull_request.base.ref }}"
+        run: ct lint --config ct.yaml --target-branch "${{ github.event.pull_request.base.ref }}"
