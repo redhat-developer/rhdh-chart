@@ -1,0 +1,141 @@
+name: Sync Lightspeed Configs
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  sync-lightspeed:
+    name: Sync Lightspeed Configs
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
+        with:
+          version: v3.17.0
+
+      - name: Set up yq
+        uses: mikefarah/yq@751d8ad57b84f1794661bc70c0afb92a22ad7b3c # v4.53.2
+        with:
+          cmd: yq --version
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: 3.14
+
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+        with:
+          go-version: ^1
+
+      - name: Set up helm-docs
+        run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync Lightspeed config files
+        run: ./hack/sync-lightspeed-configs.sh
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet charts/backstage/files/lightspeed/; then
+            echo "No changes from upstream."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changes detected from upstream."
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get current chart version
+        if: steps.changes.outputs.has_changes == 'true'
+        id: get_version
+        uses: mikefarah/yq@751d8ad57b84f1794661bc70c0afb92a22ad7b3c # v4.53.2
+        with:
+          cmd: yq '.version' charts/backstage/Chart.yaml
+
+      - name: Compute next patch version
+        if: steps.changes.outputs.has_changes == 'true'
+        id: semver
+        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1
+        with:
+          current_version: ${{ steps.get_version.outputs.result }}
+          level: patch
+
+      - name: Bump chart version
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: mikefarah/yq@751d8ad57b84f1794661bc70c0afb92a22ad7b3c # v4.53.2
+        with:
+          cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/backstage/Chart.yaml
+
+      - name: Run pre-commit
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+        continue-on-error: true
+
+      - name: Commit changes and open PR
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ steps.semver.outputs.new_version }}
+        run: |
+          TITLE="chore(lightspeed): sync config files and bump chart to ${NEW_VERSION}"
+          BRANCH="chore/sync-lightspeed-configs"
+
+          EXISTING_PR=$(gh pr list --head "${BRANCH}" --state open --json number --jq '.[0].number // empty')
+
+          git checkout -b "${BRANCH}"
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No staged changes to commit."
+            exit 0
+          fi
+          git commit -m "${TITLE}"
+
+          if [ -n "${EXISTING_PR}" ]; then
+            echo "Updating existing PR #${EXISTING_PR}."
+            git push --force origin "${BRANCH}"
+          else
+            git push origin "${BRANCH}"
+
+            BODY=$(cat <<EOF
+          Automated nightly sync of Lightspeed config files from [redhat-ai-dev/lightspeed-configs](https://github.com/redhat-ai-dev/lightspeed-configs).
+
+          Bumped chart version to **${NEW_VERSION}**.
+
+          ### Synced files
+          - \`charts/backstage/files/lightspeed/lightspeed-stack.yaml\`
+          - \`charts/backstage/files/lightspeed/config.yaml\`
+          - \`charts/backstage/files/lightspeed/rhdh-profile.py\`
+          - \`charts/backstage/files/lightspeed/secret.yaml\`
+
+          > [!CAUTION]
+          > Please review the upstream changes carefully before merging.
+          EOF
+            )
+
+            gh pr create \
+              --title "${TITLE}" \
+              --body "${BODY}" \
+              --base "${{ github.ref_name }}"
+          fi
