@@ -1,6 +1,14 @@
 # Workaround for kind cluster in CI which has no Routes and no PVCs
 route:
   enabled: false
+
+global:
+  lightspeed:
+    sidecar:
+      env:
+        - name: SERVICE_HOST
+          value: "0.0.0.0"
+
 upstream:
   postgresql:
     primary:
