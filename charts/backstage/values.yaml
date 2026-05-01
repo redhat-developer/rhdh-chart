@@ -54,7 +54,7 @@ global:
     enabled: true
     # -- Lightspeed plugins and their configuration. Override package references for disconnected environments.
     plugins:
-      - package: 'oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
+      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
         disabled: false
         pluginConfig:
           dynamicPlugins:
@@ -81,7 +81,7 @@ global:
                     config:
                       id: lightspeed
                       priority: 100
-      - package: 'oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
+      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
         disabled: false
     runtimeVolume:
       # -- Name of the Kubernetes volume used for writable Lightspeed runtime storage.
