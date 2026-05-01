@@ -222,7 +222,7 @@
                         "plugins": [
                             {
                                 "disabled": false,
-                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
+                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
                                 "pluginConfig": {
                                     "dynamicPlugins": {
                                         "frontend": {
@@ -272,7 +272,7 @@
                             },
                             {
                                 "disabled": false,
-                                "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
                             }
                         ],
                         "ragVolume": {
@@ -338,7 +338,7 @@
                             "default": [
                                 {
                                     "disabled": false,
-                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
+                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
                                     "pluginConfig": {
                                         "dynamicPlugins": {
                                             "frontend": {
@@ -388,7 +388,7 @@
                                 },
                                 {
                                     "disabled": false,
-                                    "package": "oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
                                 }
                             ],
                             "items": {
