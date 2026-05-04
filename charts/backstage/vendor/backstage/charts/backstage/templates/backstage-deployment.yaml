@@ -256,7 +256,7 @@ spec:
               {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}
           {{- end }}
-          {{- if $lightspeed.enabled }}
+        {{- if $lightspeed.enabled }}
         - name: {{ $lightspeed.sidecar.name }}
           image: {{ include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.image "context" $) }}
           imagePullPolicy: {{ $lightspeed.sidecar.imagePullPolicy | quote }}
