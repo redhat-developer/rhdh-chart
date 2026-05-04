@@ -45,6 +45,11 @@ spec:
         {{- end }}
       annotations:
         checksum/app-config: {{ include "common.tplvalues.render" ( dict "value" .Values.backstage.appConfig "context" $) | sha256sum }}
+        checksum/dynamic-plugins: {{ include "common.tplvalues.render" ( dict "value" (dict "dynamic" .Values.global.dynamic "lightspeed" (dict "enabled" $lightspeed.enabled "plugins" $lightspeed.plugins)) "context" $) | sha256sum }}
+        {{- if $lightspeed.enabled }}
+        checksum/lightspeed-configmaps: {{ include "rhdh.lightspeed.configMapsChecksum" (dict "context" $ "lightspeed" $lightspeed) | sha256sum }}
+        checksum/lightspeed-secret: {{ include "rhdh.lightspeed.secretChecksum" (dict "context" $ "lightspeed" $lightspeed) | sha256sum }}
+        {{- end }}
         {{- if .Values.backstage.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
@@ -90,8 +95,27 @@ spec:
           configMap:
             name: {{ include "common.names.fullname" . }}-app-config
         {{- end }}
+        {{- if $lightspeed.enabled }}
+        - name: {{ $lightspeed.runtimeVolume.name }}
+          {{- if eq $lightspeedRuntimeVolumeType "persistentVolumeClaim" }}
+          persistentVolumeClaim:
+            {{- include "common.tplvalues.render" ( dict "value" $lightspeed.runtimeVolume.persistentVolumeClaim "context" $ ) | nindent 12 }}
+          {{- else }}
+          emptyDir:
+            {{- include "common.tplvalues.render" ( dict "value" $lightspeed.runtimeVolume.emptyDir "context" $ ) | nindent 12 }}
+          {{- end }}
+        - name: {{ $lightspeed.ragVolume.name }}
+          emptyDir:
+            {{- include "common.tplvalues.render" ( dict "value" $lightspeed.ragVolume.emptyDir "context" $ ) | nindent 12 }}
+        {{- range $lightspeed.configMaps }}
+        - name: {{ include "rhdh.lightspeed.configMapVolumeName" . }}
+          configMap:
+            name: {{ include "rhdh.lightspeed.configMapName" (dict "root" $ "configMap" .) }}
+            optional: {{ default false .optional }}
+        {{- end }}
+        {{- end }}
       {{- include "backstage.renderImagePullSecrets" . | nindent 6 }}
-      {{- if .Values.backstage.initContainers }}
+      {{- if or .Values.backstage.initContainers $lightspeed.enabled }}
       initContainers:
         {{- if .Values.backstage.initContainers }}
         {{- range .Values.backstage.initContainers }}
@@ -232,6 +256,48 @@ spec:
               {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}
           {{- end }}
+          {{- if $lightspeed.enabled }}
+        - name: {{ $lightspeed.sidecar.name }}
+          image: {{ include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.image "context" $) }}
+          imagePullPolicy: {{ $lightspeed.sidecar.imagePullPolicy | quote }}
+          {{- if $lightspeed.sidecar.securityContext }}
+          securityContext:
+            {{- include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.securityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $lightspeed.sidecar.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $lightspeed.sidecar.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.args "context" $) | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: {{ $lightspeed.sidecar.portName }}
+              containerPort: {{ $lightspeed.sidecar.containerPort }}
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ include "rhdh.lightspeed.secretName" (dict "context" $ "lightspeed" $lightspeed) }}
+                optional: {{ default false $lightspeed.secret.optional }}
+          {{- if $lightspeed.sidecar.env }}
+          env: {{- include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.env "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if $lightspeed.sidecar.resources }}
+          resources: {{- include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.resources "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ $lightspeed.runtimeVolume.name }}
+              mountPath: {{ $lightspeed.runtimeVolume.mountPath | quote }}
+            - name: {{ $lightspeed.ragVolume.name }}
+              mountPath: {{ $lightspeed.ragVolume.mountPath | quote }}
+            {{- range $lightspeed.configMaps }}
+            - name: {{ include "rhdh.lightspeed.configMapVolumeName" . }}
+              mountPath: {{ .mountPath | quote }}
+              {{- if .subPath }}
+              subPath: {{ .subPath | quote }}
+              {{- end }}
+              readOnly: true
+            {{- end }}
+        {{- end }}
         {{- if .Values.backstage.extraContainers }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.backstage.extraContainers "context" $) | nindent 8 }}
         {{- end }}
