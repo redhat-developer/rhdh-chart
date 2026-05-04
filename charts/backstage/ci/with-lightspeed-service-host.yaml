@@ -2,6 +2,13 @@
 route:
   enabled: false
 
+global:
+  lightspeed:
+    sidecar:
+      env:
+        - name: SERVICE_HOST
+          value: "0.0.0.0"
+
 upstream:
   postgresql:
     primary:
