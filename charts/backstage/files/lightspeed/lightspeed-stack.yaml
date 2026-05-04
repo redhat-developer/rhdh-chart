@@ -15,7 +15,7 @@
 # limitations under the License.
 name: lightspeed-core-stack
 service:
-  host: 0.0.0.0
+  host: ${env.SERVICE_HOST:=127.0.0.1}
   port: 8080
   auth_enabled: false
   workers: 1
@@ -37,7 +37,7 @@ customization:
   profile_path: '/app-root/rhdh-profile.py'
 mcp_servers:
   - name: mcp-integration-tools
-    provider_id: "model-context-protocol"
-    url: "http://localhost:7007/api/mcp-actions/v1"
+    provider_id: 'model-context-protocol'
+    url: 'http://localhost:7007/api/mcp-actions/v1'
     authorization_headers:
-      Authorization: "client"
+      Authorization: 'client'
