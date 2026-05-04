@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - '**.toml'
+      - '.github/workflows/toml-checks.yaml'
   pull_request:
     paths:
       - '**.toml'
+      - '.github/workflows/toml-checks.yaml'
 
 jobs:
   validate:
