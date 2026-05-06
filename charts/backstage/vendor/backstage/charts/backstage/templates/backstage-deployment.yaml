@@ -131,7 +131,7 @@ spec:
         {{- end }}
         {{- if $lightspeed.enabled }}
         - name: {{ $lightspeed.initContainer.name }}
-          image: {{ include "common.tplvalues.render" (dict "value" $lightspeed.initContainer.image "context" $) }}
+          image: {{ include "backstage.image.render" (dict "image" $lightspeed.initContainer.image "global" .Values.global) | quote }}
           imagePullPolicy: {{ $lightspeed.initContainer.imagePullPolicy | quote }}
           {{- if $lightspeed.initContainer.securityContext }}
           securityContext:
@@ -255,7 +255,7 @@ spec:
           {{- end }}
         {{- if $lightspeed.enabled }}
         - name: {{ $lightspeed.sidecar.name }}
-          image: {{ include "common.tplvalues.render" (dict "value" $lightspeed.sidecar.image "context" $) }}
+          image: {{ include "backstage.image.render" (dict "image" $lightspeed.sidecar.image "global" .Values.global) | quote }}
           imagePullPolicy: {{ $lightspeed.sidecar.imagePullPolicy | quote }}
           {{- if $lightspeed.sidecar.securityContext }}
           securityContext:
