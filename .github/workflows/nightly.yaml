@@ -46,4 +46,5 @@ jobs:
         with:
           target_branch: ${{ matrix.branch }}
           all_charts: 'true'
-          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=${{ steps.image.outputs.tag }} --set upstream.backstage.image.pullPolicy=Always'
+          # TODO(RHDHBUGS-3095): Remove the catalogIndex.image.tag pin once the lightspeed plugins OCI refs are fixed in the latest catalog index image.
+          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=${{ steps.image.outputs.tag }} --set upstream.backstage.image.pullPolicy=Always --set global.catalogIndex.image.tag=1.10-51'
