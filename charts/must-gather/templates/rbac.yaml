@@ -19,7 +19,7 @@ rules:
     verbs: ["get", "list"]
   {{- end }}
   - apiGroups: ["apps"]
-    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets", "controllerrevisions"]
     verbs: ["get", "list"]
   {{- if .Values.rbac.rules.ingresses }}
   - apiGroups: ["networking.k8s.io"]
