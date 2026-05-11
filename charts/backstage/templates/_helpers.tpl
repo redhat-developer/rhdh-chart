@@ -50,6 +50,17 @@ Referenced from: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/
 {{- end -}}
 
 {{/*
+Return an image reference from a value that may be a string or a map with registry/repository/tag fields.
+*/}}
+{{- define "backstage.image.render" -}}
+{{- if kindIs "string" .image -}}
+  {{- .image -}}
+{{- else -}}
+  {{- include "common.images.image" (dict "imageRoot" (.image | toYaml | fromYaml) "global" .global) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the configured Lightspeed runtime volume type and validate the required
 source block is present.
 */}}

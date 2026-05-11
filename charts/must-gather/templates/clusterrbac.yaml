@@ -21,7 +21,7 @@ rules:
     resources: ["namespaces", "nodes"]
     verbs: ["get", "list"]
   - apiGroups: ["apps"]
-    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets", "controllerrevisions"]
     verbs: ["get", "list"]
   {{- if .Values.rbac.rules.platform }}
   - apiGroups: ["config.openshift.io"]

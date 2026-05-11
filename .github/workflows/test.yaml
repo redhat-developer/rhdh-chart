@@ -34,4 +34,5 @@ jobs:
         with:
           target_branch: ${{ github.event.pull_request.base.ref }}
           # The RHDH image tag is already pinned to a specific version for the 'release-1.y' branches.
-          extra_helm_args: ${{ github.event.pull_request.base.ref == 'main' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1}', env.RHDH_IMAGE_REPOSITORY, env.RHDH_IMAGE_TAG) || '' }}
+          # TODO(RHDHBUGS-3095): Remove the catalogIndex.image.tag pin once the lightspeed plugins OCI refs are fixed in the latest catalog index image.
+          extra_helm_args: ${{ github.event.pull_request.base.ref == 'main' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set global.catalogIndex.image.tag=1.10-51', env.RHDH_IMAGE_REPOSITORY, env.RHDH_IMAGE_TAG) || '--set global.catalogIndex.image.tag=1.10-51' }}
