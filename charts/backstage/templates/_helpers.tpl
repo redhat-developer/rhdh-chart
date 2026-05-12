@@ -36,6 +36,21 @@ Sets the secretKeyRef name for Backstage to the PostgreSQL existing secret if it
 {{- end -}}
 
 {{/*
+Returns the PostgreSQL admin password key, supporting both global and local configurations.
+*/}}
+{{- define "rhdh.postgresql.adminPasswordKey" -}}
+    {{- if ((((((.Values).global).postgresql).auth).secretKeys).adminPasswordKey) -}}
+        {{- .Values.global.postgresql.auth.secretKeys.adminPasswordKey -}}
+    {{- else if (((((.Values).postgresql).auth).secretKeys).adminPasswordKey) -}}
+        {{- .Values.postgresql.auth.secretKeys.adminPasswordKey -}}
+    {{- else if ((((.Values).auth).secretKeys).adminPasswordKey) -}}
+        {{- .Values.auth.secretKeys.adminPasswordKey -}}
+    {{- else -}}
+        postgres-password
+    {{- end -}}
+{{- end -}}
+
+{{/*
 Get the password secret.
 Referenced from: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/templates/_helpers.tpl#L94-L105
 */}}
