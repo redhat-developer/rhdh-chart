@@ -5,21 +5,21 @@
 
 # ⚓️ GitOps Operator Helm Deploy
 
-The GitOps  Helm Chart customizes and deploys the [RedHat GitOps Operator](https://github.com/redhat-developer/gitops-operator) written by Red Hat.
+The GitOps Helm Chart customizes and deploys the [RedHat GitOps Operator](https://github.com/redhat-developer/gitops-operator) written by Red Hat.
 
 ## Installing the chart
 
 To install the chart from source:
 ```bash
 # within this directory 
-helm upgrade --install argocd . -f values.yaml -n janus-argocd --create-namespace
+helm upgrade --install argocd . -f values.yaml -n rhdh-argocd --create-namespace
 ```
 
 ## Configuration
 
 The [values.yml](values.yaml) file contains instructions for common chart overrides.
 
-You can install multiple team instances of ArgoCD into different namespaces, just add your namespace to this list. Namespaces will be created first e.g. shown above for a single namespace called `janus-gitops`.
+You can install multiple team instances of ArgoCD into different namespaces, just add your namespace to this list. Namespaces will be created first e.g. shown above for a single namespace called `rhdh-gitops`.
 
 RBAC for each ArgoCD instance is `cluster-admin` scoped by default. You can create `namespaced` ArgoCD instances by specifying `teamInstancesAreClusterScoped: false`. This setting does not deploy any excess RBAC and uses the defaults from the gitops-operator.
 
@@ -42,8 +42,8 @@ helm instance argocd ./charts/gitops-operator --set operator=null --set ignoreHe
 
 To delete the chart:
 ```bash
-helm uninstall argocd --namespace janus-gitops
-oc delete project janus-argocd
+helm uninstall argocd --namespace rhdh-gitops
+oc delete project rhdh-argocd
 
 ### If ignoreHelmHooks is set to 'false' you will need to remove the argocd and appproject resources manually
 oc delete argocd argocd

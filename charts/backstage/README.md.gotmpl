@@ -25,7 +25,6 @@ For the **Generally Available** version of this chart, see:
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
 helm install my-backstage redhat-developer/backstage --version {{ template "chart.version" . }}
@@ -59,7 +58,6 @@ The following command can be used to add the chart repository:
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 ```
 
@@ -89,8 +87,6 @@ helm upgrade -i <release_name> redhat-developer/backstage
 ```
 
 ### Installing from an OCI Registry
-
-Note: this repo replaces https://github.com/janus-idp/helm-backstage, which has been deprecated in Feb 2024.
 
 Charts are also available in OCI format. The list of available releases can be found [here](https://quay.io/repository/rhdh/chart?tab=tags).
 
@@ -162,11 +158,11 @@ This chart defaults to an opinionated deployment of Backstage that provides user
 
 Features enabled by the default chart configuration:
 
-1. Uses [janus-idp/backstage-showcase](https://github.com/janus-idp/backstage-showcase/) that pre-loads a lot of useful plugins and features
+1. Uses [rhdh](https://github.com/redhat-developer/rhdh/) that pre-loads a lot of useful plugins and features
 2. Exposes a `Route` for easy access to the instance
 3. Enables OpenShift-compatible PostgreSQL database storage
 
-For additional instance features please consult the [documentation for `janus-idp/backstage-showcase`](https://github.com/janus-idp/backstage-showcase/tree/main/showcase-docs).
+For additional instance features please consult the [documentation for `rhdh`](https://github.com/redhat-developer/rhdh/tree/main/showcase-docs).
 
 Additional features can be enabled by extending the default configuration at:
 
@@ -181,10 +177,10 @@ upstream:
 
 ## Features
 
-This charts defaults to using the [latest Janus-IDP Backstage Showcase image](https://quay.io/janus-idp/backstage-showcase:latest) that is OpenShift compatible:
+This charts defaults to using the [RHDH image](https://quay.io/rhdh-community/rhdh:next) that is OpenShift compatible:
 
 ```console
-quay.io/janus-idp/backstage-showcase:latest
+quay.io/rhdh-community/rhdh:next
 ```
 
 Additionally this chart enhances the upstream Backstage chart with following OpenShift-specific features:
@@ -227,18 +223,32 @@ upstream:
   backstage:
     appConfig:
       app:
-        baseUrl: 'https://{{"{{"}}- include "janus-idp.hostname" . {{"}}"}}'
+        baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
       backend:
-        baseUrl: 'https://{{"{{"}}- include "janus-idp.hostname" . {{"}}"}}'
+        baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
         cors:
-          origin: 'https://{{"{{"}}- include "janus-idp.hostname" . {{"}}"}}'
+          origin: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
 ```
 
 ### Catalog Index Configuration
 
 The chart supports automatic plugin discovery through a catalog index OCI image. This is configured via `global.catalogIndex.image` (with `registry`, `repository`, and `tag` fields) and lets you use a pre-defined set of dynamic plugins.
 
-For detailed information on configuring the catalog index, including how to override the default image or use a private registry, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
+You can also configure additional catalog index images via `global.catalogIndex.extraImages` to make plugins from other sources discoverable in the Extensions UI. Each extra image contributes catalog entities only (no `dynamic-plugins.default.yaml` handling).
+
+For detailed information on configuring the catalog index, including how to override the default image, use a private registry, or add extra catalog index images, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
+
+### Lightspeed
+
+Use `global.lightspeed.enabled` to enable or disable the built-in Lightspeed feature.
+
+When enabled, the chart adds the default Lightspeed dynamic plugins, a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, a chart-generated Secret, and separate runtime and RAG data volumes. Override `global.lightspeed.plugins` for disconnected environments.
+
+Use `global.lightspeed.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
+
+When using the built-in Lightspeed feature, do not also keep Lightspeed plugin packages in `global.dynamic.plugins`. Existing installations that previously configured Lightspeed there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `global.lightspeed.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate Lightspeed plugin entries.
+
+The Lightspeed Core sidecar loads the chart-created Lightspeed Secret as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
 
 ### Vanilla Kubernetes compatibility mode
 
@@ -276,7 +286,6 @@ Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the sam
 1. Have an admin install the [orchestrator-infra Helm Chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/orchestrator-infra#readme), which will install the prerequisites required to deploy the Orchestrator-flavored RHDH. This process will include installing cluster-wide resources, so should be done with admin privileges:
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add backstage https://backstage.github.io/charts
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
 helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra

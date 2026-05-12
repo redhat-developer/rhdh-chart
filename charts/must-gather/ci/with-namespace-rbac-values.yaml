@@ -1,0 +1,9 @@
+# Namespace-scoped RBAC — creates a Role instead of a ClusterRole.
+# Collection is restricted to the release namespace only;
+# gather.namespaces is ignored in this mode.
+rbac:
+  scope: namespace
+gather:
+  # NOTE: this field will be ignored when rbac.scope is "namespace".
+  namespaces:
+    - "kube-system"

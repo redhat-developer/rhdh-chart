@@ -1,0 +1,20 @@
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- if and $lightspeed.enabled $lightspeed.configMaps }}
+{{- $created := 0 -}}
+{{- range $index, $configMap := $lightspeed.configMaps }}
+{{- if not (and (hasKey $configMap "create") (not $configMap.create)) }}
+{{- if gt $created 0 }}
+---
+{{- end }}
+{{- $created = add1 $created }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rhdh.lightspeed.configMapName" (dict "root" $ "configMap" $configMap) }}
+  namespace: {{ $.Release.Namespace | quote }}
+data:
+  {{ $configMap.subPath }}: |
+{{ include "rhdh.lightspeed.fileContent" (dict "context" $ "file" $configMap.sourceFile "optional" $configMap.optional "ref" (printf "global.lightspeed.configMaps[%s].sourceFile" $configMap.name)) | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

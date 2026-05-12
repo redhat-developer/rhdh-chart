@@ -16,10 +16,10 @@ As a prerequisite, you have to know:
 In addition, to get your database connection secured with SSL/TLS, you also need certificates in the form of PEM file. 
 
 You can find configuration guidelines for:
-- [AWS RDS PostgreSQL](https://github.com/janus-idp/operator/blob/main/docs/external-db.md#aws-rds-postgresql)
-- [Azure Database PostgreSQL](https://github.com/janus-idp/operator/blob/main/docs/external-db.md#aws-rds-postgresql)
+- [AWS RDS PostgreSQL](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/external-db.md#aws-rds-postgresql)
+- [Azure Database PostgreSQL](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/external-db.md#azure-db-postgresql)
 
-If you want to move Backstage database from local to external, here is a [Migration Guide](https://github.com/janus-idp/operator/blob/main/docs/db_migration.md).
+If you want to move Backstage database from local to external, here is a [Migration Guide](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/db_migration.md).
 
 ### Create secret with PostgreSQL connection properties:
 ````yaml
@@ -78,7 +78,7 @@ upstream:
        valueFrom:
          secretKeyRef:
            key: backend-secret
-           name: '{{ include "janus-idp.backend-secret-name" $ }}'
+           name: '{{ include "rhdh.backend-secret-name" $ }}'
    extraVolumeMounts:
      - mountPath: /opt/app-root/src/dynamic-plugins-root
        name: dynamic-plugins-root

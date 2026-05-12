@@ -11,8 +11,8 @@
                 "backstage": {
                     "image": {
                         "registry": "quay.io",
-                        "repository": "janus-idp/redhat-backstage-build",
-                        "tag": "latest",
+                        "repository": "rhdh-community/rhdh",
+                        "tag": "next",
                         "pullPolicy": ""
                     }
                 }
@@ -128,6 +128,134 @@
                                     "title": "Catalog index image tag",
                                     "type": "string",
                                     "default": "1.9"
+                                }
+                            }
+                        },
+                        "extraImages": {
+                            "title": "Extra catalog index images for additional plugin discovery in the Extensions UI. Only catalog entities are extracted from extra images (no dynamic-plugins.default.yaml handling).",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "registry",
+                                    "repository",
+                                    "tag"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "pattern": "^[A-Za-z0-9._-]+$",
+                                        "title": "Optional name for the extra catalog index image. Produces cleaner extraction directory names (e.g., /extra/community/).",
+                                        "type": "string"
+                                    },
+                                    "registry": {
+                                        "title": "Extra catalog index image registry",
+                                        "type": "string"
+                                    },
+                                    "repository": {
+                                        "title": "Extra catalog index image repository",
+                                        "type": "string"
+                                    },
+                                    "tag": {
+                                        "title": "Extra catalog index image tag",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "lightspeed": {
+                    "title": "Built-in Lightspeed feature configuration.",
+                    "type": [
+                        "boolean",
+                        "object"
+                    ],
+                    "default": {},
+                    "additionalProperties": true,
+                    "properties": {
+                        "enabled": {
+                            "title": "Enable or disable the built-in Lightspeed feature.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "plugins": {
+                            "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "package": {
+                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
+                                        "type": "string"
+                                    },
+                                    "integrity": {
+                                        "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                        "type": "string"
+                                    },
+                                    "pluginConfig": {
+                                        "title": "Optional plugin-specific app-config YAML fragment.",
+                                        "type": "object"
+                                    },
+                                    "disabled": {
+                                        "title": "Disable the plugin.",
+                                        "type": "boolean",
+                                        "default": false
+                                    }
+                                },
+                                "required": [
+                                    "package"
+                                ]
+                            }
+                        },
+                        "runtimeVolume": {
+                            "title": "Runtime data volume configuration for the Lightspeed Core sidecar.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
+                                    "type": "string",
+                                    "default": "lightspeed-data"
+                                },
+                                "mountPath": {
+                                    "title": "Mount path inside the container for Lightspeed runtime storage.",
+                                    "type": "string",
+                                    "default": "/tmp"
+                                },
+                                "type": {
+                                    "title": "Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.",
+                                    "type": "string",
+                                    "default": "emptyDir",
+                                    "enum": [
+                                        "emptyDir",
+                                        "persistentVolumeClaim"
+                                    ]
+                                },
+                                "emptyDir": {
+                                    "title": "`emptyDir` configuration for the Lightspeed runtime data volume when `runtimeVolume.type=emptyDir`.",
+                                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.EmptyDirVolumeSource",
+                                    "default": {}
+                                },
+                                "persistentVolumeClaim": {
+                                    "title": "Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.",
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "claimName": {
+                                            "title": "Name of the existing PVC to mount for Lightspeed runtime data.",
+                                            "type": "string",
+                                            "default": ""
+                                        },
+                                        "readOnly": {
+                                            "title": "Whether the existing PVC should be mounted read-only.",
+                                            "type": "boolean",
+                                            "default": false
+                                        }
+                                    },
+                                    "default": {}
                                 }
                             }
                         }

@@ -17,3 +17,6 @@
 # Documentation:
 *.md.gotmpl  @redhat-developer/RHDH-content
 /README.md   @redhat-developer/RHDH-content
+
+# Lightspeed:
+/charts/backstage/files/lightspeed/ @redhat-developer/rhdh-ai

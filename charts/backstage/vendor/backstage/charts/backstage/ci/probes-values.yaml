@@ -1,0 +1,44 @@
+backstage:
+  appConfig:
+    techdocs:
+      builder: "local"
+    app:
+      # Let's test that everything is fine with comments
+      title: The very best Backstage Helm Chart! :D
+      baseUrl: https://somedomain.tl
+    backend:
+      baseUrl: https://somedomain.tl
+      auth:
+        keys:
+          # Is just a random b64 string for test purposes
+          - secret: N4+P+zJrErWRUGm0ZbVVhX1ZC81aSP81
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /.backstage/health/v1/readiness
+      port: 7007
+      scheme: HTTP
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 2
+    timeoutSeconds: 2
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /.backstage/health/v1/liveness
+      port: 7007
+      scheme: HTTP
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 2
+  startupProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /.backstage/health/v1/liveness
+      port: 7007
+      scheme: HTTP
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 2

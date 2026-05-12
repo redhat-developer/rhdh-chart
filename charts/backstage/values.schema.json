@@ -35,6 +35,39 @@
                 "catalogIndex": {
                     "additionalProperties": false,
                     "properties": {
+                        "extraImages": {
+                            "default": [],
+                            "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                    "name": {
+                                        "pattern": "^[A-Za-z0-9._-]+$",
+                                        "title": "Optional name for the extra catalog index image. Produces cleaner extraction directory names (e.g., /extra/community/).",
+                                        "type": "string"
+                                    },
+                                    "registry": {
+                                        "title": "Extra catalog index image registry",
+                                        "type": "string"
+                                    },
+                                    "repository": {
+                                        "title": "Extra catalog index image repository",
+                                        "type": "string"
+                                    },
+                                    "tag": {
+                                        "title": "Extra catalog index image tag",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "registry",
+                                    "repository",
+                                    "tag"
+                                ],
+                                "type": "object"
+                            },
+                            "title": "Extra catalog index images for additional plugin discovery in the Extensions UI. Only catalog entities are extracted from extra images (no dynamic-plugins.default.yaml handling).",
+                            "type": "array"
+                        },
                         "image": {
                             "additionalProperties": false,
                             "properties": {
@@ -49,7 +82,7 @@
                                     "type": "string"
                                 },
                                 "tag": {
-                                    "default": "1.9",
+                                    "default": "1.10",
                                     "title": "Catalog index image tag",
                                     "type": "string"
                                 }
@@ -116,6 +149,346 @@
                     "default": "",
                     "title": "Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`",
                     "type": "string"
+                },
+                "lightspeed": {
+                    "additionalProperties": true,
+                    "default": {
+                        "configMaps": [
+                            {
+                                "create": true,
+                                "mountPath": "/app-root/lightspeed-stack.yaml",
+                                "name": "stack",
+                                "nameOverride": "",
+                                "optional": false,
+                                "sourceFile": "lightspeed-stack.yaml",
+                                "subPath": "lightspeed-stack.yaml"
+                            },
+                            {
+                                "create": true,
+                                "mountPath": "/app-root/config.yaml",
+                                "name": "config",
+                                "nameOverride": "",
+                                "optional": false,
+                                "sourceFile": "config.yaml",
+                                "subPath": "config.yaml"
+                            },
+                            {
+                                "create": true,
+                                "mountPath": "/app-root/rhdh-profile.py",
+                                "name": "rhdh-profile",
+                                "nameOverride": "",
+                                "optional": false,
+                                "sourceFile": "rhdh-profile.py",
+                                "subPath": "rhdh-profile.py"
+                            }
+                        ],
+                        "enabled": true,
+                        "initContainer": {
+                            "args": [
+                                "mkdir -p /tmp/data && echo 'Copying Lightspeed RAG data...' && cp -r /rag/vector_db /rag-content/ && cp -r /rag/embeddings_model /rag-content/ && echo 'Copy complete.'"
+                            ],
+                            "command": [
+                                "sh",
+                                "-c"
+                            ],
+                            "env": [],
+                            "image": "quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05",
+                            "imagePullPolicy": "IfNotPresent",
+                            "name": "lightspeed-rag-init",
+                            "resources": {
+                                "limits": {
+                                    "cpu": "100m",
+                                    "memory": "500Mi"
+                                },
+                                "requests": {
+                                    "cpu": "50m",
+                                    "memory": "150Mi"
+                                }
+                            },
+                            "securityContext": {
+                                "allowPrivilegeEscalation": false,
+                                "capabilities": {
+                                    "drop": [
+                                        "ALL"
+                                    ]
+                                },
+                                "readOnlyRootFilesystem": true,
+                                "runAsNonRoot": true,
+                                "seccompProfile": {
+                                    "type": "RuntimeDefault"
+                                }
+                            }
+                        },
+                        "plugins": [
+                            {
+                                "disabled": false,
+                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
+                                "pluginConfig": {
+                                    "dynamicPlugins": {
+                                        "frontend": {
+                                            "red-hat-developer-hub.backstage-plugin-lightspeed": {
+                                                "dynamicRoutes": [
+                                                    {
+                                                        "importName": "LightspeedPage",
+                                                        "path": "/lightspeed"
+                                                    }
+                                                ],
+                                                "mountPoints": [
+                                                    {
+                                                        "importName": "LightspeedFAB",
+                                                        "mountPoint": "application/listener"
+                                                    },
+                                                    {
+                                                        "importName": "LightspeedDrawerProvider",
+                                                        "mountPoint": "application/provider"
+                                                    },
+                                                    {
+                                                        "config": {
+                                                            "id": "lightspeed"
+                                                        },
+                                                        "importName": "LightspeedDrawerStateExposer",
+                                                        "mountPoint": "application/internal/drawer-state"
+                                                    },
+                                                    {
+                                                        "config": {
+                                                            "id": "lightspeed",
+                                                            "priority": 100
+                                                        },
+                                                        "importName": "LightspeedChatContainer",
+                                                        "mountPoint": "application/internal/drawer-content"
+                                                    }
+                                                ],
+                                                "translationResources": [
+                                                    {
+                                                        "importName": "lightspeedTranslations",
+                                                        "module": "Alpha",
+                                                        "ref": "lightspeedTranslationRef"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "disabled": false,
+                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                            }
+                        ],
+                        "ragVolume": {
+                            "emptyDir": {},
+                            "initMountPath": "/rag-content",
+                            "mountPath": "/rag-content",
+                            "name": "lightspeed-rag"
+                        },
+                        "runtimeVolume": {
+                            "emptyDir": {},
+                            "mountPath": "/tmp",
+                            "name": "lightspeed-data",
+                            "persistentVolumeClaim": {},
+                            "type": "emptyDir"
+                        },
+                        "secret": {
+                            "create": true,
+                            "name": "",
+                            "optional": false,
+                            "sourceFile": "secret.yaml"
+                        },
+                        "sidecar": {
+                            "args": [],
+                            "command": [],
+                            "containerPort": 8080,
+                            "env": [],
+                            "image": "quay.io/lightspeed-core/lightspeed-stack:0.5.1",
+                            "imagePullPolicy": "IfNotPresent",
+                            "name": "lightspeed-core",
+                            "portName": "http-lightspeed",
+                            "resources": {
+                                "limits": {
+                                    "cpu": "1000m",
+                                    "memory": "2Gi"
+                                },
+                                "requests": {
+                                    "cpu": "100m",
+                                    "memory": "512Mi"
+                                }
+                            },
+                            "securityContext": {
+                                "allowPrivilegeEscalation": false,
+                                "capabilities": {
+                                    "drop": [
+                                        "ALL"
+                                    ]
+                                },
+                                "readOnlyRootFilesystem": true,
+                                "runAsNonRoot": true,
+                                "seccompProfile": {
+                                    "type": "RuntimeDefault"
+                                }
+                            }
+                        }
+                    },
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "Enable or disable the built-in Lightspeed feature.",
+                            "type": "boolean"
+                        },
+                        "plugins": {
+                            "default": [
+                                {
+                                    "disabled": false,
+                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
+                                    "pluginConfig": {
+                                        "dynamicPlugins": {
+                                            "frontend": {
+                                                "red-hat-developer-hub.backstage-plugin-lightspeed": {
+                                                    "dynamicRoutes": [
+                                                        {
+                                                            "importName": "LightspeedPage",
+                                                            "path": "/lightspeed"
+                                                        }
+                                                    ],
+                                                    "mountPoints": [
+                                                        {
+                                                            "importName": "LightspeedFAB",
+                                                            "mountPoint": "application/listener"
+                                                        },
+                                                        {
+                                                            "importName": "LightspeedDrawerProvider",
+                                                            "mountPoint": "application/provider"
+                                                        },
+                                                        {
+                                                            "config": {
+                                                                "id": "lightspeed"
+                                                            },
+                                                            "importName": "LightspeedDrawerStateExposer",
+                                                            "mountPoint": "application/internal/drawer-state"
+                                                        },
+                                                        {
+                                                            "config": {
+                                                                "id": "lightspeed",
+                                                                "priority": 100
+                                                            },
+                                                            "importName": "LightspeedChatContainer",
+                                                            "mountPoint": "application/internal/drawer-content"
+                                                        }
+                                                    ],
+                                                    "translationResources": [
+                                                        {
+                                                            "importName": "lightspeedTranslations",
+                                                            "module": "Alpha",
+                                                            "ref": "lightspeedTranslationRef"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "disabled": false,
+                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                                }
+                            ],
+                            "items": {
+                                "properties": {
+                                    "disabled": {
+                                        "default": false,
+                                        "title": "Disable the plugin.",
+                                        "type": "boolean"
+                                    },
+                                    "integrity": {
+                                        "title": "Integrity checksum of the package. Optional for local packages and OCI packages. For OCI packages, you can specify the image digest in place of the tag in the 'package' field. Supported algorithms include: `sha512`, `sha384` and `sha256`. Refer to https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description for more information",
+                                        "type": "string"
+                                    },
+                                    "package": {
+                                        "title": "Package specification of the dynamic plugin to install. It should be usable by the `npm pack` command (for NPM packages) or the `skopeo copy` command (for OCI packages).",
+                                        "type": "string"
+                                    },
+                                    "pluginConfig": {
+                                        "title": "Optional plugin-specific app-config YAML fragment.",
+                                        "type": "object"
+                                    }
+                                },
+                                "required": [
+                                    "package"
+                                ],
+                                "type": "object"
+                            },
+                            "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
+                            "type": "array"
+                        },
+                        "runtimeVolume": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "emptyDir": {
+                                    "description": "Represents an empty directory for a pod. Empty directory volumes support ownership management and SELinux relabeling.",
+                                    "properties": {
+                                        "medium": {
+                                            "description": "medium represents what type of storage medium should back this directory. The default is \"\" which means to use the node's default medium. Must be an empty string (default) or Memory. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir",
+                                            "type": "string"
+                                        },
+                                        "sizeLimit": {
+                                            "oneOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "number"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "mountPath": {
+                                    "default": "/tmp",
+                                    "title": "Mount path inside the container for Lightspeed runtime storage.",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "default": "lightspeed-data",
+                                    "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
+                                    "type": "string"
+                                },
+                                "persistentVolumeClaim": {
+                                    "additionalProperties": false,
+                                    "default": {},
+                                    "properties": {
+                                        "claimName": {
+                                            "default": "",
+                                            "title": "Name of the existing PVC to mount for Lightspeed runtime data.",
+                                            "type": "string"
+                                        },
+                                        "readOnly": {
+                                            "default": false,
+                                            "title": "Whether the existing PVC should be mounted read-only.",
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "title": "Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.",
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "default": "emptyDir",
+                                    "enum": [
+                                        "emptyDir",
+                                        "persistentVolumeClaim"
+                                    ],
+                                    "title": "Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Runtime data volume configuration for the Lightspeed Core sidecar.",
+                            "type": "object"
+                        }
+                    },
+                    "title": "Built-in Lightspeed feature configuration.",
+                    "type": [
+                        "boolean",
+                        "object"
+                    ]
                 }
             },
             "type": "object"
@@ -1209,7 +1582,7 @@
                         "appConfig": {
                             "default": {
                                 "app": {
-                                    "baseUrl": "https://{{- include \"janus-idp.hostname\" . }}"
+                                    "baseUrl": "https://{{- include \"rhdh.hostname\" . }}"
                                 },
                                 "auth": {
                                     "providers": {}
@@ -1226,9 +1599,9 @@
                                             }
                                         ]
                                     },
-                                    "baseUrl": "https://{{- include \"janus-idp.hostname\" . }}",
+                                    "baseUrl": "https://{{- include \"rhdh.hostname\" . }}",
                                     "cors": {
-                                        "origin": "https://{{- include \"janus-idp.hostname\" . }}"
+                                        "origin": "https://{{- include \"rhdh.hostname\" . }}"
                                     },
                                     "database": {
                                         "connection": {
@@ -2716,7 +3089,7 @@
                                     "valueFrom": {
                                         "secretKeyRef": {
                                             "key": "backend-secret",
-                                            "name": "{{ include \"janus-idp.backend-secret-name\" $ }}"
+                                            "name": "{{ include \"rhdh.backend-secret-name\" $ }}"
                                         }
                                     }
                                 },
@@ -2724,8 +3097,8 @@
                                     "name": "POSTGRESQL_ADMIN_PASSWORD",
                                     "valueFrom": {
                                         "secretKeyRef": {
-                                            "key": "{{- include \"postgresql.adminPasswordKey\" . }}",
-                                            "name": "{{- include \"postgresql.v1.secretName\" . }}"
+                                            "key": "{{- include \"rhdh.postgresql.adminPasswordKey\" . }}",
+                                            "name": "{{- include \"rhdh.postgresql.secretName\" . }}"
                                         }
                                     }
                                 }
@@ -2923,6 +3296,10 @@
                                     "name": "dynamic-plugins-root"
                                 },
                                 {
+                                    "mountPath": "/extensions",
+                                    "name": "extensions-catalog"
+                                },
+                                {
                                     "mountPath": "/tmp",
                                     "name": "temp"
                                 }
@@ -3014,6 +3391,10 @@
                                 {
                                     "emptyDir": {},
                                     "name": "npmcacache"
+                                },
+                                {
+                                    "emptyDir": {},
+                                    "name": "extensions-catalog"
                                 },
                                 {
                                     "emptyDir": {},
@@ -4647,11 +5028,15 @@
                                         },
                                         {
                                             "name": "MAX_ENTRY_SIZE",
-                                            "value": "30000000"
+                                            "value": "40000000"
                                         },
                                         {
                                             "name": "CATALOG_INDEX_IMAGE",
                                             "value": "{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}"
+                                        },
+                                        {
+                                            "name": "CATALOG_ENTITIES_EXTRACT_DIR",
+                                            "value": "/extensions"
                                         }
                                     ],
                                     "image": "{{ include \"backstage.image\" . }}",
@@ -4706,6 +5091,10 @@
                                         {
                                             "mountPath": "/opt/app-root/src/.npm/_cacache",
                                             "name": "npmcacache"
+                                        },
+                                        {
+                                            "mountPath": "/extensions",
+                                            "name": "extensions-catalog"
                                         },
                                         {
                                             "mountPath": "/tmp",
@@ -6126,9 +6515,7 @@
                             "additionalProperties": {
                                 "type": "string"
                             },
-                            "default": {
-                                "checksum/dynamic-plugins": "{{- include \"common.tplvalues.render\" ( dict \"value\" .Values.global.dynamic \"context\" $) | sha256sum }}"
-                            },
+                            "default": {},
                             "title": "Annotations to add to the backend deployment pods",
                             "type": "object"
                         },
@@ -6635,6 +7022,24 @@
                                     "type": "integer"
                                 }
                             },
+                            "type": "object"
+                        },
+                        "strategy": {
+                            "default": {},
+                            "description": "Kubernetes Deployment strategy (RollingUpdate or Recreate). Leave empty to use the Kubernetes default (RollingUpdate with maxSurge 25% and maxUnavailable 25%).",
+                            "examples": [
+                                {
+                                    "type": "Recreate"
+                                },
+                                {
+                                    "rollingUpdate": {
+                                        "maxSurge": 0,
+                                        "maxUnavailable": 1
+                                    },
+                                    "type": "RollingUpdate"
+                                }
+                            ],
+                            "title": "Deployment update strategy",
                             "type": "object"
                         },
                         "tolerations": {

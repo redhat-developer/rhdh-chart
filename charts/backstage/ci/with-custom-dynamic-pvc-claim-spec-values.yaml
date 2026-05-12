@@ -48,3 +48,5 @@ upstream:
         emptyDir: {}
       - name: temp
         emptyDir: {}
+      - name: extensions-catalog
+        emptyDir: {}
