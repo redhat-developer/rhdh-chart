@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 5.12.0](https://img.shields.io/badge/Version-5.12.0-informational?style=flat-square)
+![Version: 5.12.1](https://img.shields.io/badge/Version-5.12.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -29,7 +29,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 5.12.0
+helm install my-backstage redhat-developer/backstage --version 5.12.1
 ```
 
 ## Introduction
@@ -188,7 +188,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.lightspeed.enabled | Enable or disable the built-in Lightspeed feature. | bool | `true` |
 | global.lightspeed.initContainer.image | Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments. | string | `"quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05"` |
 | global.lightspeed.initContainer.resources | Resource requests/limits for the Lightspeed RAG bootstrap init container. | object | `{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}}` |
-| global.lightspeed.plugins | Lightspeed plugins and their configuration. Override package references for disconnected environments. | list | `[{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-lightspeed":{"dynamicRoutes":[{"importName":"LightspeedPage","path":"/lightspeed"}],"mountPoints":[{"importName":"LightspeedFAB","mountPoint":"application/listener"},{"importName":"LightspeedDrawerProvider","mountPoint":"application/provider"},{"config":{"id":"lightspeed"},"importName":"LightspeedDrawerStateExposer","mountPoint":"application/internal/drawer-state"},{"config":{"id":"lightspeed","priority":100},"importName":"LightspeedChatContainer","mountPoint":"application/internal/drawer-content"}],"translationResources":[{"importName":"lightspeedTranslations","module":"Alpha","ref":"lightspeedTranslationRef"}]}}}}},{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}]` |
+| global.lightspeed.plugins | Lightspeed plugins and their configuration. Override package references for disconnected environments. | list | `[{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"},{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}]` |
 | global.lightspeed.ragVolume.emptyDir | `emptyDir` configuration for the RAG data volume. | object | `{}` |
 | global.lightspeed.ragVolume.initMountPath | Mount path inside the init container for seeding RAG data. | string | `"/rag-content"` |
 | global.lightspeed.ragVolume.mountPath | Mount path inside the sidecar container for serving RAG data. | string | `"/rag-content"` |
