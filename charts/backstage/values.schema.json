@@ -3097,7 +3097,7 @@
                                     "name": "POSTGRESQL_ADMIN_PASSWORD",
                                     "valueFrom": {
                                         "secretKeyRef": {
-                                            "key": "postgres-password",
+                                            "key": "{{- include \"rhdh.postgresql.adminPasswordKey\" . }}",
                                             "name": "{{- include \"rhdh.postgresql.secretName\" . }}"
                                         }
                                     }
