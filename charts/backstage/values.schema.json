@@ -222,53 +222,7 @@
                         "plugins": [
                             {
                                 "disabled": false,
-                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
-                                "pluginConfig": {
-                                    "dynamicPlugins": {
-                                        "frontend": {
-                                            "red-hat-developer-hub.backstage-plugin-lightspeed": {
-                                                "dynamicRoutes": [
-                                                    {
-                                                        "importName": "LightspeedPage",
-                                                        "path": "/lightspeed"
-                                                    }
-                                                ],
-                                                "mountPoints": [
-                                                    {
-                                                        "importName": "LightspeedFAB",
-                                                        "mountPoint": "application/listener"
-                                                    },
-                                                    {
-                                                        "importName": "LightspeedDrawerProvider",
-                                                        "mountPoint": "application/provider"
-                                                    },
-                                                    {
-                                                        "config": {
-                                                            "id": "lightspeed"
-                                                        },
-                                                        "importName": "LightspeedDrawerStateExposer",
-                                                        "mountPoint": "application/internal/drawer-state"
-                                                    },
-                                                    {
-                                                        "config": {
-                                                            "id": "lightspeed",
-                                                            "priority": 100
-                                                        },
-                                                        "importName": "LightspeedChatContainer",
-                                                        "mountPoint": "application/internal/drawer-content"
-                                                    }
-                                                ],
-                                                "translationResources": [
-                                                    {
-                                                        "importName": "lightspeedTranslations",
-                                                        "module": "Alpha",
-                                                        "ref": "lightspeedTranslationRef"
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
+                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
                             },
                             {
                                 "disabled": false,
@@ -338,53 +292,7 @@
                             "default": [
                                 {
                                     "disabled": false,
-                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
-                                    "pluginConfig": {
-                                        "dynamicPlugins": {
-                                            "frontend": {
-                                                "red-hat-developer-hub.backstage-plugin-lightspeed": {
-                                                    "dynamicRoutes": [
-                                                        {
-                                                            "importName": "LightspeedPage",
-                                                            "path": "/lightspeed"
-                                                        }
-                                                    ],
-                                                    "mountPoints": [
-                                                        {
-                                                            "importName": "LightspeedFAB",
-                                                            "mountPoint": "application/listener"
-                                                        },
-                                                        {
-                                                            "importName": "LightspeedDrawerProvider",
-                                                            "mountPoint": "application/provider"
-                                                        },
-                                                        {
-                                                            "config": {
-                                                                "id": "lightspeed"
-                                                            },
-                                                            "importName": "LightspeedDrawerStateExposer",
-                                                            "mountPoint": "application/internal/drawer-state"
-                                                        },
-                                                        {
-                                                            "config": {
-                                                                "id": "lightspeed",
-                                                                "priority": 100
-                                                            },
-                                                            "importName": "LightspeedChatContainer",
-                                                            "mountPoint": "application/internal/drawer-content"
-                                                        }
-                                                    ],
-                                                    "translationResources": [
-                                                        {
-                                                            "importName": "lightspeedTranslations",
-                                                            "module": "Alpha",
-                                                            "ref": "lightspeedTranslationRef"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
                                 },
                                 {
                                     "disabled": false,
