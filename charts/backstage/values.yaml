@@ -1,60 +1,27 @@
 nameOverride: developer-hub
 global:
   dynamic:
-    # -- Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field.
-    # Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`).
     includes:
-      # -- List of dynamic plugins included inside the `rhdh` container image, some of which are disabled by default.
-      # This file ONLY works with the `rhdh` container image.
       - "dynamic-plugins.default.yaml"
-    # -- List of dynamic plugins, possibly overriding the plugins listed in `includes` files.
-    # Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec),
-    # an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin
-    # listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description).
     plugins: []
-  # -- Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled.
   clusterRouterBase: "apps.example.com"
-  # -- Custom hostname shorthand, overrides `global.clusterRouterBase`, `upstream.ingress.host`, `route.host`, and url values in `upstream.backstage.appConfig`.
   host: ""
-  # -- Enable service authentication within Backstage instance
   auth:
-    # -- Backend service to service authentication
-    # <br /> Ref: https://backstage.io/docs/auth/service-to-service-auth/
     backend:
-      # -- Enable backend service to service authentication, unless configured otherwise it generates a secret value
       enabled: true
-      # -- Instead of generating a secret value, refer to existing secret
       existingSecret: ""
-      # -- Instead of generating a secret value, use the following value
       value: ""
-  # -- Catalog index configuration for automatic plugin discovery.
-  # The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set.
-  # The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount.
   catalogIndex:
     image:
       registry: quay.io
       repository: rhdh/plugin-catalog-index
       tag: "1.10"
-    # -- Extra catalog index images for additional plugin discovery in the Extensions UI.
-    # Each item must include `registry`, `repository`, and `tag` fields; `name` is optional.
-    # Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling).
-    # @default -- `[]`
     extraImages: []
-    # - name: community
-    #   registry: ghcr.io
-    #   repository: redhat-developer/rhdh-plugin-community-index
-    #   tag: "1.10"
-    # - registry: my-registry.example.com
-    #   repository: my-org/my-rhdh-internal-plugin-catalog
-    #   tag: "1.2.3"
-  # -- Built-in Lightspeed feature configuration.
-  # @default -- Use Lightspeed compatible settings / configurations.
   lightspeed:
-    # -- Enable or disable the built-in Lightspeed feature.
     enabled: true
-    # -- Lightspeed plugins and their configuration. Override package references for disconnected environments.
     plugins:
-      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
+      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{
+          "{{inherit}}" }}'
         disabled: false
         pluginConfig:
           dynamicPlugins:
@@ -81,75 +48,49 @@ global:
                     config:
                       id: lightspeed
                       priority: 100
-      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
+      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{
+          "{{inherit}}" }}'
         disabled: false
     runtimeVolume:
-      # -- Name of the Kubernetes volume used for writable Lightspeed runtime storage.
       name: lightspeed-data
-      # -- Mount path inside the container for Lightspeed runtime storage.
       mountPath: /tmp
-      # -- Volume source used for writable Lightspeed runtime storage mounted at `/tmp`.
-      # Supported values: `emptyDir`, `persistentVolumeClaim`.
       type: emptyDir
-      # -- `emptyDir` configuration for the Lightspeed runtime data volume when `runtimeVolume.type=emptyDir`.
       emptyDir: {}
-      # -- Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.
       persistentVolumeClaim: {}
     ragVolume:
-      # -- Name of the Kubernetes volume used for Lightspeed RAG data.
       name: lightspeed-rag
-      # -- Mount path inside the init container for seeding RAG data.
       initMountPath: /rag-content
-      # -- Mount path inside the sidecar container for serving RAG data.
       mountPath: /rag-content
-      # -- `emptyDir` configuration for the RAG data volume.
       emptyDir: {}
     configMaps:
       - name: stack
-        # -- Whether to create this ConfigMap from the bundled source file.
-        # Set to false and provide `nameOverride` to use a pre-existing ConfigMap.
         create: true
-        # -- Name of an existing ConfigMap to use instead. Required when `create` is false.
         nameOverride: ""
         mountPath: /app-root/lightspeed-stack.yaml
         subPath: lightspeed-stack.yaml
-        # -- Bundled file used to populate the ConfigMap data when `create` is true.
         sourceFile: lightspeed-stack.yaml
         optional: false
       - name: config
-        # -- Whether to create this ConfigMap from the bundled source file.
-        # Set to false and provide `nameOverride` to use a pre-existing ConfigMap.
         create: true
-        # -- Name of an existing ConfigMap to use instead. Required when `create` is false.
         nameOverride: ""
         mountPath: /app-root/config.yaml
         subPath: config.yaml
-        # -- Bundled file used to populate the ConfigMap data when `create` is true.
         sourceFile: config.yaml
         optional: false
       - name: rhdh-profile
-        # -- Whether to create this ConfigMap from the bundled source file.
-        # Set to false and provide `nameOverride` to use a pre-existing ConfigMap.
         create: true
-        # -- Name of an existing ConfigMap to use instead. Required when `create` is false.
         nameOverride: ""
         mountPath: /app-root/rhdh-profile.py
         subPath: rhdh-profile.py
-        # -- Bundled file used to populate the ConfigMap data when `create` is true.
         sourceFile: rhdh-profile.py
         optional: false
     secret:
-      # -- Whether to create a Lightspeed Secret from the bundled source file.
       create: true
-      # -- Name of an existing Secret to use instead. Required when `create` is false.
       name: ""
-      # -- Whether the Secret reference is optional in the pod spec.
       optional: false
-      # -- Bundled file used to populate the Secret's `stringData` keys.
       sourceFile: secret.yaml
     initContainer:
       name: lightspeed-rag-init
-      # -- Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.
       image: quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05
       imagePullPolicy: IfNotPresent
       command:
@@ -157,13 +98,10 @@ global:
         - -c
       args:
         - >-
-          mkdir -p /tmp/data &&
-          echo 'Copying Lightspeed RAG data...' &&
-          cp -r /rag/vector_db /rag-content/ &&
-          cp -r /rag/embeddings_model /rag-content/ &&
-          echo 'Copy complete.'
+          mkdir -p /tmp/data && echo 'Copying Lightspeed RAG data...' && cp -r /rag/vector_db
+          /rag-content/ && cp -r /rag/embeddings_model /rag-content/ && echo 'Copy
+          complete.'
       env: []
-      # -- Resource requests/limits for the Lightspeed RAG bootstrap init container.
       resources:
         requests:
           cpu: 50m
@@ -182,7 +120,6 @@ global:
           type: "RuntimeDefault"
     sidecar:
       name: lightspeed-core
-      # -- Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.
       image: quay.io/lightspeed-core/lightspeed-stack:0.5.1
       imagePullPolicy: IfNotPresent
       portName: http-lightspeed
@@ -190,7 +127,6 @@ global:
       command: []
       args: []
       env: []
-      # -- Resource requests/limits for the Lightspeed Core sidecar.
       resources:
         requests:
           cpu: 100m
@@ -207,29 +143,19 @@ global:
         runAsNonRoot: true
         seccompProfile:
           type: "RuntimeDefault"
-# -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
-# @default -- Use Openshift compatible settings
 upstream:
   nameOverride: developer-hub
   backstage:
     image:
       registry: quay.io
       repository: rhdh-community/rhdh
-      tag: next
+      tag: next-1.10
       pullPolicy: ""
     command: []
-    # FIXME (tumido): USE POSTGRES_PASSWORD and POSTGRES_USER instead of POSTGRES_ADMIN_PASSWORD
-    # This is a hack. In {fedora,rhel}/postgresql images, regular user is forbidden
-    # from creating DBs in runtime. A single DB can be created ahead of time via
-    # POSTGRESQL_DATABASE env variable (in this case via
-    # upstream.postgresql.primary.extraEnvVars value), but this doesn't allow us to
-    # create multiple DBs. Since Backstage requires by default 5 different DBs, we
-    # can't accommodate that properly.
     appConfig:
       auth:
         providers: {}
       app:
-        # Please update to match host in case you don't want to configure hostname via `global.clusterRouterBase` or `global.host` if not deploying on an openshift cluster.
         baseUrl: 'https://{{- include "rhdh.hostname" . }}'
       backend:
         baseUrl: 'https://{{- include "rhdh.hostname" . }}'
@@ -262,8 +188,6 @@ upstream:
         memory: 2.5Gi
         ephemeral-storage: 5Gi
     startupProbe:
-      # This gives enough time upon container startup before the liveness and readiness probes are triggered.
-      # Giving (120s = initialDelaySeconds + failureThreshold * periodSeconds) to account for the worst case scenario.
       httpGet:
         path: /.backstage/health/v1/liveness
         port: backend
@@ -279,11 +203,6 @@ upstream:
         path: /.backstage/health/v1/readiness
         port: backend
         scheme: HTTP
-      # Both liveness and readiness probes won't be triggered until the startup probe is successful.
-      # The startup probe is already configured to give enough time for the application to be started.
-      # So removing the additional delay here allows the readiness probe to be checked right away after the startup probe,
-      # which helps make the application available faster to the end-user.
-      # initialDelaySeconds: 30
       periodSeconds: 10
       successThreshold: 2
       timeoutSeconds: 4
@@ -293,11 +212,6 @@ upstream:
         path: /.backstage/health/v1/liveness
         port: backend
         scheme: HTTP
-      # Both liveness and readiness probes won't be triggered until the startup probe is successful.
-      # The startup probe is already configured to give enough time for the application to be started.
-      # So removing the additional delay here allows the liveness probe to be checked right away after the startup probe,
-      # which helps make the application available faster to the end-user.
-      # initialDelaySeconds: 60
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 4
@@ -313,11 +227,9 @@ upstream:
             key: postgres-password
             name: '{{- include "rhdh.postgresql.secretName" . }}'
     args:
-      # This additional `app-config`` file is generated by the initContainer below, and contains the merged configuration of installed dynamic plugins.
       - "--config"
       - dynamic-plugins-root/app-config.dynamic-plugins.yaml
     extraVolumeMounts:
-      # The initContainer below will install dynamic plugins in this volume mount.
       - name: dynamic-plugins-root
         mountPath: /opt/app-root/src/dynamic-plugins-root
       - name: extensions-catalog
@@ -325,7 +237,6 @@ upstream:
       - name: temp
         mountPath: /tmp
     extraVolumes:
-      # -- Ephemeral volume that will contain the dynamic plugins installed by the initContainer below at start.
       - name: dynamic-plugins-root
         ephemeral:
           volumeClaimTemplate:
@@ -334,33 +245,25 @@ upstream:
                 - ReadWriteOnce
               resources:
                 requests:
-                  # -- Size of the volume that will contain the dynamic plugins. It should be large enough to contain all the plugins.
                   storage: 5Gi
-      # Volume that will expose the `dynamic-plugins.yaml` file from the `dynamic-plugins` config map.
-      # The `dynamic-plugins` config map is created by the helm chart from the content of the `global.dynamic` field.
       - name: dynamic-plugins
         configMap:
           defaultMode: 420
           name: '{{ printf "%s-dynamic-plugins" .Release.Name }}'
           optional: true
-      # Optional volume that allows exposing the `.npmrc` file (through a `dynamic-plugins-npmrc` secret)
-      # to be used when running `npm pack` during the dynamic plugins installation by the initContainer.
       - name: dynamic-plugins-npmrc
         secret:
           defaultMode: 420
           optional: true
           secretName: '{{ printf "%s-dynamic-plugins-npmrc" .Release.Name }}'
-      # Optional volume that allows adding a container registry `auth.json` file (through a `dynamic-plugins-registry-auth` secret)
-      # to be used when installing plugins from secure container registries during the dynamic plugins installation by the initContainer.
       - name: dynamic-plugins-registry-auth
         secret:
           defaultMode: 416
           optional: true
-          secretName: '{{ printf "%s-dynamic-plugins-registry-auth" .Release.Name }}'
+          secretName: '{{ printf "%s-dynamic-plugins-registry-auth" .Release.Name
+            }}'
       - name: npmcacache
         emptyDir: {}
-      # -- Ephemeral volume used by the install-dynamic-plugins init container to extract catalog entities from the catalog index image.
-      # Mounted at the /extensions path in the backstage-backend main container for automatic discovery by the extension catalog backend providers.
       - name: extensions-catalog
         emptyDir: {}
       - name: temp
@@ -383,9 +286,6 @@ upstream:
           runAsNonRoot: true
           seccompProfile:
             type: "RuntimeDefault"
-        # -- Image used by the initContainer to install dynamic plugins into the `dynamic-plugins-root` volume mount.
-        # It could be replaced by a custom image based on this one.
-        # @default -- `quay.io/rhdh-community/rhdh:next`
         image: '{{ include "backstage.image" . }}'
         command:
           - ./install-dynamic-plugins.sh
@@ -393,11 +293,11 @@ upstream:
         env:
           - name: NPM_CONFIG_USERCONFIG
             value: /opt/app-root/src/.npmrc.dynamic-plugins
-            # This following variable is required for orchestrator to startup properly.
           - name: MAX_ENTRY_SIZE
             value: "40000000"
           - name: CATALOG_INDEX_IMAGE
-            value: '{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository }}:{{ .Values.global.catalogIndex.image.tag }}'
+            value: '{{ .Values.global.catalogIndex.image.registry }}/{{ .Values.global.catalogIndex.image.repository
+              }}:{{ .Values.global.catalogIndex.image.tag }}'
           - name: CATALOG_ENTITIES_EXTRACT_DIR
             value: '/extensions'
         imagePullPolicy: ""
@@ -444,7 +344,6 @@ upstream:
         adminPasswordKey: postgres-password
         userPasswordKey: password
     primary:
-      # TODO: https://issues.redhat.com/browse/RHIDP-2645
       podSecurityContext:
         enabled: false
       containerSecurityContext:
@@ -476,59 +375,31 @@ upstream:
       - name: http-metrics
         port: 9464
         targetPort: 9464
-# -- OpenShift Route parameters
 route:
-  # -- Route specific annotations
   annotations: {}
-  # -- Enable the creation of the route resource
   enabled: true
-  # -- Set the host attribute to a custom value. If not set, OpenShift will generate it, please make sure to match your baseUrl
   host: "{{ .Values.global.host }}"
-  # -- Path that the router watches for, to route traffic for to the service.
   path: "/"
-  # -- Wildcard policy if any for the route. Currently only 'Subdomain' or 'None' is allowed.
   wildcardPolicy: None
-  # -- Route TLS parameters
-  # <br /> Ref: https://docs.openshift.com/container-platform/4.9/networking/routes/secured-routes.html
   tls:
-    # -- Enable TLS configuration for the host defined at `route.host` parameter
     enabled: true
-    # -- Specify TLS termination.
     termination: "edge"
-    # -- Certificate contents
     certificate: ""
-    # -- Key file contents
     key: ""
-    # -- Cert authority certificate contents. Optional
     caCertificate: ""
-    # -- Contents of the ca certificate of the final destination.
-    # <br /> When using reencrypt termination this file should be provided in order to have routers use it for health checks on the secure connection. If this field is not specified, the router may provide its own destination CA and perform hostname validation using the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically verify.
     destinationCACertificate: ""
-    # --  Indicates the desired behavior for insecure connections to a route.
-    # <br /> While each router may make its own decisions on which ports to expose, this is normally port 80. The only valid values are None, Redirect, or empty for disabled.
     insecureEdgeTerminationPolicy: "Redirect"
-# -- Test pod parameters
 test:
-  # -- Whether to enable the test-connection pod used for testing the Release using `helm test`.
   enabled: true
   image:
-    # -- Test connection pod image registry
     registry: quay.io
-    # -- Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it.
     repository: curl/curl
-    # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
     tag: latest
-  # -- Whether to inject a fake dynamic plugins npmrc secret.
-  # <br />See RHDHBUGS-1893 and RHDHBUGS-1464 for the motivation behind this.
-  # <br />This is only used for testing purposes and should not be used in production.
-  # <br />Only relevant when `test.enabled` field is set to `true`.
   injectTestNpmrcSecret: false
 orchestrator:
   enabled: false
-  #  Disable Serverless Logic Operator if it already exists on the cluster
   serverlessLogicOperator:
     enabled: true
-  #  Disable Serverless Operator if it already exists on the cluster
   serverlessOperator:
     enabled: true
   sonataflowPlatform:
@@ -545,29 +416,26 @@ orchestrator:
       limits:
         memory: "1Gi"
         cpu: "500m"
-    # -- Secret name for the user-created secret to connect an external DB
     externalDBsecretRef: ""
-    # -- Name for the user-configured external Database
     externalDBName: ""
-    # -- Host for the user-configured external Database
     externalDBHost: ""
-    # -- Port for the user-configured external Database
     externalDBPort: ""
-    # -- Image for the init container used by the create-db job
-    initContainerImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
-    # -- Image for the container used by the create-db job
-    createDBJobImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
-    # -- Image for the container used by the sonataflow jobs service, optional and used for disconnected environments
+    initContainerImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository\
+      \ }}:{{ .Values.upstream.postgresql.image.tag }}"
+    createDBJobImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository\
+      \ }}:{{ .Values.upstream.postgresql.image.tag }}"
     jobServiceImage: ""
-    # -- Image for the container used by the sonataflow data index, optional and used for disconnected environments
     dataIndexImage: ""
-  # -- Orchestrator plugins and their configuration
   plugins:
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{inherit}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{
+        "{{inherit}}" }}'
       disabled: false
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{inherit}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{
+        "{{inherit}}" }}'
       disabled: false
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{inherit}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{
+        "{{inherit}}" }}'
       disabled: false
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{inherit}}" }}'
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{
+        "{{inherit}}" }}'
       disabled: false
