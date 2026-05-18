@@ -13,3 +13,6 @@ output
 
 # Vendored charts need to be updated manually with `helm dependency update`
 !charts/*/vendor/**/charts/*.tgz
+
+# Temporary patch file from sync-upstream-backstage.sh conflict resolution
+rhdh-vendored.patch

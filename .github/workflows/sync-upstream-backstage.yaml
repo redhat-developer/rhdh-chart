@@ -39,15 +39,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync upstream Backstage subtree
+      - name: Sync upstream Backstage subtree and re-apply RHDH patches
         id: sync
         run: |
           BEFORE_SHA=$(git rev-parse HEAD)
 
-          git remote add upstream-backstage https://github.com/backstage/charts.git
-          git fetch upstream-backstage main
-          git subtree pull --prefix charts/backstage/vendor/backstage upstream-backstage main --squash \
-            -m "Squashed sync of upstream Backstage chart"
+          ./hack/sync-upstream-backstage.sh
 
           AFTER_SHA=$(git rev-parse HEAD)
 
@@ -57,36 +54,6 @@ jobs:
           else
             echo "Changes detected from upstream."
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Apply RHDH-specific changes to vendored chart
-        if: steps.sync.outputs.has_changes == 'true'
-        run: |
-          VENDOR_GITIGNORE="charts/backstage/vendor/backstage/.gitignore"
-          RHDH_MARKER="# RHDH: track vendored chart dependencies"
-
-          # Fix directory ignore pattern: "charts/*/charts/" ignores the directory itself,
-          # which prevents un-ignoring files inside it. Change to "charts/*/charts/*" to
-          # ignore contents instead, allowing the negation pattern to work.
-          sed -i 's|^charts/\*/charts/$|charts/*/charts/*|' "${VENDOR_GITIGNORE}"
-
-          # Ensure the .gitignore has the RHDH-specific exception to track tgz files
-          if ! grep -q "${RHDH_MARKER}" "${VENDOR_GITIGNORE}"; then
-            cat >> "${VENDOR_GITIGNORE}" << 'EOF'
-
-          # RHDH: track vendored chart dependencies
-          # Since this chart is vendored, we commit its dependencies rather than fetching them at install time
-          !charts/*/charts/*.tgz
-          EOF
-          fi
-
-          # Rebuild vendored chart dependencies to restore tgz files
-          helm dependency update charts/backstage/vendor/backstage/charts/backstage
-
-          git add "${VENDOR_GITIGNORE}"
-          git add charts/backstage/vendor/backstage/charts/backstage/charts/*.tgz
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: apply RHDH-specific changes to vendored Backstage chart"
           fi
 
       - name: Align dependency version and open PR
@@ -127,8 +94,7 @@ jobs:
 
           Updated the vendored Backstage chart to version **${CHART_VERSION}** and aligned the dependency reference in \`charts/backstage/Chart.yaml\`.
 
-          > [!CAUTION]
-          > The subtree pull may have silently overwritten RHDH-specific local changes to the vendored chart. Please review the changes carefully and restore any local modifications if needed. See [CONTRIBUTING.md](../CONTRIBUTING.md#note-on-the-backstage-chart-dependencies) for details.
+          RHDH-specific template patches were re-applied automatically after the subtree pull. Please review the changes to verify the patches applied cleanly. See [CONTRIBUTING.md](../CONTRIBUTING.md#note-on-the-backstage-chart-dependencies) for details.
           EOF
             )
 
