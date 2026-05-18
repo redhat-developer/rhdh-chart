@@ -34,7 +34,7 @@ usage() {
   exit "${1:-0}"
 }
 
-while [ $# -gt 0 ]; do
+while [[ $# -gt 0 ]]; do
   case "$1" in
     --remote) REMOTE="$2"; shift 2 ;;
     --ref)    REF="$2";    shift 2 ;;
@@ -66,14 +66,15 @@ echo "Generating RHDH-specific template patches..."
 has_meaningful_diff() {
   # A diff is meaningful if added and removed lines differ in content,
   # not just in trailing whitespace or newline presence.
+  local diff_file="$1"
   local added removed
-  added=$(sed -n 's/^+//p' "$1" | grep -v '^++' | sed 's/[[:space:]]*$//' | sort)
-  removed=$(sed -n 's/^-//p' "$1" | grep -v '^--' | sed 's/[[:space:]]*$//' | sort)
-  [ "$added" != "$removed" ]
+  added=$(sed -n 's/^+//p' "$diff_file" | grep -v '^++' | sed 's/[[:space:]]*$//' | sort)
+  removed=$(sed -n 's/^-//p' "$diff_file" | grep -v '^--' | sed 's/[[:space:]]*$//' | sort)
+  [[ "$added" != "$removed" ]]
 }
 
 for vendored_file in "${VENDOR_TEMPLATES}"/*.yaml; do
-  [ -f "$vendored_file" ] || continue
+  [[ -f "$vendored_file" ]] || continue
   filename=$(basename "$vendored_file")
 
   # Only diff files that also exist upstream; RHDH-only files won't be
@@ -88,13 +89,13 @@ for vendored_file in "${VENDOR_TEMPLATES}"/*.yaml; do
            2s|^+++ .*|+++ b/${VENDOR_TEMPLATES}/${filename}|" \
     > "$FILE_DIFF" || true   # diff exits 1 when files differ
 
-  if [ -s "$FILE_DIFF" ] && has_meaningful_diff "$FILE_DIFF"; then
+  if [[ -s "$FILE_DIFF" ]] && has_meaningful_diff "$FILE_DIFF"; then
     cat "$FILE_DIFF" >> "$PATCH_FILE"
   fi
   rm -f "$FILE_DIFF"
 done
 
-if [ -s "$PATCH_FILE" ]; then
+if [[ -s "$PATCH_FILE" ]]; then
   patched_files=$(grep -c '^--- a/' "$PATCH_FILE" || true)
   echo "  Found patches for ${patched_files} file(s)."
 else
@@ -110,7 +111,7 @@ git subtree pull --prefix "$PREFIX" "$REMOTE" "$REF" --squash \
 
 AFTER_SHA=$(git rev-parse HEAD)
 
-if [ "$BEFORE_SHA" = "$AFTER_SHA" ]; then
+if [[ "$BEFORE_SHA" = "$AFTER_SHA" ]]; then
   echo "No changes from upstream."
   exit 0
 fi
@@ -118,21 +119,21 @@ fi
 echo "Upstream changes merged."
 
 # ── Re-apply RHDH patches ───────────────────────────────────────────
-if [ -s "$PATCH_FILE" ]; then
+if [[ -s "$PATCH_FILE" ]]; then
   echo "Re-applying RHDH-specific template patches..."
   if ! git apply "$PATCH_FILE"; then
     cp "$PATCH_FILE" rhdh-vendored.patch
     trap - EXIT
-    echo ""
-    echo "ERROR: RHDH patch failed to apply cleanly."
-    echo "The patch has been saved to: rhdh-vendored.patch"
-    echo ""
-    echo "To resolve:"
-    echo "  1. Review the patch:  cat rhdh-vendored.patch"
-    echo "  2. Try with 3-way:    git apply --3way rhdh-vendored.patch"
-    echo "  3. Or with rejects:   git apply --reject rhdh-vendored.patch"
-    echo "  4. Resolve any .rej files, then:  git add <files>"
-    echo "  5. Clean up:          rm rhdh-vendored.patch"
+    echo "" >&2
+    echo "ERROR: RHDH patch failed to apply cleanly." >&2
+    echo "The patch has been saved to: rhdh-vendored.patch" >&2
+    echo "" >&2
+    echo "To resolve:" >&2
+    echo "  1. Review the patch:  cat rhdh-vendored.patch" >&2
+    echo "  2. Try with 3-way:    git apply --3way rhdh-vendored.patch" >&2
+    echo "  3. Or with rejects:   git apply --reject rhdh-vendored.patch" >&2
+    echo "  4. Resolve any .rej files, then:  git add <files>" >&2
+    echo "  5. Clean up:          rm rhdh-vendored.patch" >&2
     exit 1
   fi
   echo "  RHDH template patches re-applied successfully."
@@ -142,7 +143,7 @@ fi
 RHDH_MARKER="# RHDH: track vendored chart dependencies"
 
 # Fix directory ignore pattern so negation rules work
-if [ -f "$VENDOR_GITIGNORE" ]; then
+if [[ -f "$VENDOR_GITIGNORE" ]]; then
   sed -i'' -e 's|^charts/\*/charts/$|charts/*/charts/*|' "$VENDOR_GITIGNORE"
 
   if ! grep -q "$RHDH_MARKER" "$VENDOR_GITIGNORE"; then
