@@ -198,8 +198,8 @@ spec:
 {{- else }}
         args:
           - |
-            psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' 2>&1 || {
-              if psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -tc "SELECT 1 FROM pg_database WHERE datname='sonataflow'" | grep -q 1; then
+            psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -c 'CREATE DATABASE sonataflow;' 2>&1 || {
+              if psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -tc "SELECT 1 FROM pg_database WHERE datname='sonataflow'" | grep -q 1; then
                 echo "Database 'sonataflow' already exists, skipping creation."
               else
                 echo "ERROR: Failed to create database 'sonataflow'."
