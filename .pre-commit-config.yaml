@@ -16,7 +16,7 @@ repos:
       - id: helm-dependency-update
         name: helm-dependency-update
         entry: helm dependency update charts/backstage/vendor/backstage/charts/backstage
-        language: unsupported
+        language: system
         pass_filenames: false
         files: charts/backstage/vendor/backstage/charts/backstage/Chart\.(ya?ml|lock)$
       - id: jsonschema-dereference
