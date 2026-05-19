@@ -107,7 +107,7 @@ spec:
           {{- end }}
             
           {{- if .Values.serverlessLogicOperator.enabled }}
-          kubectl get subscription {{ .Values.serverlessLogicOperator.subscription.name }} -n {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
+          kubectl get subscription {{ .Values.serverlessLogicOperator.subscription.spec.name }} -n {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
           {{- end }}
       
           echo "Test passed!"
