@@ -52,7 +52,7 @@
                   "type": "string"
                 },
                 "startingCSV": {
-                  "default": "logic-operator.v1.37.2",
+                  "default": "logic-operator.v1.38.0",
                   "title": "The initial version of the operator",
                   "type": "string"
                 }
