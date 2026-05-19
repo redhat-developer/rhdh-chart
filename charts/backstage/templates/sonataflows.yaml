@@ -186,11 +186,27 @@ spec:
         command: [ "sh", "-c" ]
 {{- if .Values.upstream.postgresql.enabled }}
         args:
-          - "psql -h {{ .Release.Name }}-postgresql{{- if eq .Values.upstream.postgresql.architecture "replication" }}-primary{{- end }} -p 5432 -U postgres -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
+          - |
+            psql -h {{ .Release.Name }}-postgresql{{- if eq .Values.upstream.postgresql.architecture "replication" }}-primary{{- end }} -p 5432 -U postgres -c 'CREATE DATABASE sonataflow;' 2>&1 || {
+              if psql -h {{ .Release.Name }}-postgresql{{- if eq .Values.upstream.postgresql.architecture "replication" }}-primary{{- end }} -p 5432 -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='sonataflow'" | grep -q 1; then
+                echo "Database 'sonataflow' already exists, skipping creation."
+              else
+                echo "ERROR: Failed to create database 'sonataflow'."
+                exit 1
+              fi
+            }
 {{- else }}
         args:
-          - "psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' || echo WARNING: Could not create database"
+          - |
+            psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' 2>&1 || {
+              if psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -tc "SELECT 1 FROM pg_database WHERE datname='sonataflow'" | grep -q 1; then
+                echo "Database 'sonataflow' already exists, skipping creation."
+              else
+                echo "ERROR: Failed to create database 'sonataflow'."
+                exit 1
+              fi
+            }
 {{- end }}
       restartPolicy: Never
-  backoffLimit: 2
+  backoffLimit: {{ .Values.orchestrator.sonataflowPlatform.dbCreationJobBackoffLimit }}
 {{- end }}
