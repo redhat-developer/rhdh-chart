@@ -85,12 +85,10 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-create-sonataflow-database
+  name: {{ .Release.Name }}-create-sonataflow-db
   namespace: {{ .Release.Namespace }}
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
+  ttlSecondsAfterFinished: 300
   activeDeadlineSeconds: 120
   template:
     spec:
