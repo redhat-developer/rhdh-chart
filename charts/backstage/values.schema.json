@@ -470,15 +470,15 @@
                             "title": "Image for the container used by the create-db job",
                             "type": "string"
                         },
-                        "dbCreationJobBackoffLimit": {
-                            "default": 2,
-                            "title": "Number of retries for the create-db job if it fails",
-                            "type": "integer"
-                        },
                         "dataIndexImage": {
                             "additionalProperties": false,
                             "title": "Image for the container used by the sonataflow data index",
                             "type": "string"
+                        },
+                        "dbCreationJobBackoffLimit": {
+                            "default": 2,
+                            "title": "Number of retries for the create-db job if it fails",
+                            "type": "integer"
                         },
                         "eventing": {
                             "additionalProperties": false,
