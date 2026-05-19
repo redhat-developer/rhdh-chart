@@ -568,6 +568,11 @@
                             "type": "string",
                             "additionalProperties": false
                         },
+                        "dbCreationJobBackoffLimit": {
+                            "default": 2,
+                            "title": "Number of retries for the create-db job if it fails",
+                            "type": "integer"
+                        },
                         "jobServiceImage": {
                             "title": "Image for the container used by the sonataflow jobs service",
                             "type": "string",
