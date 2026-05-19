@@ -19,27 +19,36 @@ Unlike standard Helm dependencies that fetch tarballs from a remote repository, 
 
 ### Developer workflow
 
-To sync with the upstream Backstage repository, add it as a remote on your local machine:
+To sync with the upstream Backstage repository, use the [`hack/sync-upstream-backstage.sh`](./hack/sync-upstream-backstage.sh) script:
 
 ```bash
-git remote add -f upstream-backstage https://github.com/backstage/charts.git
+./hack/sync-upstream-backstage.sh
 ```
 
-When the upstream Backstage team releases an update, we can pull their changes into our subtree:
+The script automatically:
+1. Fetches the upstream remote (adding it if needed)
+2. Generates a patch of RHDH-specific template modifications (e.g., Lightspeed integration, catalog index images)
+3. Performs the subtree pull (which resets vendored files to upstream)
+4. Re-applies the RHDH patch on top of the updated upstream
+5. Restores `.gitignore` exceptions and vendored `.tgz` dependencies
+6. Commits the result
+
+You can customize the remote and branch:
 
 ```bash
-git fetch upstream-backstage main
-git subtree pull --prefix charts/backstage/vendor/backstage upstream-backstage main --squash
-
-# You may also need to update the dependency version under charts/backstage/Chart.yaml
+./hack/sync-upstream-backstage.sh --remote upstream-backstage --ref main
 ```
 
-It is important to use `--squash` to avoid pulling the entire commit history of the upstream chart repository.
+If the RHDH patch fails to apply (because upstream changed the same lines), the script saves the patch to `rhdh-vendored.patch` in the repo root and exits with an error. To resolve:
+1. Review the patch: `cat rhdh-vendored.patch`
+2. Try 3-way merge: `git apply --3way rhdh-vendored.patch`
+3. Or apply with rejects: `git apply --reject rhdh-vendored.patch`, then resolve any `.rej` files
+4. Stage and commit the resolved files, then clean up: `rm rhdh-vendored.patch`
 
-> [!CAUTION]
-> **Reviewing subtree syncs:** The subtree pull may silently overwrite RHDH-specific local changes to the vendored chart, even when there are no merge conflicts. This can happen because Git's merge algorithm may auto-resolve changes in favor of upstream. After each sync, carefully review the diff to ensure any local customizations (e.g., `.gitignore` exceptions, template modifications) are preserved. If local changes were lost, restore them manually before merging.
+After syncing, you may also need to update the dependency version under `charts/backstage/Chart.yaml` and rebuild the lock file (see below).
 
-*Note: If merge conflicts occur, resolve them in your editor, then `git add` and `git commit` the resolution as a normal merge.*
+> [!NOTE]
+> The [weekly CI workflow](./.github/workflows/sync-upstream-backstage.yaml) uses this same script to sync automatically and open a PR.
 
 ### Sync Lightspeed vendored config files
 

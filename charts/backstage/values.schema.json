@@ -222,53 +222,7 @@
                         "plugins": [
                             {
                                 "disabled": false,
-                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
-                                "pluginConfig": {
-                                    "dynamicPlugins": {
-                                        "frontend": {
-                                            "red-hat-developer-hub.backstage-plugin-lightspeed": {
-                                                "dynamicRoutes": [
-                                                    {
-                                                        "importName": "LightspeedPage",
-                                                        "path": "/lightspeed"
-                                                    }
-                                                ],
-                                                "mountPoints": [
-                                                    {
-                                                        "importName": "LightspeedFAB",
-                                                        "mountPoint": "application/listener"
-                                                    },
-                                                    {
-                                                        "importName": "LightspeedDrawerProvider",
-                                                        "mountPoint": "application/provider"
-                                                    },
-                                                    {
-                                                        "config": {
-                                                            "id": "lightspeed"
-                                                        },
-                                                        "importName": "LightspeedDrawerStateExposer",
-                                                        "mountPoint": "application/internal/drawer-state"
-                                                    },
-                                                    {
-                                                        "config": {
-                                                            "id": "lightspeed",
-                                                            "priority": 100
-                                                        },
-                                                        "importName": "LightspeedChatContainer",
-                                                        "mountPoint": "application/internal/drawer-content"
-                                                    }
-                                                ],
-                                                "translationResources": [
-                                                    {
-                                                        "importName": "lightspeedTranslations",
-                                                        "module": "Alpha",
-                                                        "ref": "lightspeedTranslationRef"
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
+                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
                             },
                             {
                                 "disabled": false,
@@ -338,53 +292,7 @@
                             "default": [
                                 {
                                     "disabled": false,
-                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}",
-                                    "pluginConfig": {
-                                        "dynamicPlugins": {
-                                            "frontend": {
-                                                "red-hat-developer-hub.backstage-plugin-lightspeed": {
-                                                    "dynamicRoutes": [
-                                                        {
-                                                            "importName": "LightspeedPage",
-                                                            "path": "/lightspeed"
-                                                        }
-                                                    ],
-                                                    "mountPoints": [
-                                                        {
-                                                            "importName": "LightspeedFAB",
-                                                            "mountPoint": "application/listener"
-                                                        },
-                                                        {
-                                                            "importName": "LightspeedDrawerProvider",
-                                                            "mountPoint": "application/provider"
-                                                        },
-                                                        {
-                                                            "config": {
-                                                                "id": "lightspeed"
-                                                            },
-                                                            "importName": "LightspeedDrawerStateExposer",
-                                                            "mountPoint": "application/internal/drawer-state"
-                                                        },
-                                                        {
-                                                            "config": {
-                                                                "id": "lightspeed",
-                                                                "priority": 100
-                                                            },
-                                                            "importName": "LightspeedChatContainer",
-                                                            "mountPoint": "application/internal/drawer-content"
-                                                        }
-                                                    ],
-                                                    "translationResources": [
-                                                        {
-                                                            "importName": "lightspeedTranslations",
-                                                            "module": "Alpha",
-                                                            "ref": "lightspeedTranslationRef"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
                                 },
                                 {
                                     "disabled": false,
@@ -3097,7 +3005,7 @@
                                     "name": "POSTGRESQL_ADMIN_PASSWORD",
                                     "valueFrom": {
                                         "secretKeyRef": {
-                                            "key": "postgres-password",
+                                            "key": "{{- include \"rhdh.postgresql.adminPasswordKey\" . }}",
                                             "name": "{{- include \"rhdh.postgresql.secretName\" . }}"
                                         }
                                     }
@@ -7022,6 +6930,24 @@
                                     "type": "integer"
                                 }
                             },
+                            "type": "object"
+                        },
+                        "strategy": {
+                            "default": {},
+                            "description": "Kubernetes Deployment strategy (RollingUpdate or Recreate). Leave empty to use the Kubernetes default (RollingUpdate with maxSurge 25% and maxUnavailable 25%).",
+                            "examples": [
+                                {
+                                    "type": "Recreate"
+                                },
+                                {
+                                    "rollingUpdate": {
+                                        "maxSurge": 0,
+                                        "maxUnavailable": 1
+                                    },
+                                    "type": "RollingUpdate"
+                                }
+                            ],
+                            "title": "Deployment update strategy",
                             "type": "object"
                         },
                         "tolerations": {
