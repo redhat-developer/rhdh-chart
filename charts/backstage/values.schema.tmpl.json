@@ -570,8 +570,8 @@
                         },
                         "dbCreationJobBackoffLimit": {
                             "default": 2,
-                            "minimum": 0,
                             "maximum": 10,
+                            "minimum": 0,
                             "title": "Number of retries for the create-db job if it fails",
                             "type": "integer"
                         },
