@@ -85,7 +85,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-create-sonataflow-db
+  name: {{ .Release.Name }}-create-sonataflow-database
   namespace: {{ .Release.Namespace }}
 spec:
   ttlSecondsAfterFinished: 300
