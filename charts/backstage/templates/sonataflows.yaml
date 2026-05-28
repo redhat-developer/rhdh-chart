@@ -85,11 +85,8 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-create-sonataflow-database
+  name: {{ .Release.Name }}-create-sonataflow-database-{{ .Chart.Version }}
   namespace: {{ .Release.Namespace }}
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   ttlSecondsAfterFinished: 300
   activeDeadlineSeconds: 120
@@ -202,8 +199,8 @@ spec:
 {{- else }}
         args:
           - |
-            psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -c 'CREATE DATABASE sonataflow;' 2>&1 || {
-              if psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d postgres -tc "SELECT 1 FROM pg_database WHERE datname='sonataflow'" | grep -q 1; then
+            psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -c 'CREATE DATABASE sonataflow;' 2>&1 || {
+              if psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d {{ .Values.orchestrator.sonataflowPlatform.externalDBName }} -tc "SELECT 1 FROM pg_database WHERE datname='sonataflow'" | grep -q 1; then
                 echo "Database 'sonataflow' already exists, skipping creation."
               else
                 echo "ERROR: Failed to create database 'sonataflow'."
