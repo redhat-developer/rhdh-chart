@@ -9057,6 +9057,29 @@ entries:
       charts.openshift.io/provider: Red Hat Developer Hub Team
       charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
     apiVersion: v2
+    created: "2026-05-29T22:05:35.683636547Z"
+    description: 'Helm chart to deploy the Orchestrator solution''s required infrastructure
+      suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless
+      Logic Operator, both required to configure Red Hat Developer Hub to use the
+      Orchestrator. '
+    digest: 9b6908040069f9e6094b03ebe94dc1a4f475dc4465314ed8cebab7cc38e0ce63
+    kubeVersion: '>= 1.25.0-0'
+    maintainers:
+    - name: Red Hat Developer Hub Team
+      url: https://github.com/redhat-developer/rhdh-chart
+    name: redhat-developer-hub-orchestrator-infra
+    sources:
+    - https://github.com/redhat-developer/rhdh-chart
+    type: application
+    urls:
+    - https://github.com/redhat-developer/rhdh-chart/releases/download/redhat-developer-hub-orchestrator-infra-0.2.4/redhat-developer-hub-orchestrator-infra-0.2.4.tgz
+    version: 0.2.4
+  - annotations:
+      charts.openshift.io/name: Orchestrator Infrastructure for Red Hat Developer
+        Hub
+      charts.openshift.io/provider: Red Hat Developer Hub Team
+      charts.openshift.io/supportURL: https://issues.redhat.com/browse/RHIDP
+    apiVersion: v2
     created: "2025-09-16T14:29:40.871062371Z"
     description: 'Helm chart to deploy the Orchestrator solution''s required infrastructure
       suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless
@@ -9349,4 +9372,4 @@ entries:
     urls:
     - https://github.com/redhat-developer/rhdh-chart/releases/download/rhdh-must-gather-0.1.0/rhdh-must-gather-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-29T21:55:40.87069858Z"
+generated: "2026-05-29T22:05:35.684035784Z"
