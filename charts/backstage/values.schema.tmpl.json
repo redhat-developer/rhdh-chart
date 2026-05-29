@@ -575,6 +575,18 @@
                             "title": "Number of retries for the create-db job if it fails",
                             "type": "integer"
                         },
+                        "dbCreationJobTTLSecondsAfterFinished": {
+                            "default": 300,
+                            "minimum": 0,
+                            "title": "Time in seconds after which a finished create-db Job is automatically deleted",
+                            "type": "integer"
+                        },
+                        "dbCreationJobActiveDeadlineSeconds": {
+                            "default": 120,
+                            "minimum": 1,
+                            "title": "Maximum time in seconds for the create-db Job to complete before being terminated",
+                            "type": "integer"
+                        },
                         "jobServiceImage": {
                             "title": "Image for the container used by the sonataflow jobs service",
                             "type": "string",

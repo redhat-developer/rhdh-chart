@@ -211,7 +211,9 @@ Kubernetes: `>= 1.27.0-0`
 | orchestrator.serverlessOperator.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
 | orchestrator.sonataflowPlatform.dataIndexImage | Image for the container used by the sonataflow data index, optional and used for disconnected environments | string | `""` |
+| orchestrator.sonataflowPlatform.dbCreationJobActiveDeadlineSeconds | Maximum time in seconds for the create-db Job to complete before being terminated | int | `120` |
 | orchestrator.sonataflowPlatform.dbCreationJobBackoffLimit | Number of retries for the create-db job if it fails | int | `2` |
+| orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished | Time in seconds after which a finished create-db Job is automatically deleted | int | `300` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBHost | Host for the user-configured external Database | string | `""` |

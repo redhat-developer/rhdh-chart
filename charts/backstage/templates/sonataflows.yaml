@@ -85,11 +85,11 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-create-sonataflow-database-{{ .Chart.Version }}
+  name: {{ .Release.Name }}-create-sf-db-{{ .Chart.Version | replace "." "-" }}
   namespace: {{ .Release.Namespace }}
 spec:
-  ttlSecondsAfterFinished: 300
-  activeDeadlineSeconds: 120
+  ttlSecondsAfterFinished: {{ .Values.orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished }}
+  activeDeadlineSeconds: {{ .Values.orchestrator.sonataflowPlatform.dbCreationJobActiveDeadlineSeconds }}
   template:
     spec:
       initContainers:
