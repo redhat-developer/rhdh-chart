@@ -570,7 +570,6 @@
                         },
                         "dbCreationJobBackoffLimit": {
                             "default": 2,
-                            "maximum": 10,
                             "minimum": 0,
                             "title": "Number of retries for the Sonataflow database creation job if it fails",
                             "type": "integer"
