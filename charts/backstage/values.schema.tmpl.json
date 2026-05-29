@@ -572,18 +572,18 @@
                             "default": 2,
                             "maximum": 10,
                             "minimum": 0,
-                            "title": "Number of retries for the create-db job if it fails",
+                            "title": "Number of retries for the Sonataflow database creation job if it fails",
                             "type": "integer"
                         },
                         "dbCreationJobTTLSecondsAfterFinished": {
                             "minimum": 1,
-                            "title": "Time in seconds after which a finished create-db Job is automatically deleted. Leave empty to disable (recommended for GitOps/ArgoCD)",
+                            "title": "Time in seconds after which the Sonataflow database creation Job is automatically deleted. Leave empty to disable (recommended for GitOps/ArgoCD)",
                             "type": ["integer", "null"]
                         },
                         "dbCreationJobActiveDeadlineSeconds": {
                             "default": 120,
                             "minimum": 1,
-                            "title": "Maximum time in seconds for the create-db Job to complete before being terminated",
+                            "title": "Maximum time in seconds for the Sonataflow database creation Job to complete before being terminated",
                             "type": "integer"
                         },
                         "jobServiceImage": {
