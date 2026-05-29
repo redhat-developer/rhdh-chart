@@ -88,7 +88,9 @@ metadata:
   name: {{ .Release.Name }}-create-sf-db-{{ .Chart.Version | replace "." "-" }}
   namespace: {{ .Release.Namespace }}
 spec:
-  ttlSecondsAfterFinished: {{ .Values.orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished }}
+{{- with .Values.orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ . }}
+{{- end }}
   activeDeadlineSeconds: {{ .Values.orchestrator.sonataflowPlatform.dbCreationJobActiveDeadlineSeconds }}
   template:
     spec:

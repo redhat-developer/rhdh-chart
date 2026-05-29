@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 6.0.0](https://img.shields.io/badge/Version-6.0.0-informational?style=flat-square)
+![Version: 6.0.1](https://img.shields.io/badge/Version-6.0.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -29,7 +29,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 6.0.0
+helm install my-backstage redhat-developer/backstage --version 6.0.1
 ```
 
 ## Introduction
@@ -211,9 +211,9 @@ Kubernetes: `>= 1.27.0-0`
 | orchestrator.serverlessOperator.enabled |  | bool | `true` |
 | orchestrator.sonataflowPlatform.createDBJobImage | Image for the container used by the create-db job | string | `"{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"` |
 | orchestrator.sonataflowPlatform.dataIndexImage | Image for the container used by the sonataflow data index, optional and used for disconnected environments | string | `""` |
-| orchestrator.sonataflowPlatform.dbCreationJobActiveDeadlineSeconds | Maximum time in seconds for the create-db Job to complete before being terminated | int | `120` |
-| orchestrator.sonataflowPlatform.dbCreationJobBackoffLimit | Number of retries for the create-db job if it fails | int | `2` |
-| orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished | Time in seconds after which a finished create-db Job is automatically deleted | int | `300` |
+| orchestrator.sonataflowPlatform.dbCreationJobActiveDeadlineSeconds | Maximum time in seconds for the Sonataflow database creation Job to complete before being terminated | int | `120` |
+| orchestrator.sonataflowPlatform.dbCreationJobBackoffLimit | Number of retries for the Sonataflow database creation job if it fails | int | `2` |
+| orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished | Time in seconds after which the Sonataflow database creation Job is automatically deleted. Leave empty to disable (recommended for GitOps/ArgoCD) | int | `nil` |
 | orchestrator.sonataflowPlatform.eventing.broker.name |  | string | `""` |
 | orchestrator.sonataflowPlatform.eventing.broker.namespace |  | string | `""` |
 | orchestrator.sonataflowPlatform.externalDBHost | Host for the user-configured external Database | string | `""` |

@@ -489,10 +489,12 @@
                             "type": "integer"
                         },
                         "dbCreationJobTTLSecondsAfterFinished": {
-                            "default": 300,
-                            "minimum": 0,
-                            "title": "Time in seconds after which a finished create-db Job is automatically deleted",
-                            "type": "integer"
+                            "minimum": 1,
+                            "title": "Time in seconds after which a finished create-db Job is automatically deleted. Leave empty to disable (recommended for GitOps/ArgoCD)",
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
                         },
                         "eventing": {
                             "additionalProperties": false,

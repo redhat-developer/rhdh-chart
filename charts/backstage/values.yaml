@@ -533,11 +533,11 @@ orchestrator:
     initContainerImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
     # -- Image for the container used by the create-db job
     createDBJobImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
-    # -- Number of retries for the create-db job if it fails
+    # -- Number of retries for the Sonataflow database creation job if it fails
     dbCreationJobBackoffLimit: 2
-    # -- Time in seconds after which a finished create-db Job is automatically deleted
-    dbCreationJobTTLSecondsAfterFinished: 300
-    # -- Maximum time in seconds for the create-db Job to complete before being terminated
+    # -- (int) Time in seconds after which the Sonataflow database creation Job is automatically deleted. Leave empty to disable (recommended for GitOps/ArgoCD)
+    dbCreationJobTTLSecondsAfterFinished:
+    # -- Maximum time in seconds for the Sonataflow database creation Job to complete before being terminated
     dbCreationJobActiveDeadlineSeconds: 120
     # -- Image for the container used by the sonataflow jobs service, optional and used for disconnected environments
     jobServiceImage: ""
