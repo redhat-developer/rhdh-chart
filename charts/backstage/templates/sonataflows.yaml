@@ -85,7 +85,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-create-sonataflow-database
+  name: {{ .Release.Name }}-create-sf-db-{{ .Chart.Version | replace "." "-" }}
   namespace: {{ .Release.Namespace }}
 spec:
   activeDeadlineSeconds: 120
