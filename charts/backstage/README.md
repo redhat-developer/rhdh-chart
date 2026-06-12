@@ -186,7 +186,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.lightspeed.configMaps[2].nameOverride | Name of an existing ConfigMap to use instead. Required when `create` is false. | string | `""` |
 | global.lightspeed.configMaps[2].sourceFile | Bundled file used to populate the ConfigMap data when `create` is true. | string | `"rhdh-profile.py"` |
 | global.lightspeed.enabled | Enable or disable the built-in Lightspeed feature. | bool | `true` |
-| global.lightspeed.initContainer.image | Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments. | string | `"quay.io/redhat-ai-dev/rag-content:release-1.9-lls-0.5.0-642c567fe10a62b5ff711654306b72912f341e05"` |
+| global.lightspeed.initContainer.image | Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments. | string | `"quay.io/redhat-ai-dev/rag-content:release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"` |
 | global.lightspeed.initContainer.resources | Resource requests/limits for the Lightspeed RAG bootstrap init container. | object | `{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}}` |
 | global.lightspeed.plugins | Lightspeed plugins and their configuration. Override package references for disconnected environments. | list | `[{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"},{"disabled":false,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}]` |
 | global.lightspeed.ragVolume.emptyDir | `emptyDir` configuration for the RAG data volume. | object | `{}` |
