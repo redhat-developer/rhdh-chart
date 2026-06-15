@@ -1,9 +1,9 @@
 dependencies:
 - name: common
-  repository: https://charts.bitnami.com/bitnami
-  version: 2.40.0
-- name: backstage
-  repository: file://./vendor/backstage/charts/backstage/
-  version: 2.8.0
-digest: sha256:3a285e9b4bb569e1138a09ca0d894f1d09ec053d27901913dbed5a151c591fab
-generated: "2026-06-01T04:30:43.114289007Z"
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 2.10.0
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 12.10.0
+digest: sha256:77630aa988cef5e3a9f64a9fc3427345f451534e973dbece805850be587cb59e
+generated: "2024-05-11T14:39:32.274594+01:00"
