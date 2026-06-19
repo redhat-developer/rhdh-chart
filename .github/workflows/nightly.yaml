@@ -69,15 +69,24 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Compute image tag
+      - name: Compute image repo and tag
         if: steps.check.outputs.exists == 'true'
         id: image
         run: |
           if [[ "${{ matrix.branch }}" == "main" ]]; then
+            echo "repo=rhdh-community/rhdh" >> "$GITHUB_OUTPUT"
             echo "tag=next" >> "$GITHUB_OUTPUT"
           else
-            # release-x.y -> next-x.y
-            echo "tag=next-${BRANCH#release-}" >> "$GITHUB_OUTPUT"
+            version="${BRANCH#release-}"
+            candidate_tag="next-${version}"
+            if skopeo inspect --no-tags "docker://quay.io/rhdh-community/rhdh:${candidate_tag}" &>/dev/null; then
+              echo "repo=rhdh-community/rhdh" >> "$GITHUB_OUTPUT"
+              echo "tag=${candidate_tag}" >> "$GITHUB_OUTPUT"
+            else
+              echo "::warning::Tag ${candidate_tag} not found on quay.io/rhdh-community/rhdh, falling back to quay.io/rhdh/rhdh-hub-rhel9:${version}"
+              echo "repo=rhdh/rhdh-hub-rhel9" >> "$GITHUB_OUTPUT"
+              echo "tag=${version}" >> "$GITHUB_OUTPUT"
+            fi
           fi
         env:
           BRANCH: ${{ matrix.branch }}
@@ -107,4 +116,4 @@ jobs:
           chart: charts/${{ matrix.chart }}
           all_charts: 'true'
           monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
-          extra_helm_args: ${{ matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag={0} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.tag) || '' }}
+          extra_helm_args: ${{ matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}
