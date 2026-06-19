@@ -1,0 +1,17 @@
+{{- if .Values.appConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rhdh.fullname" . }}-app-config
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backstage
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  app-config.yaml: |
+    {{- include "common.tplvalues.render" (dict "value" .Values.appConfig "context" $) | nindent 4 }}
+{{- end }}

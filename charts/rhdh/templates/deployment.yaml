@@ -1,0 +1,406 @@
+{{- $installDir := "/opt/app-root/src" -}}
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- $lightspeedRuntimeVolumeType := "" -}}
+{{- if $lightspeed.enabled -}}
+{{- $lightspeedRuntimeVolumeType = include "rhdh.lightspeed.runtimeVolumeType" (dict "volume" $lightspeed.runtimeVolume "path" "lightspeed.runtimeVolume") -}}
+{{- end -}}
+{{- $extraCatalogImages := include "rhdh.catalogIndex.extraImagesEnvValue" . | trim -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rhdh.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backstage
+  {{- if or .Values.commonAnnotations .Values.deploymentAnnotations }}
+  annotations:
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.deploymentAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rhdh.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backstage
+  template:
+    metadata:
+      labels:
+        {{- include "rhdh.labels" . | nindent 8 }}
+        app.kubernetes.io/component: backstage
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/app-config: {{ include "common.tplvalues.render" (dict "value" .Values.appConfig "context" $) | sha256sum }}
+        checksum/dynamic-plugins: {{ include "common.tplvalues.render" (dict "value" (dict "dynamicPlugins" .Values.dynamicPlugins "lightspeed" (dict "enabled" $lightspeed.enabled "plugins" $lightspeed.plugins)) "context" $) | sha256sum }}
+        {{- if $lightspeed.enabled }}
+        checksum/lightspeed-configmaps: {{ include "rhdh.lightspeed.configMapsChecksum" (dict "context" $ "lightspeed" $lightspeed) | sha256sum }}
+        checksum/lightspeed-secret: {{ include "rhdh.lightspeed.secretChecksum" (dict "context" $ "lightspeed" $lightspeed) | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "rhdh.serviceAccountName" . }}
+      {{- include "rhdh.imagePullSecrets" . | nindent 6 }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hostAliases }}
+      hostAliases:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        # --- System volumes (hardcoded, never replaced) ---
+        - name: dynamic-plugins-root
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 5Gi
+        - name: dynamic-plugins
+          configMap:
+            defaultMode: 420
+            name: {{ printf "%s-dynamic-plugins" (include "rhdh.fullname" .) }}
+            optional: true
+        - name: dynamic-plugins-npmrc
+          secret:
+            defaultMode: 420
+            optional: true
+            secretName: {{ printf "%s-dynamic-plugins-npmrc" (include "rhdh.fullname" .) }}
+        - name: dynamic-plugins-registry-auth
+          secret:
+            defaultMode: 416
+            optional: true
+            secretName: {{ printf "%s-dynamic-plugins-registry-auth" (include "rhdh.fullname" .) }}
+        - name: npmcacache
+          emptyDir: {}
+        - name: extensions-catalog
+          emptyDir: {}
+        - name: temp
+          emptyDir: {}
+        {{- if .Values.appConfig }}
+        - name: backstage-app-config
+          configMap:
+            name: {{ include "rhdh.fullname" . }}-app-config
+        {{- end }}
+        {{- range .Values.extraAppConfig }}
+        - name: {{ .configMapRef }}
+          configMap:
+            name: {{ .configMapRef }}
+        {{- end }}
+        {{- if $lightspeed.enabled }}
+        - name: {{ $lightspeed.runtimeVolume.name }}
+          {{- if eq $lightspeedRuntimeVolumeType "persistentVolumeClaim" }}
+          persistentVolumeClaim:
+            {{- include "common.tplvalues.render" (dict "value" $lightspeed.runtimeVolume.persistentVolumeClaim "context" $) | nindent 12 }}
+          {{- else }}
+          emptyDir:
+            {{- include "common.tplvalues.render" (dict "value" $lightspeed.runtimeVolume.emptyDir "context" $) | nindent 12 }}
+          {{- end }}
+        - name: {{ $lightspeed.ragVolume.name }}
+          emptyDir:
+            {{- include "common.tplvalues.render" (dict "value" $lightspeed.ragVolume.emptyDir "context" $) | nindent 12 }}
+        {{- range $lightspeed.configMaps }}
+        - name: {{ include "rhdh.lightspeed.configMapVolumeName" . }}
+          configMap:
+            name: {{ include "rhdh.lightspeed.configMapName" (dict "root" $ "configMap" .) }}
+            optional: {{ default false .optional }}
+        {{- end }}
+        {{- end }}
+        # --- User-additional volumes (appended) ---
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      initContainers:
+        # --- System init containers (hardcoded) ---
+        - name: install-dynamic-plugins
+          image: {{ include "rhdh.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            seccompProfile:
+              type: "RuntimeDefault"
+          command:
+            - ./install-dynamic-plugins.sh
+            - /dynamic-plugins-root
+          env:
+            - name: NPM_CONFIG_USERCONFIG
+              value: /opt/app-root/src/.npmrc.dynamic-plugins
+            - name: MAX_ENTRY_SIZE
+              value: "40000000"
+            - name: CATALOG_INDEX_IMAGE
+              value: {{ printf "%s/%s:%s" .Values.catalogIndex.image.registry .Values.catalogIndex.image.repository .Values.catalogIndex.image.tag | quote }}
+            - name: CATALOG_ENTITIES_EXTRACT_DIR
+              value: /extensions
+            {{- if $extraCatalogImages }}
+            - name: EXTRA_CATALOG_INDEX_IMAGES
+              value: {{ $extraCatalogImages | quote }}
+            {{- end }}
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 2.5Gi
+              ephemeral-storage: 5Gi
+          volumeMounts:
+            - mountPath: /dynamic-plugins-root
+              name: dynamic-plugins-root
+            - mountPath: /opt/app-root/src/dynamic-plugins.yaml
+              name: dynamic-plugins
+              readOnly: true
+              subPath: dynamic-plugins.yaml
+            - mountPath: /opt/app-root/src/.npmrc.dynamic-plugins
+              name: dynamic-plugins-npmrc
+              readOnly: true
+              subPath: .npmrc
+            - mountPath: /opt/app-root/src/.config/containers
+              name: dynamic-plugins-registry-auth
+              readOnly: true
+            - mountPath: /opt/app-root/src/.npm/_cacache
+              name: npmcacache
+            - name: extensions-catalog
+              mountPath: /extensions
+            - name: temp
+              mountPath: /tmp
+          workingDir: /opt/app-root/src
+        {{- if $lightspeed.enabled }}
+        - name: {{ $lightspeed.initContainer.name }}
+          image: {{ include "rhdh.image.render" (dict "image" $lightspeed.initContainer.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ $lightspeed.initContainer.imagePullPolicy | quote }}
+          {{- with $lightspeed.initContainer.securityContext }}
+          securityContext:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with $lightspeed.initContainer.command }}
+          command:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with $lightspeed.initContainer.args }}
+          args:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with $lightspeed.initContainer.env }}
+          env:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with $lightspeed.initContainer.resources }}
+          resources:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ $lightspeed.runtimeVolume.name }}
+              mountPath: {{ $lightspeed.runtimeVolume.mountPath | quote }}
+            - name: {{ $lightspeed.ragVolume.name }}
+              mountPath: {{ $lightspeed.ragVolume.initMountPath | quote }}
+        {{- end }}
+        # --- User-additional init containers (appended) ---
+        {{- with .Values.initContainers }}
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: backstage-backend
+          image: {{ include "rhdh.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command:
+            {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.command }}
+          command:
+            {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args:
+            {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else }}
+          args:
+            {{- range .Values.args }}
+            - {{ . | quote }}
+            {{- end }}
+            - "--config"
+            - "{{ $installDir }}/dynamic-plugins-root/app-config.dynamic-plugins.yaml"
+            {{- range .Values.extraAppConfig }}
+            - "--config"
+            - "{{ $installDir }}/{{ .filename }}"
+            {{- end }}
+            {{- if .Values.appConfig }}
+            - "--config"
+            - "{{ $installDir }}/app-config-from-configmap.yaml"
+            {{- end }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if or .Values.envFrom.configMaps .Values.envFrom.secrets }}
+          envFrom:
+            {{- range .Values.envFrom.configMaps }}
+            - configMapRef:
+                name: {{ . }}
+            {{- end }}
+            {{- range .Values.envFrom.secrets }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+          {{- end }}
+          env:
+            # --- System env vars (hardcoded) ---
+            - name: APP_CONFIG_backend_listen_port
+              value: {{ .Values.service.port | quote }}
+            {{- if .Values.auth.backend.enabled }}
+            - name: BACKEND_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rhdh.backend-secret-name" . }}
+                  key: backend-secret
+            {{- end }}
+            {{- if .Values.postgresql.enabled }}
+            - name: POSTGRES_HOST
+              value: {{ include "rhdh.postgresql.host" . }}
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.auth.username | default "postgres" }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rhdh.postgresql.secretName" . }}
+                  key: {{ include "rhdh.postgresql.adminPasswordKey" . }}
+            {{- end }}
+            # --- User-additional env vars (appended) ---
+            {{- with .Values.env }}
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: backend
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+            # --- System volume mounts (hardcoded) ---
+            - mountPath: {{ $installDir }}/dynamic-plugins-root
+              name: dynamic-plugins-root
+            - name: extensions-catalog
+              mountPath: /extensions
+            - name: temp
+              mountPath: /tmp
+            {{- if .Values.appConfig }}
+            - name: backstage-app-config
+              mountPath: "{{ $installDir }}/app-config-from-configmap.yaml"
+              subPath: app-config.yaml
+            {{- end }}
+            {{- range .Values.extraAppConfig }}
+            - name: {{ .configMapRef }}
+              mountPath: "{{ $installDir }}/{{ .filename }}"
+              subPath: {{ .filename }}
+            {{- end }}
+            # --- User-additional volume mounts (appended) ---
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- if $lightspeed.enabled }}
+        - name: {{ $lightspeed.sidecar.name }}
+          image: {{ include "rhdh.image.render" (dict "image" $lightspeed.sidecar.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ $lightspeed.sidecar.imagePullPolicy | quote }}
+          {{- with $lightspeed.sidecar.securityContext }}
+          securityContext:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with $lightspeed.sidecar.command }}
+          command:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with $lightspeed.sidecar.args }}
+          args:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: {{ $lightspeed.sidecar.portName }}
+              containerPort: {{ $lightspeed.sidecar.containerPort }}
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ include "rhdh.lightspeed.secretName" (dict "context" $ "lightspeed" $lightspeed) }}
+                optional: {{ default false $lightspeed.secret.optional }}
+          {{- with $lightspeed.sidecar.env }}
+          env:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with $lightspeed.sidecar.resources }}
+          resources:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ $lightspeed.runtimeVolume.name }}
+              mountPath: {{ $lightspeed.runtimeVolume.mountPath | quote }}
+            - name: {{ $lightspeed.ragVolume.name }}
+              mountPath: {{ $lightspeed.ragVolume.mountPath | quote }}
+            {{- range $lightspeed.configMaps }}
+            - name: {{ include "rhdh.lightspeed.configMapVolumeName" . }}
+              mountPath: {{ .mountPath | quote }}
+              {{- if .subPath }}
+              subPath: {{ .subPath | quote }}
+              {{- end }}
+              readOnly: true
+            {{- end }}
+        {{- end }}
+        # --- User-additional sidecar containers (appended) ---
+        {{- with .Values.containers }}
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+        {{- end }}

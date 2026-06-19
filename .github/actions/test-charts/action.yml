@@ -52,18 +52,18 @@ runs:
       run: |
         if [[ -n "$INPUT_CHART" ]]; then
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          if [[ "$INPUT_CHART" == "charts/backstage" ]]; then
-            echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+          if [[ "$INPUT_CHART" == "charts/backstage" || "$INPUT_CHART" == "charts/rhdh" ]]; then
+            echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
           fi
         elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+          echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
         else
           listChanged=$(ct list-changed --target-branch "$INPUT_TARGET_BRANCH")
           if [[ -n "$listChanged" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            if grep 'charts/backstage' <<< "$listChanged"; then
-              echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+            if grep -E 'charts/backstage|charts/rhdh' <<< "$listChanged"; then
+              echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
             fi
           fi
         fi
@@ -158,7 +158,7 @@ runs:
     # For the simple testing that we are doing here on a vanilla K8s cluster, we only need both the Knative and SonataFlow CRDs.
     # TODO(rm3l): Update this when/if there is an upstream counterpart installable via OLM.
     - name: Install Knative and SonataFlow CRDs
-      if: steps.list-changed.outputs.backstageChartChanged == 'true'
+      if: steps.list-changed.outputs.orchestratorCrdsNeeded == 'true'
       shell: bash
       env:
         SONATAFLOW_OPERATOR_VERSION: "10.1.0"
@@ -203,6 +203,16 @@ runs:
             "--set upstream.backstage.podSecurityContext.runAsGroup=1001"
             "--set upstream.backstage.podSecurityContext.fsGroup=1001"
           )
+        elif [[ "$INPUT_CHART" == "charts/rhdh" ]]; then
+          # On vanilla K8s (KinD), there is no SCC to assign a common UID.
+          # Set fsGroup so shared volumes (e.g. RAG data) are group-writable
+          # across init containers and sidecars that may run as different UIDs.
+          EXTRA_ARGS+=(
+            "--set route.enabled=false"
+            "--set podSecurityContext.runAsUser=1001"
+            "--set podSecurityContext.runAsGroup=1001"
+            "--set podSecurityContext.fsGroup=1001"
+          )
         fi
         if [[ -n "$INPUT_EXTRA_HELM_ARGS" ]]; then
           IFS=' ' read -ra ADDITIONAL_ARGS <<< "$INPUT_EXTRA_HELM_ARGS"
@@ -211,10 +221,20 @@ runs:
         CT_ARGS=(
           --debug
           --config ct-install.yaml
-          --upgrade
           --target-branch "$INPUT_TARGET_BRANCH"
           --helm-extra-set-args="${EXTRA_ARGS[*]}"
         )
+        # Only test upgrades from the previous revision if the chart exists on the target branch.
+        # New charts (not yet on the target branch) would fail dependency build on the previous revision.
+        if [[ -n "$INPUT_CHART" ]]; then
+          if git show "origin/$INPUT_TARGET_BRANCH:${INPUT_CHART}/Chart.yaml" &>/dev/null; then
+            CT_ARGS+=(--upgrade)
+          else
+            echo "Chart $INPUT_CHART is new (not on $INPUT_TARGET_BRANCH); skipping upgrade test."
+          fi
+        else
+          CT_ARGS+=(--upgrade)
+        fi
         if [[ -n "$INPUT_CHART" ]]; then
           CT_ARGS+=(--charts "$INPUT_CHART")
         elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then

@@ -1,4 +1,4 @@
-# RHDH Backstage Helm Chart for OpenShift
+# RHDH Helm Chart for OpenShift and Kubernetes
 
 {{ template "chart.deprecationWarning" . }}
 
@@ -8,8 +8,6 @@
 {{ template "chart.description" . }}
 
 {{ template "chart.homepageLine" . }}
-
-> **DEPRECATED:** Starting with RHDH 2.y, this chart is deprecated in favor of the new [`redhat-developer-hub`](../rhdh/) chart, which owns all Kubernetes templates directly and no longer depends on the upstream Backstage subchart. See the [upgrade guide](../rhdh/README.md#upgrading-from-the-backstage-chart-rhdh-1y) for migration instructions. This chart will continue to receive critical fixes on the supported `release-1.y` branches but no new features.
 
 ## Productized RHDH
 
@@ -29,19 +27,20 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version {{ template "chart.version" . }}
+helm install my-rhdh redhat-developer/redhat-developer-hub --version {{ template "chart.version" . }}
 ```
 
 ## Introduction
 
-This chart bootstraps a [Backstage](https://backstage.io/docs/deployment/docker) deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps a [Red Hat Developer Hub](https://developers.redhat.com/rhdh) deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+Unlike the legacy `backstage` chart, this chart owns all Kubernetes templates directly (Deployment, Service, ConfigMap, etc.) without depending on an upstream Backstage subchart. It uses an **"add, don't replace"** pattern: system-required volumes, volume mounts, environment variables, and init containers are hardcoded in the Deployment template, while user-provided values (`volumes`, `volumeMounts`, `env`, `initContainers`, `containers`) are always appended — never replacing the defaults.
 
 ## Prerequisites
 
 - Kubernetes 1.27+ ([OpenShift 4.14+](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html-single/release_notes/index#ocp-4-14-about-this-release))
 - Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
 - PV provisioner support in the underlying infrastructure
-- [Backstage container image](https://backstage.io/docs/deployment/docker)
 
 ## Usage
 
@@ -68,24 +67,22 @@ Once the chart has been added, install this chart. However before doing so, plea
 - To get proper connection between frontend and backend of Backstage please update the `apps.example.com` to match your cluster host:
 
    ```yaml
-   global:
-     clusterRouterBase: apps.example.com
+   clusterRouterBase: apps.example.com
    ```
 
-   > Tip: you can use `helm upgrade -i --set global.clusterRouterBase=apps.example.com ...` instead of a value file
+   > Tip: you can use `helm upgrade -i --set clusterRouterBase=apps.example.com ...` instead of a value file
 
 - If your cluster doesn't provide PVCs, you should disable PostgreSQL persistence via:
 
    ```yaml
-   upstream:
-     postgresql:
-       primary:
-         persistence:
-           enabled: false
+   postgresql:
+     primary:
+       persistence:
+         enabled: false
    ```
 
 ```console
-helm upgrade -i <release_name> redhat-developer/backstage
+helm upgrade -i <release_name> redhat-developer/redhat-developer-hub
 ```
 
 ### Installing from an OCI Registry
@@ -142,39 +139,49 @@ helm install <release_name> <repo_or_oci_registry> \
 
 ### Uninstalling the Chart
 
-To uninstall/delete the `my-backstage-release` deployment:
+To uninstall/delete the `my-rhdh` deployment:
 
 ```console
-helm uninstall my-backstage-release
+helm uninstall my-rhdh
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Upgrading from the backstage chart (RHDH 1.y)
+
+> **Note:** This section is a work in progress. A detailed migration guide will be provided before the GA release of RHDH 2.y.
+
+If you are upgrading from the legacy `backstage` chart (used in RHDH 1.y), the new `redhat-developer-hub` chart is a clean break. The values structure has changed significantly — all `global.*` and `upstream.backstage.*` nesting has been flattened to root-level keys. A `helm upgrade` from the old chart to this one is **not** supported; you will need to perform a fresh install with migrated values.
 
 {{ template "chart.requirementsSection" . }}
 
 {{ template "chart.valuesSection" . }}
 
-## Opinionated Backstage deployment
+## Opinionated RHDH deployment
 
-This chart defaults to an opinionated deployment of Backstage that provides user with a usable Backstage instance out of the box.
+This chart defaults to an opinionated deployment of Red Hat Developer Hub that provides users with a usable instance out of the box.
 
 Features enabled by the default chart configuration:
 
 1. Uses [rhdh](https://github.com/redhat-developer/rhdh/) that pre-loads a lot of useful plugins and features
 2. Exposes a `Route` for easy access to the instance
 3. Enables OpenShift-compatible PostgreSQL database storage
+4. Built-in Lightspeed AI feature (enabled by default)
+5. Dynamic plugins system with catalog index support
 
 For additional instance features please consult the [documentation for `rhdh`](https://github.com/redhat-developer/rhdh/tree/main/showcase-docs).
 
 Additional features can be enabled by extending the default configuration at:
 
 ```yaml
-upstream:
-  backstage:
-    appConfig:
-      # Inline app-config.yaml for the instance
-    extraEnvVars:
-      # Additional environment variables
+appConfig:
+  # Inline app-config.yaml for the instance
+env:
+  # Additional environment variables (appended to system defaults)
+volumes:
+  # Additional volumes (appended to system defaults)
+volumeMounts:
+  # Additional volume mounts (appended to system defaults)
 ```
 
 ## Features
@@ -185,13 +192,21 @@ This charts defaults to using the [RHDH image](https://quay.io/rhdh-community/rh
 quay.io/rhdh-community/rhdh:next
 ```
 
-Additionally this chart enhances the upstream Backstage chart with following OpenShift-specific features:
+### "Add, don't replace" pattern
+
+System-required volumes, volume mounts, environment variables, init containers, and sidecar containers are hardcoded in the Deployment template. User-provided values are always **appended** after the system defaults:
+
+- `volumes` — appended after dynamic-plugins-root, temp, npmcacache, extensions-catalog, etc.
+- `volumeMounts` — appended after dynamic-plugins-root, extensions, temp mounts
+- `env` — appended after APP_CONFIG_backend_listen_port, BACKEND_SECRET, POSTGRES_* vars
+- `initContainers` — appended after install-dynamic-plugins and Lightspeed RAG init
+- `containers` — appended after the Lightspeed Core sidecar
+
+This means you never need to copy system defaults to add your own entries.
 
 ### OpenShift Routes
 
-This chart offers a drop-in replacement for the `Ingress` resource already provided by the upstream chart via an OpenShift `Route`.
-
-OpenShift routes are enabled by default. In order to use the chart without it, please set `route.enabled` to `false` and switch to the `Ingress` resource via `upstream.ingress` values.
+This chart offers an OpenShift `Route` resource enabled by default. In order to use the chart without it, please set `route.enabled` to `false` and switch to the `Ingress` resource via `ingress` values.
 
 Routes can be further configured via the `route` field.
 
@@ -199,56 +214,52 @@ To manually provide the Backstage pod with the right context, please add the fol
 
 ```yaml
 # values.yaml
-global:
-  clusterRouterBase: apps.example.com
+clusterRouterBase: apps.example.com
 ```
 
-> Tip: you can use `helm upgrade -i --set global.clusterRouterBase=apps.example.com ...` instead of a value file
+> Tip: you can use `helm upgrade -i --set clusterRouterBase=apps.example.com ...` instead of a value file
 
 Custom hosts are also supported via the following shorthand:
 
 ```yaml
 # values.yaml
-global:
-  host: backstage.example.com
+host: backstage.example.com
 ```
 
-> Note: Setting either `global.host` or `global.clusterRouterBase` will disable the automatic hostname discovery.
-        When both fields are set, `global.host` will take precedence.
+> Note: Setting either `host` or `clusterRouterBase` will disable the automatic hostname discovery.
+        When both fields are set, `host` will take precedence.
         These are just templating shorthands. For full manual configuration please pay attention to values under the `route` key.
 
 Any custom modifications to how backstage is being exposed may require additional changes to the `values.yaml`:
 
 ```yaml
 # values.yaml
-upstream:
-  backstage:
-    appConfig:
-      app:
-        baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
-      backend:
-        baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
-        cors:
-          origin: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
+appConfig:
+  app:
+    baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
+  backend:
+    baseUrl: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
+    cors:
+      origin: 'https://{{"{{"}}- include "rhdh.hostname" . {{"}}"}}'
 ```
 
 ### Catalog Index Configuration
 
-The chart supports automatic plugin discovery through a catalog index OCI image. This is configured via `global.catalogIndex.image` (with `registry`, `repository`, and `tag` fields) and lets you use a pre-defined set of dynamic plugins.
+The chart supports automatic plugin discovery through a catalog index OCI image. This is configured via `catalogIndex.image` (with `registry`, `repository`, and `tag` fields) and lets you use a pre-defined set of dynamic plugins.
 
-You can also configure additional catalog index images via `global.catalogIndex.extraImages` to make plugins from other sources discoverable in the Extensions UI. Each extra image contributes catalog entities only (no `dynamic-plugins.default.yaml` handling).
+You can also configure additional catalog index images via `catalogIndex.extraImages` to make plugins from other sources discoverable in the Extensions UI. Each extra image contributes catalog entities only (no `dynamic-plugins.default.yaml` handling).
 
 For detailed information on configuring the catalog index, including how to override the default image, use a private registry, or add extra catalog index images, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
 
 ### Lightspeed
 
-Use `global.lightspeed.enabled` to enable or disable the built-in Lightspeed feature.
+Use `lightspeed.enabled` to enable or disable the built-in Lightspeed feature.
 
-When enabled, the chart adds the default Lightspeed dynamic plugins, a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, a chart-generated Secret, and separate runtime and RAG data volumes. Override `global.lightspeed.plugins` for disconnected environments.
+When enabled, the chart adds the default Lightspeed dynamic plugins, a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, a chart-generated Secret, and separate runtime and RAG data volumes. Override `lightspeed.plugins` for disconnected environments.
 
-Use `global.lightspeed.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
+Use `lightspeed.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
 
-When using the built-in Lightspeed feature, do not also keep Lightspeed plugin packages in `global.dynamic.plugins`. Existing installations that previously configured Lightspeed there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `global.lightspeed.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate Lightspeed plugin entries.
+When using the built-in Lightspeed feature, do not also keep Lightspeed plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `lightspeed.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate Lightspeed plugin entries.
 
 The Lightspeed Core sidecar loads the chart-created Lightspeed Secret as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
 
@@ -258,32 +269,29 @@ To deploy this chart on vanilla Kubernetes or any other non-OCP platform, apply 
 
 ```yaml
 # values.yaml
-global:
-  host: # Specify your own Ingress host
+host: # Specify your own Ingress host
 route:
   enabled: false  # OpenShift Routes do not exist on vanilla Kubernetes
-upstream:
-  ingress:
-    enabled: true  # Use Kubernetes Ingress instead of OpenShift Route
-  backstage:
-    podSecurityContext:  # Vanilla Kubernetes doesn't feature OpenShift default SCCs with dynamic UIDs, adjust accordingly to the deployed image
-      runAsUser: 1001
-      runAsGroup: 1001
-      fsGroup: 1001
-  postgresql:
-    primary:
-      podSecurityContext:
-        enabled: true
-        fsGroup: 26
-        runAsUser: 26
-    volumePermissions:
+ingress:
+  enabled: true  # Use Kubernetes Ingress instead of OpenShift Route
+podSecurityContext:  # Vanilla Kubernetes doesn't feature OpenShift default SCCs with dynamic UIDs, adjust accordingly to the deployed image
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+postgresql:
+  primary:
+    podSecurityContext:
       enabled: true
+      fsGroup: 26
+      runAsUser: 26
+  volumePermissions:
+    enabled: true
 ```
 
 ## Installing RHDH with Orchestrator on OpenShift
 
 Orchestrator brings serverless workflows into Backstage, focusing on the journey for application migration to the cloud, onboarding developers, and user-made workflows of Backstage actions or external systems.
-Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the same namespace and in the following way: 
+Orchestrator is a flavor of RHDH, and can be installed alongside RHDH in the same namespace and in the following way:
 
 1. Have an admin install the [orchestrator-infra Helm Chart](https://github.com/redhat-developer/rhdh-chart/tree/main/charts/orchestrator-infra#readme), which will install the prerequisites required to deploy the Orchestrator-flavored RHDH. This process will include installing cluster-wide resources, so should be done with admin privileges:
 ```
@@ -293,10 +301,10 @@ helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-infra
 ```
 2. Manually approve the Install Plans created by the chart, and wait for the Openshift Serverless and Openshift Serverless Logic Operators to be deployed. To do so, follow the post-install notes given by the chart, or see them [here](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/orchestrator-infra/templates/NOTES.txt)
-3. Install the `backstage` chart with Helm, enabling orchestrator, like so:
+3. Install the `redhat-developer-hub` chart with Helm, enabling orchestrator, like so:
 
 ```
-helm install <release_name> redhat-developer/backstage --set orchestrator.enabled=true 
+helm install <release_name> redhat-developer/redhat-developer-hub --set orchestrator.enabled=true
 ```
 Note that serverlessLogicOperator, and serverlessOperator are enabled by default. They can be disabled together or seperately by passing the following flags:
 `--set orchestrator.serverlessLogicOperator.enabled=false --set orchestrator.serverlessOperator.enabled=false`
@@ -305,7 +313,7 @@ Note that serverlessLogicOperator, and serverlessOperator are enabled by default
 
 Workflows running with Orchestrator may use the Notifications plugin.
 For this, you must enable the Notifications and Signals plugins.
-To do so, you would need to edit the [default Helm values.yaml](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml) file, and add the plugins listed below to the global.dynamic.plugins list.
+To do so, you would need to edit the [default Helm values.yaml](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/rhdh/values.yaml) file, and add the plugins listed below to the `dynamicPlugins.plugins` list.
 Do this before installing the Helm Chart, or upgrade the Helm release with the new values file.
 
 ```yaml
@@ -320,24 +328,26 @@ Do this before installing the Helm Chart, or upgrade the Helm release with the n
 ```
 Enabling these plugins will allow you to recieve notifications from workflows running with Orchestrator.
 
-### Using Orchestrator while configuring an ExternalDB 
+### Using Orchestrator while configuring an ExternalDB
 
 To use orchestrator with an external DB, please follow the instructions in [our documentation](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)
 and populate the following values in the values.yaml:
 ```bash
-    externalDBsecretRef: <cred-secret>
-    externalDBName: ""
-    externalDBHost: ""
-    externalDBPort: ""
+    orchestrator:
+      sonataflowPlatform:
+        externalDBsecretRef: <cred-secret>
+        externalDBName: ""
+        externalDBHost: ""
+        externalDBPort: ""
 ```
-The values for externalDBHost and externalDBPort should match the ones configured in the cred-secret. 
+The values for externalDBHost and externalDBPort should match the ones configured in the cred-secret.
 
 Please note that `externalDBName` is the name of the user-configured existing database, not the database that the orchestrator and sonataflow resources will use.
 A Job will run to create the 'sonataflow' database in the external database for the workflows to use.
 
 Finally, install the Helm Chart (including [setting up the external DB](https://github.com/redhat-developer/rhdh-chart/blob/main/docs/external-db.md)):
 ```
-helm install <release_name> redhat-developer/backstage \
+helm install <release_name> redhat-developer/redhat-developer-hub \
   --set orchestrator.enabled=true \
   --set orchestrator.sonataflowPlatform.externalDBsecretRef=<cred-secret> \
   --set orchestrator.sonataflowPlatform.externalDBName=example \

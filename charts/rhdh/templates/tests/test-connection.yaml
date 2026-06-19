@@ -1,0 +1,41 @@
+{{- if .Values.test.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "rhdh.fullname" . }}-test-connection"
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backstage
+  annotations:
+    helm.sh/hook: test
+spec:
+  automountServiceAccountToken: false
+  containers:
+    - name: curl
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 20Mi
+          ephemeral-storage: 10Mi
+        limits:
+          cpu: 10m
+          memory: 20Mi
+          ephemeral-storage: 10Mi
+      livenessProbe:
+        exec:
+          command:
+          - ls
+          - /usr/bin/curl
+      image: {{ include "rhdh.image.render" (dict "image" .Values.test.image "global" .Values.global) | quote }}
+      imagePullPolicy: ""
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          curl --connect-timeout 5 --max-time 20 --retry 20 --retry-delay 10 --retry-max-time 60 --retry-all-errors {{ include "rhdh.fullname" . }}:{{ .Values.service.port }}
+  restartPolicy: Never
+{{- end }}

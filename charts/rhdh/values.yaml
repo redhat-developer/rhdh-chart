@@ -1,0 +1,540 @@
+# Default values for redhat-developer-hub.
+
+# -- Global parameters shared with bitnami subcharts (postgresql, common).
+global:
+  # -- Global Docker image registry. Overrides per-image registries for all containers.
+  imageRegistry: ""
+  # -- Global Docker registry secret names.
+  imagePullSecrets: []
+  # -- Global default StorageClass for PVCs.
+  defaultStorageClass: ""
+  security:
+    # -- Allow non-bitnami images for the postgresql subchart. Only effective when postgresql.enabled is true;
+    # does not affect the RHDH or Lightspeed images. Must be true when using a non-bitnami PostgreSQL image
+    # (including the Red Hat secured image used in the downstream build).
+    allowInsecureImages: true
+
+# -- Number of desired pods.
+replicaCount: 1
+
+# -- Container image configuration.
+image:
+  registry: quay.io
+  repository: rhdh-community/rhdh
+  tag: next
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag with an image digest.
+  digest: ""
+
+# -- Secrets for pulling images from private registries (merged with global.imagePullSecrets).
+imagePullSecrets: []
+# -- Override the chart name used in resource naming.
+nameOverride: ""
+# -- Override the full resource name.
+fullnameOverride: ""
+
+# -- ServiceAccount configuration.
+serviceAccount:
+  create: false
+  automount: true
+  annotations: {}
+  # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+# -- Annotations to add to the pod.
+podAnnotations: {}
+# -- Labels to add to the pod.
+podLabels: {}
+
+# -- Pod-level security context.
+podSecurityContext: {}
+
+# -- Container-level security context with hardened defaults for OpenShift.
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  seccompProfile:
+    type: "RuntimeDefault"
+
+# -- Service configuration.
+service:
+  type: ClusterIP
+  port: 7007
+  # -- Additional service ports.
+  extraPorts:
+    - name: http-metrics
+      port: 9464
+      targetPort: 9464
+  annotations: {}
+  sessionAffinity: ""
+  clusterIP: ""
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  externalTrafficPolicy: ""
+
+# -- Kubernetes Ingress configuration.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+# -- Gateway API HTTPRoute configuration.
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+  rules: []
+
+# -- Resource requests and limits for the main RHDH container.
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 2.5Gi
+    ephemeral-storage: 5Gi
+
+# -- Startup probe configuration. Gives the application time to start before liveness/readiness probes kick in.
+startupProbe:
+  httpGet:
+    path: /.backstage/health/v1/liveness
+    port: backend
+    scheme: HTTP
+  initialDelaySeconds: 30
+  timeoutSeconds: 4
+  periodSeconds: 20
+  successThreshold: 1
+  failureThreshold: 3
+
+# -- Readiness probe configuration.
+readinessProbe:
+  httpGet:
+    path: /.backstage/health/v1/readiness
+    port: backend
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 2
+  failureThreshold: 3
+  timeoutSeconds: 4
+
+# -- Liveness probe configuration.
+livenessProbe:
+  httpGet:
+    path: /.backstage/health/v1/liveness
+    port: backend
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+  timeoutSeconds: 4
+
+# -- Horizontal Pod Autoscaler configuration.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# -- Additional volumes to add to the pod. These are ADDED to system-required volumes
+# (dynamic-plugins-root, temp, npmcacache, etc.), never replacing them.
+volumes: []
+
+# -- Additional volume mounts to add to the main container. These are ADDED to
+# system-required mounts, never replacing them.
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# -- Topology spread constraints for pod scheduling.
+topologySpreadConstraints: []
+
+# -- Host aliases for /etc/hosts entries.
+hostAliases: []
+
+# -- Annotations for the Deployment resource (not the pod).
+deploymentAnnotations: {}
+
+# -- Number of old ReplicaSets to retain.
+revisionHistoryLimit: 10
+
+# -- Deployment update strategy.
+strategy: {}
+
+# -- Override the container command.
+command: []
+
+# -- Additional arguments for the backstage container. System arguments
+# (--config dynamic-plugins-root/app-config.dynamic-plugins.yaml) are added by the template automatically.
+args: []
+
+# -- Labels applied to ALL chart resources.
+commonLabels: {}
+# -- Annotations applied to ALL chart resources.
+commonAnnotations: {}
+
+# -- Diagnostic mode disables all probes and overrides the container command for debugging.
+diagnosticMode:
+  enabled: false
+  command:
+    - sleep
+  args:
+    - infinity
+
+# -- Inline Backstage app-config YAML. Rendered into a ConfigMap and mounted as app-config-from-configmap.yaml.
+# @default -- Default config with base URLs, CORS, database connection, and backend auth.
+appConfig:
+  auth:
+    providers: {}
+  app:
+    baseUrl: 'https://{{- include "rhdh.hostname" . }}'
+  backend:
+    baseUrl: 'https://{{- include "rhdh.hostname" . }}'
+    cors:
+      origin: 'https://{{- include "rhdh.hostname" . }}'
+    database:
+      connection:
+        password: ${POSTGRESQL_ADMIN_PASSWORD}
+        user: postgres
+    auth:
+      externalAccess:
+        - type: legacy
+          options:
+            subject: legacy-default-config
+            secret: ${BACKEND_SECRET}
+
+# -- Additional app-config files from existing ConfigMaps.
+extraAppConfig: []
+# - filename: app-config.production.yaml
+#   configMapRef: my-production-config
+
+# -- Additional environment variables for the main container. These are ADDED to system
+# env vars (BACKEND_SECRET, DB credentials, etc.), never replacing them.
+env: []
+
+# -- ConfigMaps and Secrets to inject as environment variables via envFrom.
+envFrom:
+  configMaps: []
+  secrets: []
+
+# -- Additional sidecar containers. These are ADDED to system containers
+# (e.g. Lightspeed sidecar), never replacing them.
+containers: []
+
+# -- Additional init containers. These are ADDED after system init containers
+# (install-dynamic-plugins, Lightspeed RAG init), never replacing them.
+initContainers: []
+
+# -- Pod Disruption Budget configuration.
+podDisruptionBudget:
+  create: false
+  minAvailable: ""
+  maxUnavailable: 1
+
+# -- Custom hostname. Overrides clusterRouterBase for URL generation.
+host: ""
+
+# -- Cluster router base domain used to auto-generate the hostname.
+clusterRouterBase: "apps.example.com"
+
+# -- Service-to-service authentication configuration.
+auth:
+  backend:
+    # -- Enable backend service-to-service authentication.
+    # Generates a random secret unless existingSecret or value is set.
+    enabled: true
+    # -- Use an existing secret instead of generating one.
+    existingSecret: ""
+    # -- Use a specific value instead of generating one.
+    value: ""
+
+# -- Dynamic plugin system configuration.
+dynamicPlugins:
+  # -- Array of YAML files listing dynamic plugins to include.
+  # Relative paths are resolved from the working directory of the initContainer (`/opt/app-root/src`).
+  includes:
+    - "dynamic-plugins.default.yaml"
+  # -- List of dynamic plugins. Every item defines the plugin `package` as a NPM package spec or OCI reference.
+  plugins: []
+
+# -- Catalog index configuration for automatic plugin discovery.
+# -- Catalog index configuration for automatic plugin discovery.
+catalogIndex:
+  image:
+    registry: quay.io
+    repository: rhdh/plugin-catalog-index
+    tag: "1.10"
+    digest: ""
+  # -- Extra catalog index images for additional plugin discovery in the Extensions UI.
+  # Each item must include `registry`, `repository`, and `tag` fields; `name` and `digest` are optional.
+  # Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling).
+  # @default -- `[]`
+  extraImages: []
+  # - name: community
+  #   registry: ghcr.io
+  #   repository: redhat-developer/rhdh-plugin-community-index
+  #   tag: "1.10"
+  #   digest: ""
+  # - registry: my-registry.example.com
+  #   repository: my-org/my-rhdh-internal-plugin-catalog
+  #   tag: "1.2.3"
+  #   digest: ""
+
+# -- Built-in Lightspeed AI feature configuration.
+lightspeed:
+  enabled: true
+  plugins:
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
+      disabled: false
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
+      disabled: false
+  runtimeVolume:
+    name: lightspeed-data
+    mountPath: /tmp
+    type: emptyDir
+    emptyDir: {}
+    persistentVolumeClaim: {}
+  ragVolume:
+    name: lightspeed-rag
+    initMountPath: /rag-content
+    mountPath: /rag-content
+    emptyDir: {}
+  configMaps:
+    - name: stack
+      create: true
+      nameOverride: ""
+      mountPath: /app-root/lightspeed-stack.yaml
+      subPath: lightspeed-stack.yaml
+      sourceFile: lightspeed-stack.yaml
+      optional: false
+    - name: config
+      create: true
+      nameOverride: ""
+      mountPath: /app-root/config.yaml
+      subPath: config.yaml
+      sourceFile: config.yaml
+      optional: false
+    - name: rhdh-profile
+      create: true
+      nameOverride: ""
+      mountPath: /app-root/rhdh-profile.py
+      subPath: rhdh-profile.py
+      sourceFile: rhdh-profile.py
+      optional: false
+  secret:
+    create: true
+    name: ""
+    optional: false
+    sourceFile: secret.yaml
+  initContainer:
+    name: lightspeed-rag-init
+    image:
+      registry: quay.io
+      repository: redhat-ai-dev/rag-content
+      tag: release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3
+      digest: ""
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+    args:
+      - >-
+        mkdir -p /tmp/data &&
+        echo 'Copying Lightspeed RAG data...' &&
+        cp -r /rag/vector_db /rag-content/ &&
+        cp -r /rag/embeddings_model /rag-content/ &&
+        echo 'Copy complete.'
+    env: []
+    resources:
+      requests:
+        cpu: 50m
+        memory: 150Mi
+      limits:
+        cpu: 100m
+        memory: 500Mi
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      seccompProfile:
+        type: "RuntimeDefault"
+  sidecar:
+    name: lightspeed-core
+    image:
+      registry: quay.io
+      repository: lightspeed-core/lightspeed-stack
+      tag: "0.5.1"
+      digest: ""
+    imagePullPolicy: IfNotPresent
+    portName: http-lightspeed
+    containerPort: 8080
+    command: []
+    args: []
+    env: []
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      seccompProfile:
+        type: "RuntimeDefault"
+
+# -- OpenShift Route configuration.
+route:
+  annotations: {}
+  enabled: true
+  host: "{{ .Values.host }}"
+  path: "/"
+  wildcardPolicy: None
+  tls:
+    enabled: true
+    termination: "edge"
+    certificate: ""
+    key: ""
+    caCertificate: ""
+    destinationCACertificate: ""
+    insecureEdgeTerminationPolicy: "Redirect"
+
+# -- Built-in PostgreSQL database (bitnami subchart).
+postgresql:
+  enabled: true
+  postgresqlDataDir: /var/lib/pgsql/data/userdata
+  serviceBindings:
+    enabled: true
+  image:
+    registry: quay.io
+    repository: fedora/postgresql-15
+    tag: latest
+    digest: ""
+  auth:
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+  primary:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 250m
+        memory: 1024Mi
+        ephemeral-storage: 20Mi
+    persistence:
+      enabled: true
+      size: 1Gi
+      mountPath: /var/lib/pgsql/data
+    extraEnvVars:
+      - name: POSTGRESQL_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: '{{- include "rhdh.postgresql.adminPasswordKey" . }}'
+            name: '{{- include "rhdh.postgresql.secretName" . }}'
+
+# -- Network Policy configuration.
+networkPolicy:
+  enabled: false
+  ingressRules:
+    namespaceSelector: {}
+    podSelector: {}
+    customRules: []
+  egressRules:
+    denyConnectionsToExternal: false
+    customRules: []
+
+# -- Prometheus metrics configuration.
+metrics:
+  serviceMonitor:
+    enabled: false
+    path: /metrics
+    port: http-metrics
+    interval: ""
+    labels: {}
+    annotations: {}
+
+# -- Orchestrator (Serverless workflows) configuration.
+orchestrator:
+  enabled: false
+  serverlessLogicOperator:
+    enabled: true
+  serverlessOperator:
+    enabled: true
+  sonataflowPlatform:
+    monitoring:
+      enabled: true
+    eventing:
+      broker:
+        name: ""
+        namespace: ""
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    externalDBsecretRef: ""
+    externalDBName: ""
+    externalDBHost: ""
+    externalDBPort: ""
+    initContainerImage: "{{ .Values.postgresql.image.registry }}/{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+    createDBJobImage: "{{ .Values.postgresql.image.registry }}/{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+    dbCreationJobBackoffLimit: 2
+    dbCreationJobTTLSecondsAfterFinished:
+    dbCreationJobActiveDeadlineSeconds: 120
+    jobServiceImage: ""
+    dataIndexImage: ""
+  plugins:
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{inherit}}" }}'
+      disabled: false
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{inherit}}" }}'
+      disabled: false
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{inherit}}" }}'
+      disabled: false
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{inherit}}" }}'
+      disabled: false
+
+# -- Test pod configuration for `helm test`.
+test:
+  enabled: true
+  image:
+    registry: quay.io
+    repository: curl/curl
+    tag: "8.9.1"
+    digest: ""
+  injectTestNpmrcSecret: false

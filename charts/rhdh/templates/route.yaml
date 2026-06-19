@@ -1,0 +1,57 @@
+{{- if .Values.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "rhdh.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backstage
+  {{- if or .Values.commonAnnotations .Values.route.annotations }}
+  annotations:
+    {{- with .Values.route.annotations }}
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+{{- $host := include "common.tplvalues.render" (dict "value" .Values.route.host "context" $) | trim -}}
+{{- if $host }}
+  host: {{ $host }}
+{{- else }}
+  host: {{ include "rhdh.hostname" . }}
+{{- end }}
+{{- with .Values.route.path }}
+  path: {{ . }}
+{{- end }}
+  port:
+    targetPort: http-backend
+{{- if .Values.route.tls.enabled }}
+  tls:
+    insecureEdgeTerminationPolicy: {{ .Values.route.tls.insecureEdgeTerminationPolicy }}
+    termination: {{ .Values.route.tls.termination }}
+    {{- if .Values.route.tls.key }}
+    key: |
+      {{- .Values.route.tls.key | nindent 6 }}
+    {{- end }}
+    {{- if .Values.route.tls.certificate }}
+    certificate: |
+      {{- .Values.route.tls.certificate | nindent 6 }}
+    {{- end }}
+    {{- if .Values.route.tls.caCertificate }}
+    caCertificate: |
+      {{- .Values.route.tls.caCertificate | nindent 6 }}
+    {{- end }}
+    {{- if .Values.route.tls.destinationCACertificate }}
+    destinationCACertificate: |
+      {{- .Values.route.tls.destinationCACertificate | nindent 6 }}
+    {{- end }}
+{{- end }}
+  to:
+    kind: Service
+    name: {{ include "rhdh.fullname" . }}
+    weight: 100
+  wildcardPolicy: {{ .Values.route.wildcardPolicy }}
+{{- end }}

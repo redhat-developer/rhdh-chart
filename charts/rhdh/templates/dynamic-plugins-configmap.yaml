@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-dynamic-plugins" (include "rhdh.fullname" .) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backstage
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  dynamic-plugins.yaml: |
+    {{- $lightspeed := include "rhdh.lightspeed" . | fromYaml }}
+    {{- $dynamic := deepCopy .Values.dynamicPlugins }}
+    {{- $plugins := list }}
+
+    {{- range .Values.dynamicPlugins.plugins }}
+      {{- $plugins = append $plugins . }}
+    {{- end }}
+
+    {{- if .Values.orchestrator.enabled }}
+      {{- range .Values.orchestrator.plugins }}
+        {{- $plugins = append $plugins . }}
+      {{- end }}
+    {{- end }}
+
+    {{- if $lightspeed.enabled }}
+      {{- range $lightspeed.plugins }}
+        {{- $plugins = append $plugins . }}
+      {{- end }}
+    {{- end }}
+
+    {{- $_ := set $dynamic "plugins" $plugins }}
+
+    {{- include "common.tplvalues.render" (dict "value" $dynamic "context" $) | nindent 4 }}

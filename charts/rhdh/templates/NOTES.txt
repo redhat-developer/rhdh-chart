@@ -1,0 +1,12 @@
+Red Hat Developer Hub has been installed.
+
+{{- if .Values.route.enabled }}
+Your application is accessible via OpenShift Route:
+  {{ include "rhdh.hostname" . }}
+{{- else if .Values.ingress.enabled }}
+Your application is accessible via Ingress. Check your ingress configuration for the URL.
+{{- else }}
+To access the application, forward the service port:
+  kubectl port-forward svc/{{ include "rhdh.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+Then open http://localhost:{{ .Values.service.port }} in your browser.
+{{- end }}
