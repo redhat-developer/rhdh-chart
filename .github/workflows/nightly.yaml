@@ -11,9 +11,35 @@ concurrency:
 
 jobs:
 
-  test-chart:
-    name: Nightly Test (${{ matrix.branch }})
+  discover-charts:
+    name: Discover charts
     runs-on: ubuntu-latest
+    outputs:
+      charts: ${{ steps.list.outputs.charts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: List charts
+        id: list
+        run: |
+          excluded=$(yq e '.excluded-charts[]' ct.yaml 2>/dev/null || true)
+          charts='[]'
+          for chart_dir in charts/*/; do
+            [[ ! -d "$chart_dir" ]] && continue
+            chart_name=$(basename "$chart_dir")
+            chart_path="${chart_dir%/}"
+            if ! echo "$excluded" | grep -qx "$chart_name"; then
+              charts=$(echo "$charts" | jq -c --arg c "$chart_name" '. + [$c]')
+            fi
+          done
+          echo "charts=$charts" >> "$GITHUB_OUTPUT"
+
+  test-chart:
+    needs: discover-charts
+    name: Nightly (${{ matrix.branch }} / ${{ matrix.chart }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -22,29 +48,72 @@ jobs:
           - release-1.10
           - release-1.9
           - release-1.8
+        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           ref: ${{ matrix.branch }}
           fetch-depth: 0
 
-      - name: Compute image tag
+      - name: Check chart exists on branch
+        id: check
+        env:
+          CHART: charts/${{ matrix.chart }}
+        run: |
+          if [[ -d "$CHART" ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Chart $CHART does not exist on branch ${{ matrix.branch }}, skipping"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute image repo and tag
+        if: steps.check.outputs.exists == 'true'
         id: image
         run: |
           if [[ "${{ matrix.branch }}" == "main" ]]; then
+            echo "repo=rhdh-community/rhdh" >> "$GITHUB_OUTPUT"
             echo "tag=next" >> "$GITHUB_OUTPUT"
           else
-            # release-x.y -> next-x.y
-            echo "tag=next-${BRANCH#release-}" >> "$GITHUB_OUTPUT"
+            version="${BRANCH#release-}"
+            candidate_tag="next-${version}"
+            if skopeo inspect --no-tags "docker://quay.io/rhdh-community/rhdh:${candidate_tag}" &>/dev/null; then
+              echo "repo=rhdh-community/rhdh" >> "$GITHUB_OUTPUT"
+              echo "tag=${candidate_tag}" >> "$GITHUB_OUTPUT"
+            else
+              echo "::warning::Tag ${candidate_tag} not found on quay.io/rhdh-community/rhdh, falling back to quay.io/rhdh/rhdh-hub-rhel9:${version}"
+              echo "repo=rhdh/rhdh-hub-rhel9" >> "$GITHUB_OUTPUT"
+              echo "tag=${version}" >> "$GITHUB_OUTPUT"
+            fi
           fi
         env:
           BRANCH: ${{ matrix.branch }}
 
+      # Exclude all charts except the target so that 'ct install --all' tests only
+      # the target chart. This ensures backward compatibility with release branches
+      # where the composite action does not yet have the 'chart' input.
+      - name: Restrict chart-testing to target chart
+        if: steps.check.outputs.exists == 'true'
+        env:
+          CHART: charts/${{ matrix.chart }}
+        run: |
+          target_name=$(basename "$CHART")
+          for chart_dir in charts/*/; do
+            [[ ! -d "$chart_dir" ]] && continue
+            chart_name=$(basename "$chart_dir")
+            if [[ "$chart_name" != "$target_name" ]]; then
+              yq e ".excluded-charts += [\"$chart_name\"]" -i ct-install.yaml
+            fi
+          done
+
       - name: Test charts
+        if: steps.check.outputs.exists == 'true'
         uses: ./.github/actions/test-charts
         with:
           target_branch: ${{ matrix.branch }}
+          chart: charts/${{ matrix.chart }}
           all_charts: 'true'
-          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=${{ steps.image.outputs.tag }} --set upstream.backstage.image.pullPolicy=Always'
+          monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
+          extra_helm_args: ${{ matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}

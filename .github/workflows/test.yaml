@@ -12,20 +12,70 @@ concurrency:
 
 jobs:
 
-  test-chart:
-    # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
-    name: Test Latest Release
+  discover-charts:
+    name: Discover changed charts
     runs-on: ubuntu-latest
-    # Make CI for PRs more stable by using the latest stable/RC RHDH image.
-    # We have a workflow that tests the unstable 'next' image tag on a nightly basis.
-    # Image repository and tag can be configured via GitHub repository variables.
+    outputs:
+      charts: ${{ steps.list.outputs.charts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-depth: 0
+
+      - name: List changed charts
+        id: list
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          ci_changed=$(git diff --name-only "origin/${TARGET_BRANCH}"...HEAD -- .github/actions/test-charts/ .github/workflows/test.yaml ct.yaml ct-install.yaml)
+          if [[ -n "$ci_changed" ]]; then
+            echo "CI files changed — testing all charts"
+            all_charts=true
+          else
+            all_charts=false
+          fi
+
+          if [[ "$all_charts" == "true" ]]; then
+            chart_dirs=$(find charts -mindepth 1 -maxdepth 1 -type d)
+          else
+            changed_files=$(git diff --name-only "origin/${TARGET_BRANCH}"...HEAD -- charts/)
+            if [[ -z "$changed_files" ]]; then
+              echo "charts=[]" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            chart_dirs=$(echo "$changed_files" | cut -d'/' -f1-2 | sort -u)
+          fi
+
+          excluded=$(yq e '.excluded-charts[]' ct.yaml 2>/dev/null || true)
+          charts='[]'
+          while IFS= read -r chart; do
+            [[ -z "$chart" ]] && continue
+            [[ ! -d "$chart" ]] && continue
+            chart_name=$(basename "$chart")
+            if ! echo "$excluded" | grep -qx "$chart_name"; then
+              charts=$(echo "$charts" | jq -c --arg c "$chart_name" '. + [$c]')
+            fi
+          done <<< "$chart_dirs"
+          echo "charts=$charts" >> "$GITHUB_OUTPUT"
+
+  test-chart:
+    needs: discover-charts
+    if: needs.discover-charts.outputs.charts != '[]'
+    name: Test (${{ matrix.chart }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
     env:
       RHDH_IMAGE_REPOSITORY: ${{ vars.RHDH_IMAGE_REPOSITORY || 'rhdh/rhdh-hub-rhel9' }}
       RHDH_IMAGE_TAG: ${{ vars.RHDH_IMAGE_TAG || 'latest' }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
 
@@ -33,5 +83,23 @@ jobs:
         uses: ./.github/actions/test-charts
         with:
           target_branch: ${{ github.event.pull_request.base.ref }}
+          chart: charts/${{ matrix.chart }}
+          monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
           # The RHDH image tag is already pinned to a specific version for the 'release-1.y' branches.
-          extra_helm_args: ${{ github.event.pull_request.base.ref == 'main' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1}', env.RHDH_IMAGE_REPOSITORY, env.RHDH_IMAGE_TAG) || '' }}
+          extra_helm_args: ${{ matrix.chart == 'backstage' && github.event.pull_request.base.ref == 'main' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1}', env.RHDH_IMAGE_REPOSITORY, env.RHDH_IMAGE_TAG) || '' }}
+
+  # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
+  status:
+    name: Test Latest Release
+    needs: [discover-charts, test-chart]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check test results
+        run: |
+          result="${{ needs.test-chart.result }}"
+          if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+            echo "Chart tests did not succeed (result: $result)."
+            exit 1
+          fi
+          echo "All chart tests passed (or no charts to test)."
