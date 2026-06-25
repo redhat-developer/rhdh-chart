@@ -12,9 +12,9 @@ global:
     plugins:
       # Enable additional plugins, which should be merged with the Orchestrator plugins
       - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import-backend-dynamic
-        disabled: false
+        enabled: true
       - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import
-        disabled: false
+        enabled: true
 
 orchestrator:
   enabled: true
