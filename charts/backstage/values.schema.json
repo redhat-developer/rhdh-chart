@@ -185,7 +185,7 @@
                         "enabled": true,
                         "initContainer": {
                             "args": [
-                                "mkdir -p /tmp/data && echo 'Copying Lightspeed RAG data...' && cp -r /rag/vector_db /rag-content/ && cp -r /rag/embeddings_model /rag-content/ && echo 'Copy complete.'"
+                                "mkdir -p /tmp/data && echo 'Copying Lightspeed RAG data...' && cp -r --no-preserve=mode,ownership /rag/vector_db /rag-content/ && cp -r --no-preserve=mode,ownership /rag/embeddings_model /rag-content/ && mkdir -p /rag-content/vector_db/notebooks && chmod -R a+rwX /rag-content/embeddings_model /rag-content/vector_db && echo 'Copy complete.'"
                             ],
                             "command": [
                                 "sh",
