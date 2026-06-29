@@ -1,4 +1,4 @@
-name: Lint Charts
+name: Test Charts
 
 on:
   pull_request:
@@ -8,15 +8,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # pin@v4.3.1
+        with:
+          version: v3.10.0
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # pin@v4
         with:
@@ -39,6 +42,18 @@ jobs:
           helm repo add ingress-nginx "https://kubernetes.github.io/ingress-nginx"
           helm repo update
 
-      - name: Run chart-testing (lint)
+      - name: Create KIND Cluster
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --config ct.yaml --target-branch "${{ github.event.pull_request.base.ref }}"
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # pin@v1.14.0
+
+      - name: Install Gateway API CRDs
+        if: steps.list-changed.outputs.changed == 'true'
+        run: kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/standard-install.yaml
+
+      - name: Install Ingress Controller
+        if: steps.list-changed.outputs.changed == 'true'
+        run: "helm install ingress-nginx/ingress-nginx --generate-name --set controller.service.type='NodePort' --set controller.admissionWebhooks.enabled=false"
+
+      - name: Run chart-testing (install)
+        if: steps.list-changed.outputs.changed == 'true'
+        run: ct install --config ct-install.yaml --target-branch "${{ github.event.pull_request.base.ref }}"

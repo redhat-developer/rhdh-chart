@@ -21,6 +21,6 @@
 .idea/
 *.tmproj
 .vscode/
-# Templates files
-README.md.gotmpl
-values.schema.tmpll.json
+
+# Unit tests are not shipped with the packaged chart
+tests/
