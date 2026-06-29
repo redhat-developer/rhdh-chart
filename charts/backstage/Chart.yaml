@@ -22,7 +22,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
-    version: "2.40.0"
+    version: "2.41.0"
   - name: backstage
     repository: "file://./vendor/backstage/charts/backstage/"
     version: "2.8.0"
