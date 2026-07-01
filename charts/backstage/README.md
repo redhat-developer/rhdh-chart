@@ -156,7 +156,7 @@ Kubernetes: `>= 1.27.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://./vendor/backstage/charts/backstage/ | upstream(backstage) | 2.8.0 |
+| file://./vendor/backstage/charts/backstage/ | upstream(backstage) | 2.8.1 |
 | https://charts.bitnami.com/bitnami | common | 2.40.0 |
 
 ## Values
