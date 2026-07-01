@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 6.1.2](https://img.shields.io/badge/Version-6.1.2-informational?style=flat-square)
+![Version: 6.1.3](https://img.shields.io/badge/Version-6.1.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -29,7 +29,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 6.1.2
+helm install my-backstage redhat-developer/backstage --version 6.1.3
 ```
 
 ## Introduction
@@ -202,7 +202,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.lightspeed.secret.name | Name of an existing Secret to use instead. Required when `create` is false. | string | `""` |
 | global.lightspeed.secret.optional | Whether the Secret reference is optional in the pod spec. | bool | `false` |
 | global.lightspeed.secret.sourceFile | Bundled file used to populate the Secret's `stringData` keys. | string | `"secret.yaml"` |
-| global.lightspeed.sidecar.image | Full image reference for the Lightspeed Core sidecar. Override for disconnected environments. | string | `"quay.io/lightspeed-core/lightspeed-stack:0.5.1"` |
+| global.lightspeed.sidecar.image | Full image reference for the Lightspeed Core sidecar. Override for disconnected environments. | string | `"quay.io/lightspeed-core/lightspeed-stack:0.5.2"` |
 | global.lightspeed.sidecar.resources | Resource requests/limits for the Lightspeed Core sidecar. | object | `{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}}` |
 | nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |
