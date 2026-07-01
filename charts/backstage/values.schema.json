@@ -221,11 +221,11 @@
                         },
                         "plugins": [
                             {
-                                "disabled": false,
+                                "enabled": true,
                                 "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
                             },
                             {
-                                "disabled": false,
+                                "enabled": true,
                                 "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
                             }
                         ],
@@ -291,11 +291,11 @@
                         "plugins": {
                             "default": [
                                 {
-                                    "disabled": false,
+                                    "enabled": true,
                                     "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
                                 },
                                 {
-                                    "disabled": false,
+                                    "enabled": true,
                                     "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
                                 }
                             ],

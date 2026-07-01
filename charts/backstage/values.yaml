@@ -9,7 +9,7 @@ global:
       - "dynamic-plugins.default.yaml"
     # -- List of dynamic plugins, possibly overriding the plugins listed in `includes` files.
     # Every item defines the plugin `package` as a [NPM package spec](https://docs.npmjs.com/cli/v10/using-npm/package-spec),
-    # an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `disabled` flag to disable/enable a plugin
+    # an optional `pluginConfig` with plugin-specific backstage configuration, and an optional `enabled` flag to enable/disable a plugin
     # listed in `includes` files. It also includes an `integrity` field that is used to verify the plugin package [integrity](https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description).
     plugins: []
   # -- Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled.
@@ -55,10 +55,10 @@ global:
     # -- Lightspeed plugins and their configuration. Override package references for disconnected environments.
     plugins:
       - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
-        disabled: false
+        enabled: true
 
       - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
-        disabled: false
+        enabled: true
     runtimeVolume:
       # -- Name of the Kubernetes volume used for writable Lightspeed runtime storage.
       name: lightspeed-data
@@ -548,10 +548,10 @@ orchestrator:
   # -- Orchestrator plugins and their configuration
   plugins:
     - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{inherit}}" }}'
-      disabled: false
+      enabled: true
     - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{inherit}}" }}'
-      disabled: false
+      enabled: true
     - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{inherit}}" }}'
-      disabled: false
+      enabled: true
     - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{inherit}}" }}'
-      disabled: false
+      enabled: true
