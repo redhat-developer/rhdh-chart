@@ -307,13 +307,13 @@ To do so, you would need to edit the [default Helm values.yaml](https://github.c
 Do this before installing the Helm Chart, or upgrade the Helm release with the new values file.
 
 ```yaml
-- disabled: false
+- enabled: true
   package: "./dynamic-plugins/dist/backstage-plugin-notifications"
-- disabled: false
+- enabled: true
   package: "./dynamic-plugins/dist/backstage-plugin-signals"
-- disabled: false
+- enabled: true
   package: "./dynamic-plugins/dist/backstage-plugin-notifications-backend-dynamic"
-- disabled: false
+- enabled: true
   package: "./dynamic-plugins/dist/backstage-plugin-signals-backend-dynamic"
 ```
 Enabling these plugins will allow you to recieve notifications from workflows running with Orchestrator.
