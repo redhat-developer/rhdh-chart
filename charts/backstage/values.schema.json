@@ -182,7 +182,7 @@
                                 "subPath": "rhdh-profile.py"
                             }
                         ],
-                        "enabled": true,
+                        "enabled": false,
                         "initContainer": {
                             "args": [
                                 "mkdir -p /tmp/data && echo 'Copying Lightspeed RAG data...' && cp -r --no-preserve=mode,ownership /rag/vector_db /rag-content/ && cp -r --no-preserve=mode,ownership /rag/embeddings_model /rag-content/ && mkdir -p /rag-content/vector_db/notebooks && chmod -R a+rwX /rag-content/embeddings_model /rag-content/vector_db && echo 'Copy complete.'"
@@ -284,7 +284,7 @@
                     },
                     "properties": {
                         "enabled": {
-                            "default": true,
+                            "default": false,
                             "title": "Enable or disable the built-in Lightspeed feature.",
                             "type": "boolean"
                         },

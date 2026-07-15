@@ -51,7 +51,8 @@ global:
   # @default -- Use Lightspeed compatible settings / configurations.
   lightspeed:
     # -- Enable or disable the built-in Lightspeed feature.
-    enabled: true
+    # FIXME: temporarily disabled due to DPDY issues; to re-enable in [RHIDP-15458](https://redhat.atlassian.net/browse/RHIDP-15458)
+    enabled: false
     # -- Lightspeed plugins and their configuration. Override package references for disconnected environments.
     plugins:
       - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
