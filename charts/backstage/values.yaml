@@ -161,7 +161,7 @@ global:
     sidecar:
       name: lightspeed-core
       # -- Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.
-      image: quay.io/lightspeed-core/lightspeed-stack:0.5.2
+      image: quay.io/lightspeed-core/lightspeed-stack:0.5.3
       imagePullPolicy: IfNotPresent
       portName: http-lightspeed
       containerPort: 8080
