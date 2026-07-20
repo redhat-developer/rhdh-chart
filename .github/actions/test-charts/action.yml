@@ -17,6 +17,10 @@ inputs:
     description: 'Specific chart to test (e.g., charts/backstage). When set, only this chart is tested.'
     required: false
     default: ''
+  helm_extra_args:
+    description: 'Extra arguments to pass to helm via ct install --helm-extra-args (e.g., --values file.yaml)'
+    required: false
+    default: ''
   monitoring_heartbeat:
     description: 'Enable background cluster monitoring (pod status + events every 30s) during chart tests'
     required: false
@@ -174,6 +178,7 @@ runs:
       env:
         INPUT_CHART: ${{ inputs.chart }}
         INPUT_EXTRA_HELM_ARGS: ${{ inputs.extra_helm_args }}
+        INPUT_HELM_EXTRA_ARGS: ${{ inputs.helm_extra_args }}
         INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
         INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
         INPUT_MONITORING_HEARTBEAT: ${{ inputs.monitoring_heartbeat }}
@@ -213,6 +218,9 @@ runs:
           --target-branch "$INPUT_TARGET_BRANCH"
           --helm-extra-set-args="${EXTRA_ARGS[*]}"
         )
+        if [[ -n "$INPUT_HELM_EXTRA_ARGS" ]]; then
+          CT_ARGS+=(--helm-extra-args="$INPUT_HELM_EXTRA_ARGS")
+        fi
         if [[ -n "$INPUT_CHART" ]]; then
           CT_ARGS+=(--charts "$INPUT_CHART")
         elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then

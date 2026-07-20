@@ -108,6 +108,12 @@ jobs:
             fi
           done
 
+      - name: Generate nightly values override for backstage chart
+        if: steps.check.outputs.exists == 'true' && matrix.chart == 'backstage'
+        run: |
+          yq e '{"global": {"dynamic": {"includes": .global.dynamic.includes}, "lightspeed": {"plugins": .global.lightspeed.plugins}}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+            charts/backstage/values.yaml > /tmp/backstage-nightly-values.yaml
+
       - name: Test charts
         if: steps.check.outputs.exists == 'true'
         uses: ./.github/actions/test-charts
@@ -117,3 +123,4 @@ jobs:
           all_charts: 'true'
           monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
           extra_helm_args: ${{ matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}
+          helm_extra_args: ${{ matrix.chart == 'backstage' && '--values /tmp/backstage-nightly-values.yaml' || '' }}

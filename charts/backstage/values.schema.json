@@ -82,7 +82,7 @@
                                     "type": "string"
                                 },
                                 "tag": {
-                                    "default": "1.10",
+                                    "default": "next",
                                     "title": "Catalog index image tag",
                                     "type": "string"
                                 }
