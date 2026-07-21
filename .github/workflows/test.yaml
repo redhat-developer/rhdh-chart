@@ -69,10 +69,6 @@ jobs:
       fail-fast: false
       matrix:
         chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
-    env:
-      RHDH_IMAGE_REPOSITORY: ${{ vars.RHDH_IMAGE_REPOSITORY || 'rhdh/rhdh-hub-rhel9' }}
-      RHDH_IMAGE_TAG: ${{ vars.RHDH_IMAGE_TAG || 'latest' }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -85,8 +81,6 @@ jobs:
           target_branch: ${{ github.event.pull_request.base.ref }}
           chart: charts/${{ matrix.chart }}
           monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
-          # The RHDH image tag is already pinned to a specific version for the 'release-1.y' branches.
-          extra_helm_args: ${{ matrix.chart == 'backstage' && github.event.pull_request.base.ref == 'main' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1}', env.RHDH_IMAGE_REPOSITORY, env.RHDH_IMAGE_TAG) || '' }}
 
   # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
   status:
