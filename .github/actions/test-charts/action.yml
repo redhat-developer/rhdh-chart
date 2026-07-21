@@ -21,6 +21,10 @@ inputs:
     description: 'Extra arguments to pass to helm via ct install --helm-extra-args (e.g., --values file.yaml)'
     required: false
     default: ''
+  helm_template_values_file:
+    description: 'Extra values file for a helm-template sanity check (renders each CI scenario with these values layered on top, but does not install)'
+    required: false
+    default: ''
   monitoring_heartbeat:
     description: 'Enable background cluster monitoring (pod status + events every 30s) during chart tests'
     required: false
@@ -88,6 +92,22 @@ runs:
         helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
         helm repo add bitnami https://charts.bitnami.com/bitnami
         helm repo update
+
+    - name: Helm template sanity check (full-plugins override)
+      if: steps.list-changed.outputs.changed == 'true' && inputs.helm_template_values_file != ''
+      shell: bash
+      env:
+        INPUT_CHART: ${{ inputs.chart }}
+        VALUES_FILE: ${{ inputs.helm_template_values_file }}
+      run: |
+        helm dependency build "$INPUT_CHART"
+        for ci_values in "$INPUT_CHART"/ci/*-values.yaml "$INPUT_CHART"/ci/*.yaml; do
+          [[ -f "$ci_values" ]] || continue
+          echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
+          output=$(helm template test-release "$INPUT_CHART" \
+            --values "$ci_values" \
+            --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
+        done
 
     - name: Generate KinD Config
       if: steps.list-changed.outputs.changed == 'true'
