@@ -232,7 +232,6 @@ runs:
           EXTRA_ARGS+=("${ADDITIONAL_ARGS[@]}")
         fi
         CT_ARGS=(
-          --debug
           --config ct-install.yaml
           --target-branch "$INPUT_TARGET_BRANCH"
           --helm-extra-set-args="${EXTRA_ARGS[*]}"
@@ -249,6 +248,9 @@ runs:
           fi
         else
           CT_ARGS+=(--upgrade)
+        fi
+        if [[ "$RUNNER_DEBUG" == "1" ]]; then
+          CT_ARGS+=(--debug)
         fi
         if [[ -n "$INPUT_HELM_EXTRA_ARGS" ]]; then
           CT_ARGS+=(--helm-extra-args="$INPUT_HELM_EXTRA_ARGS")
