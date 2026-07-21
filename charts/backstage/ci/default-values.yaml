@@ -2,6 +2,14 @@
 route:
   enabled: false
 
+# CI: skip dynamic plugin downloads to speed up tests.
+# The chart features under test (deployment, config, probes, etc.) don't depend on actual plugins.
+global:
+  dynamic:
+    includes: []
+  lightspeed:
+    plugins: []
+
 upstream:
   postgresql:
     primary:

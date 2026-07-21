@@ -41,10 +41,17 @@ jobs:
         env:
           BRANCH: ${{ matrix.branch }}
 
+      - name: Generate nightly values override for backstage chart
+        run: |
+          yq e '{"global": {"dynamic": {"includes": .global.dynamic.includes}, "lightspeed": {"plugins": .global.lightspeed.plugins}}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+            charts/backstage/values.yaml > /tmp/backstage-nightly-values.yaml
+
+
       - name: Test charts
         uses: ./.github/actions/test-charts
         with:
           target_branch: ${{ matrix.branch }}
           all_charts: 'true'
-          # TODO(RHDHBUGS-3095): Remove the catalogIndex.image.tag pin once the lightspeed plugins OCI refs are fixed in the latest catalog index image.
-          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=${{ steps.image.outputs.tag }} --set upstream.backstage.image.pullPolicy=Always --set global.catalogIndex.image.tag=1.10-51'
+          monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
+          extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=${{ steps.image.outputs.tag }} --set upstream.backstage.image.pullPolicy=Always'
+          helm_extra_args: '--values /tmp/backstage-nightly-values.yaml'

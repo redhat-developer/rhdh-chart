@@ -9,15 +9,20 @@ upstream:
 
 global:
   dynamic:
+    # CI: skip dynamic plugin downloads to speed up tests.
+    includes: []
     plugins:
       # Enable additional plugins, which should be merged with the Orchestrator plugins
       - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import-backend-dynamic
         disabled: false
       - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import
         disabled: false
+  lightspeed:
+    plugins: []
 
 orchestrator:
   enabled: true
+  plugins: []
 
 test:
   injectTestNpmrcSecret: true

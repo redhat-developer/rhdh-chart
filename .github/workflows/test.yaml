@@ -16,12 +16,7 @@ jobs:
     # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
     name: Test Latest Release
     runs-on: ubuntu-latest
-    # Make CI for PRs more stable by using the latest stable/RC RHDH image.
-    # We have a workflow that tests the unstable 'next' image tag on a nightly basis.
-    # Image repository and tag can be configured via GitHub repository variables.
-    env:
-      RHDH_IMAGE_REPOSITORY: ${{ vars.RHDH_IMAGE_REPOSITORY || 'rhdh/rhdh-hub-rhel9' }}
-      RHDH_IMAGE_TAG: ${{ vars.RHDH_IMAGE_TAG || 'latest' }}
+    timeout-minutes: 120
 
     steps:
       - name: Checkout
@@ -29,10 +24,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Generate full-plugins values for template sanity check
+        run: |
+          yq e '{"global": {"dynamic": {"includes": .global.dynamic.includes}, "lightspeed": {"plugins": .global.lightspeed.plugins}}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+            charts/backstage/values.yaml > /tmp/backstage-full-plugins-values.yaml
+
       - name: Test charts
         uses: ./.github/actions/test-charts
         with:
           target_branch: ${{ github.event.pull_request.base.ref }}
-          # The RHDH image tag is already pinned to a specific version for the 'release-1.y' branches.
-          # TODO(RHDHBUGS-3095): Remove the catalogIndex.image.tag pin once the lightspeed plugins OCI refs are fixed in the latest catalog index image.
-          extra_helm_args: ${{ github.event.pull_request.base.ref == 'main' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set global.catalogIndex.image.tag=1.10-51', env.RHDH_IMAGE_REPOSITORY, env.RHDH_IMAGE_TAG) || '--set global.catalogIndex.image.tag=1.10-51' }}
+          monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
+          helm_template_values_file: /tmp/backstage-full-plugins-values.yaml

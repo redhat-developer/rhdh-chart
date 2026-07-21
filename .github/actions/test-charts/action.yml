@@ -13,6 +13,22 @@ inputs:
     description: 'Install all charts instead of only changed ones'
     required: false
     default: 'false'
+  chart:
+    description: 'Specific chart to test (e.g., charts/backstage). When set, only this chart is tested.'
+    required: false
+    default: ''
+  helm_extra_args:
+    description: 'Extra arguments to pass to helm via ct install --helm-extra-args (e.g., --values file.yaml)'
+    required: false
+    default: ''
+  helm_template_values_file:
+    description: 'Extra values file for a helm-template sanity check (renders each CI scenario with these values layered on top, but does not install)'
+    required: false
+    default: ''
+  monitoring_heartbeat:
+    description: 'Enable background cluster monitoring (pod status + events every 30s) during chart tests'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -38,10 +54,16 @@ runs:
       id: list-changed
       shell: bash
       env:
+        INPUT_CHART: ${{ inputs.chart }}
         INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
         INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
       run: |
-        if [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
+        if [[ -n "$INPUT_CHART" ]]; then
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          if [[ "$INPUT_CHART" == "charts/backstage" ]]; then
+            echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+          fi
+        elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
           echo "changed=true" >> "$GITHUB_OUTPUT"
           echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
         else
@@ -70,6 +92,22 @@ runs:
         helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
         helm repo add bitnami https://charts.bitnami.com/bitnami
         helm repo update
+
+    - name: Helm template sanity check (full-plugins override)
+      if: steps.list-changed.outputs.changed == 'true' && inputs.helm_template_values_file != ''
+      shell: bash
+      env:
+        INPUT_CHART: ${{ inputs.chart }}
+        VALUES_FILE: ${{ inputs.helm_template_values_file }}
+      run: |
+        helm dependency build "$INPUT_CHART"
+        for ci_values in "$INPUT_CHART"/ci/*-values.yaml; do
+          [[ -f "$ci_values" ]] || continue
+          echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
+          output=$(helm template test-release "$INPUT_CHART" \
+            --values "$ci_values" \
+            --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
+        done
 
     - name: Generate KinD Config
       if: steps.list-changed.outputs.changed == 'true'
@@ -134,7 +172,7 @@ runs:
       env:
         OLM_VERSION: "v0.31.0"
       run: |
-        curl -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
+        curl --proto =https -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
         chmod +x install-olm.sh
         ./install-olm.sh "${OLM_VERSION}"
 
@@ -158,28 +196,70 @@ runs:
       if: steps.list-changed.outputs.changed == 'true'
       shell: bash
       env:
+        INPUT_CHART: ${{ inputs.chart }}
         INPUT_EXTRA_HELM_ARGS: ${{ inputs.extra_helm_args }}
+        INPUT_HELM_EXTRA_ARGS: ${{ inputs.helm_extra_args }}
         INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
         INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
+        INPUT_MONITORING_HEARTBEAT: ${{ inputs.monitoring_heartbeat }}
       run: |
-        EXTRA_ARGS=(
-          "--set route.enabled=false"
-          "--set upstream.ingress.enabled=true"
-          "--set global.host=rhdh.127.0.0.1.sslip.io"
-          "--set upstream.backstage.podSecurityContext.fsGroup=1001"
-        )
+        if [[ "$INPUT_MONITORING_HEARTBEAT" == "true" ]]; then
+          (
+            while true; do
+              echo "=== $(date -u '+%Y-%m-%dT%H:%M:%SZ') === Pod status ==="
+              kubectl get pods -A --no-headers || true
+              echo "=== Recent events ==="
+              kubectl get events -A --sort-by='.lastTimestamp' --no-headers 2>/dev/null | tail -15 || true
+              echo "---"
+              sleep 30
+            done
+          ) &
+          MONITOR_PID=$!
+          trap 'kill $MONITOR_PID 2>/dev/null || true' EXIT
+        fi
+
+        EXTRA_ARGS=()
+        if [[ -z "$INPUT_CHART" || "$INPUT_CHART" == "charts/backstage" ]]; then
+          EXTRA_ARGS+=(
+            "--set route.enabled=false"
+            "--set upstream.ingress.enabled=true"
+            "--set global.host=rhdh.127.0.0.1.sslip.io"
+            "--set upstream.backstage.podSecurityContext.fsGroup=1001"
+          )
+        fi
         if [[ -n "$INPUT_EXTRA_HELM_ARGS" ]]; then
           IFS=' ' read -ra ADDITIONAL_ARGS <<< "$INPUT_EXTRA_HELM_ARGS"
           EXTRA_ARGS+=("${ADDITIONAL_ARGS[@]}")
         fi
         CT_ARGS=(
-          --debug
           --config ct-install.yaml
-          --upgrade
           --target-branch "$INPUT_TARGET_BRANCH"
           --helm-extra-set-args="${EXTRA_ARGS[*]}"
         )
-        if [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
+        if [[ -n "$INPUT_CHART" ]]; then
+          old_version=$(git show "origin/$INPUT_TARGET_BRANCH:$INPUT_CHART/Chart.yaml" 2>/dev/null | yq '.version' 2>/dev/null || echo "0.0.0")
+          new_version=$(yq '.version' "$INPUT_CHART/Chart.yaml")
+          old_major=${old_version%%.*}
+          new_major=${new_version%%.*}
+          if [[ "$old_version" == "$new_version" ]]; then
+            echo "Skipping --upgrade: chart version unchanged ($old_version)"
+          elif [[ "$old_major" != "$new_major" ]]; then
+            echo "Skipping --upgrade: major version bump detected ($old_version -> $new_version)"
+          else
+            CT_ARGS+=(--upgrade)
+          fi
+        else
+          CT_ARGS+=(--upgrade)
+        fi
+        if [[ "$RUNNER_DEBUG" == "1" ]]; then
+          CT_ARGS+=(--debug)
+        fi
+        if [[ -n "$INPUT_HELM_EXTRA_ARGS" ]]; then
+          CT_ARGS+=(--helm-extra-args="$INPUT_HELM_EXTRA_ARGS")
+        fi
+        if [[ -n "$INPUT_CHART" ]]; then
+          CT_ARGS+=(--charts "$INPUT_CHART")
+        elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
           CT_ARGS+=(--all)
         fi
         ct install "${CT_ARGS[@]}"
