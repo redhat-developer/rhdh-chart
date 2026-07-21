@@ -101,7 +101,7 @@ runs:
         VALUES_FILE: ${{ inputs.helm_template_values_file }}
       run: |
         helm dependency build "$INPUT_CHART"
-        for ci_values in "$INPUT_CHART"/ci/*-values.yaml "$INPUT_CHART"/ci/*.yaml; do
+        for ci_values in "$INPUT_CHART"/ci/*-values.yaml; do
           [[ -f "$ci_values" ]] || continue
           echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
           output=$(helm template test-release "$INPUT_CHART" \
