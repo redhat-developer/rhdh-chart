@@ -234,10 +234,22 @@ runs:
         CT_ARGS=(
           --debug
           --config ct-install.yaml
-          --upgrade
           --target-branch "$INPUT_TARGET_BRANCH"
           --helm-extra-set-args="${EXTRA_ARGS[*]}"
         )
+        if [[ -n "$INPUT_CHART" ]]; then
+          old_version=$(git show "origin/$INPUT_TARGET_BRANCH:$INPUT_CHART/Chart.yaml" 2>/dev/null | yq '.version' 2>/dev/null || echo "0.0.0")
+          new_version=$(yq '.version' "$INPUT_CHART/Chart.yaml")
+          old_major=${old_version%%.*}
+          new_major=${new_version%%.*}
+          if [[ "$old_major" == "$new_major" ]]; then
+            CT_ARGS+=(--upgrade)
+          else
+            echo "Skipping --upgrade: major version bump detected ($old_version -> $new_version)"
+          fi
+        else
+          CT_ARGS+=(--upgrade)
+        fi
         if [[ -n "$INPUT_HELM_EXTRA_ARGS" ]]; then
           CT_ARGS+=(--helm-extra-args="$INPUT_HELM_EXTRA_ARGS")
         fi
