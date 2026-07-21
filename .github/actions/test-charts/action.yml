@@ -241,10 +241,12 @@ runs:
           new_version=$(yq '.version' "$INPUT_CHART/Chart.yaml")
           old_major=${old_version%%.*}
           new_major=${new_version%%.*}
-          if [[ "$old_major" == "$new_major" ]]; then
-            CT_ARGS+=(--upgrade)
-          else
+          if [[ "$old_version" == "$new_version" ]]; then
+            echo "Skipping --upgrade: chart version unchanged ($old_version)"
+          elif [[ "$old_major" != "$new_major" ]]; then
             echo "Skipping --upgrade: major version bump detected ($old_version -> $new_version)"
+          else
+            CT_ARGS+=(--upgrade)
           fi
         else
           CT_ARGS+=(--upgrade)
