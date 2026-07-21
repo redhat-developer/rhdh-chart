@@ -152,7 +152,7 @@ runs:
       env:
         OLM_VERSION: "v0.31.0"
       run: |
-        curl -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
+        curl --proto =https -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
         chmod +x install-olm.sh
         ./install-olm.sh "${OLM_VERSION}"
 
