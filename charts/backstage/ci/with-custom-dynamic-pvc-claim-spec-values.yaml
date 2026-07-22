@@ -2,6 +2,11 @@
 route:
   enabled: false
 
+# CI: skip dynamic plugin downloads to speed up tests.
+global:
+  dynamic:
+    includes: []
+
 upstream:
   postgresql:
     primary:
