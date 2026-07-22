@@ -13,6 +13,14 @@ inputs:
     description: 'Install all charts instead of only changed ones'
     required: false
     default: 'false'
+  helm_extra_args:
+    description: 'Extra arguments to pass to helm via ct install --helm-extra-args (e.g., --values file.yaml)'
+    required: false
+    default: ''
+  helm_template_values_file:
+    description: 'Extra values file for a helm-template sanity check (renders each CI scenario with these values layered on top, but does not install)'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -71,6 +79,22 @@ runs:
         helm repo add bitnami https://charts.bitnami.com/bitnami
         helm repo add backstage https://backstage.github.io/charts
         helm repo update
+
+    - name: Helm template sanity check (full-plugins override)
+      if: (steps.list-changed.outputs.backstageChartChanged == 'true' || inputs.all_charts == 'true') && inputs.helm_template_values_file != ''
+      shell: bash
+      env:
+        VALUES_FILE: ${{ inputs.helm_template_values_file }}
+      run: |
+        helm dependency build charts/backstage
+        for ci_values in charts/backstage/ci/*-values.yaml; do
+          [[ -f "$ci_values" ]] || continue
+          echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
+          output=$(helm template test-release charts/backstage \
+            --kube-version 1.30.0 \
+            --values "$ci_values" \
+            --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
+        done
 
     - name: Generate KinD Config
       if: steps.list-changed.outputs.changed == 'true'
@@ -135,7 +159,7 @@ runs:
       env:
         OLM_VERSION: "v0.31.0"
       run: |
-        curl -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
+        curl --proto =https -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
         chmod +x install-olm.sh
         ./install-olm.sh "${OLM_VERSION}"
 
@@ -160,6 +184,7 @@ runs:
       shell: bash
       env:
         INPUT_EXTRA_HELM_ARGS: ${{ inputs.extra_helm_args }}
+        INPUT_HELM_EXTRA_ARGS: ${{ inputs.helm_extra_args }}
         INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
         INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
       run: |
@@ -173,12 +198,17 @@ runs:
           EXTRA_ARGS+=("${ADDITIONAL_ARGS[@]}")
         fi
         CT_ARGS=(
-          --debug
           --config ct-install.yaml
           --upgrade
           --target-branch "$INPUT_TARGET_BRANCH"
           --helm-extra-set-args="${EXTRA_ARGS[*]}"
         )
+        if [[ "$RUNNER_DEBUG" == "1" ]]; then
+          CT_ARGS+=(--debug)
+        fi
+        if [[ -n "$INPUT_HELM_EXTRA_ARGS" ]]; then
+          CT_ARGS+=(--helm-extra-args="$INPUT_HELM_EXTRA_ARGS")
+        fi
         if [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
           CT_ARGS+=(--all)
         fi

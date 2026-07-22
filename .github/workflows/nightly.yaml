@@ -21,9 +21,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Generate nightly values override for backstage chart
+        run: |
+          yq e '{"global": {"dynamic": {"includes": .global.dynamic.includes}}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+            charts/backstage/values.yaml > /tmp/backstage-nightly-values.yaml
+
       - name: Test charts
         uses: ./.github/actions/test-charts
         with:
           target_branch: main
           all_charts: 'true'
           extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=next --set upstream.backstage.image.pullPolicy=Always'
+          helm_extra_args: '--values /tmp/backstage-nightly-values.yaml'
