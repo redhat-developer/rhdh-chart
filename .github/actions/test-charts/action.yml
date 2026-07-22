@@ -98,15 +98,28 @@ runs:
       shell: bash
       env:
         INPUT_CHART: ${{ inputs.chart }}
+        INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
+        INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
         VALUES_FILE: ${{ inputs.helm_template_values_file }}
       run: |
-        helm dependency build "$INPUT_CHART"
-        for ci_values in "$INPUT_CHART"/ci/*-values.yaml; do
-          [[ -f "$ci_values" ]] || continue
-          echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
-          output=$(helm template test-release "$INPUT_CHART" \
-            --values "$ci_values" \
-            --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
+        if [[ -n "$INPUT_CHART" ]]; then
+          CHARTS=("$INPUT_CHART")
+        elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
+          CHARTS=(charts/*/)
+        else
+          mapfile -t CHARTS < <(ct list-changed --target-branch "$INPUT_TARGET_BRANCH")
+        fi
+        for chart in "${CHARTS[@]}"; do
+          chart="${chart%/}"
+          [[ -d "$chart/ci" ]] || continue
+          helm dependency build "$chart"
+          for ci_values in "$chart"/ci/*-values.yaml; do
+            [[ -f "$ci_values" ]] || continue
+            echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
+            output=$(helm template test-release "$chart" \
+              --values "$ci_values" \
+              --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
+          done
         done
 
     - name: Generate KinD Config
