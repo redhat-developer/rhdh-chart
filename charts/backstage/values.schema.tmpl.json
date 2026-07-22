@@ -127,7 +127,7 @@
                                 "tag": {
                                     "title": "Catalog index image tag",
                                     "type": "string",
-                                    "default": "1.9"
+                                    "default": "next"
                                 }
                             }
                         },

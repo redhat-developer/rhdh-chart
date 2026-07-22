@@ -18,7 +18,7 @@ jobs:
       charts: ${{ steps.list.outputs.charts }}
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: List charts
         id: list
@@ -52,7 +52,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ matrix.branch }}
           fetch-depth: 0
@@ -108,6 +108,12 @@ jobs:
             fi
           done
 
+      - name: Generate nightly values override for backstage chart
+        if: steps.check.outputs.exists == 'true' && matrix.chart == 'backstage'
+        run: |
+          yq e '{"global": {"dynamic": {"includes": .global.dynamic.includes}, "lightspeed": {"plugins": .global.lightspeed.plugins}}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+            charts/backstage/values.yaml > /tmp/backstage-nightly-values.yaml
+
       - name: Test charts
         if: steps.check.outputs.exists == 'true'
         uses: ./.github/actions/test-charts
@@ -117,3 +123,4 @@ jobs:
           all_charts: 'true'
           monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
           extra_helm_args: ${{ matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}
+          helm_extra_args: ${{ matrix.chart == 'backstage' && '--values /tmp/backstage-nightly-values.yaml' || '' }}

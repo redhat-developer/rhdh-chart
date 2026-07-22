@@ -34,7 +34,7 @@ global:
     image:
       registry: quay.io
       repository: rhdh/plugin-catalog-index
-      tag: "1.10"
+      tag: "next"
     # -- Extra catalog index images for additional plugin discovery in the Extensions UI.
     # Each item must include `registry`, `repository`, and `tag` fields; `name` is optional.
     # Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling).

@@ -3,7 +3,12 @@ route:
   enabled: false
 
 global:
+  # CI: skip dynamic plugin downloads to speed up tests.
+  dynamic:
+    includes: []
+  # FIXME(RHIDP-15458): remove plugins override once next catalog index is stable with correct lightspeed refs in the DPDY
   lightspeed:
+    plugins: []
     sidecar:
       env:
         - name: SERVICE_HOST

@@ -9,15 +9,20 @@ upstream:
 
 global:
   dynamic:
+    # CI: skip dynamic plugin downloads to speed up tests.
+    includes: []
     plugins:
       # Enable additional plugins, which should be merged with the Orchestrator plugins
-      - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import-backend-dynamic
+      - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/backstage-community-plugin-catalog-backend-module-scaffolder-relation-processor:bs_1.52.0__2.15.0
         enabled: true
-      - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-bulk-import
+      - package: oci://ghcr.io/redhat-developer/rhdh-plugin-export-overlays/backstage-community-plugin-tech-radar:bs_1.52.0__1.20.0
         enabled: true
+  lightspeed:
+    plugins: []
 
 orchestrator:
   enabled: true
+  plugins: []
 
 test:
   injectTestNpmrcSecret: true
