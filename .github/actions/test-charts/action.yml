@@ -117,6 +117,7 @@ runs:
             [[ -f "$ci_values" ]] || continue
             echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
             output=$(helm template test-release "$chart" \
+              --kube-version 1.30.0 \
               --values "$ci_values" \
               --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
           done
