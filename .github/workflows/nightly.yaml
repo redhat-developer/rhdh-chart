@@ -52,6 +52,5 @@ jobs:
         with:
           target_branch: ${{ matrix.branch }}
           all_charts: 'true'
-          monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
           extra_helm_args: '--set upstream.backstage.image.repository=rhdh-community/rhdh --set upstream.backstage.image.tag=${{ steps.image.outputs.tag }} --set upstream.backstage.image.pullPolicy=Always'
           helm_extra_args: '--values /tmp/backstage-nightly-values.yaml'

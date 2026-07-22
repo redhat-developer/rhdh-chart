@@ -33,5 +33,4 @@ jobs:
         uses: ./.github/actions/test-charts
         with:
           target_branch: ${{ github.event.pull_request.base.ref }}
-          monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
           helm_template_values_file: /tmp/backstage-full-plugins-values.yaml
