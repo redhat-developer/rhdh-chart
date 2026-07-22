@@ -94,33 +94,19 @@ runs:
         helm repo update
 
     - name: Helm template sanity check (full-plugins override)
-      if: steps.list-changed.outputs.changed == 'true' && inputs.helm_template_values_file != ''
+      if: (steps.list-changed.outputs.backstageChartChanged == 'true' || inputs.all_charts == 'true') && inputs.helm_template_values_file != ''
       shell: bash
       env:
-        INPUT_CHART: ${{ inputs.chart }}
-        INPUT_ALL_CHARTS: ${{ inputs.all_charts }}
-        INPUT_TARGET_BRANCH: ${{ inputs.target_branch }}
         VALUES_FILE: ${{ inputs.helm_template_values_file }}
       run: |
-        if [[ -n "$INPUT_CHART" ]]; then
-          CHARTS=("$INPUT_CHART")
-        elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
-          CHARTS=(charts/*/)
-        else
-          mapfile -t CHARTS < <(ct list-changed --target-branch "$INPUT_TARGET_BRANCH")
-        fi
-        for chart in "${CHARTS[@]}"; do
-          chart="${chart%/}"
-          [[ -d "$chart/ci" ]] || continue
-          helm dependency build "$chart"
-          for ci_values in "$chart"/ci/*-values.yaml; do
-            [[ -f "$ci_values" ]] || continue
-            echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
-            output=$(helm template test-release "$chart" \
-              --kube-version 1.30.0 \
-              --values "$ci_values" \
-              --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
-          done
+        helm dependency build charts/backstage
+        for ci_values in charts/backstage/ci/*-values.yaml; do
+          [[ -f "$ci_values" ]] || continue
+          echo "==> helm template: $(basename "$ci_values") + $(basename "$VALUES_FILE")"
+          output=$(helm template test-release charts/backstage \
+            --kube-version 1.30.0 \
+            --values "$ci_values" \
+            --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
         done
 
     - name: Generate KinD Config
