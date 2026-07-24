@@ -4,8 +4,6 @@ on:
   pull_request:
     branches:
       - main
-      - rhdh-[0-9]+.[0-9]+
-      - "[0-9]+.[0-9]+.x"
       - release-[0-9]+.[0-9]+
 
 concurrency:
