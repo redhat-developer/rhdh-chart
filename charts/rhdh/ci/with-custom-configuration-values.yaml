@@ -1,0 +1,27 @@
+# CI: skip dynamic plugin downloads and catalog index extraction to speed up tests.
+# The chart features under test (deployment, config, probes, etc.) don't depend on actual plugins.
+dynamicPlugins:
+  includes: []
+extraAppConfig:
+  - configMapRef: "my-app-config"
+    filename: "app-config-custom.yaml"
+lightspeed:
+  plugins: []
+  existingSecret: "test-lightspeed-secret"
+  config:
+    stack:
+      existingConfigMap:
+        name: "test-lightspeed-stack"
+    server:
+      existingConfigMap:
+        name: "test-lightspeed-server"
+    profile:
+      existingConfigMap:
+        name: "test-lightspeed-profile"
+  core:
+    extraEnv:
+      - name: SERVICE_HOST
+        value: "0.0.0.0"
+orchestrator:
+  enabled: true
+  plugins: []

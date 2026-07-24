@@ -1,0 +1,15 @@
+{{- if .Values.appConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rhdh.fullname" . }}-app-config
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+data:
+  app-config.yaml: |
+    {{- include "common.tplvalues.render" (dict "value" .Values.appConfig "context" $) | nindent 4 }}
+{{- end }}

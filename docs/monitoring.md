@@ -19,30 +19,28 @@ To enable metrics monitoring on OpenShift, we need to create a `ServiceMonitor` 
 
 #### Helm deployment
 
-To enable metrics on OpenShift when deploying with the RHDH Helm chart, you will need to modify the [`values.yaml`](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/backstage/values.yaml) of the Chart.
+To enable metrics on OpenShift when deploying with the RHDH Helm chart, you will need to modify the [`values.yaml`](https://github.com/redhat-developer/rhdh-chart/blob/main/charts/rhdh/values.yaml) of the Chart.
 
 To obtain the `values.yaml`, you can run the following command:
 
 ```bash
-helm show values redhat-developer/backstage > values.yaml
+helm show values redhat-developer/redhat-developer-hub > values.yaml
 ```
 
-Then, you will need to modify the `values.yaml` to enable metrics monitoring by setting `upstream.metrics.serviceMonitor.enabled` to true:
+Then, you will need to modify the `values.yaml` to enable metrics monitoring by setting `metrics.serviceMonitor.enabled` to true:
 
 ```yaml title="values.yaml"
-upstream:
-  # Other Configurations Above
-  metrics:
-    serviceMonitor:
-      enabled: true
-      path: /metrics
-      port: http-metrics
+metrics:
+  serviceMonitor:
+    enabled: true
+    path: /metrics
+    port: http-metrics
 ```
 
 Then you can deploy the RHDH Helm chart with the modified `values.yaml`:
 
 ```bash
-helm upgrade -i <release_name> redhat-developer/backstage -f values.yaml
+helm upgrade -i <release_name> redhat-developer/redhat-developer-hub -f values.yaml
 ```
 
 You can then verify metrics are being captured by navigating to the OpenShift Console. Go to `Developer` Mode, change to the namespace the showcase is deployed on, selecting `Observe` and navigating to the `Metrics` tab. Here you can create PromQL queries to query the metrics being captured by OpenTelemetry.
@@ -64,15 +62,11 @@ In both methods, we can configure the metrics scraping to scrape from pods based
 To add annotations to the backstage pod, add the following to the RHDH Helm chart `values.yaml`:
 
 ```yaml title="values.yaml"
-upstream:
-  backstage:
-    # Other configurations above
-    podAnnotations:
-      # Other annotations above
-      prometheus.io/scrape: 'true'
-      prometheus.io/path: '/metrics'
-      prometheus.io/port: '9464'
-      prometheus.io/scheme: 'http'
+podAnnotations:
+  prometheus.io/scrape: 'true'
+  prometheus.io/path: '/metrics'
+  prometheus.io/port: '9464'
+  prometheus.io/scheme: 'http'
 ```
 
 #### Metrics Add-on
@@ -101,21 +95,17 @@ InsightsMetrics
 Here's a complete example of a `values.yaml` configuration with monitoring enabled:
 
 ```yaml title="values.yaml"
-upstream:
-  backstage:
-    # Add pod annotations for AKS monitoring (if deploying on AKS)
-    podAnnotations:
-      prometheus.io/scrape: 'true'
-      prometheus.io/path: '/metrics'
-      prometheus.io/port: '9464'
-      prometheus.io/scheme: 'http'
-  
-  # Enable ServiceMonitor for OpenShift monitoring
-  metrics:
-    serviceMonitor:
-      enabled: true
-      path: /metrics
-      port: http-metrics
+podAnnotations:
+  prometheus.io/scrape: 'true'
+  prometheus.io/path: '/metrics'
+  prometheus.io/port: '9464'
+  prometheus.io/scheme: 'http'
+
+metrics:
+  serviceMonitor:
+    enabled: true
+    path: /metrics
+    port: http-metrics
 ```
 
 ### OpenShift-specific Configuration
@@ -123,16 +113,11 @@ upstream:
 For OpenShift deployments, focus on the ServiceMonitor configuration:
 
 ```yaml title="values.yaml"
-upstream:
-  # Enable ServiceMonitor for OpenShift Prometheus
-  metrics:
-    serviceMonitor:
-      enabled: true
-      path: /metrics
-      port: http-metrics
-  
-  backstage:
-    # Other backstage configurations as needed
+metrics:
+  serviceMonitor:
+    enabled: true
+    path: /metrics
+    port: http-metrics
 ```
 
 ### AKS-specific Configuration
@@ -140,15 +125,11 @@ upstream:
 For AKS deployments, focus on pod annotations:
 
 ```yaml title="values.yaml"
-upstream:
-  backstage:
-    # Add annotations for Azure Monitor
-    podAnnotations:
-      prometheus.io/scrape: 'true'
-      prometheus.io/path: '/metrics'
-      prometheus.io/port: '9464'
-      prometheus.io/scheme: 'http'
-
+podAnnotations:
+  prometheus.io/scrape: 'true'
+  prometheus.io/path: '/metrics'
+  prometheus.io/port: '9464'
+  prometheus.io/scheme: 'http'
 ```
 
 ## Troubleshooting

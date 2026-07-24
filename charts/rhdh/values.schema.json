@@ -1,0 +1,2404 @@
+{
+    "$id": "https://raw.githubusercontent.com/redhat-developer/rhdh-chart/main/charts/rhdh/values.schema.json",
+    "properties": {
+        "affinity": {
+            "default": {},
+            "title": "Affinity for pod assignment.",
+            "type": "object"
+        },
+        "appConfig": {
+            "default": {
+                "app": {
+                    "baseUrl": "https://{{- include \"rhdh.hostname\" . }}"
+                },
+                "auth": {
+                    "providers": {}
+                },
+                "backend": {
+                    "auth": {
+                        "externalAccess": [
+                            {
+                                "options": {
+                                    "secret": "${BACKEND_SECRET}",
+                                    "subject": "legacy-default-config"
+                                },
+                                "type": "legacy"
+                            }
+                        ]
+                    },
+                    "baseUrl": "https://{{- include \"rhdh.hostname\" . }}",
+                    "cors": {
+                        "origin": "https://{{- include \"rhdh.hostname\" . }}"
+                    },
+                    "database": {
+                        "connection": {
+                            "host": "${POSTGRES_HOST}",
+                            "password": "${POSTGRES_PASSWORD}",
+                            "port": "${POSTGRES_PORT}",
+                            "user": "${POSTGRES_USER}"
+                        }
+                    }
+                }
+            },
+            "title": "Inline Backstage app-config YAML. Rendered into a ConfigMap and mounted as app-config-from-configmap.yaml.",
+            "type": "object"
+        },
+        "argsOverride": {
+            "default": [],
+            "items": {
+                "type": "string"
+            },
+            "title": "Override the container arguments entirely. When set, system --config arguments are NOT added automatically.",
+            "type": "array"
+        },
+        "auth": {
+            "additionalProperties": false,
+            "properties": {
+                "backend": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "Enable backend service-to-service authentication. Disable if you inject the secret via extraEnvFrom or extraEnv instead.",
+                            "type": "boolean"
+                        },
+                        "existingSecretRef": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "key": {
+                                    "default": "backend-secret",
+                                    "title": "Key within the Secret that holds the backend auth token.",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "default": "",
+                                    "title": "Name of the existing Secret. When empty, the chart generates one.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Reference an existing Secret instead of generating one.",
+                            "type": "object"
+                        },
+                        "value": {
+                            "default": "",
+                            "title": "Use a specific value instead of generating one.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Backend service to service authentication.",
+                    "type": "object"
+                }
+            },
+            "title": "Service-to-service authentication configuration.",
+            "type": "object"
+        },
+        "autoscaling": {
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "default": false,
+                    "title": "Enable autoscaling.",
+                    "type": "boolean"
+                },
+                "maxReplicas": {
+                    "default": 3,
+                    "minimum": 1,
+                    "title": "Maximum number of replicas.",
+                    "type": "integer"
+                },
+                "minReplicas": {
+                    "default": 1,
+                    "minimum": 1,
+                    "title": "Minimum number of replicas.",
+                    "type": "integer"
+                },
+                "targetCPUUtilizationPercentage": {
+                    "default": 80,
+                    "title": "Target CPU utilization percentage.",
+                    "type": "integer"
+                },
+                "targetMemoryUtilizationPercentage": {
+                    "title": "Target memory utilization percentage.",
+                    "type": "integer"
+                }
+            },
+            "title": "Horizontal Pod Autoscaler configuration.",
+            "type": "object"
+        },
+        "catalogIndex": {
+            "additionalProperties": false,
+            "properties": {
+                "extraImages": {
+                    "default": [],
+                    "examples": [
+                        [
+                            {
+                                "digest": "",
+                                "name": "community",
+                                "registry": "ghcr.io",
+                                "repository": "redhat-developer/rhdh-plugin-community-index",
+                                "tag": "1.10.2"
+                            },
+                            {
+                                "digest": "",
+                                "registry": "my-registry.example.com",
+                                "repository": "my-org/my-rhdh-internal-plugin-catalog",
+                                "tag": "1.2.3"
+                            }
+                        ]
+                    ],
+                    "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                            "digest": {
+                                "default": "",
+                                "title": "Overrides the extra catalog index image tag with an image digest.",
+                                "type": "string"
+                            },
+                            "name": {
+                                "pattern": "^[A-Za-z0-9._-]+$",
+                                "title": "Optional name for the extra catalog index image.",
+                                "type": "string"
+                            },
+                            "registry": {
+                                "title": "Extra catalog index image registry.",
+                                "type": "string"
+                            },
+                            "repository": {
+                                "title": "Extra catalog index image repository.",
+                                "type": "string"
+                            },
+                            "tag": {
+                                "title": "Extra catalog index image tag.",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "registry",
+                            "repository",
+                            "tag"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "Extra catalog index images for additional plugin discovery in the Extensions UI.",
+                    "type": "array"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "digest": {
+                            "default": "",
+                            "title": "Overrides the catalog index image tag with an image digest.",
+                            "type": "string"
+                        },
+                        "registry": {
+                            "default": "quay.io",
+                            "title": "Catalog index image registry.",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "default": "rhdh/plugin-catalog-index",
+                            "title": "Catalog index image repository.",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "default": "next",
+                            "title": "Catalog index image tag.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Catalog index image configuration.",
+                    "type": "object"
+                }
+            },
+            "title": "Catalog index configuration for automatic plugin discovery.",
+            "type": "object"
+        },
+        "commandOverride": {
+            "default": [],
+            "items": {
+                "type": "string"
+            },
+            "title": "Override the container command.",
+            "type": "array"
+        },
+        "commonAnnotations": {
+            "default": {},
+            "title": "Annotations applied to ALL chart resources.",
+            "type": "object"
+        },
+        "commonLabels": {
+            "default": {},
+            "title": "Labels applied to ALL chart resources.",
+            "type": "object"
+        },
+        "containerSecurityContext": {
+            "default": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                    "drop": [
+                        "ALL"
+                    ]
+                },
+                "readOnlyRootFilesystem": true,
+                "runAsNonRoot": true,
+                "seccompProfile": {
+                    "type": "RuntimeDefault"
+                }
+            },
+            "title": "Security context for the main RHDH container (not the Lightspeed sidecar or init containers).",
+            "type": "object"
+        },
+        "deploymentAnnotations": {
+            "default": {},
+            "title": "Annotations for the Deployment resource (not the pod).",
+            "type": "object"
+        },
+        "dynamicPlugins": {
+            "additionalProperties": false,
+            "properties": {
+                "includes": {
+                    "default": [
+                        "dynamic-plugins.default.yaml"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "List of YAML files to include, each of which should contain a `plugins` array.",
+                    "type": "array"
+                },
+                "initContainer": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "argsOverride": {
+                            "default": [],
+                            "title": "Override the default arguments.",
+                            "type": "array"
+                        },
+                        "commandOverride": {
+                            "default": [],
+                            "title": "Override the default command.",
+                            "type": "array"
+                        },
+                        "extraArgs": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.",
+                            "type": "array"
+                        },
+                        "extraEnv": {
+                            "default": [],
+                            "title": "Extra environment variables appended after the system env vars.",
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "default": [],
+                            "title": "Additional volume mounts appended after the system mounts.",
+                            "type": "array"
+                        },
+                        "resources": {
+                            "title": "Resource requests and limits.",
+                            "type": "object"
+                        },
+                        "securityContext": {
+                            "title": "Security context for the init container. Defaults to containerSecurityContext if empty.",
+                            "type": "object"
+                        }
+                    },
+                    "title": "Configuration for the install-dynamic-plugins init container.",
+                    "type": "object"
+                },
+                "maxEntrySize": {
+                    "default": 40000000,
+                    "title": "Maximum uncompressed size (in bytes) of a single dynamic plugin entry.",
+                    "type": "integer"
+                },
+                "plugins": {
+                    "items": {
+                        "properties": {
+                            "enabled": {
+                                "default": true,
+                                "title": "Enable the plugin.",
+                                "type": "boolean"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package.",
+                                "type": "string"
+                            },
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install.",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "List of dynamic plugins. Every item defines the plugin `package` as a NPM package spec or OCI reference.",
+                    "type": "array"
+                },
+                "volume": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "emptyDir": {
+                            "title": "Raw Kubernetes emptyDir volume spec. Used when type is emptyDir.",
+                            "type": "object"
+                        },
+                        "ephemeral": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "accessModes": {
+                                    "default": [
+                                        "ReadWriteOnce"
+                                    ],
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Access modes for the ephemeral PVC.",
+                                    "type": "array"
+                                },
+                                "resources": {
+                                    "description": "VolumeResourceRequirements describes the storage resource requirements for a volume.",
+                                    "properties": {
+                                        "limits": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        },
+                                        "requests": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "storageClassName": {
+                                    "default": "",
+                                    "title": "StorageClass for the ephemeral volume. When empty, uses global.defaultStorageClass or the cluster default. Set to \"-\" to disable dynamic provisioning.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Ephemeral volume configuration. The chart builds the full ephemeral.volumeClaimTemplate.spec from these fields.",
+                            "type": "object"
+                        },
+                        "pvc": {
+                            "title": "Raw Kubernetes persistentVolumeClaim volume spec. Used when type is pvc.",
+                            "type": "object"
+                        },
+                        "type": {
+                            "default": "ephemeral",
+                            "enum": [
+                                "ephemeral",
+                                "emptyDir",
+                                "pvc"
+                            ],
+                            "title": "Volume type.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Volume configuration for the dynamic plugins root directory.",
+                    "type": "object"
+                }
+            },
+            "title": "Dynamic plugin system configuration.",
+            "type": "object"
+        },
+        "envFromOverride": {
+            "default": [],
+            "title": "Override the container envFrom entirely. When set, extraEnvFrom is ignored.",
+            "type": "array"
+        },
+        "envOverride": {
+            "default": [],
+            "title": "Override the container environment variables entirely. When set, system env vars (BACKEND_SECRET, DB credentials, etc.) are NOT added automatically.",
+            "type": "array"
+        },
+        "externalDatabase": {
+            "additionalProperties": false,
+            "properties": {
+                "existingSecretRef": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "key": {
+                            "default": "password",
+                            "title": "Key within the Secret that holds the password.",
+                            "type": "string"
+                        },
+                        "name": {
+                            "default": "",
+                            "title": "Name of the existing Secret.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Reference to an existing Secret containing the database password.",
+                    "type": "object"
+                },
+                "host": {
+                    "default": "",
+                    "title": "External database hostname.",
+                    "type": "string"
+                },
+                "port": {
+                    "default": 5432,
+                    "title": "External database port.",
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                },
+                "user": {
+                    "default": "postgres",
+                    "title": "External database user.",
+                    "type": "string"
+                }
+            },
+            "title": "External database connection. Used when postgresql.enabled is false.",
+            "type": "object"
+        },
+        "extraAppConfig": {
+            "default": [],
+            "items": {
+                "properties": {
+                    "configMapRef": {
+                        "title": "Name of the existing ConfigMap.",
+                        "type": "string"
+                    },
+                    "filename": {
+                        "title": "Filename for the app-config file.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "filename",
+                    "configMapRef"
+                ],
+                "type": "object"
+            },
+            "title": "Additional app-config files from existing ConfigMaps.",
+            "type": "array"
+        },
+        "extraArgs": {
+            "default": [],
+            "items": {
+                "type": "string"
+            },
+            "title": "Extra arguments appended after the system --config flags.",
+            "type": "array"
+        },
+        "extraContainers": {
+            "default": [],
+            "title": "Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed sidecar), never replacing them.",
+            "type": "array"
+        },
+        "extraEnv": {
+            "default": [],
+            "title": "Extra environment variables appended after the system env vars.",
+            "type": "array"
+        },
+        "extraEnvFrom": {
+            "default": [],
+            "title": "Extra envFrom entries appended to the container.",
+            "type": "array"
+        },
+        "extraInitContainers": {
+            "default": [],
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Lightspeed RAG init), never replacing them.",
+            "type": "array"
+        },
+        "extraVolumeMounts": {
+            "default": [],
+            "title": "Additional volume mounts to add to the main container. These are ADDED to system-required mounts, never replacing them.",
+            "type": "array"
+        },
+        "extraVolumes": {
+            "default": [],
+            "title": "Additional volumes to add to the pod. These are ADDED to system-required volumes (dynamic-plugins-root, temp, npmcacache, etc.), never replacing them.",
+            "type": "array"
+        },
+        "fullnameOverride": {
+            "default": "",
+            "title": "Override the full resource name.",
+            "type": "string"
+        },
+        "global": {
+            "properties": {
+                "defaultStorageClass": {
+                    "default": "",
+                    "title": "Global default StorageClass for PVCs.",
+                    "type": "string"
+                },
+                "imagePullSecrets": {
+                    "default": [],
+                    "items": {
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "title": "Global Docker registry secret names.",
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "default": "",
+                    "title": "Global Docker image registry.",
+                    "type": "string"
+                }
+            },
+            "title": "Global parameters shared with bitnami subcharts.",
+            "type": "object"
+        },
+        "host": {
+            "default": "",
+            "title": "Custom hostname. Overrides openshift.clusterRouterBase for URL generation.",
+            "type": "string"
+        },
+        "hostAliases": {
+            "default": [],
+            "title": "Host aliases for /etc/hosts entries.",
+            "type": "array"
+        },
+        "httpRoute": {
+            "additionalProperties": false,
+            "properties": {
+                "annotations": {
+                    "default": {},
+                    "title": "HTTPRoute annotations.",
+                    "type": "object"
+                },
+                "enabled": {
+                    "default": false,
+                    "title": "Enable the creation of the HTTPRoute resource.",
+                    "type": "boolean"
+                },
+                "hostnames": {
+                    "default": [],
+                    "title": "Hostnames.",
+                    "type": "array"
+                },
+                "labels": {
+                    "default": {},
+                    "title": "Additional labels for the HTTPRoute resource.",
+                    "type": "object"
+                },
+                "parentRefs": {
+                    "default": [],
+                    "title": "Parent references.",
+                    "type": "array"
+                },
+                "rules": {
+                    "default": [],
+                    "title": "HTTPRoute rules.",
+                    "type": "array"
+                }
+            },
+            "title": "Gateway API HTTPRoute configuration.",
+            "type": "object"
+        },
+        "image": {
+            "additionalProperties": false,
+            "properties": {
+                "digest": {
+                    "default": "",
+                    "title": "Overrides the image tag with an image digest.",
+                    "type": "string"
+                },
+                "pullPolicy": {
+                    "default": "IfNotPresent",
+                    "enum": [
+                        "Always",
+                        "IfNotPresent",
+                        "Never"
+                    ],
+                    "title": "Image pull policy.",
+                    "type": "string"
+                },
+                "registry": {
+                    "default": "quay.io",
+                    "title": "Image registry.",
+                    "type": "string"
+                },
+                "repository": {
+                    "default": "rhdh-community/rhdh",
+                    "title": "Image repository.",
+                    "type": "string"
+                },
+                "tag": {
+                    "default": "next",
+                    "title": "Image tag.",
+                    "type": "string"
+                }
+            },
+            "title": "Container image configuration.",
+            "type": "object"
+        },
+        "imagePullSecrets": {
+            "default": [],
+            "items": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "title": "Secrets for pulling images from private registries.",
+            "type": "array"
+        },
+        "ingress": {
+            "additionalProperties": false,
+            "properties": {
+                "annotations": {
+                    "default": {},
+                    "title": "Ingress annotations.",
+                    "type": "object"
+                },
+                "className": {
+                    "default": "",
+                    "title": "Ingress class name.",
+                    "type": "string"
+                },
+                "enabled": {
+                    "default": false,
+                    "title": "Enable the creation of the Ingress resource.",
+                    "type": "boolean"
+                },
+                "hosts": {
+                    "default": [
+                        {
+                            "host": "{{ .Values.host }}",
+                            "paths": [
+                                {
+                                    "path": "/",
+                                    "pathType": "ImplementationSpecific"
+                                }
+                            ]
+                        }
+                    ],
+                    "title": "Ingress hosts.",
+                    "type": "array"
+                },
+                "tls": {
+                    "default": [],
+                    "title": "Ingress TLS configuration.",
+                    "type": "array"
+                }
+            },
+            "title": "Kubernetes Ingress configuration.",
+            "type": "object"
+        },
+        "lightspeed": {
+            "additionalProperties": false,
+            "default": {
+                "config": {
+                    "profile": {
+                        "existingConfigMap": {
+                            "key": "",
+                            "name": ""
+                        }
+                    },
+                    "server": {
+                        "existingConfigMap": {
+                            "key": "",
+                            "name": ""
+                        }
+                    },
+                    "stack": {
+                        "existingConfigMap": {
+                            "key": "",
+                            "name": ""
+                        }
+                    }
+                },
+                "core": {
+                    "argsOverride": [],
+                    "commandOverride": [],
+                    "extraArgs": [],
+                    "extraEnv": [],
+                    "extraVolumeMounts": [],
+                    "image": {
+                        "digest": "",
+                        "registry": "quay.io",
+                        "repository": "lightspeed-core/lightspeed-stack",
+                        "tag": "0.5.3"
+                    },
+                    "imagePullPolicy": "IfNotPresent",
+                    "resources": {
+                        "limits": {
+                            "cpu": "1000m",
+                            "memory": "2Gi"
+                        },
+                        "requests": {
+                            "cpu": "100m",
+                            "memory": "512Mi"
+                        }
+                    },
+                    "securityContext": {
+                        "allowPrivilegeEscalation": false,
+                        "capabilities": {
+                            "drop": [
+                                "ALL"
+                            ]
+                        },
+                        "readOnlyRootFilesystem": true,
+                        "runAsNonRoot": true,
+                        "seccompProfile": {
+                            "type": "RuntimeDefault"
+                        }
+                    }
+                },
+                "enabled": true,
+                "existingSecret": "",
+                "plugins": [
+                    {
+                        "enabled": true,
+                        "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
+                    },
+                    {
+                        "enabled": true,
+                        "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                    }
+                ],
+                "ragInit": {
+                    "argsOverride": [],
+                    "commandOverride": [],
+                    "extraArgs": [],
+                    "extraEnv": [],
+                    "extraVolumeMounts": [],
+                    "image": {
+                        "digest": "",
+                        "registry": "quay.io",
+                        "repository": "redhat-ai-dev/rag-content",
+                        "tag": "release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"
+                    },
+                    "imagePullPolicy": "IfNotPresent",
+                    "resources": {
+                        "limits": {
+                            "cpu": "100m",
+                            "memory": "500Mi"
+                        },
+                        "requests": {
+                            "cpu": "50m",
+                            "memory": "150Mi"
+                        }
+                    },
+                    "securityContext": {
+                        "allowPrivilegeEscalation": false,
+                        "capabilities": {
+                            "drop": [
+                                "ALL"
+                            ]
+                        },
+                        "readOnlyRootFilesystem": true,
+                        "runAsNonRoot": true,
+                        "seccompProfile": {
+                            "type": "RuntimeDefault"
+                        }
+                    }
+                },
+                "runtimeVolume": {
+                    "emptyDir": {},
+                    "persistentVolumeClaim": {},
+                    "type": "emptyDir"
+                }
+            },
+            "properties": {
+                "config": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "profile": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "existingConfigMap": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "key": {
+                                            "default": "",
+                                            "title": "Key within the ConfigMap. Defaults to the bundled filename if not set.",
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "default": "",
+                                            "title": "Name of the existing ConfigMap.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Use an existing ConfigMap instead of the bundled default.",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "Python profile with prompt templates (rhdh-profile.py).",
+                            "type": "object"
+                        },
+                        "server": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "existingConfigMap": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "key": {
+                                            "default": "",
+                                            "title": "Key within the ConfigMap. Defaults to the bundled filename if not set.",
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "default": "",
+                                            "title": "Name of the existing ConfigMap.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Use an existing ConfigMap instead of the bundled default.",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "Llama Stack server configuration (config.yaml).",
+                            "type": "object"
+                        },
+                        "stack": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "existingConfigMap": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "key": {
+                                            "default": "",
+                                            "title": "Key within the ConfigMap. Defaults to the bundled filename if not set.",
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "default": "",
+                                            "title": "Name of the existing ConfigMap.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Use an existing ConfigMap instead of the bundled default.",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "Lightspeed Core service configuration (lightspeed-stack.yaml).",
+                            "type": "object"
+                        }
+                    },
+                    "title": "Configuration files mounted into the sidecar. By default, the chart creates ConfigMaps from bundled source files.",
+                    "type": "object"
+                },
+                "core": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "argsOverride": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "title": "Override the container's default args.",
+                            "type": "array"
+                        },
+                        "commandOverride": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "title": "Override the container's default command.",
+                            "type": "array"
+                        },
+                        "extraArgs": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.",
+                            "type": "array"
+                        },
+                        "extraEnv": {
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            },
+                            "title": "Additional environment variables.",
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            },
+                            "title": "Additional volume mounts.",
+                            "type": "array"
+                        },
+                        "image": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "digest": {
+                                    "default": "",
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "default": "quay.io",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "default": "lightspeed-core/lightspeed-stack",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Container image for the Lightspeed Core sidecar.",
+                            "type": "object"
+                        },
+                        "imagePullPolicy": {
+                            "default": "IfNotPresent",
+                            "enum": [
+                                "Always",
+                                "IfNotPresent",
+                                "Never"
+                            ],
+                            "type": "string"
+                        },
+                        "resources": {
+                            "description": "ResourceRequirements describes the compute resource requirements.",
+                            "properties": {
+                                "claims": {
+                                    "description": "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.",
+                                    "items": {
+                                        "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
+                                        "properties": {
+                                            "name": {
+                                                "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
+                                                "type": "string"
+                                            },
+                                            "request": {
+                                                "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "name"
+                                        ],
+                                        "type": "object"
+                                    },
+                                    "type": "array",
+                                    "x-kubernetes-list-map-keys": [
+                                        "name"
+                                    ],
+                                    "x-kubernetes-list-type": "map"
+                                },
+                                "limits": {
+                                    "additionalProperties": {
+                                        "oneOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            }
+                                        ]
+                                    },
+                                    "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                    "type": "object"
+                                },
+                                "requests": {
+                                    "additionalProperties": {
+                                        "oneOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            }
+                                        ]
+                                    },
+                                    "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "securityContext": {
+                            "description": "SecurityContext holds security configuration that will be applied to a container. Some fields are present in both SecurityContext and PodSecurityContext.  When both are set, the values in SecurityContext take precedence.",
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "description": "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "boolean"
+                                },
+                                "appArmorProfile": {
+                                    "description": "AppArmorProfile defines a pod or container's AppArmor settings.",
+                                    "properties": {
+                                        "localhostProfile": {
+                                            "description": "localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is \"Localhost\".",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "type indicates which kind of AppArmor profile will be applied. Valid options are:\n  Localhost - a profile pre-loaded on the node.\n  RuntimeDefault - the container runtime's default profile.\n  Unconfined - no AppArmor enforcement.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ],
+                                    "type": "object",
+                                    "x-kubernetes-unions": [
+                                        {
+                                            "discriminator": "type",
+                                            "fields-to-discriminateBy": {
+                                                "localhostProfile": "LocalhostProfile"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "capabilities": {
+                                    "description": "Adds and removes POSIX capabilities from running containers.",
+                                    "properties": {
+                                        "add": {
+                                            "description": "Added capabilities",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array",
+                                            "x-kubernetes-list-type": "atomic"
+                                        },
+                                        "drop": {
+                                            "description": "Removed capabilities",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array",
+                                            "x-kubernetes-list-type": "atomic"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "privileged": {
+                                    "description": "Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host. Defaults to false. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "boolean"
+                                },
+                                "procMount": {
+                                    "description": "procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "string"
+                                },
+                                "readOnlyRootFilesystem": {
+                                    "description": "Whether this container has a read-only root filesystem. Default is false. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "boolean"
+                                },
+                                "runAsGroup": {
+                                    "description": "The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "integer"
+                                },
+                                "runAsNonRoot": {
+                                    "description": "Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If unset or false, no such validation will be performed. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+                                    "type": "boolean"
+                                },
+                                "runAsUser": {
+                                    "description": "The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if unspecified. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "integer"
+                                },
+                                "seLinuxOptions": {
+                                    "description": "SELinuxOptions are the labels to be applied to the container",
+                                    "properties": {
+                                        "level": {
+                                            "description": "Level is SELinux level label that applies to the container.",
+                                            "type": "string"
+                                        },
+                                        "role": {
+                                            "description": "Role is a SELinux role label that applies to the container.",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "Type is a SELinux type label that applies to the container.",
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "description": "User is a SELinux user label that applies to the container.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "seccompProfile": {
+                                    "description": "SeccompProfile defines a pod/container's seccomp profile settings. Only one profile source may be set.",
+                                    "properties": {
+                                        "localhostProfile": {
+                                            "description": "localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is \"Localhost\". Must NOT be set for any other type.",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "type indicates which kind of seccomp profile will be applied. Valid options are:\n\nLocalhost - a profile defined in a file on the node should be used. RuntimeDefault - the container runtime default profile should be used. Unconfined - no profile should be applied.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ],
+                                    "type": "object",
+                                    "x-kubernetes-unions": [
+                                        {
+                                            "discriminator": "type",
+                                            "fields-to-discriminateBy": {
+                                                "localhostProfile": "LocalhostProfile"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "windowsOptions": {
+                                    "description": "WindowsSecurityContextOptions contain Windows-specific options and credentials.",
+                                    "properties": {
+                                        "gmsaCredentialSpec": {
+                                            "description": "GMSACredentialSpec is where the GMSA admission webhook (https://github.com/kubernetes-sigs/windows-gmsa) inlines the contents of the GMSA credential spec named by the GMSACredentialSpecName field.",
+                                            "type": "string"
+                                        },
+                                        "gmsaCredentialSpecName": {
+                                            "description": "GMSACredentialSpecName is the name of the GMSA credential spec to use.",
+                                            "type": "string"
+                                        },
+                                        "hostProcess": {
+                                            "description": "HostProcess determines if a container should be run as a 'Host Process' container. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true.",
+                                            "type": "boolean"
+                                        },
+                                        "runAsUserName": {
+                                            "description": "The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "title": "Lightspeed Core sidecar container.",
+                    "type": "object"
+                },
+                "enabled": {
+                    "default": true,
+                    "title": "Enable or disable the built-in Lightspeed feature.",
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "default": "",
+                    "title": "Name of an existing Secret to inject via envFrom into the lightspeed-core container.",
+                    "type": "string"
+                },
+                "plugins": {
+                    "default": [
+                        {
+                            "enabled": true,
+                            "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
+                        },
+                        {
+                            "enabled": true,
+                            "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                        }
+                    ],
+                    "items": {
+                        "properties": {
+                            "enabled": {
+                                "default": true,
+                                "title": "Enable the plugin.",
+                                "type": "boolean"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package.",
+                                "type": "string"
+                            },
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install.",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
+                    "type": "array"
+                },
+                "ragInit": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "argsOverride": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "title": "Override the default arguments.",
+                            "type": "array"
+                        },
+                        "commandOverride": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "title": "Override the default command.",
+                            "type": "array"
+                        },
+                        "extraArgs": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.",
+                            "type": "array"
+                        },
+                        "extraEnv": {
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            },
+                            "title": "Additional environment variables.",
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            },
+                            "title": "Additional volume mounts.",
+                            "type": "array"
+                        },
+                        "image": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "digest": {
+                                    "default": "",
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "default": "quay.io",
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "default": "redhat-ai-dev/rag-content",
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Container image for the RAG init container.",
+                            "type": "object"
+                        },
+                        "imagePullPolicy": {
+                            "default": "IfNotPresent",
+                            "enum": [
+                                "Always",
+                                "IfNotPresent",
+                                "Never"
+                            ],
+                            "type": "string"
+                        },
+                        "resources": {
+                            "description": "ResourceRequirements describes the compute resource requirements.",
+                            "properties": {
+                                "claims": {
+                                    "description": "Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.\n\nThis is an alpha field and requires enabling the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.",
+                                    "items": {
+                                        "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
+                                        "properties": {
+                                            "name": {
+                                                "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
+                                                "type": "string"
+                                            },
+                                            "request": {
+                                                "description": "Request is the name chosen for a request in the referenced claim. If empty, everything from the claim is made available, otherwise only the result of this request.",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "name"
+                                        ],
+                                        "type": "object"
+                                    },
+                                    "type": "array",
+                                    "x-kubernetes-list-map-keys": [
+                                        "name"
+                                    ],
+                                    "x-kubernetes-list-type": "map"
+                                },
+                                "limits": {
+                                    "additionalProperties": {
+                                        "oneOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            }
+                                        ]
+                                    },
+                                    "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                    "type": "object"
+                                },
+                                "requests": {
+                                    "additionalProperties": {
+                                        "oneOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            }
+                                        ]
+                                    },
+                                    "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "securityContext": {
+                            "description": "SecurityContext holds security configuration that will be applied to a container. Some fields are present in both SecurityContext and PodSecurityContext.  When both are set, the values in SecurityContext take precedence.",
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "description": "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "boolean"
+                                },
+                                "appArmorProfile": {
+                                    "description": "AppArmorProfile defines a pod or container's AppArmor settings.",
+                                    "properties": {
+                                        "localhostProfile": {
+                                            "description": "localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is \"Localhost\".",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "type indicates which kind of AppArmor profile will be applied. Valid options are:\n  Localhost - a profile pre-loaded on the node.\n  RuntimeDefault - the container runtime's default profile.\n  Unconfined - no AppArmor enforcement.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ],
+                                    "type": "object",
+                                    "x-kubernetes-unions": [
+                                        {
+                                            "discriminator": "type",
+                                            "fields-to-discriminateBy": {
+                                                "localhostProfile": "LocalhostProfile"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "capabilities": {
+                                    "description": "Adds and removes POSIX capabilities from running containers.",
+                                    "properties": {
+                                        "add": {
+                                            "description": "Added capabilities",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array",
+                                            "x-kubernetes-list-type": "atomic"
+                                        },
+                                        "drop": {
+                                            "description": "Removed capabilities",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array",
+                                            "x-kubernetes-list-type": "atomic"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "privileged": {
+                                    "description": "Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host. Defaults to false. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "boolean"
+                                },
+                                "procMount": {
+                                    "description": "procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "string"
+                                },
+                                "readOnlyRootFilesystem": {
+                                    "description": "Whether this container has a read-only root filesystem. Default is false. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "boolean"
+                                },
+                                "runAsGroup": {
+                                    "description": "The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "integer"
+                                },
+                                "runAsNonRoot": {
+                                    "description": "Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If unset or false, no such validation will be performed. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+                                    "type": "boolean"
+                                },
+                                "runAsUser": {
+                                    "description": "The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if unspecified. May also be set in PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is windows.",
+                                    "type": "integer"
+                                },
+                                "seLinuxOptions": {
+                                    "description": "SELinuxOptions are the labels to be applied to the container",
+                                    "properties": {
+                                        "level": {
+                                            "description": "Level is SELinux level label that applies to the container.",
+                                            "type": "string"
+                                        },
+                                        "role": {
+                                            "description": "Role is a SELinux role label that applies to the container.",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "Type is a SELinux type label that applies to the container.",
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "description": "User is a SELinux user label that applies to the container.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "seccompProfile": {
+                                    "description": "SeccompProfile defines a pod/container's seccomp profile settings. Only one profile source may be set.",
+                                    "properties": {
+                                        "localhostProfile": {
+                                            "description": "localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is \"Localhost\". Must NOT be set for any other type.",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "description": "type indicates which kind of seccomp profile will be applied. Valid options are:\n\nLocalhost - a profile defined in a file on the node should be used. RuntimeDefault - the container runtime default profile should be used. Unconfined - no profile should be applied.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ],
+                                    "type": "object",
+                                    "x-kubernetes-unions": [
+                                        {
+                                            "discriminator": "type",
+                                            "fields-to-discriminateBy": {
+                                                "localhostProfile": "LocalhostProfile"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "windowsOptions": {
+                                    "description": "WindowsSecurityContextOptions contain Windows-specific options and credentials.",
+                                    "properties": {
+                                        "gmsaCredentialSpec": {
+                                            "description": "GMSACredentialSpec is where the GMSA admission webhook (https://github.com/kubernetes-sigs/windows-gmsa) inlines the contents of the GMSA credential spec named by the GMSACredentialSpecName field.",
+                                            "type": "string"
+                                        },
+                                        "gmsaCredentialSpecName": {
+                                            "description": "GMSACredentialSpecName is the name of the GMSA credential spec to use.",
+                                            "type": "string"
+                                        },
+                                        "hostProcess": {
+                                            "description": "HostProcess determines if a container should be run as a 'Host Process' container. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true.",
+                                            "type": "boolean"
+                                        },
+                                        "runAsUserName": {
+                                            "description": "The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "title": "RAG data bootstrap init container.",
+                    "type": "object"
+                },
+                "runtimeVolume": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "emptyDir": {
+                            "description": "Represents an empty directory for a pod. Empty directory volumes support ownership management and SELinux relabeling.",
+                            "properties": {
+                                "medium": {
+                                    "description": "medium represents what type of storage medium should back this directory. The default is \"\" which means to use the node's default medium. Must be an empty string (default) or Memory. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir",
+                                    "type": "string"
+                                },
+                                "sizeLimit": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "number"
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "mountPath": {
+                            "default": "/tmp",
+                            "title": "Mount path inside the container for Lightspeed runtime storage.",
+                            "type": "string"
+                        },
+                        "name": {
+                            "default": "lightspeed-data",
+                            "title": "Name of the Kubernetes volume used for writable Lightspeed runtime storage.",
+                            "type": "string"
+                        },
+                        "persistentVolumeClaim": {
+                            "additionalProperties": false,
+                            "default": {},
+                            "properties": {
+                                "claimName": {
+                                    "default": "",
+                                    "title": "Name of the existing PVC to mount.",
+                                    "type": "string"
+                                },
+                                "readOnly": {
+                                    "default": false,
+                                    "title": "Whether the PVC should be mounted read-only.",
+                                    "type": "boolean"
+                                }
+                            },
+                            "title": "Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.",
+                            "type": "object"
+                        },
+                        "type": {
+                            "default": "emptyDir",
+                            "enum": [
+                                "emptyDir",
+                                "persistentVolumeClaim"
+                            ],
+                            "title": "Volume source used for writable Lightspeed runtime storage.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Runtime data volume configuration for the Lightspeed Core sidecar.",
+                    "type": "object"
+                }
+            },
+            "title": "Built-in Lightspeed AI feature configuration.",
+            "type": "object"
+        },
+        "livenessProbe": {
+            "default": {
+                "failureThreshold": 3,
+                "httpGet": {
+                    "path": "/.backstage/health/v1/liveness",
+                    "port": "backend",
+                    "scheme": "HTTP"
+                },
+                "periodSeconds": 10,
+                "successThreshold": 1,
+                "timeoutSeconds": 4
+            },
+            "title": "Liveness probe configuration.",
+            "type": "object"
+        },
+        "metrics": {
+            "additionalProperties": false,
+            "properties": {
+                "serviceMonitor": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "annotations": {
+                            "default": {},
+                            "title": "Additional annotations for the ServiceMonitor.",
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "default": false,
+                            "title": "Enable the ServiceMonitor resource.",
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "default": "",
+                            "title": "Scrape interval.",
+                            "type": "string"
+                        },
+                        "labels": {
+                            "default": {},
+                            "title": "Additional labels for the ServiceMonitor.",
+                            "type": "object"
+                        },
+                        "path": {
+                            "default": "/metrics",
+                            "title": "Metrics path.",
+                            "type": "string"
+                        },
+                        "port": {
+                            "default": "http-metrics",
+                            "title": "Metrics port name.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "ServiceMonitor configuration.",
+                    "type": "object"
+                }
+            },
+            "title": "Prometheus metrics configuration.",
+            "type": "object"
+        },
+        "nameOverride": {
+            "default": "",
+            "title": "Override the chart name used in resource naming.",
+            "type": "string"
+        },
+        "nodeSelector": {
+            "default": {},
+            "title": "Node selector for pod assignment.",
+            "type": "object"
+        },
+        "openshift": {
+            "additionalProperties": false,
+            "properties": {
+                "clusterRouterBase": {
+                    "default": "apps.example.com",
+                    "title": "Cluster router base domain used to auto-generate the hostname.",
+                    "type": "string"
+                },
+                "route": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "annotations": {
+                            "default": {},
+                            "title": "Route specific annotations.",
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "default": true,
+                            "title": "Enable the creation of the route resource.",
+                            "type": "boolean"
+                        },
+                        "host": {
+                            "default": "{{ .Values.host }}",
+                            "title": "Set the host attribute to a custom value.",
+                            "type": "string"
+                        },
+                        "path": {
+                            "default": "/",
+                            "title": "Path that the router watches for, to route traffic for to the service.",
+                            "type": "string"
+                        },
+                        "tls": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "caCertificate": {
+                                    "default": "",
+                                    "title": "Cert authority certificate contents.",
+                                    "type": "string"
+                                },
+                                "certificate": {
+                                    "default": "",
+                                    "title": "Certificate contents.",
+                                    "type": "string"
+                                },
+                                "destinationCACertificate": {
+                                    "default": "",
+                                    "title": "Contents of the ca certificate of the final destination.",
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "default": true,
+                                    "title": "Enable TLS configuration for the host defined at `openshift.route.host` parameter.",
+                                    "type": "boolean"
+                                },
+                                "insecureEdgeTerminationPolicy": {
+                                    "default": "Redirect",
+                                    "enum": [
+                                        "Redirect",
+                                        "None",
+                                        ""
+                                    ],
+                                    "title": "Indicates the desired behavior for insecure connections to a route.",
+                                    "type": "string"
+                                },
+                                "key": {
+                                    "default": "",
+                                    "title": "Key file contents.",
+                                    "type": "string"
+                                },
+                                "termination": {
+                                    "default": "edge",
+                                    "enum": [
+                                        "edge",
+                                        "reencrypt",
+                                        "passthrough"
+                                    ],
+                                    "title": "Specify TLS termination.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "Route TLS parameters.",
+                            "type": "object"
+                        },
+                        "wildcardPolicy": {
+                            "default": "None",
+                            "enum": [
+                                "None",
+                                "Subdomain"
+                            ],
+                            "title": "Wildcard policy if any for the route.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "OpenShift Route parameters.",
+                    "type": "object"
+                }
+            },
+            "title": "OpenShift-specific configuration.",
+            "type": "object"
+        },
+        "orchestrator": {
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "default": false,
+                    "title": "Enable the Orchestrator feature.",
+                    "type": "boolean"
+                },
+                "plugins": {
+                    "items": {
+                        "properties": {
+                            "enabled": {
+                                "default": true,
+                                "title": "Enable the plugin.",
+                                "type": "boolean"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package.",
+                                "type": "string"
+                            },
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install.",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "List of orchestrator plugins and their configuration.",
+                    "type": "array"
+                },
+                "serverlessLogicOperator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "Enable the Serverless Logic Operator.",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "Serverless Logic Operator configuration.",
+                    "type": "object"
+                },
+                "serverlessOperator": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "title": "Enable the Serverless Operator.",
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "Serverless Operator configuration.",
+                    "type": "object"
+                },
+                "sonataflowPlatform": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "dataIndex": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "image": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "digest": {
+                                            "default": "",
+                                            "type": "string"
+                                        },
+                                        "registry": {
+                                            "default": "",
+                                            "type": "string"
+                                        },
+                                        "repository": {
+                                            "default": "",
+                                            "type": "string"
+                                        },
+                                        "tag": {
+                                            "default": "",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Override the Data Index container image. If empty, the operator default is used.",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "SonataFlow Data Index service configuration.",
+                            "type": "object"
+                        },
+                        "dbCreationJob": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "activeDeadlineSeconds": {
+                                    "default": 120,
+                                    "minimum": 1,
+                                    "title": "Maximum time in seconds for the Job to complete before being terminated.",
+                                    "type": "integer"
+                                },
+                                "backoffLimit": {
+                                    "default": 2,
+                                    "minimum": 0,
+                                    "title": "Number of retries for the database creation job if it fails.",
+                                    "type": "integer"
+                                },
+                                "image": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "digest": {
+                                            "default": "{{ .Values.postgresql.image.digest }}",
+                                            "type": "string"
+                                        },
+                                        "registry": {
+                                            "default": "{{ .Values.postgresql.image.registry }}",
+                                            "type": "string"
+                                        },
+                                        "repository": {
+                                            "default": "{{ .Values.postgresql.image.repository }}",
+                                            "type": "string"
+                                        },
+                                        "tag": {
+                                            "default": "{{ .Values.postgresql.image.tag }}",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Container image for the create-db Job. Defaults to the postgresql subchart image if empty.",
+                                    "type": "object"
+                                },
+                                "ttlSecondsAfterFinished": {
+                                    "minimum": 1,
+                                    "title": "Time in seconds after which the Job is automatically deleted. Leave empty to disable (recommended for GitOps/ArgoCD).",
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                }
+                            },
+                            "title": "Database creation Job configuration.",
+                            "type": "object"
+                        },
+                        "eventing": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "broker": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "name": {
+                                            "default": "",
+                                            "title": "Broker name.",
+                                            "type": "string"
+                                        },
+                                        "namespace": {
+                                            "default": "",
+                                            "title": "Broker namespace.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Broker configuration.",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "Eventing configuration.",
+                            "type": "object"
+                        },
+                        "externalDB": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "existingSecret": {
+                                    "default": "",
+                                    "title": "Name of a Secret containing POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD keys.",
+                                    "type": "string"
+                                },
+                                "host": {
+                                    "default": "",
+                                    "title": "Database host (used in JDBC URLs).",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "default": "",
+                                    "title": "Database name to connect to for the CREATE DATABASE command.",
+                                    "type": "string"
+                                },
+                                "port": {
+                                    "default": "",
+                                    "title": "Database port (used in JDBC URLs).",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "External database connection. Used when postgresql.enabled is false.",
+                            "type": "object"
+                        },
+                        "jobService": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "image": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "digest": {
+                                            "default": "",
+                                            "type": "string"
+                                        },
+                                        "registry": {
+                                            "default": "",
+                                            "type": "string"
+                                        },
+                                        "repository": {
+                                            "default": "",
+                                            "type": "string"
+                                        },
+                                        "tag": {
+                                            "default": "",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Override the Job Service container image. If empty, the operator default is used.",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "SonataFlow Job Service configuration.",
+                            "type": "object"
+                        },
+                        "monitoring": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": true,
+                                    "title": "Enable monitoring.",
+                                    "type": "boolean"
+                                }
+                            },
+                            "title": "Monitoring configuration.",
+                            "type": "object"
+                        },
+                        "resources": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "limits": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "default": "500m",
+                                            "title": "CPU limit.",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "default": "1Gi",
+                                            "title": "Memory limit.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Resource limits.",
+                                    "type": "object"
+                                },
+                                "requests": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "cpu": {
+                                            "default": "250m",
+                                            "title": "CPU request.",
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "default": "64Mi",
+                                            "title": "Memory request.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Resource requests.",
+                                    "type": "object"
+                                }
+                            },
+                            "title": "Resources configuration.",
+                            "type": "object"
+                        }
+                    },
+                    "title": "SonataFlowPlatform configuration.",
+                    "type": "object"
+                }
+            },
+            "title": "Orchestrator (Serverless workflows) configuration.",
+            "type": "object"
+        },
+        "podAnnotations": {
+            "default": {},
+            "title": "Annotations to add to the pod.",
+            "type": "object"
+        },
+        "podDisruptionBudget": {
+            "additionalProperties": false,
+            "properties": {
+                "create": {
+                    "default": false,
+                    "title": "Create a PodDisruptionBudget.",
+                    "type": "boolean"
+                },
+                "maxUnavailable": {
+                    "default": 1,
+                    "title": "Maximum number of pods unavailable.",
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                },
+                "minAvailable": {
+                    "default": "",
+                    "title": "Minimum number of pods available.",
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
+            },
+            "title": "Pod Disruption Budget configuration.",
+            "type": "object"
+        },
+        "podLabels": {
+            "default": {},
+            "title": "Labels to add to the pod.",
+            "type": "object"
+        },
+        "podSecurityContext": {
+            "default": {},
+            "title": "Pod-level security context.",
+            "type": "object"
+        },
+        "postgresql": {
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "title": "Enable the built-in PostgreSQL database.",
+                    "type": "boolean"
+                }
+            },
+            "title": "Built-in PostgreSQL database (bitnami subchart).",
+            "type": "object"
+        },
+        "preInitContainers": {
+            "default": [],
+            "title": "Init containers to run BEFORE the system init containers (e.g. inject auth credentials before install-dynamic-plugins runs).",
+            "type": "array"
+        },
+        "readinessProbe": {
+            "default": {
+                "failureThreshold": 3,
+                "httpGet": {
+                    "path": "/.backstage/health/v1/readiness",
+                    "port": "backend",
+                    "scheme": "HTTP"
+                },
+                "periodSeconds": 10,
+                "successThreshold": 2,
+                "timeoutSeconds": 4
+            },
+            "title": "Readiness probe configuration.",
+            "type": "object"
+        },
+        "replicaCount": {
+            "default": 1,
+            "minimum": 0,
+            "title": "Number of desired pods.",
+            "type": "integer"
+        },
+        "resources": {
+            "default": {
+                "limits": {
+                    "cpu": "1000m",
+                    "ephemeral-storage": "5Gi",
+                    "memory": "2.5Gi"
+                },
+                "requests": {
+                    "cpu": "250m",
+                    "memory": "1Gi"
+                }
+            },
+            "title": "Resource requests and limits for the main RHDH container.",
+            "type": "object"
+        },
+        "revisionHistoryLimit": {
+            "default": 10,
+            "minimum": 0,
+            "title": "Number of old ReplicaSets to retain.",
+            "type": "integer"
+        },
+        "service": {
+            "additionalProperties": false,
+            "properties": {
+                "annotations": {
+                    "default": {},
+                    "title": "Service annotations.",
+                    "type": "object"
+                },
+                "clusterIP": {
+                    "default": "",
+                    "title": "Cluster IP.",
+                    "type": "string"
+                },
+                "externalTrafficPolicy": {
+                    "default": "",
+                    "title": "External traffic policy.",
+                    "type": "string"
+                },
+                "extraPorts": {
+                    "default": [
+                        {
+                            "name": "http-metrics",
+                            "port": 9464,
+                            "targetPort": 9464
+                        }
+                    ],
+                    "items": {
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "port": {
+                                "type": "integer"
+                            },
+                            "targetPort": {
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "title": "Additional service ports.",
+                    "type": "array"
+                },
+                "ipFamilies": {
+                    "default": [],
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "IP families for dual-stack networking.",
+                    "type": "array"
+                },
+                "ipFamilyPolicy": {
+                    "default": "",
+                    "title": "IP family policy for dual-stack networking.",
+                    "type": "string"
+                },
+                "loadBalancerIP": {
+                    "default": "",
+                    "title": "LoadBalancer IP.",
+                    "type": "string"
+                },
+                "loadBalancerSourceRanges": {
+                    "default": [],
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "LoadBalancer source ranges.",
+                    "type": "array"
+                },
+                "nodePort": {
+                    "default": "",
+                    "title": "Node port for NodePort/LoadBalancer service types (range 30000-32767).",
+                    "type": [
+                        "string",
+                        "integer"
+                    ]
+                },
+                "port": {
+                    "default": 7007,
+                    "title": "Service port.",
+                    "type": "integer"
+                },
+                "sessionAffinity": {
+                    "default": "",
+                    "title": "Session affinity.",
+                    "type": "string"
+                },
+                "type": {
+                    "default": "ClusterIP",
+                    "enum": [
+                        "ClusterIP",
+                        "NodePort",
+                        "LoadBalancer"
+                    ],
+                    "title": "Service type.",
+                    "type": "string"
+                }
+            },
+            "title": "Service configuration.",
+            "type": "object"
+        },
+        "serviceAccount": {
+            "additionalProperties": false,
+            "properties": {
+                "annotations": {
+                    "default": {},
+                    "title": "Annotations for the ServiceAccount.",
+                    "type": "object"
+                },
+                "automount": {
+                    "default": true,
+                    "title": "Automount the ServiceAccount token.",
+                    "type": "boolean"
+                },
+                "create": {
+                    "default": false,
+                    "title": "Create a ServiceAccount.",
+                    "type": "boolean"
+                },
+                "labels": {
+                    "default": {},
+                    "title": "Additional labels for the ServiceAccount.",
+                    "type": "object"
+                },
+                "name": {
+                    "default": "",
+                    "title": "The name of the service account to use. If not set and create is true, a name is generated using the fullname template.",
+                    "type": "string"
+                }
+            },
+            "title": "ServiceAccount configuration.",
+            "type": "object"
+        },
+        "startupProbe": {
+            "default": {
+                "failureThreshold": 3,
+                "httpGet": {
+                    "path": "/.backstage/health/v1/liveness",
+                    "port": "backend",
+                    "scheme": "HTTP"
+                },
+                "initialDelaySeconds": 30,
+                "periodSeconds": 20,
+                "successThreshold": 1,
+                "timeoutSeconds": 4
+            },
+            "title": "Startup probe configuration.",
+            "type": "object"
+        },
+        "strategy": {
+            "default": {},
+            "title": "Deployment update strategy.",
+            "type": "object"
+        },
+        "test": {
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "title": "Enable test configuration.",
+                    "type": "boolean"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "digest": {
+                            "default": "",
+                            "title": "Overrides the test pod image tag with an image digest.",
+                            "type": "string"
+                        },
+                        "pullPolicy": {
+                            "default": "IfNotPresent",
+                            "enum": [
+                                "",
+                                "Always",
+                                "Never",
+                                "IfNotPresent"
+                            ],
+                            "title": "Image pull policy for the test pod.",
+                            "type": "string"
+                        },
+                        "registry": {
+                            "default": "quay.io",
+                            "title": "Registry to use for the test pod image.",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "default": "curl/curl",
+                            "title": "Repository to use for the test pod image.",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "default": "8.9.1",
+                            "title": "Tag to use for the test pod image.",
+                            "type": "string"
+                        }
+                    },
+                    "title": "Image to use for the test pod. Note that the image needs to have both the `sh` and `curl` binaries in it.",
+                    "type": "object"
+                },
+                "securityContext": {
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "properties": {
+                                "drop": {
+                                    "default": [
+                                        "ALL"
+                                    ],
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "readOnlyRootFilesystem": {
+                            "default": true,
+                            "type": "boolean"
+                        }
+                    },
+                    "title": "Security context for the test pod container.",
+                    "type": "object"
+                }
+            },
+            "title": "Test pod configuration for `helm test`.",
+            "type": "object"
+        },
+        "tolerations": {
+            "default": [],
+            "title": "Tolerations for pod assignment.",
+            "type": "array"
+        },
+        "topologySpreadConstraints": {
+            "default": [],
+            "title": "Topology spread constraints for pod scheduling.",
+            "type": "array"
+        }
+    },
+    "title": "Red Hat Developer Hub Helm Chart Values",
+    "type": "object"
+}

@@ -1,0 +1,27 @@
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- if $lightspeed.enabled }}
+{{- $first := true }}
+{{- range $key := list "stack" "server" "profile" }}
+{{- $entry := index $lightspeed.config $key }}
+{{- if not $entry.existingConfigMap.name }}
+{{- if not $first }}
+---
+{{- end }}
+{{- $first = false }}
+{{- $file := include "rhdh.lightspeed.configFile" $key }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rhdh.lightspeed.configMapName" (dict "root" $ "key" $key "entry" $entry) }}
+  labels:
+    {{- include "rhdh.labels" $ | nindent 4 }}
+  {{- with $.Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+data:
+  {{ $file }}: |
+{{ $.Files.Get (printf "files/lightspeed/%s" $file) | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

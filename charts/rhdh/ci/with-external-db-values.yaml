@@ -1,0 +1,24 @@
+# CI: skip dynamic plugin downloads and catalog index extraction to speed up tests.
+# The chart features under test (deployment, config, probes, etc.) don't depend on actual plugins.
+dynamicPlugins:
+  includes: []
+postgresql:
+  enabled: false
+externalDatabase:
+  host: "ext-db-postgresql.ext-services.svc.cluster.local"
+  port: 5432
+  user: "postgres"
+  existingSecretRef:
+    name: "ext-db-password"
+    key: "password"
+lightspeed:
+  plugins: []
+orchestrator:
+  enabled: true
+  plugins: []
+  sonataflowPlatform:
+    externalDB:
+      existingSecret: "ext-db-orchestrator"
+      name: "postgres"
+      host: "ext-db-postgresql.ext-services.svc.cluster.local"
+      port: "5432"

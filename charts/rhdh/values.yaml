@@ -1,0 +1,686 @@
+# Default values for redhat-developer-hub.
+
+# ── Global ──────────────────────────────────────────────────
+
+# -- Global parameters shared with bitnami subcharts (postgresql, common).
+global:
+  # -- Global Docker image registry. Overrides per-image registries for all containers.
+  imageRegistry: ""
+  # -- Global Docker registry secret names.
+  imagePullSecrets: []
+  # -- Global default StorageClass for PVCs.
+  defaultStorageClass: ""
+
+# ── Chart metadata overrides ────────────────────────────────
+
+# -- Override the chart name used in resource naming.
+nameOverride: ""
+# -- Override the full resource name.
+fullnameOverride: ""
+# -- Labels applied to ALL chart resources.
+commonLabels: {}
+# -- Annotations applied to ALL chart resources.
+commonAnnotations: {}
+
+# ── Container image ─────────────────────────────────────────
+
+# -- Container image configuration.
+image:
+  registry: "quay.io"
+  repository: "rhdh-community/rhdh"
+  tag: "next"
+  pullPolicy: "IfNotPresent"
+  # -- Overrides the image tag with an image digest.
+  digest: ""
+
+# -- Secrets for pulling images from private registries (merged with global.imagePullSecrets).
+imagePullSecrets: []
+
+# ── Backstage application configuration ─────────────────────
+
+# -- Inline Backstage app-config YAML. Rendered into a ConfigMap and mounted as app-config-from-configmap.yaml.
+# @default -- Default config with base URLs, CORS, database connection, and backend auth.
+appConfig:
+  auth:
+    providers: {}
+  app:
+    baseUrl: 'https://{{- include "rhdh.hostname" . }}'
+  backend:
+    baseUrl: 'https://{{- include "rhdh.hostname" . }}'
+    cors:
+      origin: 'https://{{- include "rhdh.hostname" . }}'
+    database:
+      connection:
+        host: ${POSTGRES_HOST}
+        port: ${POSTGRES_PORT}
+        user: ${POSTGRES_USER}
+        password: ${POSTGRES_PASSWORD}
+    auth:
+      externalAccess:
+        - type: legacy
+          options:
+            subject: legacy-default-config
+            secret: ${BACKEND_SECRET}
+
+# -- Additional app-config files from existing ConfigMaps.
+extraAppConfig: []
+# - filename: app-config.production.yaml
+#   configMapRef: my-production-config
+
+# -- Service-to-service authentication configuration.
+auth:
+  backend:
+    # -- Enable backend service-to-service authentication.
+    # Generates a random secret unless existingSecretRef is set or value is provided.
+    # Disable if you inject the secret via extraEnvFrom or extraEnv instead.
+    enabled: true
+    # -- Reference an existing Secret instead of generating one.
+    # When not set, the chart auto-generates a random token.
+    existingSecretRef:
+      # -- Name of the existing Secret. When empty, the chart generates one.
+      name: ""
+      # -- Key within the Secret that holds the backend auth token.
+      key: "backend-secret"
+    # -- Use a specific value instead of generating one.
+    value: ""
+
+# -- Override the container command.
+commandOverride: []
+
+# -- Override the container arguments entirely. When set, system config arguments are NOT added automatically; you must include them yourself.
+argsOverride: []
+# -- Extra arguments appended after the system config flags.
+extraArgs: []
+
+# -- Override the container environment variables entirely. When set, system env vars
+# (BACKEND_SECRET, DB credentials, etc.) are NOT added automatically.
+envOverride: []
+# -- Extra environment variables appended after the system env vars.
+extraEnv: []
+
+# -- Override the container envFrom entirely. When set, extraEnvFrom is ignored.
+# Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix).
+envFromOverride: []
+# -- Extra envFrom entries appended to the container.
+# Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix).
+extraEnvFrom: []
+# - configMapRef:
+#     name: my-config
+# - secretRef:
+#     name: my-secret
+
+# ── Dynamic plugins ─────────────────────────────────────────
+
+# -- Dynamic plugin system configuration.
+dynamicPlugins:
+  # -- Array of YAML files listing dynamic plugins to include.
+  # Relative paths are resolved from the working directory of the initContainer (`/opt/app-root/src`).
+  includes:
+    - "dynamic-plugins.default.yaml"
+  # -- List of dynamic plugins. Every item defines the plugin `package` as a NPM package spec or OCI reference.
+  plugins: []
+  # -- Maximum uncompressed size (in bytes) of a single dynamic plugin entry.
+  maxEntrySize: 40000000
+  # -- Volume configuration for the dynamic plugins root directory.
+  volume:
+    # -- Volume type: "ephemeral" (auto-provisioned PVC per pod), "emptyDir" (scratch space, lost on pod restart),
+    # or "pvc" (pre-existing PersistentVolumeClaim).
+    type: "ephemeral"
+    # -- Ephemeral volume configuration. Used when type is "ephemeral".
+    # The chart builds the full ephemeral.volumeClaimTemplate.spec from these fields.
+    ephemeral:
+      # -- StorageClass for the ephemeral volume. When empty, uses global.defaultStorageClass
+      # or the cluster default.
+      storageClassName: ""
+      # -- Access modes for the ephemeral PVC.
+      accessModes:
+        - "ReadWriteOnce"
+      # -- Resource requests for the ephemeral PVC.
+      resources:
+        requests:
+          storage: "5Gi"
+    # -- Raw Kubernetes emptyDir volume spec. Used when type is "emptyDir".
+    emptyDir: {}
+    # -- Raw Kubernetes persistentVolumeClaim volume spec. Used when type is "pvc".
+    pvc:
+      claimName: ""
+  # -- Configuration for the install-dynamic-plugins init container.
+  initContainer:
+    # -- Override the default command. Leave empty to use the default (./install-dynamic-plugins.sh /dynamic-plugins-root).
+    commandOverride: []
+    # -- Override the default arguments. Leave empty to use the defaults.
+    argsOverride: []
+    # -- Extra arguments appended after the default arguments. Ignored when argsOverride is set.
+    extraArgs: []
+    # -- Extra environment variables appended after the system env vars
+    # (NPM_CONFIG_USERCONFIG, MAX_ENTRY_SIZE, CATALOG_INDEX_IMAGE, etc.).
+    extraEnv: []
+    # -- Additional volume mounts appended after the system mounts
+    # (dynamic-plugins-root, npmrc, registry-auth, npmcacache, extensions-catalog, temp).
+    extraVolumeMounts: []
+    # -- Resource requests and limits.
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 2.5Gi
+        ephemeral-storage: 5Gi
+    # -- Security context for the init container.
+    # @default -- Same as containerSecurityContext
+    securityContext: {}
+
+# -- Catalog index configuration for automatic plugin discovery.
+catalogIndex:
+  image:
+    registry: "quay.io"
+    repository: "rhdh/plugin-catalog-index"
+    tag: "next"
+    digest: ""
+  # -- Extra catalog index images for additional plugin discovery in the Extensions UI.
+  # Each item must include `registry`, `repository`, and `tag` fields; `name` and `digest` are optional.
+  # Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling).
+  # @default -- `[]`
+  extraImages: []
+  # - name: community
+  #   registry: ghcr.io
+  #   repository: redhat-developer/rhdh-plugin-community-index
+  #   tag: "1.10"
+  #   digest: ""
+  # - registry: my-registry.example.com
+  #   repository: my-org/my-rhdh-internal-plugin-catalog
+  #   tag: "1.2.3"
+  #   digest: ""
+
+# ── Deployment / Pod ────────────────────────────────────────
+
+# -- Number of desired pods.
+replicaCount: 1
+
+# -- Number of old ReplicaSets to retain.
+revisionHistoryLimit: 10
+
+# -- Deployment update strategy.
+strategy: {}
+
+# -- ServiceAccount configuration.
+serviceAccount:
+  create: false
+  automount: true
+  # -- Additional labels for the ServiceAccount.
+  labels: {}
+  annotations: {}
+  # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+# -- Annotations to add to the pod.
+podAnnotations: {}
+# -- Labels to add to the pod.
+podLabels: {}
+
+# -- Pod-level security context.
+podSecurityContext: {}
+
+# -- Security context for the main RHDH container (not the Lightspeed sidecar or init containers).
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  seccompProfile:
+    type: "RuntimeDefault"
+
+# -- Resource requests and limits for the main RHDH container.
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 2.5Gi
+    ephemeral-storage: 5Gi
+
+# -- Startup probe configuration. Gives the application time to start before liveness/readiness probes kick in.
+startupProbe:
+  httpGet:
+    path: "/.backstage/health/v1/liveness"
+    port: "backend"
+    scheme: "HTTP"
+  initialDelaySeconds: 30
+  timeoutSeconds: 4
+  periodSeconds: 20
+  successThreshold: 1
+  failureThreshold: 3
+
+# -- Readiness probe configuration.
+readinessProbe:
+  httpGet:
+    path: "/.backstage/health/v1/readiness"
+    port: "backend"
+    scheme: "HTTP"
+  periodSeconds: 10
+  successThreshold: 2
+  failureThreshold: 3
+  timeoutSeconds: 4
+
+# -- Liveness probe configuration.
+livenessProbe:
+  httpGet:
+    path: "/.backstage/health/v1/liveness"
+    port: "backend"
+    scheme: "HTTP"
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+  timeoutSeconds: 4
+
+# -- Additional volumes to add to the pod. These are ADDED to system-required volumes
+# (dynamic-plugins-root, temp, npmcacache, etc.), never replacing them.
+extraVolumes: []
+
+# -- Additional volume mounts to add to the main container. These are ADDED to
+# system-required mounts, never replacing them.
+extraVolumeMounts: []
+
+# -- Additional sidecar containers. These are ADDED to system containers
+# (e.g. Lightspeed sidecar), never replacing them.
+extraContainers: []
+
+# -- Init containers to run BEFORE the system init containers
+# (e.g. inject auth credentials before install-dynamic-plugins runs).
+preInitContainers: []
+
+# -- Additional init containers. These are ADDED after system init containers
+# (install-dynamic-plugins, Lightspeed RAG init), never replacing them.
+extraInitContainers: []
+
+# -- Node labels for pod assignment.
+nodeSelector: {}
+
+# -- Tolerations for pod assignment.
+tolerations: []
+
+# -- Affinity rules for pod assignment.
+affinity: {}
+
+# -- Topology spread constraints for pod scheduling.
+topologySpreadConstraints: []
+
+# -- Host aliases for /etc/hosts entries.
+hostAliases: []
+
+# -- Annotations for the Deployment resource (not the pod).
+deploymentAnnotations: {}
+
+# ── Autoscaling & availability ──────────────────────────────
+
+# -- Horizontal Pod Autoscaler configuration.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# -- Pod Disruption Budget configuration.
+podDisruptionBudget:
+  create: false
+  minAvailable: ""
+  maxUnavailable: 1
+
+# ── Networking ──────────────────────────────────────────────
+
+# -- Custom hostname. Overrides openshift.clusterRouterBase for URL generation.
+host: ""
+
+# -- Service configuration.
+service:
+  type: "ClusterIP"
+  port: 7007
+  # -- Additional service ports.
+  extraPorts:
+    - name: "http-metrics"
+      port: 9464
+      targetPort: 9464
+  annotations: {}
+  # -- Node port for NodePort/LoadBalancer service types (range 30000-32767).
+  nodePort: ""
+  sessionAffinity: ""
+  clusterIP: ""
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  externalTrafficPolicy: ""
+  # -- IP family policy for dual-stack networking.
+  ipFamilyPolicy: ""
+  # -- IP families for dual-stack networking.
+  ipFamilies: []
+
+# -- Kubernetes Ingress configuration.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: "ImplementationSpecific"
+  tls: []
+
+# -- Gateway API HTTPRoute configuration.
+httpRoute:
+  enabled: false
+  # -- Additional labels for the HTTPRoute resource.
+  labels: {}
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+  rules: []
+
+# ── OpenShift ───────────────────────────────────────────────
+
+# -- OpenShift-specific configuration.
+openshift:
+  # -- Cluster router base domain used to auto-generate the hostname.
+  clusterRouterBase: "apps.example.com"
+  # -- OpenShift Route configuration.
+  route:
+    annotations: {}
+    enabled: true
+    host: "{{ .Values.host }}"
+    path: "/"
+    wildcardPolicy: "None"
+    tls:
+      enabled: true
+      termination: "edge"
+      certificate: ""
+      key: ""
+      caCertificate: ""
+      destinationCACertificate: ""
+      insecureEdgeTerminationPolicy: "Redirect"
+
+# ── Database ────────────────────────────────────────────────
+
+# -- Built-in PostgreSQL database (bitnami subchart).
+postgresql:
+  enabled: true
+  postgresqlDataDir: "/var/lib/pgsql/data/userdata"
+  serviceBindings:
+    enabled: true
+  image:
+    registry: "quay.io"
+    repository: "fedora/postgresql-15"
+    tag: "latest"
+    digest: ""
+  auth:
+    secretKeys:
+      adminPasswordKey: "postgres-password"
+      userPasswordKey: "password"
+  primary:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 250m
+        memory: 1024Mi
+        ephemeral-storage: 20Mi
+    persistence:
+      enabled: true
+      size: 1Gi
+      mountPath: "/var/lib/pgsql/data"
+    extraEnvVars:
+      - name: "POSTGRESQL_ADMIN_PASSWORD"
+        valueFrom:
+          secretKeyRef:
+            key: '{{- include "rhdh.postgresql.adminPasswordKey" . }}'
+            name: '{{- include "rhdh.postgresql.secretName" . }}'
+
+# -- External database connection. Used when postgresql.enabled is false.
+# When both postgresql.enabled and externalDatabase.host are false/empty,
+# the chart renders no database env vars (BYO configuration via extraEnv or appConfig).
+externalDatabase:
+  # -- External database hostname.
+  host: ""
+  # -- External database port.
+  port: 5432
+  # -- External database user.
+  user: "postgres"
+  # -- Reference to an existing Secret containing the database password.
+  existingSecretRef:
+    # -- Name of the existing Secret.
+    name: ""
+    # -- Key within the Secret that holds the password.
+    key: "password"
+
+# ── Observability ───────────────────────────────────────────
+
+# -- Prometheus metrics configuration.
+metrics:
+  serviceMonitor:
+    enabled: false
+    path: "/metrics"
+    port: "http-metrics"
+    interval: ""
+    labels: {}
+    annotations: {}
+
+# ── Built-in features ──────────────────────────────────────
+
+# -- Built-in Lightspeed AI feature configuration.
+lightspeed:
+  enabled: true
+  # -- Lightspeed dynamic plugin packages.
+  plugins:
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
+      enabled: true
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
+      enabled: true
+  # -- Configuration files mounted into the sidecar.
+  # By default, the chart creates ConfigMaps from bundled source files.
+  # Set existingConfigMap to use a pre-existing ConfigMap instead.
+  config:
+    # -- Lightspeed Core service configuration (lightspeed-stack.yaml).
+    stack:
+      # -- Use an existing ConfigMap instead of the bundled default.
+      # @default -- Created from bundled lightspeed-stack.yaml
+      existingConfigMap:
+        # -- Name of the existing ConfigMap.
+        name: ""
+        # -- Key within the ConfigMap that holds the file content. Defaults to the bundled filename (lightspeed-stack.yaml) if not set.
+        key: ""
+    # -- Llama Stack server configuration (config.yaml).
+    server:
+      # -- Use an existing ConfigMap instead of the bundled default.
+      # @default -- Created from bundled config.yaml
+      existingConfigMap:
+        # -- Name of the existing ConfigMap.
+        name: ""
+        # -- Key within the ConfigMap that holds the file content. Defaults to the bundled filename (config.yaml) if not set.
+        key: ""
+    # -- Python profile with prompt templates (rhdh-profile.py).
+    profile:
+      # -- Use an existing ConfigMap instead of the bundled default.
+      # @default -- Created from bundled rhdh-profile.py
+      existingConfigMap:
+        # -- Name of the existing ConfigMap.
+        name: ""
+        # -- Key within the ConfigMap that holds the file content. Defaults to the bundled filename (rhdh-profile.py) if not set.
+        key: ""
+  # -- Name of an existing Secret to inject via envFrom into the lightspeed-core container.
+  # If empty, no secret is mounted.
+  # Expected keys (all optional — only set the ones for the providers you use):
+  #   ENABLE_VLLM, VLLM_URL, VLLM_API_KEY, VLLM_MAX_TOKENS, VLLM_TLS_VERIFY,
+  #   ENABLE_OPENAI, OPENAI_API_KEY,
+  #   ENABLE_VERTEX_AI, VERTEX_AI_PROJECT, VERTEX_AI_LOCATION, GOOGLE_APPLICATION_CREDENTIALS,
+  #   ENABLE_OLLAMA, OLLAMA_URL,
+  #   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME,
+  #   LLAMA_STACK_LOGGING
+  # See files/lightspeed/secret.example.yaml for a reference template.
+  existingSecret: ""
+  # -- Writable scratch volume for the sidecar (/tmp).
+  runtimeVolume:
+    # -- Volume type: "emptyDir" or "persistentVolumeClaim".
+    type: "emptyDir"
+    emptyDir: {}
+    persistentVolumeClaim: {}
+  # -- RAG data bootstrap init container.
+  ragInit:
+    image:
+      registry: "quay.io"
+      repository: "redhat-ai-dev/rag-content"
+      tag: "release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"
+      digest: ""
+    imagePullPolicy: "IfNotPresent"
+    # -- Override the default command for the RAG init container.
+    commandOverride: []
+    # -- Override the default arguments for the RAG init container.
+    argsOverride: []
+    # -- Extra arguments appended after the default arguments. Ignored when argsOverride is set.
+    extraArgs: []
+    extraEnv: []
+    extraVolumeMounts: []
+    resources:
+      requests:
+        cpu: 50m
+        memory: 150Mi
+      limits:
+        cpu: 100m
+        memory: 500Mi
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      seccompProfile:
+        type: "RuntimeDefault"
+  # -- Lightspeed Core sidecar container.
+  core:
+    image:
+      registry: "quay.io"
+      repository: "lightspeed-core/lightspeed-stack"
+      tag: "0.5.3"
+      digest: ""
+    imagePullPolicy: "IfNotPresent"
+    # -- Override the container's default command. Leave empty to use the image entrypoint.
+    commandOverride: []
+    # -- Override the container's default args. Leave empty to use the image defaults.
+    argsOverride: []
+    # -- Extra arguments appended after the default arguments. Ignored when argsOverride is set.
+    extraArgs: []
+    extraEnv: []
+    extraVolumeMounts: []
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      seccompProfile:
+        type: "RuntimeDefault"
+
+# -- Orchestrator (Serverless workflows) configuration.
+orchestrator:
+  enabled: false
+  serverlessLogicOperator:
+    enabled: true
+  serverlessOperator:
+    enabled: true
+  sonataflowPlatform:
+    monitoring:
+      enabled: true
+    eventing:
+      broker:
+        name: ""
+        namespace: ""
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    # -- External database connection. Used when postgresql.enabled is false.
+    externalDB:
+      # -- Name of a Secret containing POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD keys.
+      existingSecret: ""
+      # -- Database name to connect to for the CREATE DATABASE command.
+      name: ""
+      # -- Database host (used in JDBC URLs).
+      host: ""
+      # -- Database port (used in JDBC URLs).
+      port: ""
+    # -- Database creation Job configuration.
+    dbCreationJob:
+      backoffLimit: 2
+      ttlSecondsAfterFinished:
+      activeDeadlineSeconds: 120
+      # -- Container image for the create-db Job.
+      image:
+        registry: "{{ .Values.postgresql.image.registry }}"
+        repository: "{{ .Values.postgresql.image.repository }}"
+        tag: "{{ .Values.postgresql.image.tag }}"
+        digest: "{{ .Values.postgresql.image.digest }}"
+    # -- SonataFlow Data Index service configuration.
+    dataIndex:
+      # -- Override the Data Index container image. If empty, the operator default is used.
+      image:
+        registry: ""
+        repository: ""
+        tag: ""
+        digest: ""
+    # -- SonataFlow Job Service configuration.
+    jobService:
+      # -- Override the Job Service container image. If empty, the operator default is used.
+      image:
+        registry: ""
+        repository: ""
+        tag: ""
+        digest: ""
+  plugins:
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{inherit}}" }}'
+      enabled: true
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{inherit}}" }}'
+      enabled: true
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{inherit}}" }}'
+      enabled: true
+    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{inherit}}" }}'
+      enabled: true
+
+# ── Testing ─────────────────────────────────────────────────
+
+# -- Test pod configuration for `helm test`.
+test:
+  enabled: true
+  image:
+    registry: "quay.io"
+    repository: "curl/curl"
+    tag: "8.9.1"
+    digest: ""
+    pullPolicy: "IfNotPresent"
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: ["ALL"]

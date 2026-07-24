@@ -6,7 +6,7 @@ inputs:
     description: 'Target branch for chart-testing'
     required: true
   extra_helm_args:
-    description: 'Extra Helm arguments to pass to ct install'
+    description: 'Individual --set overrides passed to ct install via --helm-extra-set-args'
     required: false
     default: ''
   all_charts:
@@ -14,11 +14,11 @@ inputs:
     required: false
     default: 'false'
   chart:
-    description: 'Specific chart to test (e.g., charts/backstage). When set, only this chart is tested.'
+    description: 'Specific chart to test (e.g., charts/rhdh). When set, only this chart is tested.'
     required: false
     default: ''
   helm_extra_args:
-    description: 'Extra arguments to pass to helm via ct install --helm-extra-args (e.g., --values file.yaml)'
+    description: 'General helm flags (e.g. --values file.yaml) passed to ct install via --helm-extra-args'
     required: false
     default: ''
   helm_template_values_file:
@@ -60,18 +60,21 @@ runs:
       run: |
         if [[ -n "$INPUT_CHART" ]]; then
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          if [[ "$INPUT_CHART" == "charts/backstage" ]]; then
-            echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+          if [[ "$INPUT_CHART" == "charts/rhdh" ]]; then
+            echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
+            echo "externalDbNeeded=true" >> "$GITHUB_OUTPUT"
           fi
         elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+          echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
+          echo "externalDbNeeded=true" >> "$GITHUB_OUTPUT"
         else
           listChanged=$(ct list-changed --target-branch "$INPUT_TARGET_BRANCH")
           if [[ -n "$listChanged" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            if grep 'charts/backstage' <<< "$listChanged"; then
-              echo "backstageChartChanged=true" >> "$GITHUB_OUTPUT"
+            if grep -q 'charts/rhdh' <<< "$listChanged"; then
+              echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
+              echo "externalDbNeeded=true" >> "$GITHUB_OUTPUT"
             fi
           fi
         fi
@@ -182,7 +185,7 @@ runs:
     # For the simple testing that we are doing here on a vanilla K8s cluster, we only need both the Knative and SonataFlow CRDs.
     # TODO(rm3l): Update this when/if there is an upstream counterpart installable via OLM.
     - name: Install Knative and SonataFlow CRDs
-      if: steps.list-changed.outputs.backstageChartChanged == 'true'
+      if: steps.list-changed.outputs.orchestratorCrdsNeeded == 'true'
       shell: bash
       env:
         SONATAFLOW_OPERATOR_VERSION: "10.1.0"
@@ -191,6 +194,83 @@ runs:
           kubectl create -f "${crdDir}"
         done
         kubectl create -f "https://github.com/apache/incubator-kie-tools/releases/download/${SONATAFLOW_OPERATOR_VERSION}/apache-kie-${SONATAFLOW_OPERATOR_VERSION}-incubating-sonataflow-operator.yaml"
+
+    - name: Set up external services and test resources for rhdh
+      if: steps.list-changed.outputs.externalDbNeeded == 'true'
+      shell: bash
+      run: |
+        RHDH_VALUES="charts/rhdh/values.yaml"
+
+        # ── External PostgreSQL (ext-services namespace) ──
+        # Extract the image from the rhdh chart values to stay in sync
+        PG_REGISTRY=$(yq -r '.postgresql.image.registry' "$RHDH_VALUES")
+        PG_REPOSITORY=$(yq -r '.postgresql.image.repository' "$RHDH_VALUES")
+        PG_TAG=$(yq -r '.postgresql.image.tag' "$RHDH_VALUES")
+        # Pin the chart version to match the rhdh chart dependency
+        PG_CHART_VERSION=$(yq -r '.dependencies[] | select(.name == "postgresql") | .version' charts/rhdh/Chart.yaml)
+        echo "[INFO] Using PostgreSQL chart version: ${PG_CHART_VERSION}"
+        echo "[INFO] Using PostgreSQL image: ${PG_REGISTRY}/${PG_REPOSITORY}:${PG_TAG}"
+
+        kubectl create namespace ext-services
+        helm install ext-db bitnami/postgresql \
+          --namespace ext-services \
+          --version "$PG_CHART_VERSION" \
+          --set image.registry="$PG_REGISTRY" \
+          --set image.repository="$PG_REPOSITORY" \
+          --set image.tag="$PG_TAG" \
+          --set auth.postgresPassword=testpassword \
+          --set postgresqlDataDir=/var/lib/pgsql/data/userdata \
+          --set primary.persistence.enabled=false \
+          --set primary.podSecurityContext.enabled=false \
+          --set primary.containerSecurityContext.enabled=false \
+          --set primary.extraEnvVars[0].name=POSTGRESQL_ADMIN_PASSWORD \
+          --set primary.extraEnvVars[0].value=testpassword \
+          --wait --timeout 300s
+
+        # ── Fixed test namespace (ct-charts) ──
+        # Using --namespace with ct install keeps this namespace alive across all
+        # ci/ values file tests, so pre-created resources persist.
+        kubectl create namespace ct-charts
+
+        # Secret for external-db test (with-external-db-values.yaml)
+        kubectl create secret generic ext-db-password \
+          --namespace ct-charts \
+          --from-literal=password=testpassword
+
+        # Secret for orchestrator external-db (with-external-db-values.yaml)
+        kubectl create secret generic ext-db-orchestrator \
+          --namespace ct-charts \
+          --from-literal=POSTGRES_HOST=ext-db-postgresql.ext-services.svc.cluster.local \
+          --from-literal=POSTGRES_PORT=5432 \
+          --from-literal=POSTGRES_USER=postgres \
+          --from-literal=POSTGRES_PASSWORD=testpassword
+
+        # Fake .npmrc secret for dynamic-plugins init container test.
+        # The volume is optional: true in the deployment, so this is only needed
+        # if a ci/ values file actually exercises the npmrc path.
+        # ct uses the Chart.yaml name as the Helm release name, so fullname = redhat-developer-hub.
+        # kubectl create secret generic redhat-developer-hub-dynamic-plugins-npmrc \
+        #   --namespace ct-charts \
+        #   --from-literal=.npmrc=$'@myscope:registry=https://my-registry.example.com\n//my-registry.example.com:_authToken=foo'
+
+        # Lightspeed existing-resource test (with-lightspeed-existing-config-values.yaml)
+        kubectl create configmap test-lightspeed-stack \
+          --namespace ct-charts \
+          --from-file=lightspeed-stack.yaml=charts/rhdh/files/lightspeed/lightspeed-stack.yaml
+        kubectl create configmap test-lightspeed-server \
+          --namespace ct-charts \
+          --from-file=config.yaml=charts/rhdh/files/lightspeed/config.yaml
+        kubectl create configmap test-lightspeed-profile \
+          --namespace ct-charts \
+          --from-file=rhdh-profile.py=charts/rhdh/files/lightspeed/rhdh-profile.py
+        kubectl create secret generic test-lightspeed-secret \
+          --namespace ct-charts \
+          --from-literal=LLAMA_STACK_LOGGING=info
+
+        # Minimal app-config for extraAppConfig test (with-extra-app-config-values.yaml)
+        kubectl create configmap my-app-config \
+          --namespace ct-charts \
+          --from-literal=app-config-custom.yaml='{}'
 
     - name: Run chart-testing (install)
       if: steps.list-changed.outputs.changed == 'true'
@@ -219,12 +299,17 @@ runs:
         fi
 
         EXTRA_ARGS=()
-        if [[ -z "$INPUT_CHART" || "$INPUT_CHART" == "charts/backstage" ]]; then
+        if [[ "$INPUT_CHART" == "charts/rhdh" ]]; then
+          # On vanilla K8s (KinD), there is no SCC to assign a common UID.
+          # Set fsGroup so shared volumes (e.g. RAG data) are group-writable
+          # across init containers and sidecars that may run as different UIDs.
           EXTRA_ARGS+=(
-            "--set route.enabled=false"
-            "--set upstream.ingress.enabled=true"
-            "--set global.host=rhdh.127.0.0.1.sslip.io"
-            "--set upstream.backstage.podSecurityContext.fsGroup=1001"
+            "--set openshift.route.enabled=false"
+            "--set ingress.enabled=true"
+            "--set host=rhdh.127.0.0.1.sslip.io"
+            "--set postgresql.primary.persistence.enabled=false"
+            "--set postgresql.primary.resources.limits.ephemeral-storage=200Mi"
+            "--set podSecurityContext.fsGroup=1001"
           )
         fi
         if [[ -n "$INPUT_EXTRA_HELM_ARGS" ]]; then
@@ -236,19 +321,32 @@ runs:
           --target-branch "$INPUT_TARGET_BRANCH"
           --helm-extra-set-args="${EXTRA_ARGS[*]}"
         )
+        # Use a fixed namespace so that pre-created test resources
+        # (Secrets, ConfigMaps) persist across all ci/ values file tests.
+        kubectl create namespace ct-charts 2>/dev/null || true
+        CT_ARGS+=(--namespace ct-charts)
+        # Test upgrades from the previous revision unless:
+        # - the chart is new (not on the target branch)
+        # - the chart version is unchanged
+        # - there is a major version bump
+        SKIP_UPGRADE=false
         if [[ -n "$INPUT_CHART" ]]; then
-          old_version=$(git show "origin/$INPUT_TARGET_BRANCH:$INPUT_CHART/Chart.yaml" 2>/dev/null | yq '.version' 2>/dev/null || echo "0.0.0")
-          new_version=$(yq '.version' "$INPUT_CHART/Chart.yaml")
-          old_major=${old_version%%.*}
-          new_major=${new_version%%.*}
-          if [[ "$old_version" == "$new_version" ]]; then
-            echo "Skipping --upgrade: chart version unchanged ($old_version)"
-          elif [[ "$old_major" != "$new_major" ]]; then
-            echo "Skipping --upgrade: major version bump detected ($old_version -> $new_version)"
+          if ! git show "origin/$INPUT_TARGET_BRANCH:${INPUT_CHART}/Chart.yaml" &>/dev/null; then
+            echo "Skipping --upgrade: chart $INPUT_CHART is new (not on $INPUT_TARGET_BRANCH)"
+            SKIP_UPGRADE=true
           else
-            CT_ARGS+=(--upgrade)
+            old_version=$(git show "origin/$INPUT_TARGET_BRANCH:$INPUT_CHART/Chart.yaml" | yq '.version' 2>/dev/null || echo "0.0.0")
+            new_version=$(yq '.version' "$INPUT_CHART/Chart.yaml")
+            if [[ "$old_version" == "$new_version" ]]; then
+              echo "Skipping --upgrade: chart version unchanged ($old_version)"
+              SKIP_UPGRADE=true
+            elif [[ "${old_version%%.*}" != "${new_version%%.*}" ]]; then
+              echo "Skipping --upgrade: major version bump ($old_version -> $new_version)"
+              SKIP_UPGRADE=true
+            fi
           fi
-        else
+        fi
+        if [[ "$SKIP_UPGRADE" == "false" ]]; then
           CT_ARGS+=(--upgrade)
         fi
         if [[ "$RUNNER_DEBUG" == "1" ]]; then
