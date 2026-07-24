@@ -21,11 +21,13 @@ jobs:
     env:
       GO111MODULE: on
     steps:
-      - name: Checkout
+      - name: Checkout PR branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.head_ref }}
+          persist-credentials: false
           fetch-depth: 0
-          persist-credentials: false # Avoid token leakage to hooks
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
@@ -44,6 +46,67 @@ jobs:
         run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 
       - name: Run pre-commit
+        id: precommit
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+        continue-on-error: true
+        with:
+          extra_args: --verbose --all-files --show-diff-on-failure
+
+      - name: Check for changes
+        id: check
+        run: |
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "✅ All files are up to date"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Pre-commit hooks modified files"
+            git status --short
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Auto-commit and push pre-commit changes
+        id: autopush
+        # Only attempt on same-repo PRs (not forks) for security; best-effort — failure falls through to the next step
+        if: steps.check.outputs.changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        env:
+          RHDH_BOT_TOKEN: ${{ secrets.RHDH_BOT_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [[ -z "${RHDH_BOT_TOKEN}" || -z "${HEAD_REF}" ]]; then
+            echo "::warning::RHDH_BOT_TOKEN or HEAD_REF is not set, skipping auto-push"
+            exit 0
+          fi
+          git config user.name "rhdh-bot"
+          git config user.email "rhdh-bot@redhat.com"
+          git remote set-url origin "https://x-access-token:${RHDH_BOT_TOKEN}@github.com/${{ github.repository }}.git"
+          git add -A
+          git commit -m "chore: apply pre-commit fixes"
+          if git push origin "HEAD:${HEAD_REF}"; then
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            git reset --mixed HEAD~1
+          fi
+
+      - name: Re-run pre-commit after auto-push
+        if: steps.autopush.outputs.pushed == 'true'
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
           extra_args: --verbose --all-files --show-diff-on-failure
+
+      - name: Fail if pre-commit issues remain
+        if: >-
+          steps.precommit.outcome == 'failure' &&
+          (steps.check.outputs.changed != 'true' || steps.autopush.outputs.pushed != 'true')
+        run: |
+          echo "::error::Pre-commit hooks detected issues that need to be fixed"
+          echo ""
+          echo "❌ The pre-commit hooks detected issues that need to be fixed."
+          echo ""
+          echo "To fix these issues:"
+          echo "  1. Install pre-commit: https://pre-commit.com/#install"
+          echo "  2. Install helm-docs: https://github.com/norwoodj/helm-docs#installation"
+          echo "  3. Run: pre-commit run --all-files"
+          echo "  4. Commit and push any resulting changes"
+          exit 1
