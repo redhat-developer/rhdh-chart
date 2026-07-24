@@ -332,6 +332,16 @@ images are configured.
 {{- end -}}
 
 {{/*
+Returns the orchestrator DB creation Job name, lowercased and truncated to 63 chars.
+The version suffix is preserved in full; only the prefix is truncated.
+*/}}
+{{- define "rhdh.orchestrator.dbJobName" -}}
+{{- $versionSuffix := printf "-%s" (.Chart.Version | replace "." "-") -}}
+{{- $prefix := printf "%s-create-sf-db" .Release.Name | trunc (int (sub 63 (len $versionSuffix))) | trimSuffix "-" -}}
+{{- printf "%s%s" $prefix $versionSuffix | lower -}}
+{{- end -}}
+
+{{/*
 DEPRECATED: The following templates are deprecated. Please use the corresponding "rhdh.*" templates instead.
 */}}
 

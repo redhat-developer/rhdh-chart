@@ -3,8 +3,12 @@ route:
   enabled: false
 
 global:
+  # CI: skip dynamic plugin downloads to speed up tests.
+  dynamic:
+    includes: []
   lightspeed:
     enabled: false
+    plugins: []
 
 upstream:
   postgresql:

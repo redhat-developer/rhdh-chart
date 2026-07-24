@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 6.2.0](https://img.shields.io/badge/Version-6.2.0-informational?style=flat-square)
+![Version: 7.0.1](https://img.shields.io/badge/Version-7.0.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -29,7 +29,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 6.2.0
+helm install my-backstage redhat-developer/backstage --version 7.0.1
 ```
 
 ## Introduction
@@ -168,7 +168,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.auth.backend.enabled | Enable backend service to service authentication, unless configured otherwise it generates a secret value | bool | `true` |
 | global.auth.backend.existingSecret | Instead of generating a secret value, refer to existing secret | string | `""` |
 | global.auth.backend.value | Instead of generating a secret value, use the following value | string | `""` |
-| global.catalogIndex | Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount. | object | `{"extraImages":[],"image":{"registry":"quay.io","repository":"rhdh/plugin-catalog-index","tag":"1.10"}}` |
+| global.catalogIndex | Catalog index configuration for automatic plugin discovery. The `install-dynamic-plugins.py` script pulls this image if the `CATALOG_INDEX_IMAGE` environment variable is set. The `dynamic-plugins.default.yaml` file will be extracted and written to `dynamic-plugins-root` volume mount. | object | `{"extraImages":[],"image":{"registry":"quay.io","repository":"rhdh/plugin-catalog-index","tag":"next"}}` |
 | global.catalogIndex.extraImages | Extra catalog index images for additional plugin discovery in the Extensions UI. Each item must include `registry`, `repository`, and `tag` fields; `name` is optional. Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling). | list | `[]` |
 | global.clusterRouterBase | Shorthand for users who do not want to specify a custom HOSTNAME. Used ONLY with the DEFAULT upstream.backstage.appConfig value and with OCP Route enabled. | string | `"apps.example.com"` |
 | global.dynamic.includes | Array of YAML files listing dynamic plugins to include with those listed in the `plugins` field. Relative paths are resolved from the working directory of the initContainer that will install the plugins (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
@@ -185,7 +185,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.lightspeed.configMaps[2].create | Whether to create this ConfigMap from the bundled source file. Set to false and provide `nameOverride` to use a pre-existing ConfigMap. | bool | `true` |
 | global.lightspeed.configMaps[2].nameOverride | Name of an existing ConfigMap to use instead. Required when `create` is false. | string | `""` |
 | global.lightspeed.configMaps[2].sourceFile | Bundled file used to populate the ConfigMap data when `create` is true. | string | `"rhdh-profile.py"` |
-| global.lightspeed.enabled | Enable or disable the built-in Lightspeed feature. | bool | `true` |
+| global.lightspeed.enabled | Enable or disable the built-in Lightspeed feature. FIXME: temporarily disabled due to DPDY issues; to re-enable in [RHIDP-15458](https://redhat.atlassian.net/browse/RHIDP-15458) | bool | `false` |
 | global.lightspeed.initContainer.image | Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments. | string | `"quay.io/redhat-ai-dev/rag-content:release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"` |
 | global.lightspeed.initContainer.resources | Resource requests/limits for the Lightspeed RAG bootstrap init container. | object | `{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}}` |
 | global.lightspeed.plugins | Lightspeed plugins and their configuration. Override package references for disconnected environments. | list | `[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}]` |
@@ -202,7 +202,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.lightspeed.secret.name | Name of an existing Secret to use instead. Required when `create` is false. | string | `""` |
 | global.lightspeed.secret.optional | Whether the Secret reference is optional in the pod spec. | bool | `false` |
 | global.lightspeed.secret.sourceFile | Bundled file used to populate the Secret's `stringData` keys. | string | `"secret.yaml"` |
-| global.lightspeed.sidecar.image | Full image reference for the Lightspeed Core sidecar. Override for disconnected environments. | string | `"quay.io/lightspeed-core/lightspeed-stack:0.5.2"` |
+| global.lightspeed.sidecar.image | Full image reference for the Lightspeed Core sidecar. Override for disconnected environments. | string | `"quay.io/lightspeed-core/lightspeed-stack:0.5.3"` |
 | global.lightspeed.sidecar.resources | Resource requests/limits for the Lightspeed Core sidecar. | object | `{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}}` |
 | nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |
