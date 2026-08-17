@@ -2,7 +2,7 @@
 # Backstage Helm Chart
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/backstage)](https://artifacthub.io/packages/search?repo=backstage)
-![Version: 2.8.0](https://img.shields.io/badge/Version-2.8.0-informational?style=flat-square)
+![Version: 2.10.0](https://img.shields.io/badge/Version-2.10.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying a Backstage application
@@ -138,18 +138,21 @@ Kubernetes: `>= 1.19.0-0`
 | backstage.image.tag | Backstage image tag (immutable tags are recommended) | string | `"latest"` |
 | backstage.initContainers | Backstage container init containers | list | `[]` |
 | backstage.installDir | Directory containing the backstage installation | string | `"/app"` |
+| backstage.lifecycleHooks | Lifecycle hooks for the Backstage container <br /> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ <!-- E.g. lifecycleHooks:   preStop:     exec:       command: ["/bin/sh", "-c", "sleep 10"] --> | object | `{}` |
 | backstage.livenessProbe | Liveness Probe Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes <!-- E.g. livenessProbe:   failureThreshold: 3   httpGet:     path: /.backstage/health/v1/liveness     port: 7007     scheme: HTTP   initialDelaySeconds: 60   periodSeconds: 10   successThreshold: 1   timeoutSeconds: 2 | object | `{"httpGet":{"path":"/.backstage/health/v1/liveness","port":7007,"scheme":"HTTP"}}` |
 | backstage.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
 | backstage.pdb | Pod Disruption Budget configuration ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/ | object | `{"create":false,"maxUnavailable":"","minAvailable":""}` |
 | backstage.podAnnotations | Annotations to add to the backend deployment pods | object | `{}` |
 | backstage.podLabels | Labels to add to the backend deployment pods | object | `{}` |
 | backstage.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
+| backstage.priorityClassName | Priority class name for pod scheduling <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/ | string | `""` |
 | backstage.readinessProbe | Readiness Probe Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes <!-- E.g. readinessProbe:   failureThreshold: 3   httpGet:     path: /.backstage/health/v1/readiness     port: 7007     scheme: HTTP   initialDelaySeconds: 30   periodSeconds: 10   successThreshold: 2   timeoutSeconds: 2 | object | `{"httpGet":{"path":"/.backstage/health/v1/readiness","port":7007,"scheme":"HTTP"}}` |
 | backstage.replicas | Number of deployment replicas | int | `1` |
 | backstage.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container <!-- E.g. resources:   limits:     memory: 1Gi     cpu: 1000m   requests:     memory: 250Mi     cpu: 100m --> | object | `{}` |
 | backstage.revisionHistoryLimit | Define the [count of deployment revisions](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#clean-up-policy) to be kept. May be set to 0 in case of GitOps deployment approach. | int | `10` |
 | backstage.startupProbe | Startup Probe Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes <!-- E.g. startupProbe:   failureThreshold: 3   httpGet:     path: /.backstage/health/v1/liveness     port: 7007     scheme: HTTP   initialDelaySeconds: 60   periodSeconds: 10   successThreshold: 1   timeoutSeconds: 2 | object | `{"httpGet":{"path":"/.backstage/health/v1/liveness","port":7007,"scheme":"HTTP"}}` |
 | backstage.strategy | Deployment [update strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy). When unset, Kubernetes applies its default (RollingUpdate with maxSurge 25% and maxUnavailable 25%). Set to `Recreate` (or `RollingUpdate` with `maxSurge: 0`) to guarantee a single Backstage pod runs at a time, which is recommended when plugin database migrations run on startup to avoid concurrent migration attempts. <!-- E.g. strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 0     maxUnavailable: 1 --> | object | `{}` |
+| backstage.terminationGracePeriodSeconds | Duration in seconds the pod needs to terminate gracefully before being force killed <br /> Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination <!-- E.g. terminationGracePeriodSeconds: 60 --> | string | `nil` |
 | backstage.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[]` |
 | backstage.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
 | clusterDomain | Default Kubernetes cluster domain | string | `"cluster.local"` |
