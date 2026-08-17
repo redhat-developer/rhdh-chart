@@ -1,0 +1,22 @@
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- if include "rhdh.lightspeed.okp.active" . }}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if and $isOpenShift $lightspeed.okp.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "rhdh.lightspeed.okp.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.lightspeed.okp.labels" . | nindent 4 }}
+spec:
+  to:
+    kind: Service
+    name: {{ include "rhdh.lightspeed.okp.fullname" . }}
+  port:
+    targetPort: httpd
+  tls:
+    termination: {{ $lightspeed.okp.route.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ $lightspeed.okp.route.tls.insecureEdgeTerminationPolicy }}
+{{- end }}
+{{- end }}

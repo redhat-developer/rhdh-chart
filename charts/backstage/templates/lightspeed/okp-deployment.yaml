@@ -1,0 +1,56 @@
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- if include "rhdh.lightspeed.okp.active" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rhdh.lightspeed.okp.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.lightspeed.okp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $lightspeed.okp.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rhdh.lightspeed.okp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "rhdh.lightspeed.okp.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if $lightspeed.okp.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range $lightspeed.okp.imagePullSecrets }}
+        - name: {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      containers:
+      - name: okp
+        image: "{{ $lightspeed.okp.image.repository }}:{{ $lightspeed.okp.image.tag }}"
+        imagePullPolicy: {{ $lightspeed.okp.image.pullPolicy }}
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            /opt/solr/bin/solr start --user-managed --force -m {{ $lightspeed.okp.solr.memory }}
+            rm -f /etc/httpd/conf.d/ssl.conf
+            exec httpd -D FOREGROUND
+        env:
+        - name: SOLR_HOST_BIND
+          value: {{ $lightspeed.okp.solr.hostBind | quote }}
+        - name: MIMIR_HTTPD_SERVER_NAME
+          value: {{ $lightspeed.okp.httpd.serverName | quote }}
+        - name: COMPRESSED
+          value: {{ $lightspeed.okp.httpd.compressed | quote }}
+        - name: ENCRYPT
+          value: {{ $lightspeed.okp.httpd.encrypt | quote }}
+        ports:
+        - containerPort: 8080
+          name: httpd
+          protocol: TCP
+        - containerPort: 8983
+          name: solr
+          protocol: TCP
+        {{- if $lightspeed.okp.resources }}
+        resources:
+          {{- toYaml $lightspeed.okp.resources | nindent 10 }}
+        {{- end }}
+{{- end }}

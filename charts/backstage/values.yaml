@@ -53,12 +53,41 @@ global:
     # -- Enable or disable the built-in Lightspeed feature.
     # FIXME: temporarily disabled due to DPDY issues; to re-enable in [RHIDP-15458](https://redhat.atlassian.net/browse/RHIDP-15458)
     enabled: false
-    # -- Lightspeed plugins and their configuration. Override package references for disconnected environments.
+    # -- Intelligent Assistant plugins and their configuration. Override package references for disconnected environments.
     plugins:
-      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
+      - package: 'oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant:{{ "{{inherit}}" }}'
         enabled: true
-
-      - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
+        pluginConfig:
+          dynamicPlugins:
+            frontend:
+              red-hat-developer-hub.backstage-plugin-intelligent-assistant:
+                translationResources:
+                  - importName: lightspeedTranslations
+                    module: Alpha
+                    ref: intelligentAssistantTranslationRef
+                dynamicRoutes:
+                  - path: /intelligent-assistant
+                    importName: LightspeedPage
+                    module: Legacy
+                mountPoints:
+                  - mountPoint: application/listener
+                    importName: LightspeedFAB
+                    module: Legacy
+                  - mountPoint: application/provider
+                    importName: LightspeedDrawerProvider
+                    module: Legacy
+                  - mountPoint: application/internal/drawer-state
+                    importName: LightspeedDrawerStateExposer
+                    module: Legacy
+                    config:
+                      id: intelligent-assistant
+                  - mountPoint: application/internal/drawer-content
+                    importName: LightspeedChatContainer
+                    module: Legacy
+                    config:
+                      id: intelligent-assistant
+                      priority: 100
+      - package: 'oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend:{{ "{{inherit}}" }}'
         enabled: true
     runtimeVolume:
       # -- Name of the Kubernetes volume used for writable Lightspeed runtime storage.
@@ -72,15 +101,6 @@ global:
       emptyDir: {}
       # -- Existing PVC reference for the Lightspeed runtime data volume when `runtimeVolume.type=persistentVolumeClaim`.
       persistentVolumeClaim: {}
-    ragVolume:
-      # -- Name of the Kubernetes volume used for Lightspeed RAG data.
-      name: lightspeed-rag
-      # -- Mount path inside the init container for seeding RAG data.
-      initMountPath: /rag-content
-      # -- Mount path inside the sidecar container for serving RAG data.
-      mountPath: /rag-content
-      # -- `emptyDir` configuration for the RAG data volume.
-      emptyDir: {}
     configMaps:
       - name: stack
         # -- Whether to create this ConfigMap from the bundled source file.
@@ -124,51 +144,20 @@ global:
       optional: false
       # -- Bundled file used to populate the Secret's `stringData` keys.
       sourceFile: secret.yaml
-    initContainer:
-      name: lightspeed-rag-init
-      # -- Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments.
-      image: quay.io/redhat-ai-dev/rag-content:release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-      args:
-        - >-
-          mkdir -p /tmp/data &&
-          echo 'Copying Lightspeed RAG data...' &&
-          cp -r --no-preserve=mode,ownership /rag/vector_db /rag-content/ &&
-          cp -r --no-preserve=mode,ownership /rag/embeddings_model /rag-content/ &&
-          mkdir -p /rag-content/vector_db/notebooks &&
-          chmod -R a+rwX /rag-content/embeddings_model /rag-content/vector_db &&
-          echo 'Copy complete.'
-      env: []
-      # -- Resource requests/limits for the Lightspeed RAG bootstrap init container.
-      resources:
-        requests:
-          cpu: 50m
-          memory: 150Mi
-        limits:
-          cpu: 100m
-          memory: 500Mi
-      securityContext:
-        readOnlyRootFilesystem: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
     sidecar:
       name: lightspeed-core
       # -- Full image reference for the Lightspeed Core sidecar. Override for disconnected environments.
-      image: quay.io/lightspeed-core/lightspeed-stack:0.5.3
+      image: quay.io/lightspeed-core/lightspeed-stack:dev-20260811-0da4b12
       imagePullPolicy: IfNotPresent
       portName: http-lightspeed
       containerPort: 8080
       command: []
-      args: []
-      env: []
+      args:
+        - "--synthesized-config-output"
+        - "/tmp/.generated/run.yaml"
+      env:
+        - name: HF_HOME
+          value: /tmp/hf_cache
       # -- Resource requests/limits for the Lightspeed Core sidecar.
       resources:
         requests:
@@ -186,6 +175,73 @@ global:
         runAsNonRoot: true
         seccompProfile:
           type: "RuntimeDefault"
+    # -- OKP (Offline Knowledge Portal) configuration.
+    # Deploys an OKP instance for document retrieval when lightspeed is enabled.
+    okp:
+      image:
+        # -- OKP container image repository.
+        repository: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9
+        # -- OKP container image pull policy.
+        pullPolicy: IfNotPresent
+        # -- OKP container image tag.
+        tag: "1.2.10-1786628394"
+      # -- Number of OKP replicas.
+      replicaCount: 1
+      solr:
+        # -- Solr JVM memory allocation.
+        memory: "1g"
+        # -- Solr host bind address.
+        hostBind: "0.0.0.0"
+      httpd:
+        # -- HTTPD server name.
+        serverName: "localhost"
+        # -- Enable gzip compression in HTTPD.
+        compressed: "true"
+        # -- Enable HTTPS encryption in HTTPD.
+        encrypt: "false"
+      # -- Resource requests/limits for the OKP container.
+      resources:
+        requests:
+          cpu: "200m"
+          memory: "2Gi"
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+      service:
+        # -- OKP Service type.
+        type: ClusterIP
+      # -- Image pull secrets for the OKP container image.
+      # Required on vanilla Kubernetes to authenticate with registry.redhat.io.
+      # Not needed on OpenShift where the cluster-wide pull secret covers Red Hat registries.
+      # @default -- `[]`
+      imagePullSecrets: []
+      # imagePullSecrets:
+      #   - "my-rh-registry-secret"
+      route:
+        # -- Enable OpenShift Route for OKP.
+        enabled: true
+        tls:
+          # -- TLS termination type for the OKP route.
+          termination: edge
+          # -- Insecure edge termination policy.
+          insecureEdgeTerminationPolicy: Allow
+      ingress:
+        # -- Enable Kubernetes Ingress for OKP.
+        # On OpenShift (auto-detected), this is ignored in favor of Route.
+        enabled: true
+        # -- Hostname for the OKP Ingress resource. Required on vanilla Kubernetes for external access.
+        host: ""
+        # -- IngressClass name (e.g., "nginx"). Leave empty to use the cluster default.
+        className: ""
+        # -- Additional annotations for the OKP Ingress resource.
+        annotations: {}
+        tls:
+          # -- Enable TLS on the OKP Ingress.
+          enabled: false
+          # -- Name of the TLS Secret for the OKP Ingress.
+          secretName: ""
+      # -- OKP search filter query for RHDH product docs.
+      chunkFilterQuery: "product:*developer_hub*"
 # -- Upstream Backstage [chart configuration](https://github.com/backstage/charts/blob/main/charts/backstage/values.yaml)
 # @default -- Use Openshift compatible settings
 upstream:

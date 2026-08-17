@@ -1,0 +1,40 @@
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- if include "rhdh.lightspeed.okp.active" . }}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if and (not $isOpenShift) $lightspeed.okp.ingress.enabled $lightspeed.okp.ingress.host }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "rhdh.lightspeed.okp.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.lightspeed.okp.labels" . | nindent 4 }}
+  {{- if $lightspeed.okp.ingress.annotations }}
+  annotations:
+    {{- toYaml $lightspeed.okp.ingress.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $lightspeed.okp.ingress.className }}
+  ingressClassName: {{ $lightspeed.okp.ingress.className | quote }}
+  {{- end }}
+  {{- if $lightspeed.okp.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ $lightspeed.okp.ingress.host | quote }}
+      {{- if $lightspeed.okp.ingress.tls.secretName }}
+      secretName: {{ $lightspeed.okp.ingress.tls.secretName | quote }}
+      {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ $lightspeed.okp.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "rhdh.lightspeed.okp.fullname" . }}
+                port:
+                  number: 8080
+{{- end }}
+{{- end }}

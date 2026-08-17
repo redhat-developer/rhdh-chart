@@ -122,46 +122,15 @@ Return resolved Lightspeed values from global.lightspeed with legacy key migrati
           {{- $_ := set $lightspeed.runtimeVolume "type" "emptyDir" -}}
         {{- end -}}
       {{- end -}}
-    {{- else if hasKey $raw "sharedVolume" -}}
-      {{- $legacySharedVolume := get $raw "sharedVolume" -}}
-      {{- if kindIs "map" $legacySharedVolume -}}
-        {{- if hasKey $legacySharedVolume "name" -}}
-          {{- $_ := set $lightspeed.runtimeVolume "name" (get $legacySharedVolume "name") -}}
-        {{- end -}}
-        {{- if and (hasKey $legacySharedVolume "mountPaths") (kindIs "slice" (get $legacySharedVolume "mountPaths")) -}}
-          {{- $legacyMountPaths := get $legacySharedVolume "mountPaths" -}}
-          {{- if gt (len $legacyMountPaths) 0 -}}
-            {{- $_ := set $lightspeed.runtimeVolume "mountPath" (first $legacyMountPaths) -}}
-          {{- end -}}
-          {{- if gt (len $legacyMountPaths) 1 -}}
-            {{- $_ := set $lightspeed.ragVolume "mountPath" (index $legacyMountPaths 1) -}}
-          {{- end -}}
-        {{- end -}}
-        {{- if hasKey $legacySharedVolume "initMountPath" -}}
-          {{- $_ := set $lightspeed.ragVolume "initMountPath" (get $legacySharedVolume "initMountPath") -}}
-        {{- end -}}
-        {{- if and (hasKey $legacySharedVolume "ephemeral") (not (empty (get $legacySharedVolume "ephemeral"))) -}}
-          {{- fail "global.lightspeed.sharedVolume.ephemeral is no longer supported; use global.lightspeed.runtimeVolume.persistentVolumeClaim or global.lightspeed.runtimeVolume.emptyDir instead" -}}
-        {{- else if hasKey $legacySharedVolume "emptyDir" -}}
-          {{- $_ := set $lightspeed.runtimeVolume "type" "emptyDir" -}}
-          {{- $_ := set $lightspeed.runtimeVolume "emptyDir" (get $legacySharedVolume "emptyDir") -}}
-        {{- end -}}
-      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- if $lightspeed.enabled -}}
-  {{- if or (not (kindIs "map" $lightspeed.initContainer)) (empty $lightspeed.initContainer.name) -}}
-    {{- fail "global.lightspeed.enabled=true requires the built-in Lightspeed init container configuration" -}}
-  {{- end -}}
   {{- if or (not (kindIs "map" $lightspeed.sidecar)) (empty $lightspeed.sidecar.name) -}}
     {{- fail "global.lightspeed.enabled=true requires the built-in Lightspeed sidecar configuration" -}}
   {{- end -}}
   {{- if or (not (kindIs "map" $lightspeed.runtimeVolume)) (empty $lightspeed.runtimeVolume.name) (empty $lightspeed.runtimeVolume.mountPath) -}}
     {{- fail "global.lightspeed.enabled=true requires the built-in Lightspeed runtime volume configuration" -}}
-  {{- end -}}
-  {{- if or (not (kindIs "map" $lightspeed.ragVolume)) (empty $lightspeed.ragVolume.name) (empty $lightspeed.ragVolume.mountPath) (empty $lightspeed.ragVolume.initMountPath) -}}
-    {{- fail "global.lightspeed.enabled=true requires the built-in Lightspeed RAG volume configuration" -}}
   {{- end -}}
   {{- $_ := include "rhdh.lightspeed.runtimeVolumeType" (dict "volume" $lightspeed.runtimeVolume "path" "global.lightspeed.runtimeVolume") -}}
 {{- end -}}
@@ -339,6 +308,66 @@ The version suffix is preserved in full; only the prefix is truncated.
 {{- $versionSuffix := printf "-%s" (.Chart.Version | replace "." "-") -}}
 {{- $prefix := printf "%s-create-sf-db" .Release.Name | trunc (int (sub 63 (len $versionSuffix))) | trimSuffix "-" -}}
 {{- printf "%s%s" $prefix $versionSuffix | lower -}}
+{{- end -}}
+
+{{/*
+Return whether OKP should be deployed.
+On OpenShift: always active when lightspeed is enabled.
+On vanilla K8s: only active when the user opts in by setting okp.ingress.host.
+*/}}
+{{- define "rhdh.lightspeed.okp.active" -}}
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if and $lightspeed.enabled (or $isOpenShift $lightspeed.okp.ingress.host) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the OKP deployment/service/route name.
+*/}}
+{{- define "rhdh.lightspeed.okp.fullname" -}}
+{{- printf "%s-lightspeed-okp" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Return OKP labels.
+*/}}
+{{- define "rhdh.lightspeed.okp.labels" -}}
+app.kubernetes.io/name: lightspeed-okp
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: lightspeed-okp
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
+Return OKP selector labels.
+*/}}
+{{- define "rhdh.lightspeed.okp.selectorLabels" -}}
+app.kubernetes.io/name: lightspeed-okp
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
+Return the OKP external URL for the OKP_SERVICE_URL env var.
+Must be browser-accessible because LCORE uses it for both Solr queries
+and clickable source links in the UI.
+*/}}
+{{- define "rhdh.lightspeed.okp.serviceUrl" -}}
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- $fullname := include "rhdh.lightspeed.okp.fullname" . -}}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if and (not $isOpenShift) $lightspeed.okp.ingress.host -}}
+  {{- if $lightspeed.okp.ingress.tls.enabled -}}
+    {{- printf "https://%s" $lightspeed.okp.ingress.host -}}
+  {{- else -}}
+    {{- printf "http://%s" $lightspeed.okp.ingress.host -}}
+  {{- end -}}
+{{- else if .Values.global.clusterRouterBase -}}
+  {{- printf "http://%s-%s.%s" $fullname .Release.Namespace .Values.global.clusterRouterBase -}}
+{{- else -}}
+  {{- printf "http://%s.%s.svc.cluster.local:8080" $fullname .Release.Namespace -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

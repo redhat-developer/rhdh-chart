@@ -7,6 +7,10 @@
 ---
 {{- end }}
 {{- $created = add1 $created }}
+{{- $sourceFile := $configMap.sourceFile -}}
+{{- if and (eq $configMap.name "stack") (not (include "rhdh.lightspeed.okp.active" $)) -}}
+  {{- $sourceFile = "lightspeed-stack-no-okp.yaml" -}}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,7 +18,7 @@ metadata:
   namespace: {{ $.Release.Namespace | quote }}
 data:
   {{ $configMap.subPath }}: |
-{{ include "rhdh.lightspeed.fileContent" (dict "context" $ "file" $configMap.sourceFile "optional" $configMap.optional "ref" (printf "global.lightspeed.configMaps[%s].sourceFile" $configMap.name)) | nindent 4 }}
+{{ include "rhdh.lightspeed.fileContent" (dict "context" $ "file" $sourceFile "optional" $configMap.optional "ref" (printf "global.lightspeed.configMaps[%s].sourceFile" $configMap.name)) | nindent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}
