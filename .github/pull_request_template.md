@@ -1,30 +1,28 @@
 <!--
 Thank you for your contribution! Complete the following fields to provide insight into the changes being requested as well as steps that you can take to ensure it meets all of the requirements
 
-Please remember to link any JIRA issue(s) that this PR closes or relates to, as this helps provide more context to reviewers.
+Please remember to:
+- mention any issue(s) that this PR closes using a closing keyword as well as the issue number, such as "Closes #XYZ" or "Resolves backstage/repo-name#XYZ", cf.
+  [documentation](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
+- ensure there are no merge commits!
 
--->
+ -->
 
 ## Description of the change
 
 <!-- Describe the change being requested. -->
 
-## Which issue(s) does this PR fix or relate to
+## Existing or Associated Issue(s)
 
 <!-- List any related issues. -->
 
-- _JIRA_issue_link_
+## Additional Information
 
-## How to test changes / Special notes to the reviewer
-
-<!--
-Detailed instructions may help reviewers test this PR quickly and provide quicker feedback.
--->
+ <!-- Provide as much information that you feel would be helpful for those reviewing the proposed changes. -->
 
 ## Checklist
 
-- [ ] For each Chart updated, version bumped in the corresponding `Chart.yaml` according to [Semantic Versioning](http://semver.org/).
-- [ ] For each Chart updated, variables are documented in the `values.yaml` and added to the corresponding README.md. The [pre-commit](https://pre-commit.com/) utility can be used to generate the necessary content. Run `pre-commit run --all-files` to run the hooks and then push any resulting changes. The [pre-commit Workflow](./workflows/pre-commit.yaml) will enforce this and warn you if needed.
-- [ ] JSON Schema template updated and re-generated the raw schema via the `pre-commit` hook.
-- [ ] Tests pass using the [Chart Testing](https://github.com/helm/chart-testing) tool and the `ct lint` command.
-- [ ] If you updated the [orchestrator-infra](../charts/orchestrator-infra) chart, make sure the versions of the [Knative CRDs](../charts/orchestrator-infra/crds) are aligned with the versions of the CRDs installed by the OpenShift Serverless operators declared in the [values.yaml](../charts/orchestrator-infra/values.yaml) file. See [Installing Knative Eventing and Knative Serving CRDs](../charts/orchestrator-infra/README.md#installing-knative-eventing-and-knative-serving-crds) for more details.
+- [ ] Chart version bumped in `Chart.yaml` according to [semver](http://semver.org/).
+- [ ] Variables are documented in the `values.yaml` and added to the README.md. The [helm-docs](https://github.com/norwoodj/helm-docs) utility can be used to generate the necessary content. Use `helm-docs --dry-run` to preview the content.
+- [ ] JSON Schema generated.
+- [ ] List tests pass for Chart using the [Chart Testing](https://github.com/helm/chart-testing) tool and the `ct lint` command.
