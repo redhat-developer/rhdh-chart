@@ -403,7 +403,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.externalDatabase.existingSecretRef.name }}
+                  name: {{ required "externalDatabase.existingSecretRef.name is required when externalDatabase.host is set" .Values.externalDatabase.existingSecretRef.name }}
                   key: {{ .Values.externalDatabase.existingSecretRef.key | default "password" }}
             {{- end }}
             # --- User-additional env vars (appended) ---

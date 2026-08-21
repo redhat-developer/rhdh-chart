@@ -448,6 +448,7 @@ postgresql:
             name: '{{- include "rhdh.postgresql.secretName" . }}'
 
 # -- External database connection. Used when postgresql.enabled is false.
+# See docs/external-db.md for TLS setup and privilege requirements.
 # When both postgresql.enabled and externalDatabase.host are false/empty,
 # the chart renders no database env vars (BYO configuration via extraEnv or appConfig).
 externalDatabase:
