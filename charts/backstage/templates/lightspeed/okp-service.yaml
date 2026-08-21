@@ -1,0 +1,21 @@
+{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- if include "rhdh.lightspeed.okp.active" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rhdh.lightspeed.okp.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rhdh.lightspeed.okp.labels" . | nindent 4 }}
+spec:
+  type: {{ $lightspeed.okp.service.type }}
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: httpd
+  - port: 8983
+    targetPort: 8983
+    name: solr
+  selector:
+    {{- include "rhdh.lightspeed.okp.selectorLabels" . | nindent 4 }}
+{{- end }}

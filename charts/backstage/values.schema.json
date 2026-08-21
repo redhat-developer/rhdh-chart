@@ -183,58 +183,116 @@
                             }
                         ],
                         "enabled": false,
-                        "initContainer": {
-                            "args": [
-                                "mkdir -p /tmp/data && echo 'Copying Lightspeed RAG data...' && cp -r --no-preserve=mode,ownership /rag/vector_db /rag-content/ && cp -r --no-preserve=mode,ownership /rag/embeddings_model /rag-content/ && mkdir -p /rag-content/vector_db/notebooks && chmod -R a+rwX /rag-content/embeddings_model /rag-content/vector_db && echo 'Copy complete.'"
-                            ],
-                            "command": [
-                                "sh",
-                                "-c"
-                            ],
-                            "env": [],
-                            "image": "quay.io/redhat-ai-dev/rag-content:release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3",
-                            "imagePullPolicy": "IfNotPresent",
-                            "name": "lightspeed-rag-init",
-                            "resources": {
-                                "limits": {
-                                    "cpu": "100m",
-                                    "memory": "500Mi"
-                                },
-                                "requests": {
-                                    "cpu": "50m",
-                                    "memory": "150Mi"
+                        "okp": {
+                            "chunkFilterQuery": "product:*developer_hub*",
+                            "httpd": {
+                                "compressed": "true",
+                                "encrypt": "false",
+                                "serverName": "localhost"
+                            },
+                            "image": {
+                                "pullPolicy": "IfNotPresent",
+                                "repository": "registry.redhat.io/offline-knowledge-portal/rhokp-rhel9",
+                                "tag": "1.2.10-1786628394"
+                            },
+                            "imagePullSecrets": [],
+                            "ingress": {
+                                "annotations": {},
+                                "className": "",
+                                "enabled": true,
+                                "host": "",
+                                "tls": {
+                                    "enabled": false,
+                                    "secretName": ""
                                 }
                             },
-                            "securityContext": {
-                                "allowPrivilegeEscalation": false,
-                                "capabilities": {
-                                    "drop": [
-                                        "ALL"
-                                    ]
+                            "replicaCount": 1,
+                            "resources": {
+                                "limits": {
+                                    "cpu": "2",
+                                    "memory": "4Gi"
                                 },
-                                "readOnlyRootFilesystem": true,
-                                "runAsNonRoot": true,
-                                "seccompProfile": {
-                                    "type": "RuntimeDefault"
+                                "requests": {
+                                    "cpu": "200m",
+                                    "memory": "2Gi"
                                 }
+                            },
+                            "route": {
+                                "enabled": true,
+                                "tls": {
+                                    "insecureEdgeTerminationPolicy": "Allow",
+                                    "termination": "edge"
+                                }
+                            },
+                            "service": {
+                                "type": "ClusterIP"
+                            },
+                            "solr": {
+                                "hostBind": "0.0.0.0",
+                                "memory": "1g"
                             }
                         },
                         "plugins": [
                             {
                                 "enabled": true,
-                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
+                                "package": "oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant:{{ \"{{inherit}}\" }}",
+                                "pluginConfig": {
+                                    "dynamicPlugins": {
+                                        "frontend": {
+                                            "red-hat-developer-hub.backstage-plugin-intelligent-assistant": {
+                                                "dynamicRoutes": [
+                                                    {
+                                                        "importName": "LightspeedPage",
+                                                        "module": "Legacy",
+                                                        "path": "/intelligent-assistant"
+                                                    }
+                                                ],
+                                                "mountPoints": [
+                                                    {
+                                                        "importName": "LightspeedFAB",
+                                                        "module": "Legacy",
+                                                        "mountPoint": "application/listener"
+                                                    },
+                                                    {
+                                                        "importName": "LightspeedDrawerProvider",
+                                                        "module": "Legacy",
+                                                        "mountPoint": "application/provider"
+                                                    },
+                                                    {
+                                                        "config": {
+                                                            "id": "intelligent-assistant"
+                                                        },
+                                                        "importName": "LightspeedDrawerStateExposer",
+                                                        "module": "Legacy",
+                                                        "mountPoint": "application/internal/drawer-state"
+                                                    },
+                                                    {
+                                                        "config": {
+                                                            "id": "intelligent-assistant",
+                                                            "priority": 100
+                                                        },
+                                                        "importName": "LightspeedChatContainer",
+                                                        "module": "Legacy",
+                                                        "mountPoint": "application/internal/drawer-content"
+                                                    }
+                                                ],
+                                                "translationResources": [
+                                                    {
+                                                        "importName": "lightspeedTranslations",
+                                                        "module": "Alpha",
+                                                        "ref": "intelligentAssistantTranslationRef"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
                             },
                             {
                                 "enabled": true,
-                                "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                                "package": "oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend:{{ \"{{inherit}}\" }}"
                             }
                         ],
-                        "ragVolume": {
-                            "emptyDir": {},
-                            "initMountPath": "/rag-content",
-                            "mountPath": "/rag-content",
-                            "name": "lightspeed-rag"
-                        },
                         "runtimeVolume": {
                             "emptyDir": {},
                             "mountPath": "/tmp",
@@ -249,11 +307,19 @@
                             "sourceFile": "secret.yaml"
                         },
                         "sidecar": {
-                            "args": [],
+                            "args": [
+                                "--synthesized-config-output",
+                                "/tmp/.generated/run.yaml"
+                            ],
                             "command": [],
                             "containerPort": 8080,
-                            "env": [],
-                            "image": "quay.io/lightspeed-core/lightspeed-stack:0.5.3",
+                            "env": [
+                                {
+                                    "name": "HF_HOME",
+                                    "value": "/tmp/hf_cache"
+                                }
+                            ],
+                            "image": "quay.io/lightspeed-core/lightspeed-stack:dev-20260811-0da4b12",
                             "imagePullPolicy": "IfNotPresent",
                             "name": "lightspeed-core",
                             "portName": "http-lightspeed",
@@ -292,11 +358,62 @@
                             "default": [
                                 {
                                     "enabled": true,
-                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
+                                    "package": "oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant:{{ \"{{inherit}}\" }}",
+                                    "pluginConfig": {
+                                        "dynamicPlugins": {
+                                            "frontend": {
+                                                "red-hat-developer-hub.backstage-plugin-intelligent-assistant": {
+                                                    "dynamicRoutes": [
+                                                        {
+                                                            "importName": "LightspeedPage",
+                                                            "module": "Legacy",
+                                                            "path": "/intelligent-assistant"
+                                                        }
+                                                    ],
+                                                    "mountPoints": [
+                                                        {
+                                                            "importName": "LightspeedFAB",
+                                                            "module": "Legacy",
+                                                            "mountPoint": "application/listener"
+                                                        },
+                                                        {
+                                                            "importName": "LightspeedDrawerProvider",
+                                                            "module": "Legacy",
+                                                            "mountPoint": "application/provider"
+                                                        },
+                                                        {
+                                                            "config": {
+                                                                "id": "intelligent-assistant"
+                                                            },
+                                                            "importName": "LightspeedDrawerStateExposer",
+                                                            "module": "Legacy",
+                                                            "mountPoint": "application/internal/drawer-state"
+                                                        },
+                                                        {
+                                                            "config": {
+                                                                "id": "intelligent-assistant",
+                                                                "priority": 100
+                                                            },
+                                                            "importName": "LightspeedChatContainer",
+                                                            "module": "Legacy",
+                                                            "mountPoint": "application/internal/drawer-content"
+                                                        }
+                                                    ],
+                                                    "translationResources": [
+                                                        {
+                                                            "importName": "lightspeedTranslations",
+                                                            "module": "Alpha",
+                                                            "ref": "intelligentAssistantTranslationRef"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
                                 },
                                 {
                                     "enabled": true,
-                                    "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                                    "package": "oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend:{{ \"{{inherit}}\" }}"
                                 }
                             ],
                             "items": {

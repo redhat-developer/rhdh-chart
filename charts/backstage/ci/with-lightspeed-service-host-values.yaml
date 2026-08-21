@@ -13,6 +13,11 @@ global:
       env:
         - name: SERVICE_HOST
           value: "0.0.0.0"
+    okp:
+      route:
+        enabled: false
+      ingress:
+        enabled: false
 
 upstream:
   postgresql:

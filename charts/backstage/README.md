@@ -1,7 +1,7 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 7.0.1](https://img.shields.io/badge/Version-7.0.1-informational?style=flat-square)
+![Version: 7.1.0](https://img.shields.io/badge/Version-7.1.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -29,7 +29,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 7.0.1
+helm install my-backstage redhat-developer/backstage --version 7.1.0
 ```
 
 ## Introduction
@@ -186,13 +186,30 @@ Kubernetes: `>= 1.27.0-0`
 | global.lightspeed.configMaps[2].nameOverride | Name of an existing ConfigMap to use instead. Required when `create` is false. | string | `""` |
 | global.lightspeed.configMaps[2].sourceFile | Bundled file used to populate the ConfigMap data when `create` is true. | string | `"rhdh-profile.py"` |
 | global.lightspeed.enabled | Enable or disable the built-in Lightspeed feature. FIXME: temporarily disabled due to DPDY issues; to re-enable in [RHIDP-15458](https://redhat.atlassian.net/browse/RHIDP-15458) | bool | `false` |
-| global.lightspeed.initContainer.image | Full image reference for the Lightspeed RAG bootstrap init container. Override for disconnected environments. | string | `"quay.io/redhat-ai-dev/rag-content:release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"` |
-| global.lightspeed.initContainer.resources | Resource requests/limits for the Lightspeed RAG bootstrap init container. | object | `{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}}` |
-| global.lightspeed.plugins | Lightspeed plugins and their configuration. Override package references for disconnected environments. | list | `[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}]` |
-| global.lightspeed.ragVolume.emptyDir | `emptyDir` configuration for the RAG data volume. | object | `{}` |
-| global.lightspeed.ragVolume.initMountPath | Mount path inside the init container for seeding RAG data. | string | `"/rag-content"` |
-| global.lightspeed.ragVolume.mountPath | Mount path inside the sidecar container for serving RAG data. | string | `"/rag-content"` |
-| global.lightspeed.ragVolume.name | Name of the Kubernetes volume used for Lightspeed RAG data. | string | `"lightspeed-rag"` |
+| global.lightspeed.okp | OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval when lightspeed is enabled. | object | `{"chunkFilterQuery":"product:*developer_hub*","httpd":{"compressed":"true","encrypt":"false","serverName":"localhost"},"image":{"pullPolicy":"IfNotPresent","repository":"registry.redhat.io/offline-knowledge-portal/rhokp-rhel9","tag":"1.2.10-1786628394"},"imagePullSecrets":[],"ingress":{"annotations":{},"className":"","enabled":true,"host":"","tls":{"enabled":false,"secretName":""}},"replicaCount":1,"resources":{"limits":{"cpu":"2","memory":"4Gi"},"requests":{"cpu":"200m","memory":"2Gi"}},"route":{"enabled":true,"tls":{"insecureEdgeTerminationPolicy":"Allow","termination":"edge"}},"service":{"type":"ClusterIP"},"solr":{"hostBind":"0.0.0.0","memory":"1g"}}` |
+| global.lightspeed.okp.chunkFilterQuery | OKP search filter query for RHDH product docs. | string | `"product:*developer_hub*"` |
+| global.lightspeed.okp.httpd.compressed | Enable gzip compression in HTTPD. | string | `"true"` |
+| global.lightspeed.okp.httpd.encrypt | Enable HTTPS encryption in HTTPD. | string | `"false"` |
+| global.lightspeed.okp.httpd.serverName | HTTPD server name. | string | `"localhost"` |
+| global.lightspeed.okp.image.pullPolicy | OKP container image pull policy. | string | `"IfNotPresent"` |
+| global.lightspeed.okp.image.repository | OKP container image repository. | string | `"registry.redhat.io/offline-knowledge-portal/rhokp-rhel9"` |
+| global.lightspeed.okp.image.tag | OKP container image tag. | string | `"1.2.10-1786628394"` |
+| global.lightspeed.okp.imagePullSecrets | Image pull secrets for the OKP container image. Required on vanilla Kubernetes to authenticate with registry.redhat.io. Not needed on OpenShift where the cluster-wide pull secret covers Red Hat registries. | list | `[]` |
+| global.lightspeed.okp.ingress.annotations | Additional annotations for the OKP Ingress resource. | object | `{}` |
+| global.lightspeed.okp.ingress.className | IngressClass name (e.g., "nginx"). Leave empty to use the cluster default. | string | `""` |
+| global.lightspeed.okp.ingress.enabled | Enable Kubernetes Ingress for OKP. On OpenShift (auto-detected), this is ignored in favor of Route. | bool | `true` |
+| global.lightspeed.okp.ingress.host | Hostname for the OKP Ingress resource. Required on vanilla Kubernetes for external access. | string | `""` |
+| global.lightspeed.okp.ingress.tls.enabled | Enable TLS on the OKP Ingress. | bool | `false` |
+| global.lightspeed.okp.ingress.tls.secretName | Name of the TLS Secret for the OKP Ingress. | string | `""` |
+| global.lightspeed.okp.replicaCount | Number of OKP replicas. | int | `1` |
+| global.lightspeed.okp.resources | Resource requests/limits for the OKP container. | object | `{"limits":{"cpu":"2","memory":"4Gi"},"requests":{"cpu":"200m","memory":"2Gi"}}` |
+| global.lightspeed.okp.route.enabled | Enable OpenShift Route for OKP. | bool | `true` |
+| global.lightspeed.okp.route.tls.insecureEdgeTerminationPolicy | Insecure edge termination policy. | string | `"Allow"` |
+| global.lightspeed.okp.route.tls.termination | TLS termination type for the OKP route. | string | `"edge"` |
+| global.lightspeed.okp.service.type | OKP Service type. | string | `"ClusterIP"` |
+| global.lightspeed.okp.solr.hostBind | Solr host bind address. | string | `"0.0.0.0"` |
+| global.lightspeed.okp.solr.memory | Solr JVM memory allocation. | string | `"1g"` |
+| global.lightspeed.plugins | Intelligent Assistant plugins and their configuration. Override package references for disconnected environments. | list | `[{"enabled":true,"package":"oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant:{{ \"{{inherit}}\" }}","pluginConfig":{"dynamicPlugins":{"frontend":{"red-hat-developer-hub.backstage-plugin-intelligent-assistant":{"dynamicRoutes":[{"importName":"LightspeedPage","module":"Legacy","path":"/intelligent-assistant"}],"mountPoints":[{"importName":"LightspeedFAB","module":"Legacy","mountPoint":"application/listener"},{"importName":"LightspeedDrawerProvider","module":"Legacy","mountPoint":"application/provider"},{"config":{"id":"intelligent-assistant"},"importName":"LightspeedDrawerStateExposer","module":"Legacy","mountPoint":"application/internal/drawer-state"},{"config":{"id":"intelligent-assistant","priority":100},"importName":"LightspeedChatContainer","module":"Legacy","mountPoint":"application/internal/drawer-content"}],"translationResources":[{"importName":"lightspeedTranslations","module":"Alpha","ref":"intelligentAssistantTranslationRef"}]}}}}},{"enabled":true,"package":"oci://quay.io/rhdh/red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend:{{ \"{{inherit}}\" }}"}]` |
 | global.lightspeed.runtimeVolume.emptyDir | `emptyDir` configuration for the Lightspeed runtime data volume when `runtimeVolume.type=emptyDir`. | object | `{}` |
 | global.lightspeed.runtimeVolume.mountPath | Mount path inside the container for Lightspeed runtime storage. | string | `"/tmp"` |
 | global.lightspeed.runtimeVolume.name | Name of the Kubernetes volume used for writable Lightspeed runtime storage. | string | `"lightspeed-data"` |
@@ -202,7 +219,7 @@ Kubernetes: `>= 1.27.0-0`
 | global.lightspeed.secret.name | Name of an existing Secret to use instead. Required when `create` is false. | string | `""` |
 | global.lightspeed.secret.optional | Whether the Secret reference is optional in the pod spec. | bool | `false` |
 | global.lightspeed.secret.sourceFile | Bundled file used to populate the Secret's `stringData` keys. | string | `"secret.yaml"` |
-| global.lightspeed.sidecar.image | Full image reference for the Lightspeed Core sidecar. Override for disconnected environments. | string | `"quay.io/lightspeed-core/lightspeed-stack:0.5.3"` |
+| global.lightspeed.sidecar.image | Full image reference for the Lightspeed Core sidecar. Override for disconnected environments. | string | `"quay.io/lightspeed-core/lightspeed-stack:dev-20260811-0da4b12"` |
 | global.lightspeed.sidecar.resources | Resource requests/limits for the Lightspeed Core sidecar. | object | `{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}}` |
 | nameOverride |  | string | `"developer-hub"` |
 | orchestrator.enabled |  | bool | `false` |

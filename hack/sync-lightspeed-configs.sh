@@ -12,6 +12,7 @@ LIGHTSPEED_DIR="${REPO_ROOT}/charts/backstage/files/lightspeed"
 # Format: upstream_path|destination_path|transform_function
 TARGETS=(
   "lightspeed-core-configs/lightspeed-stack.yaml|${LIGHTSPEED_DIR}/lightspeed-stack.yaml|copy_fetched_file"
+  "lightspeed-core-configs/lightspeed-stack.yaml|${LIGHTSPEED_DIR}/lightspeed-stack-no-okp.yaml|strip_okp_config"
   "llama-stack-configs/config.yaml|${LIGHTSPEED_DIR}/config.yaml|copy_fetched_file"
   "lightspeed-core-configs/rhdh-profile.py|${LIGHTSPEED_DIR}/rhdh-profile.py|copy_fetched_file"
   "env/default-values.env|${LIGHTSPEED_DIR}/secret.yaml|render_secret_yaml_from_env"
@@ -22,6 +23,12 @@ copy_fetched_file() {
   local destination_file=$2
 
   cp "${source_file}" "${destination_file}"
+}
+strip_okp_config() {
+  local source_file=$1
+  local destination_file=$2
+
+  yq 'del(.rag, .okp)' "${source_file}" > "${destination_file}"
 }
 render_secret_yaml_from_env() {
   local source_file=$1
