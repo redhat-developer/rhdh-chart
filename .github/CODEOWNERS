@@ -20,3 +20,4 @@
 
 # Lightspeed:
 /charts/backstage/files/lightspeed/ @redhat-developer/rhdh-ai
+/charts/rhdh/files/lightspeed/      @redhat-developer/rhdh-ai

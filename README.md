@@ -1,18 +1,17 @@
 
-# UPDATE
+# RHDH Helm Charts
 
-This repository now houses the only RHDH CI Helm chart after merging with the now deprecated repository: https://github.com/rhdh-bot/openshift-helm-charts/. 
+## Charts
 
-See:  https://issues.redhat.com/browse/RHIDP-1477
-
-# RHDH Helm Chart for OpenShift
-
-See [charts/backstage/README.md](charts/backstage/README.md).
-
-# RHDH orchestrator infra Helm chart for Openshift
-
-See [charts/orchestrator-infra/README.md](charts/orchestrator-infra/README.md)
+| Chart | Path | Status |
+|-------|------|--------|
+| **Red Hat Developer Hub** | [charts/rhdh/](charts/rhdh/README.md) | Active |
+| Orchestrator Infra (OpenShift) | [charts/orchestrator-infra/](charts/orchestrator-infra/README.md) | Active |
+| Must-Gather | [charts/must-gather/](charts/must-gather/) | Active |
+| Orchestrator Software Templates | [charts/orchestrator-software-templates/](charts/orchestrator-software-templates/) | Demo only |
+| Orchestrator Software Templates Infra | [charts/orchestrator-software-templates-infra/](charts/orchestrator-software-templates-infra/) | Demo only |
+| Backstage (legacy) | [charts/backstage/](charts/backstage/README.md) | **Deprecated** — use [Red Hat Developer Hub](charts/rhdh/README.md) instead |
 
 ## Contributing and reporting issues
 
-To report issues against this chart, please use JIRA (not GH issues): https://issues.redhat.com/browse/RHIDP
+To report issues against these charts, please use JIRA (not GitHub Issues): https://redhat.atlassian.net/browse/RHDHBUGS

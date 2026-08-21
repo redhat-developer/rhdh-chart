@@ -1,7 +1,9 @@
 
 # RHDH Backstage Helm Chart for OpenShift
 
-![Version: 7.0.1](https://img.shields.io/badge/Version-7.0.1-informational?style=flat-square)
+> **:exclamation: This Helm Chart is deprecated!**
+
+![Version: 7.0.99](https://img.shields.io/badge/Version-7.0.99-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -9,6 +11,8 @@ A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported v
 The telemetry data collection feature is enabled by default. Red Hat Developer Hub sends telemetry data to Red Hat by using the `backstage-plugin-analytics-provider-segment` plugin. To disable this and to learn what data is being collected, see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.6/html-single/telemetry_data_collection_and_analysis/index
 
 **Homepage:** <https://red.ht/rhdh>
+
+> **DEPRECATED:** Starting with RHDH 2.y, this chart is deprecated in favor of the new [`redhat-developer-hub`](../rhdh/) chart, which owns all Kubernetes templates directly and no longer depends on the upstream Backstage subchart. See the [upgrade guide](../rhdh/README.md#upgrading-from-the-backstage-chart-rhdh-1y) for migration instructions. This chart will continue to receive critical fixes on the supported `release-1.y` branches but no new features.
 
 ## Productized RHDH
 
@@ -29,7 +33,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 7.0.1
+helm install my-backstage redhat-developer/backstage --version 7.0.99
 ```
 
 ## Introduction

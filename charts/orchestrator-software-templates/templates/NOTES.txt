@@ -46,19 +46,19 @@ Next Steps:
    cp charts/orchestrator-software-templates/orchestrator-templates-values.yaml.template orchestrator-templates-values.yaml
    sed -i "s|__RHDH_BASE_URL__|$RHDH_ROUTE|g" orchestrator-templates-values.yaml
 
-2. Backup current values and upgrade backstage chart:
-   
+2. Backup current values and upgrade the RHDH chart:
+
    # Backup current configuration
-   helm show values charts/backstage \
-     -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }} > current-backstage-values.yaml
-   
+   helm show values charts/rhdh \
+     -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }} > current-rhdh-values.yaml
+
    # Upgrade with both value files
-   helm upgrade {{ .Values.orchestratorTemplates.rhdhChartReleaseName }} charts/backstage \
+   helm upgrade {{ .Values.orchestratorTemplates.rhdhChartReleaseName }} charts/rhdh \
      -n {{ .Values.orchestratorTemplates.rhdhChartNamespace }} \
-     -f current-backstage-values.yaml \
+     -f current-rhdh-values.yaml \
      -f orchestrator-templates-values.yaml
 
-3. Wait for the backstage deployment to finish rollout
+3. Wait for the RHDH deployment to finish rollout
 
 4. Access your RHDH instance and check the 'Create' section for new software templates.
 

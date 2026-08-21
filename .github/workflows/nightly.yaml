@@ -15,25 +15,36 @@ jobs:
     name: Discover charts
     runs-on: ubuntu-latest
     outputs:
-      charts: ${{ steps.list.outputs.charts }}
+      matrix: ${{ steps.list.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
 
-      - name: List charts
+      - name: Build per-branch chart matrix
         id: list
         run: |
-          excluded=$(yq e '.excluded-charts[]' ct.yaml 2>/dev/null || true)
-          charts='[]'
-          for chart_dir in charts/*/; do
-            [[ ! -d "$chart_dir" ]] && continue
-            chart_name=$(basename "$chart_dir")
-            chart_path="${chart_dir%/}"
-            if ! echo "$excluded" | grep -qx "$chart_name"; then
-              charts=$(echo "$charts" | jq -c --arg c "$chart_name" '. + [$c]')
+          branches=(main release-1.10 release-1.9 release-1.8)
+          matrix='[]'
+          for branch in "${branches[@]}"; do
+            ref="origin/$branch"
+            if ! git rev-parse --verify "$ref" &>/dev/null; then
+              echo "::warning::Branch $branch does not exist, skipping"
+              continue
             fi
+
+            excluded=$(git show "$ref:ct.yaml" 2>/dev/null | yq e '.excluded-charts[]' 2>/dev/null || true)
+            while IFS= read -r entry; do
+              [[ -z "$entry" ]] && continue
+              chart_name=$(basename "$entry")
+              [[ -z "$chart_name" ]] && continue
+              if ! echo "$excluded" | grep -qx "$chart_name"; then
+                matrix=$(echo "$matrix" | jq -c --arg b "$branch" --arg c "$chart_name" '. + [{"branch": $b, "chart": $c}]')
+              fi
+            done < <(git ls-tree --name-only "$ref" charts/)
           done
-          echo "charts=$charts" >> "$GITHUB_OUTPUT"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
   test-chart:
     needs: discover-charts
@@ -43,12 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch:
-          - main
-          - release-1.10
-          - release-1.9
-          - release-1.8
-        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
+        include: ${{ fromJson(needs.discover-charts.outputs.matrix) }}
 
     steps:
       - name: Checkout
@@ -114,6 +120,12 @@ jobs:
           yq e '{"global": {"dynamic": {"includes": .global.dynamic.includes}, "lightspeed": {"plugins": .global.lightspeed.plugins}}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
             charts/backstage/values.yaml > /tmp/backstage-nightly-values.yaml
 
+      - name: Generate nightly values override for rhdh chart
+        if: steps.check.outputs.exists == 'true' && matrix.chart == 'rhdh'
+        run: |
+          yq e '{"dynamicPlugins": {"includes": .dynamicPlugins.includes}, "lightspeed": {"plugins": .lightspeed.plugins}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+            charts/rhdh/values.yaml > /tmp/rhdh-nightly-values.yaml
+
       - name: Test charts
         if: steps.check.outputs.exists == 'true'
         uses: ./.github/actions/test-charts
@@ -122,5 +134,7 @@ jobs:
           chart: charts/${{ matrix.chart }}
           all_charts: 'true'
           monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
-          extra_helm_args: ${{ matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}
-          helm_extra_args: ${{ matrix.chart == 'backstage' && '--values /tmp/backstage-nightly-values.yaml' || '' }}
+          # extra_helm_args: individual --set overrides, passed to ct install via --helm-extra-set-args
+          extra_helm_args: ${{ matrix.chart == 'rhdh' && format('--set image.repository={0} --set image.tag={1} --set image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}
+          # helm_extra_args: general helm flags (e.g. --values), passed to ct install via --helm-extra-args
+          helm_extra_args: ${{ matrix.chart == 'rhdh' && '--values /tmp/rhdh-nightly-values.yaml' || matrix.chart == 'backstage' && '--values /tmp/backstage-nightly-values.yaml' || '' }}

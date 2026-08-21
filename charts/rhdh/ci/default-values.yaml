@@ -1,0 +1,8 @@
+# CI: skip dynamic plugin downloads and catalog index extraction to speed up tests.
+# The chart features under test (deployment, config, probes, etc.) don't depend on actual plugins.
+dynamicPlugins:
+  includes: []
+lightspeed:
+  plugins: []
+orchestrator:
+  plugins: []

@@ -3,7 +3,9 @@ chart-dirs:
 validate-maintainers: false
 remote: origin
 helm-extra-args: --timeout 500s
-# Excluding software template charts - which are for demo purposes
 excluded-charts:
+  # Deprecated in favor of the rhdh chart
+  - backstage
+  # Demo-only charts, not meant for production deployment
   - orchestrator-software-templates
   - orchestrator-software-templates-infra

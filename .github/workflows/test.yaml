@@ -76,10 +76,10 @@ jobs:
           fetch-depth: 0
 
       - name: Generate full-plugins values for template sanity check
-        if: matrix.chart == 'backstage'
+        if: matrix.chart == 'rhdh'
         run: |
-          yq e '{"global": {"dynamic": {"includes": .global.dynamic.includes}, "lightspeed": {"plugins": .global.lightspeed.plugins}}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
-            charts/backstage/values.yaml > /tmp/backstage-full-plugins-values.yaml
+          yq e '{"dynamicPlugins": {"includes": .dynamicPlugins.includes}, "lightspeed": {"plugins": .lightspeed.plugins}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+            charts/rhdh/values.yaml > /tmp/rhdh-full-plugins-values.yaml
 
       - name: Test charts
         uses: ./.github/actions/test-charts
@@ -87,7 +87,7 @@ jobs:
           target_branch: ${{ github.event.pull_request.base.ref }}
           chart: charts/${{ matrix.chart }}
           monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
-          helm_template_values_file: ${{ matrix.chart == 'backstage' && '/tmp/backstage-full-plugins-values.yaml' || '' }}
+          helm_template_values_file: ${{ matrix.chart == 'rhdh' && '/tmp/rhdh-full-plugins-values.yaml' || '' }}
 
   # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
   status:

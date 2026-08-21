@@ -13,12 +13,12 @@ jobs:
     strategy:
       matrix:
         chartConfig:
-          - name: "backstage"
-            path: "backstage"
+          - name: "rhdh"
+            path: "rhdh"
           - name: "orchestrator-infra"
             path: "orchestrator-infra"
-          - name: "backstage-orchestrator"
-            path: "backstage"
+          - name: "rhdh-orchestrator"
+            path: "rhdh"
             cliArgs: "--set orchestrator.enabled=true"
 
     steps:
