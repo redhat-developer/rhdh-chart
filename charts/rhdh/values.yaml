@@ -573,7 +573,7 @@ lightspeed:
     image:
       registry: "quay.io"
       repository: "lightspeed-core/lightspeed-stack"
-      tag: "0.5.3"
+      tag: "0.6.2"
       digest: ""
     imagePullPolicy: "IfNotPresent"
     # -- Override the container's default command. Leave empty to use the image entrypoint.
