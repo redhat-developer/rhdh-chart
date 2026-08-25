@@ -225,6 +225,7 @@ runs:
           --set primary.containerSecurityContext.enabled=false \
           --set primary.extraEnvVars[0].name=POSTGRESQL_ADMIN_PASSWORD \
           --set primary.extraEnvVars[0].value=testpassword \
+          --set primary.resourcesPreset=none \
           --wait --timeout 300s
 
         # ── Fixed test namespace (ct-charts) ──
@@ -310,6 +311,10 @@ runs:
             "--set postgresql.primary.persistence.enabled=false"
             "--set postgresql.primary.resources.limits.ephemeral-storage=200Mi"
             "--set podSecurityContext.fsGroup=1001"
+            # Use Recreate strategy to avoid running two RHDH pods simultaneously
+            # during upgrade tests, which can exhaust the single KIND node's
+            # resources and starve the database.
+            "--set strategy.type=Recreate"
           )
         fi
         if [[ -n "$INPUT_EXTRA_HELM_ARGS" ]]; then
