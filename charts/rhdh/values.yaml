@@ -677,7 +677,7 @@ test:
   image:
     registry: "quay.io"
     repository: "curl/curl"
-    tag: "8.9.1"
+    tag: "8.21.0"
     digest: ""
     pullPolicy: "IfNotPresent"
   securityContext:
