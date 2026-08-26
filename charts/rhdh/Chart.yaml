@@ -36,7 +36,7 @@ dependencies:
   # that check. See https://github.com/bitnami/charts/issues/30850
   - name: postgresql
     repository: oci://registry-1.docker.io/bitnamicharts
-    version: "16.2.5"
+    version: "18.8.13"
     condition: postgresql.enabled
 keywords:
   - backstage
