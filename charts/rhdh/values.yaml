@@ -294,7 +294,7 @@ extraContainers: []
 preInitContainers: []
 
 # -- Additional init containers. These are ADDED after system init containers
-# (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.
+# (install-dynamic-plugins), never replacing them.
 extraInitContainers: []
 
 # -- Node labels for pod assignment.
