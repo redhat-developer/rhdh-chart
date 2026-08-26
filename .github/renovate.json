@@ -5,6 +5,9 @@
     "helpers:pinGitHubActionDigests"
   ],
   "ignorePaths": [
-    "charts/**/vendor/**"
+    "charts/**/vendor/**",
+    "charts/backstage/**",
+    "charts/orchestrator-software-templates/**",
+    "charts/orchestrator-software-templates-infra/**"
   ]
 }
