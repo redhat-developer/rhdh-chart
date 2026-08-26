@@ -2338,7 +2338,7 @@
                             "type": "string"
                         },
                         "tag": {
-                            "default": "8.9.1",
+                            "default": "8.21.0",
                             "title": "Tag to use for the test pod image.",
                             "type": "string"
                         }
