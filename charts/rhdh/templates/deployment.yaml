@@ -229,54 +229,6 @@ spec:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
             {{- end }}
           workingDir: /opt/app-root/src
-        {{- if $intelligentAssistant.enabled }}
-        - name: lightspeed-rag-init
-          image: {{ include "rhdh.image.render" (dict "image" $intelligentAssistant.ragInit.image "global" .Values.global) | quote }}
-          imagePullPolicy: {{ $intelligentAssistant.ragInit.imagePullPolicy | quote }}
-          {{- with $intelligentAssistant.ragInit.securityContext }}
-          securityContext:
-            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
-          {{- end }}
-          {{- if $intelligentAssistant.ragInit.commandOverride }}
-          command:
-            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.ragInit.commandOverride "context" $) | nindent 12 }}
-          {{- else }}
-          command: ["sh", "-c"]
-          {{- end }}
-          {{- if $intelligentAssistant.ragInit.argsOverride }}
-          args:
-            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.ragInit.argsOverride "context" $) | nindent 12 }}
-          {{- else }}
-          args:
-            - >-
-              mkdir -p /tmp/data &&
-              echo 'Copying Intelligent Assistant RAG data...' &&
-              cp -r --no-preserve=mode,ownership /rag/vector_db /rag-content/ &&
-              cp -r --no-preserve=mode,ownership /rag/embeddings_model /rag-content/ &&
-              mkdir -p /rag-content/vector_db/notebooks &&
-              chmod -R a+rwX /rag-content/embeddings_model /rag-content/vector_db &&
-              echo 'Copy complete.'
-            {{- range $intelligentAssistant.ragInit.extraArgs }}
-            - {{ . | quote }}
-            {{- end }}
-          {{- end }}
-          {{- with $intelligentAssistant.ragInit.extraEnv }}
-          env:
-            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
-          {{- end }}
-          {{- with $intelligentAssistant.ragInit.resources }}
-          resources:
-            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            - name: lightspeed-data
-              mountPath: "/tmp"
-            - name: lightspeed-rag
-              mountPath: "/rag-content"
-            {{- with $intelligentAssistant.ragInit.extraVolumeMounts }}
-            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
-            {{- end }}
-        {{- end }}
         {{- if or .Values.postgresql.enabled .Values.externalDatabase.host }}
         - name: wait-for-db
           image: {{ include "rhdh.image.render" (dict "image" .Values.postgresql.image "global" .Values.global) | quote }}
@@ -470,6 +422,10 @@ spec:
                 name: {{ $intelligentAssistant.existingSecret }}
           {{- end }}
           env:
+            {{- if include "rhdh.intelligentAssistant.okp.active" $ }}
+            - name: OKP_SERVICE_URL
+              value: {{ include "rhdh.intelligentAssistant.okp.serviceUrl" $ | quote }}
+            {{- end }}
             - name: KV_STORE_PATH
               value: "/tmp/kvstore.db"
             - name: SQL_STORE_PATH

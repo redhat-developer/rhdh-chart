@@ -9,6 +9,10 @@
 {{- end }}
 {{- $first = false }}
 {{- $file := include "rhdh.intelligentAssistant.configFile" $key }}
+{{- $sourceFile := $file -}}
+{{- if and (eq $key "stack") (not (include "rhdh.intelligentAssistant.okp.active" $)) -}}
+  {{- $sourceFile = "lightspeed-stack-no-okp.yaml" -}}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,7 +25,7 @@ metadata:
   {{- end }}
 data:
   {{ $file }}: |
-{{ $.Files.Get (printf "files/intelligent-assistant/%s" $file) | nindent 4 }}
+{{ $.Files.Get (printf "files/intelligent-assistant/%s" $sourceFile) | nindent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}

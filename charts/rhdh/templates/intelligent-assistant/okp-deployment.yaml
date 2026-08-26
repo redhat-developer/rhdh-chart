@@ -1,0 +1,67 @@
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- if include "rhdh.intelligentAssistant.okp.active" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rhdh.intelligentAssistant.okp.fullname" . }}
+  labels:
+    {{- include "rhdh.intelligentAssistant.okp.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ $ia.okp.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rhdh.intelligentAssistant.okp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "rhdh.intelligentAssistant.okp.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if $ia.okp.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range $ia.okp.imagePullSecrets }}
+        - name: {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      containers:
+      - name: okp
+        image: {{ include "rhdh.image.render" (dict "image" $ia.okp.image "global" .Values.global) | quote }}
+        imagePullPolicy: {{ $ia.okp.image.pullPolicy | default "IfNotPresent" | quote }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: "RuntimeDefault"
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            /opt/solr/bin/solr start --user-managed --force -m {{ $ia.okp.solr.memory }}
+            rm -f /etc/httpd/conf.d/ssl.conf
+            exec httpd -D FOREGROUND
+        env:
+        - name: SOLR_HOST_BIND
+          value: {{ $ia.okp.solr.hostBind | quote }}
+        - name: MIMIR_HTTPD_SERVER_NAME
+          value: {{ $ia.okp.httpd.serverName | quote }}
+        - name: COMPRESSED
+          value: {{ $ia.okp.httpd.compressed | quote }}
+        - name: ENCRYPT
+          value: {{ $ia.okp.httpd.encrypt | quote }}
+        ports:
+        - containerPort: 8080
+          name: httpd
+          protocol: TCP
+        - containerPort: 8983
+          name: solr
+          protocol: TCP
+        {{- with $ia.okp.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+{{- end }}

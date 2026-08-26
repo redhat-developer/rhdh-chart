@@ -293,3 +293,63 @@ The version suffix is preserved in full; only the prefix is truncated.
 {{- $prefix := printf "%s-create-sf-db" (include "rhdh.fullname" .) | trunc (int (sub 63 (len $versionSuffix))) | trimSuffix "-" -}}
 {{- printf "%s%s" $prefix $versionSuffix | lower -}}
 {{- end -}}
+
+{{/*
+Return whether OKP should be deployed.
+On OpenShift: always active when Intelligent Assistant is enabled.
+On vanilla K8s: only active when the user opts in by setting okp.ingress.host.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.active" -}}
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if and $ia.enabled (or $isOpenShift $ia.okp.ingress.host) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the OKP deployment/service/route name.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.fullname" -}}
+{{- printf "%s-lightspeed-okp" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Return OKP labels.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.labels" -}}
+{{ include "rhdh.labels" . }}
+app.kubernetes.io/component: lightspeed-okp
+{{- end -}}
+
+{{/*
+Return OKP selector labels.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "rhdh.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: lightspeed-okp
+{{- end -}}
+
+{{/*
+Return the OKP internal service URL for the OKP_SERVICE_URL env var.
+On OpenShift: uses the Route URL (via clusterRouterBase) for browser-accessible links.
+On vanilla K8s with Ingress: uses the Ingress host.
+Fallback: cluster-internal service URL.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.serviceUrl" -}}
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- $fullname := include "rhdh.intelligentAssistant.okp.fullname" . -}}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if and (not $isOpenShift) $ia.okp.ingress.host -}}
+  {{- if $ia.okp.ingress.tls.enabled -}}
+    {{- printf "https://%s" $ia.okp.ingress.host -}}
+  {{- else -}}
+    {{- printf "http://%s" $ia.okp.ingress.host -}}
+  {{- end -}}
+{{- else if .Values.openshift.clusterRouterBase -}}
+  {{- printf "http://%s-%s.%s" $fullname .Release.Namespace .Values.openshift.clusterRouterBase -}}
+{{- else -}}
+  {{- printf "http://%s.%s.svc.cluster.local:8080" $fullname .Release.Namespace -}}
+{{- end -}}
+{{- end -}}
