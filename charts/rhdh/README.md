@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 1.0.2
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 1.1.0
 ```
 
 ## Introduction
@@ -243,6 +243,7 @@ Kubernetes: `>= 1.31.0-0`
 | image.digest | Overrides the image tag with an image digest. | string | `""` |
 | imagePullSecrets | Secrets for pulling images from private registries (merged with global.imagePullSecrets). | list | `[]` |
 | ingress | Kubernetes Ingress configuration. | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"{{ .Values.host }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` |
+| lifecycleHooks | Lifecycle hooks for the main RHDH container. Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ | object | `{}` |
 | lightspeed | Built-in Lightspeed AI feature configuration. | object | `{"config":{"profile":{"existingConfigMap":{"key":"","name":""}},"server":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}},"core":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"0.6.2"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"enabled":true,"existingSecret":"","plugins":[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}],"ragInit":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"redhat-ai-dev/rag-content","tag":"release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"runtimeVolume":{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}}` |
 | lightspeed.config | Configuration files mounted into the sidecar. By default, the chart creates ConfigMaps from bundled source files. Set existingConfigMap to use a pre-existing ConfigMap instead. | object | `{"profile":{"existingConfigMap":{"key":"","name":""}},"server":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}}` |
 | lightspeed.config.profile | Python profile with prompt templates (rhdh-profile.py). | object | `{"existingConfigMap":{"key":"","name":""}}` |
@@ -294,6 +295,7 @@ Kubernetes: `>= 1.31.0-0`
 | podSecurityContext | Pod-level security context. | object | `{}` |
 | postgresql | Built-in PostgreSQL database (bitnami subchart). | object | `{"auth":{"secretKeys":{"adminPasswordKey":"postgres-password","userPasswordKey":"password"}},"enabled":true,"image":{"digest":"","registry":"quay.io","repository":"fedora/postgresql-15","tag":"latest"},"postgresqlDataDir":"/var/lib/pgsql/data/userdata","primary":{"containerSecurityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":false},"extraEnvVars":[{"name":"POSTGRESQL_ADMIN_PASSWORD","valueFrom":{"secretKeyRef":{"key":"{{- include \"rhdh.postgresql.adminPasswordKey\" . }}","name":"{{- include \"rhdh.postgresql.secretName\" . }}"}}}],"persistence":{"enabled":true,"mountPath":"/var/lib/pgsql/data","size":"1Gi"},"podSecurityContext":{"enabled":false},"resources":{"limits":{"cpu":"250m","ephemeral-storage":"20Mi","memory":"1024Mi"},"requests":{"cpu":"250m","memory":"256Mi"}}},"serviceBindings":{"enabled":true}}` |
 | preInitContainers | Init containers to run BEFORE the system init containers (e.g. inject auth credentials before install-dynamic-plugins runs). | list | `[]` |
+| priorityClassName | Priority class name for pod scheduling. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/ | string | `""` |
 | readinessProbe | Readiness probe configuration. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/readiness","port":"backend","scheme":"HTTP"},"periodSeconds":10,"successThreshold":2,"timeoutSeconds":4}` |
 | replicaCount | Number of desired pods. | int | `1` |
 | resources | Resource requests and limits for the main RHDH container. | object | `{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"1Gi"}}` |
@@ -308,6 +310,7 @@ Kubernetes: `>= 1.31.0-0`
 | serviceAccount.name | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. | string | `""` |
 | startupProbe | Startup probe configuration. Gives the application time to start before liveness/readiness probes kick in. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":20,"successThreshold":1,"timeoutSeconds":4}` |
 | strategy | Deployment update strategy. | object | `{}` |
+| terminationGracePeriodSeconds | Duration in seconds the pod needs to terminate gracefully before being force killed. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination | string | `nil` |
 | test | Test pod configuration for `helm test`. | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"curl/curl","tag":"8.21.0"},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}}` |
 | tolerations | Tolerations for pod assignment. | list | `[]` |
 | topologySpreadConstraints | Topology spread constraints for pod scheduling. | list | `[]` |

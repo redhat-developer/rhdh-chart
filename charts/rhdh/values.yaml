@@ -312,6 +312,23 @@ topologySpreadConstraints: []
 # -- Host aliases for /etc/hosts entries.
 hostAliases: []
 
+# -- Priority class name for pod scheduling.
+# Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+priorityClassName: ""
+
+# -- Duration in seconds the pod needs to terminate gracefully before being force killed.
+# Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
+# @default -- `nil`
+terminationGracePeriodSeconds:
+
+# -- Lifecycle hooks for the main RHDH container.
+# Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+lifecycleHooks: {}
+# lifecycleHooks:
+#   preStop:
+#     exec:
+#       command: ["/bin/sh", "-c", "sleep 10"]
+
 # -- Annotations for the Deployment resource (not the pod).
 deploymentAnnotations: {}
 

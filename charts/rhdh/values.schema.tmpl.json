@@ -392,6 +392,25 @@
             "type": "array",
             "default": []
         },
+        "priorityClassName": {
+            "title": "Priority class name for pod scheduling.",
+            "description": "Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/",
+            "type": "string",
+            "default": ""
+        },
+        "terminationGracePeriodSeconds": {
+            "title": "Duration in seconds the pod needs to terminate gracefully before being force killed.",
+            "description": "Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination",
+            "type": ["integer", "null"],
+            "default": null,
+            "minimum": 0
+        },
+        "lifecycleHooks": {
+            "title": "Lifecycle hooks for the main RHDH container.",
+            "description": "Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/",
+            "type": "object",
+            "default": {}
+        },
         "deploymentAnnotations": {
             "title": "Annotations for the Deployment resource (not the pod).",
             "type": "object",
