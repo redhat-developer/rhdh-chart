@@ -17,7 +17,7 @@
 # This file is kept separate from values.yaml intentionally. It references
 # hardcoded mount paths (/app-root/*, /tmp/*) that are coupled to the
 # deployment template. It is deployed as a ConfigMap unless overridden via
-# lightspeed.config.stack.existingConfigMap.
+# intelligentAssistant.config.stack.existingConfigMap.
 name: lightspeed-core-stack
 service:
   host: ${env.SERVICE_HOST:=127.0.0.1}

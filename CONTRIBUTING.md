@@ -11,9 +11,9 @@ Before making a contribution to the charts in this repository, you will need to 
 - JSON Schema template updated and re-generated the raw schema via the `pre-commit` hook.
 - [ ] If you updated the [orchestrator-infra](./charts/orchestrator-infra) chart, make sure the versions of the [Knative CRDs](./charts/orchestrator-infra/crds) are aligned with the versions of the CRDs installed by the OpenShift Serverless operators declared in the [values.yaml](./charts/orchestrator-infra/values.yaml) file. See [Installing Knative Eventing and Knative Serving CRDs](./charts/orchestrator-infra/README.md#installing-knative-eventing-and-knative-serving-crds) for more details.
 
-## Sync Lightspeed vendored config files
+## Sync Lightspeed Core vendored config files
 
-The Lightspeed config files under [`charts/rhdh/files/lightspeed`](./charts/rhdh/files/lightspeed) are synced from the upstream [redhat-ai-dev/lightspeed-configs](https://github.com/redhat-ai-dev/lightspeed-configs) repository by [`hack/sync-lightspeed-configs.sh`](./hack/sync-lightspeed-configs.sh).
+The Lightspeed Core config files under [`charts/rhdh/files/intelligent-assistant`](./charts/rhdh/files/intelligent-assistant) are synced from the upstream [redhat-ai-dev/lightspeed-configs](https://github.com/redhat-ai-dev/lightspeed-configs) repository by [`hack/sync-lightspeed-configs.sh`](./hack/sync-lightspeed-configs.sh).
 
 Use the default upstream branch:
 
@@ -34,5 +34,5 @@ Verify the vendored files are already in sync without writing changes:
 ./hack/sync-lightspeed-configs.sh --ref main --check
 ```
 
-The script copies the upstream config files directly, except it appends the chart-managed `mcp_servers` block to `lightspeed-stack.yaml` and renders `secret.yaml` from upstream `env/default-values.env` by dropping comment lines plus `LIGHTSPEED_CORE_IMAGE` and `RAG_CONTENT_IMAGE`, then converting each remaining `KEY=value` line into the chart's YAML secret payload.
-Choose the upstream branch or tag that matches the Lightspeed release you want to vendor.
+The script copies the upstream `lightspeed-stack.yaml`, `config.yaml`, and `rhdh-profile.py` files into [`charts/rhdh/files/intelligent-assistant`](./charts/rhdh/files/intelligent-assistant). The RHDH chart does not vendor a Lightspeed Core `secret.yaml`; supply provider credentials with `intelligentAssistant.existingSecret`.
+Choose the upstream branch or tag that matches the Lightspeed Core release you want to vendor.

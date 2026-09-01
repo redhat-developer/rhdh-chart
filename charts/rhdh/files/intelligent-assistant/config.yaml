@@ -17,7 +17,7 @@
 # This file is kept separate from values.yaml intentionally. It is large,
 # deeply nested, and contains a multi-paragraph safety prompt — inlining it
 # into values.yaml would hurt readability. It is deployed as a ConfigMap
-# unless overridden via lightspeed.config.server.existingConfigMap.
+# unless overridden via intelligentAssistant.config.server.existingConfigMap.
 version: 3
 distro_name: developer-lightspeed-lls-0.5.x
 apis:

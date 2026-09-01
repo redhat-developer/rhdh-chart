@@ -143,7 +143,7 @@
             "default": {}
         },
         "containerSecurityContext": {
-            "title": "Security context for the main RHDH container (not the Lightspeed sidecar or init containers).",
+            "title": "Security context for the main RHDH container (not the Lightspeed Core sidecar or init containers).",
             "type": "object",
             "default": {}
         },
@@ -487,7 +487,7 @@
             "default": []
         },
         "extraContainers": {
-            "title": "Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed sidecar), never replacing them.",
+            "title": "Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them.",
             "type": "array",
             "default": []
         },
@@ -497,7 +497,7 @@
             "default": []
         },
         "extraInitContainers": {
-            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Lightspeed RAG init), never replacing them.",
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.",
             "type": "array",
             "default": []
         },
@@ -786,21 +786,21 @@
                 }
             }
         },
-        "lightspeed": {
-            "title": "Built-in Lightspeed AI feature configuration.",
+        "intelligentAssistant": {
+            "title": "Built-in Intelligent Assistant feature configuration.",
             "type": "object",
             "default": {},
             "additionalProperties": false,
             "properties": {
                 "enabled": {
-                    "title": "Enable or disable the built-in Lightspeed feature.",
+                    "title": "Enable or disable the built-in Intelligent Assistant feature.",
                     "type": "boolean",
                     "default": true
                 },
                 "plugins": {
-                    "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
+                    "title": "Intelligent Assistant plugins and their configuration. Override package references for disconnected environments.",
                     "type": "array",
-                    "default": [{"package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{inherit}}", "enabled": true}, {"package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{inherit}}", "enabled": true}],
+                    "default": [{"package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant", "enabled": true}, {"package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend", "enabled": true}],
                     "items": {
                         "type": "object",
                         "properties": {

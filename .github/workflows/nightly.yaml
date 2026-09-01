@@ -123,7 +123,7 @@ jobs:
       - name: Generate nightly values override for rhdh chart
         if: steps.check.outputs.exists == 'true' && matrix.chart == 'rhdh'
         run: |
-          yq e '{"dynamicPlugins": {"includes": .dynamicPlugins.includes}, "lightspeed": {"plugins": .lightspeed.plugins}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+          yq e '{"dynamicPlugins": {"includes": .dynamicPlugins.includes}, "intelligentAssistant": {"plugins": .intelligentAssistant.plugins}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
             charts/rhdh/values.yaml > /tmp/rhdh-nightly-values.yaml
 
       - name: Test charts

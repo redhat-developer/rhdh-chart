@@ -18,6 +18,6 @@
 *.md.gotmpl  @redhat-developer/RHDH-content
 /README.md   @redhat-developer/RHDH-content
 
-# Lightspeed:
+# Intelligent Assistant:
 /charts/backstage/files/lightspeed/ @redhat-developer/rhdh-ai
-/charts/rhdh/files/lightspeed/      @redhat-developer/rhdh-ai
+/charts/rhdh/files/intelligent-assistant/ @redhat-developer/rhdh-ai

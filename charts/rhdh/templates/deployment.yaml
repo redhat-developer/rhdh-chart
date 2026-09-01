@@ -1,5 +1,5 @@
 {{- $installDir := "/opt/app-root/src" -}}
-{{- $lightspeed := include "rhdh.lightspeed" . | fromYaml -}}
+{{- $intelligentAssistant := include "rhdh.intelligentAssistant" . | fromYaml -}}
 {{- $extraCatalogImages := include "rhdh.catalogIndex.extraImagesEnvValue" . | trim -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -37,9 +37,9 @@ spec:
         {{- end }}
       annotations:
         checksum/app-config: {{ include "common.tplvalues.render" (dict "value" .Values.appConfig "context" $) | sha256sum }}
-        checksum/dynamic-plugins: {{ include "common.tplvalues.render" (dict "value" (dict "dynamicPlugins" .Values.dynamicPlugins "lightspeed" (dict "enabled" $lightspeed.enabled "plugins" $lightspeed.plugins)) "context" $) | sha256sum }}
-        {{- if $lightspeed.enabled }}
-        checksum/lightspeed-config: {{ toJson $lightspeed.config | sha256sum }}
+        checksum/dynamic-plugins: {{ include "common.tplvalues.render" (dict "value" (dict "dynamicPlugins" .Values.dynamicPlugins "intelligentAssistant" (dict "enabled" $intelligentAssistant.enabled "plugins" $intelligentAssistant.plugins)) "context" $) | sha256sum }}
+        {{- if $intelligentAssistant.enabled }}
+        checksum/lightspeed-config: {{ toJson $intelligentAssistant.config | sha256sum }}
         {{- end }}
         {{- with .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
@@ -129,23 +129,23 @@ spec:
           configMap:
             name: {{ .configMapRef }}
         {{- end }}
-        {{- if $lightspeed.enabled }}
+        {{- if $intelligentAssistant.enabled }}
         - name: lightspeed-data
-          {{- if eq $lightspeed.runtimeVolume.type "persistentVolumeClaim" }}
+          {{- if eq $intelligentAssistant.runtimeVolume.type "persistentVolumeClaim" }}
           persistentVolumeClaim:
-            {{- include "common.tplvalues.render" (dict "value" $lightspeed.runtimeVolume.persistentVolumeClaim "context" $) | nindent 12 }}
+            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.runtimeVolume.persistentVolumeClaim "context" $) | nindent 12 }}
           {{- else }}
           emptyDir:
-            {{- include "common.tplvalues.render" (dict "value" $lightspeed.runtimeVolume.emptyDir "context" $) | nindent 12 }}
+            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.runtimeVolume.emptyDir "context" $) | nindent 12 }}
           {{- end }}
         - name: lightspeed-rag
           emptyDir: {}
         {{- range $key := list "stack" "server" "profile" }}
-        {{- $entry := index $lightspeed.config $key }}
-        {{- $cmKey := include "rhdh.lightspeed.configMapKey" (dict "key" $key "entry" $entry) }}
+        {{- $entry := index $intelligentAssistant.config $key }}
+        {{- $cmKey := include "rhdh.intelligentAssistant.configMapKey" (dict "key" $key "entry" $entry) }}
         - name: {{ printf "lightspeed-config-%s" $key }}
           configMap:
-            name: {{ include "rhdh.lightspeed.configMapName" (dict "root" $ "key" $key "entry" $entry) }}
+            name: {{ include "rhdh.intelligentAssistant.configMapName" (dict "root" $ "key" $key "entry" $entry) }}
             items:
               - key: {{ $cmKey | quote }}
                 path: {{ $cmKey | quote }}
@@ -229,42 +229,42 @@ spec:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
             {{- end }}
           workingDir: /opt/app-root/src
-        {{- if $lightspeed.enabled }}
+        {{- if $intelligentAssistant.enabled }}
         - name: lightspeed-rag-init
-          image: {{ include "rhdh.image.render" (dict "image" $lightspeed.ragInit.image "global" .Values.global) | quote }}
-          imagePullPolicy: {{ $lightspeed.ragInit.imagePullPolicy | quote }}
-          {{- with $lightspeed.ragInit.securityContext }}
+          image: {{ include "rhdh.image.render" (dict "image" $intelligentAssistant.ragInit.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ $intelligentAssistant.ragInit.imagePullPolicy | quote }}
+          {{- with $intelligentAssistant.ragInit.securityContext }}
           securityContext:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
-          {{- if $lightspeed.ragInit.commandOverride }}
+          {{- if $intelligentAssistant.ragInit.commandOverride }}
           command:
-            {{- include "common.tplvalues.render" (dict "value" $lightspeed.ragInit.commandOverride "context" $) | nindent 12 }}
+            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.ragInit.commandOverride "context" $) | nindent 12 }}
           {{- else }}
           command: ["sh", "-c"]
           {{- end }}
-          {{- if $lightspeed.ragInit.argsOverride }}
+          {{- if $intelligentAssistant.ragInit.argsOverride }}
           args:
-            {{- include "common.tplvalues.render" (dict "value" $lightspeed.ragInit.argsOverride "context" $) | nindent 12 }}
+            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.ragInit.argsOverride "context" $) | nindent 12 }}
           {{- else }}
           args:
             - >-
               mkdir -p /tmp/data &&
-              echo 'Copying Lightspeed RAG data...' &&
+              echo 'Copying Intelligent Assistant RAG data...' &&
               cp -r --no-preserve=mode,ownership /rag/vector_db /rag-content/ &&
               cp -r --no-preserve=mode,ownership /rag/embeddings_model /rag-content/ &&
               mkdir -p /rag-content/vector_db/notebooks &&
               chmod -R a+rwX /rag-content/embeddings_model /rag-content/vector_db &&
               echo 'Copy complete.'
-            {{- range $lightspeed.ragInit.extraArgs }}
+            {{- range $intelligentAssistant.ragInit.extraArgs }}
             - {{ . | quote }}
             {{- end }}
           {{- end }}
-          {{- with $lightspeed.ragInit.extraEnv }}
+          {{- with $intelligentAssistant.ragInit.extraEnv }}
           env:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
-          {{- with $lightspeed.ragInit.resources }}
+          {{- with $intelligentAssistant.ragInit.resources }}
           resources:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
@@ -273,7 +273,7 @@ spec:
               mountPath: "/tmp"
             - name: lightspeed-rag
               mountPath: "/rag-content"
-            {{- with $lightspeed.ragInit.extraVolumeMounts }}
+            {{- with $intelligentAssistant.ragInit.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
             {{- end }}
         {{- end }}
@@ -437,24 +437,24 @@ spec:
             {{- with .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
             {{- end }}
-        {{- if $lightspeed.enabled }}
+        {{- if $intelligentAssistant.enabled }}
         - name: lightspeed-core
-          image: {{ include "rhdh.image.render" (dict "image" $lightspeed.core.image "global" .Values.global) | quote }}
-          imagePullPolicy: {{ $lightspeed.core.imagePullPolicy | quote }}
-          {{- with $lightspeed.core.securityContext }}
+          image: {{ include "rhdh.image.render" (dict "image" $intelligentAssistant.core.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ $intelligentAssistant.core.imagePullPolicy | quote }}
+          {{- with $intelligentAssistant.core.securityContext }}
           securityContext:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
-          {{- with $lightspeed.core.commandOverride }}
+          {{- with $intelligentAssistant.core.commandOverride }}
           command:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
-          {{- if $lightspeed.core.argsOverride }}
+          {{- if $intelligentAssistant.core.argsOverride }}
           args:
-            {{- include "common.tplvalues.render" (dict "value" $lightspeed.core.argsOverride "context" $) | nindent 12 }}
-          {{- else if $lightspeed.core.extraArgs }}
+            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.core.argsOverride "context" $) | nindent 12 }}
+          {{- else if $intelligentAssistant.core.extraArgs }}
           args:
-            {{- range $lightspeed.core.extraArgs }}
+            {{- range $intelligentAssistant.core.extraArgs }}
             - {{ . | quote }}
             {{- end }}
           {{- end }}
@@ -462,16 +462,16 @@ spec:
             - name: http-lightspeed
               containerPort: 8080
               protocol: TCP
-          {{- if $lightspeed.existingSecret }}
+          {{- if $intelligentAssistant.existingSecret }}
           envFrom:
             - secretRef:
-                name: {{ $lightspeed.existingSecret }}
+                name: {{ $intelligentAssistant.existingSecret }}
           {{- end }}
-          {{- with $lightspeed.core.extraEnv }}
+          {{- with $intelligentAssistant.core.extraEnv }}
           env:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
-          {{- with $lightspeed.core.resources }}
+          {{- with $intelligentAssistant.core.resources }}
           resources:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
@@ -481,15 +481,15 @@ spec:
             - name: lightspeed-rag
               mountPath: "/rag-content"
             {{- range $key := list "stack" "server" "profile" }}
-            {{- $entry := index $lightspeed.config $key }}
-            {{- $file := include "rhdh.lightspeed.configFile" $key }}
-            {{- $cmKey := include "rhdh.lightspeed.configMapKey" (dict "key" $key "entry" $entry) }}
+            {{- $entry := index $intelligentAssistant.config $key }}
+            {{- $file := include "rhdh.intelligentAssistant.configFile" $key }}
+            {{- $cmKey := include "rhdh.intelligentAssistant.configMapKey" (dict "key" $key "entry" $entry) }}
             - name: {{ printf "lightspeed-config-%s" $key }}
               mountPath: {{ printf "/app-root/%s" $file | quote }}
               subPath: {{ $cmKey | quote }}
               readOnly: true
             {{- end }}
-            {{- with $lightspeed.core.extraVolumeMounts }}
+            {{- with $intelligentAssistant.core.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
             {{- end }}
         {{- end }}

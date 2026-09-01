@@ -246,7 +246,7 @@
                     "type": "RuntimeDefault"
                 }
             },
-            "title": "Security context for the main RHDH container (not the Lightspeed sidecar or init containers).",
+            "title": "Security context for the main RHDH container (not the Lightspeed Core sidecar or init containers).",
             "type": "object"
         },
         "deploymentAnnotations": {
@@ -513,7 +513,7 @@
         },
         "extraContainers": {
             "default": [],
-            "title": "Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed sidecar), never replacing them.",
+            "title": "Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them.",
             "type": "array"
         },
         "extraEnv": {
@@ -528,7 +528,7 @@
         },
         "extraInitContainers": {
             "default": [],
-            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Lightspeed RAG init), never replacing them.",
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.",
             "type": "array"
         },
         "extraVolumeMounts": {
@@ -714,7 +714,7 @@
             "title": "Kubernetes Ingress configuration.",
             "type": "object"
         },
-        "lightspeed": {
+        "intelligentAssistant": {
             "additionalProperties": false,
             "default": {
                 "config": {
@@ -779,11 +779,11 @@
                 "plugins": [
                     {
                         "enabled": true,
-                        "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
+                        "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"
                     },
                     {
                         "enabled": true,
-                        "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                        "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
                     }
                 ],
                 "ragInit": {
@@ -1198,7 +1198,7 @@
                 },
                 "enabled": {
                     "default": true,
-                    "title": "Enable or disable the built-in Lightspeed feature.",
+                    "title": "Enable or disable the built-in Intelligent Assistant feature.",
                     "type": "boolean"
                 },
                 "existingSecret": {
@@ -1210,11 +1210,11 @@
                     "default": [
                         {
                             "enabled": true,
-                            "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"
+                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"
                         },
                         {
                             "enabled": true,
-                            "package": "oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"
+                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
                         }
                     ],
                     "items": {
@@ -1242,7 +1242,7 @@
                         ],
                         "type": "object"
                     },
-                    "title": "Lightspeed plugins and their configuration. Override package references for disconnected environments.",
+                    "title": "Intelligent Assistant plugins and their configuration. Override package references for disconnected environments.",
                     "type": "array"
                 },
                 "ragInit": {
@@ -1587,7 +1587,7 @@
                     "type": "object"
                 }
             },
-            "title": "Built-in Lightspeed AI feature configuration.",
+            "title": "Built-in Intelligent Assistant feature configuration.",
             "type": "object"
         },
         "livenessProbe": {

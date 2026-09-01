@@ -10,7 +10,7 @@ metadata:
   {{- end }}
 data:
   dynamic-plugins.yaml: |
-    {{- $lightspeed := include "rhdh.lightspeed" . | fromYaml }}
+    {{- $intelligentAssistant := include "rhdh.intelligentAssistant" . | fromYaml }}
     {{- $dynamic := dict "includes" .Values.dynamicPlugins.includes }}
     {{- $plugins := list }}
 
@@ -24,8 +24,8 @@ data:
       {{- end }}
     {{- end }}
 
-    {{- if $lightspeed.enabled }}
-      {{- range $lightspeed.plugins }}
+    {{- if $intelligentAssistant.enabled }}
+      {{- range $intelligentAssistant.plugins }}
         {{- $plugins = append $plugins . }}
       {{- end }}
     {{- end }}

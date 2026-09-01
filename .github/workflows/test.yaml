@@ -78,7 +78,7 @@ jobs:
       - name: Generate full-plugins values for template sanity check
         if: matrix.chart == 'rhdh'
         run: |
-          yq e '{"dynamicPlugins": {"includes": .dynamicPlugins.includes}, "lightspeed": {"plugins": .lightspeed.plugins}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
+          yq e '{"dynamicPlugins": {"includes": .dynamicPlugins.includes}, "intelligentAssistant": {"plugins": .intelligentAssistant.plugins}, "orchestrator": {"plugins": .orchestrator.plugins}}' \
             charts/rhdh/values.yaml > /tmp/rhdh-full-plugins-values.yaml
 
       - name: Test charts

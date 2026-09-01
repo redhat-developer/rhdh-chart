@@ -1,4 +1,4 @@
-name: Sync Lightspeed Configs
+name: Sync Lightspeed Core Configs
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   sync-lightspeed:
-    name: Sync Lightspeed Configs (${{ matrix.branch }})
+    name: Sync Lightspeed Core Configs (${{ matrix.branch }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -30,6 +30,24 @@ jobs:
         with:
           ref: ${{ matrix.branch }}
           fetch-depth: 0
+
+      - name: Resolve vendored config paths
+        id: paths
+        run: |
+          # Scheduled workflows run from the default branch YAML, then check out
+          # matrix.branch. Only release-1.10 still vendors Lightspeed under the
+          # backstage chart; main and later release branches use rhdh.
+          BRANCH="${{ matrix.branch }}"
+          if [[ "${BRANCH}" == "release-1.10" ]]; then
+            FILES_DIR="charts/backstage/files/lightspeed"
+            CHART_YAML="charts/backstage/Chart.yaml"
+          else
+            FILES_DIR="charts/rhdh/files/intelligent-assistant"
+            CHART_YAML="charts/rhdh/Chart.yaml"
+          fi
+          echo "files_dir=${FILES_DIR}" >> "$GITHUB_OUTPUT"
+          echo "chart_yaml=${CHART_YAML}" >> "$GITHUB_OUTPUT"
+          echo "Using ${FILES_DIR} and ${CHART_YAML} for ${BRANCH}"
 
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
@@ -59,13 +77,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync Lightspeed config files
+      - name: Sync Lightspeed Core config files
         run: ./hack/sync-lightspeed-configs.sh --ref ${{ matrix.branch }}
 
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet charts/backstage/files/lightspeed/; then
+          if git diff --quiet "${{ steps.paths.outputs.files_dir }}"; then
             echo "No changes from upstream."
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
@@ -78,7 +96,7 @@ jobs:
         id: get_version
         uses: mikefarah/yq@c14f446382944492701b16c1ddb48bb9dbe683e3 # v4.53.6
         with:
-          cmd: yq '.version' charts/backstage/Chart.yaml
+          cmd: yq '.version' "${{ steps.paths.outputs.chart_yaml }}"
 
       - name: Compute next patch version
         if: steps.changes.outputs.has_changes == 'true'
@@ -92,7 +110,7 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         uses: mikefarah/yq@c14f446382944492701b16c1ddb48bb9dbe683e3 # v4.53.6
         with:
-          cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' charts/backstage/Chart.yaml
+          cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' "${{ steps.paths.outputs.chart_yaml }}"
 
       - name: Run pre-commit
         if: steps.changes.outputs.has_changes == 'true'
@@ -105,8 +123,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_VERSION: ${{ steps.semver.outputs.new_version }}
           TARGET_BRANCH: ${{ matrix.branch }}
+          FILES_DIR: ${{ steps.paths.outputs.files_dir }}
         run: |
-          TITLE="chore(lightspeed): sync config files and bump chart to ${NEW_VERSION}"
+          TITLE="chore(intelligent-assistant): sync Lightspeed Core config files and bump chart to ${NEW_VERSION}"
           BRANCH="chore/sync-lightspeed-configs-${TARGET_BRANCH}"
 
           EXISTING_PR=$(gh pr list --head "${BRANCH}" --base "${TARGET_BRANCH}" --state open --json number --jq '.[0].number // empty')
@@ -126,16 +145,15 @@ jobs:
           else
             git push origin "${BRANCH}"
 
+            SYNCED_FILES=$(git diff --name-only HEAD~1 -- "${FILES_DIR}" | sed 's/^/- `/;s/$/`/')
+
             BODY=$(cat <<EOF
-          Automated nightly sync of Lightspeed config files from [redhat-ai-dev/lightspeed-configs @ ${TARGET_BRANCH}](https://github.com/redhat-ai-dev/lightspeed-configs/tree/${TARGET_BRANCH}).
+          Automated nightly sync of Lightspeed Core config files from [redhat-ai-dev/lightspeed-configs @ ${TARGET_BRANCH}](https://github.com/redhat-ai-dev/lightspeed-configs/tree/${TARGET_BRANCH}).
 
           Bumped chart version to **${NEW_VERSION}**.
 
           ### Synced files
-          - \`charts/backstage/files/lightspeed/lightspeed-stack.yaml\`
-          - \`charts/backstage/files/lightspeed/config.yaml\`
-          - \`charts/backstage/files/lightspeed/rhdh-profile.py\`
-          - \`charts/backstage/files/lightspeed/secret.yaml\`
+          ${SYNCED_FILES}
 
           > [!CAUTION]
           > Please review the upstream changes carefully before merging.

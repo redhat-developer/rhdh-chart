@@ -7,14 +7,13 @@ DEFAULT_REF="main"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-LIGHTSPEED_DIR="${REPO_ROOT}/charts/backstage/files/lightspeed"
+LIGHTSPEED_DIR="${REPO_ROOT}/charts/rhdh/files/intelligent-assistant"
 
 # Format: upstream_path|destination_path|transform_function
 TARGETS=(
   "lightspeed-core-configs/lightspeed-stack.yaml|${LIGHTSPEED_DIR}/lightspeed-stack.yaml|copy_fetched_file"
   "llama-stack-configs/config.yaml|${LIGHTSPEED_DIR}/config.yaml|copy_fetched_file"
   "lightspeed-core-configs/rhdh-profile.py|${LIGHTSPEED_DIR}/rhdh-profile.py|copy_fetched_file"
-  "env/default-values.env|${LIGHTSPEED_DIR}/secret.yaml|render_secret_yaml_from_env"
 )
 
 copy_fetched_file() {
@@ -23,40 +22,12 @@ copy_fetched_file() {
 
   cp "${source_file}" "${destination_file}"
 }
-render_secret_yaml_from_env() {
-  local source_file=$1
-  local destination_file=$2
-
-  awk '
-    /^[[:space:]]*$/ { next }
-    # Skip comments from the upstream .env file.
-    /^[[:space:]]*#/ { next }
-    {
-      separator = index($0, "=")
-      if (separator == 0) {
-        printf "error: unsupported env line: %s\n", $0 > "/dev/stderr"
-        exit 1
-      }
-
-      key = substr($0, 1, separator - 1)
-      # These image settings are intentionally not part of the chart-managed secret payload.
-      if (key == "LIGHTSPEED_CORE_IMAGE" || key == "RAG_CONTENT_IMAGE") {
-        next
-      }
-
-      value = substr($0, separator + 1)
-      gsub(/\\/, "\\\\", value)
-      gsub(/"/, "\\\"", value)
-      printf "%s: \"%s\"\n", key, value
-    }
-  ' "${source_file}" > "${destination_file}"
-}
 
 usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
 
-Sync vendored Lightspeed config files from an upstream repo/ref.
+Sync vendored Lightspeed Core config files from an upstream repo/ref.
 
 Options:
   --repo REPO   GitHub repo in owner/name form (default: ${DEFAULT_REPO})
@@ -169,10 +140,10 @@ done
 
 if [[ "${check_only}" == true ]]; then
   if [[ "${changed_count}" -gt 0 ]]; then
-    echo "lightspeed config sync is required for ${changed_count} file(s)" >&2
+    echo "Lightspeed Core config sync is required for ${changed_count} file(s)" >&2
     exit 1
   fi
-  echo "lightspeed config files are already synced"
+  echo "Lightspeed Core config files are already synced"
 else
   echo "sync complete from ${repo}@${ref}"
 fi

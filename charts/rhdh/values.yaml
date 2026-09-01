@@ -222,7 +222,7 @@ podLabels: {}
 # -- Pod-level security context.
 podSecurityContext: {}
 
-# -- Security context for the main RHDH container (not the Lightspeed sidecar or init containers).
+# -- Security context for the main RHDH container (not the Lightspeed Core sidecar or init containers).
 containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
@@ -286,7 +286,7 @@ extraVolumes: []
 extraVolumeMounts: []
 
 # -- Additional sidecar containers. These are ADDED to system containers
-# (e.g. Lightspeed sidecar), never replacing them.
+# (e.g. Lightspeed Core sidecar), never replacing them.
 extraContainers: []
 
 # -- Init containers to run BEFORE the system init containers
@@ -294,7 +294,7 @@ extraContainers: []
 preInitContainers: []
 
 # -- Additional init containers. These are ADDED after system init containers
-# (install-dynamic-plugins, Lightspeed RAG init), never replacing them.
+# (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.
 extraInitContainers: []
 
 # -- Node labels for pod assignment.
@@ -479,14 +479,14 @@ metrics:
 
 # ── Built-in features ──────────────────────────────────────
 
-# -- Built-in Lightspeed AI feature configuration.
-lightspeed:
+# -- Built-in Intelligent Assistant feature configuration.
+intelligentAssistant:
   enabled: true
-  # -- Lightspeed dynamic plugin packages.
+  # -- Intelligent Assistant dynamic plugin packages.
   plugins:
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ "{{inherit}}" }}'
+    - package: 'ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant'
       enabled: true
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ "{{inherit}}" }}'
+    - package: 'ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend'
       enabled: true
   # -- Configuration files mounted into the sidecar.
   # By default, the chart creates ConfigMaps from bundled source files.
@@ -528,7 +528,7 @@ lightspeed:
   #   ENABLE_OLLAMA, OLLAMA_URL,
   #   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME,
   #   LLAMA_STACK_LOGGING
-  # See files/lightspeed/secret.example.yaml for a reference template.
+  # See files/intelligent-assistant/secret.example.yaml for a reference template.
   existingSecret: ""
   # -- Writable scratch volume for the sidecar (/tmp).
   runtimeVolume:

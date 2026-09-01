@@ -254,16 +254,16 @@ runs:
         #   --namespace ct-charts \
         #   --from-literal=.npmrc=$'@myscope:registry=https://my-registry.example.com\n//my-registry.example.com:_authToken=foo'
 
-        # Lightspeed existing-resource test (with-lightspeed-existing-config-values.yaml)
+        # Intelligent Assistant existing-resource test (with-custom-configuration-values.yaml)
         kubectl create configmap test-lightspeed-stack \
           --namespace ct-charts \
-          --from-file=lightspeed-stack.yaml=charts/rhdh/files/lightspeed/lightspeed-stack.yaml
+          --from-file=lightspeed-stack.yaml=charts/rhdh/files/intelligent-assistant/lightspeed-stack.yaml
         kubectl create configmap test-lightspeed-server \
           --namespace ct-charts \
-          --from-file=config.yaml=charts/rhdh/files/lightspeed/config.yaml
+          --from-file=config.yaml=charts/rhdh/files/intelligent-assistant/config.yaml
         kubectl create configmap test-lightspeed-profile \
           --namespace ct-charts \
-          --from-file=rhdh-profile.py=charts/rhdh/files/lightspeed/rhdh-profile.py
+          --from-file=rhdh-profile.py=charts/rhdh/files/intelligent-assistant/rhdh-profile.py
         kubectl create secret generic test-lightspeed-secret \
           --namespace ct-charts \
           --from-literal=LLAMA_STACK_LOGGING=info

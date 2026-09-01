@@ -180,55 +180,64 @@ When enabled, appends -primary when postgresql.architecture is "replication".
 {{- end -}}
 
 {{/*
-Return resolved Lightspeed values from .Values.lightspeed with validation.
+Return resolved Intelligent Assistant values from .Values.intelligentAssistant with validation.
 */}}
-{{- define "rhdh.lightspeed" -}}
-{{- $lightspeed := deepCopy .Values.lightspeed -}}
-{{- if $lightspeed.enabled -}}
-  {{- $volType := default "emptyDir" $lightspeed.runtimeVolume.type -}}
+{{- define "rhdh.intelligentAssistant" -}}
+{{- $intelligentAssistant := deepCopy .Values.intelligentAssistant -}}
+{{- if $intelligentAssistant.enabled -}}
+  {{- $volType := default "emptyDir" $intelligentAssistant.runtimeVolume.type -}}
   {{- if and (ne $volType "emptyDir") (ne $volType "persistentVolumeClaim") -}}
-    {{- fail "lightspeed.runtimeVolume.type must be emptyDir or persistentVolumeClaim" -}}
+    {{- fail "intelligentAssistant.runtimeVolume.type must be emptyDir or persistentVolumeClaim" -}}
   {{- end -}}
   {{- if eq $volType "persistentVolumeClaim" -}}
-    {{- if or (not (kindIs "map" $lightspeed.runtimeVolume.persistentVolumeClaim)) (empty $lightspeed.runtimeVolume.persistentVolumeClaim.claimName) -}}
-      {{- fail "lightspeed.runtimeVolume.persistentVolumeClaim.claimName is required when type=persistentVolumeClaim" -}}
+    {{- if or (not (kindIs "map" $intelligentAssistant.runtimeVolume.persistentVolumeClaim)) (empty $intelligentAssistant.runtimeVolume.persistentVolumeClaim.claimName) -}}
+      {{- fail "intelligentAssistant.runtimeVolume.persistentVolumeClaim.claimName is required when type=persistentVolumeClaim" -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- toYaml $lightspeed -}}
+{{- toYaml $intelligentAssistant -}}
 {{- end -}}
 
 {{/*
-Return the bundled filename for a Lightspeed config key.
+Return the bundled filename for an Intelligent Assistant config key.
 */}}
-{{- define "rhdh.lightspeed.configFile" -}}
+{{- define "rhdh.intelligentAssistant.configFile" -}}
 {{- $map := dict "stack" "lightspeed-stack.yaml" "server" "config.yaml" "profile" "rhdh-profile.py" -}}
-{{- get $map . | required (printf "unknown lightspeed config key: %s" .) -}}
+{{- get $map . | required (printf "unknown intelligentAssistant config key: %s" .) -}}
 {{- end -}}
 
 {{/*
-Return the Lightspeed ConfigMap name for a given key.
+Return the Intelligent Assistant ConfigMap name for a given key.
 If existingConfigMap.name is set, use it; otherwise generate from release name.
 Expects: dict "root" $ "key" <key> "entry" <config entry>
+
+Kubernetes names are limited to 63 characters. Using the infix "-ia-" (Intelligent
+Assistant) instead of "-intelligent-assistant-" leaves more of the fullname intact.
+Still truncate the fullname prefix (not the whole string) so "-ia-stack",
+"-ia-server", and "-ia-profile" are never chopped off the right side — Helm's
+`trunc 63` would otherwise make those three names collide when fullname is long.
 */}}
-{{- define "rhdh.lightspeed.configMapName" -}}
+{{- define "rhdh.intelligentAssistant.configMapName" -}}
 {{- if .entry.existingConfigMap.name -}}
   {{- .entry.existingConfigMap.name -}}
 {{- else -}}
-  {{- printf "%s-lightspeed-%s" (include "rhdh.fullname" .root) .key | trunc 63 | trimSuffix "-" -}}
+  {{- $suffix := printf "-ia-%s" .key -}}
+  {{- $maxPrefix := int (sub 63 (len $suffix)) -}}
+  {{- $prefix := include "rhdh.fullname" .root | trunc $maxPrefix | trimSuffix "-" -}}
+  {{- printf "%s%s" $prefix $suffix -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Return the key to use for a Lightspeed ConfigMap volume mount.
+Return the key to use for an Intelligent Assistant ConfigMap volume mount.
 If existingConfigMap.key is set, use it; otherwise use the bundled filename.
 Expects: dict "key" <key> "entry" <config entry>
 */}}
-{{- define "rhdh.lightspeed.configMapKey" -}}
+{{- define "rhdh.intelligentAssistant.configMapKey" -}}
 {{- if .entry.existingConfigMap.key -}}
   {{- .entry.existingConfigMap.key -}}
 {{- else -}}
-  {{- include "rhdh.lightspeed.configFile" .key -}}
+  {{- include "rhdh.intelligentAssistant.configFile" .key -}}
 {{- end -}}
 {{- end -}}
 

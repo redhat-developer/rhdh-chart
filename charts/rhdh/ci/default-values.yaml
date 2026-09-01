@@ -2,7 +2,7 @@
 # The chart features under test (deployment, config, probes, etc.) don't depend on actual plugins.
 dynamicPlugins:
   includes: []
-lightspeed:
+intelligentAssistant:
   plugins: []
 orchestrator:
   plugins: []

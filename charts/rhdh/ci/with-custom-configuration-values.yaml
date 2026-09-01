@@ -5,7 +5,7 @@ dynamicPlugins:
 extraAppConfig:
   - configMapRef: "my-app-config"
     filename: "app-config-custom.yaml"
-lightspeed:
+intelligentAssistant:
   plugins: []
   existingSecret: "test-lightspeed-secret"
   config:
