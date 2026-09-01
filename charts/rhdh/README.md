@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 1.0.2
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 2.0.0
 ```
 
 ## Introduction
@@ -191,7 +191,7 @@ Kubernetes: `>= 1.31.0-0`
 | commandOverride | Override the container command. | list | `[]` |
 | commonAnnotations | Annotations applied to ALL chart resources. | object | `{}` |
 | commonLabels | Labels applied to ALL chart resources. | object | `{}` |
-| containerSecurityContext | Security context for the main RHDH container (not the Lightspeed sidecar or init containers). | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| containerSecurityContext | Security context for the main RHDH container (not the Lightspeed Core sidecar or init containers). | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
 | deploymentAnnotations | Annotations for the Deployment resource (not the pod). | object | `{}` |
 | dynamicPlugins | Dynamic plugin system configuration. | object | `{"includes":["dynamic-plugins.default.yaml"],"initContainer":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}},"maxEntrySize":40000000,"plugins":[],"volume":{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"type":"ephemeral"}}` |
 | dynamicPlugins.includes | Array of YAML files listing dynamic plugins to include. Relative paths are resolved from the working directory of the initContainer (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
@@ -224,10 +224,10 @@ Kubernetes: `>= 1.31.0-0`
 | externalDatabase.user | External database user. | string | `"postgres"` |
 | extraAppConfig | Additional app-config files from existing ConfigMaps. | list | `[]` |
 | extraArgs | Extra arguments appended after the system config flags. | list | `[]` |
-| extraContainers | Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed sidecar), never replacing them. | list | `[]` |
+| extraContainers | Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them. | list | `[]` |
 | extraEnv | Extra environment variables appended after the system env vars. | list | `[]` |
 | extraEnvFrom | Extra envFrom entries appended to the container. Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix). | list | `[]` |
-| extraInitContainers | Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Lightspeed RAG init), never replacing them. | list | `[]` |
+| extraInitContainers | Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them. | list | `[]` |
 | extraVolumeMounts | Additional volume mounts to add to the main container. These are ADDED to system-required mounts, never replacing them. | list | `[]` |
 | extraVolumes | Additional volumes to add to the pod. These are ADDED to system-required volumes (dynamic-plugins-root, temp, npmcacache, etc.), never replacing them. | list | `[]` |
 | fullnameOverride | Override the full resource name. | string | `""` |
@@ -243,32 +243,32 @@ Kubernetes: `>= 1.31.0-0`
 | image.digest | Overrides the image tag with an image digest. | string | `""` |
 | imagePullSecrets | Secrets for pulling images from private registries (merged with global.imagePullSecrets). | list | `[]` |
 | ingress | Kubernetes Ingress configuration. | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"{{ .Values.host }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` |
-| lightspeed | Built-in Lightspeed AI feature configuration. | object | `{"config":{"profile":{"existingConfigMap":{"key":"","name":""}},"server":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}},"core":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"0.6.2"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"enabled":true,"existingSecret":"","plugins":[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}],"ragInit":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"redhat-ai-dev/rag-content","tag":"release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"runtimeVolume":{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}}` |
-| lightspeed.config | Configuration files mounted into the sidecar. By default, the chart creates ConfigMaps from bundled source files. Set existingConfigMap to use a pre-existing ConfigMap instead. | object | `{"profile":{"existingConfigMap":{"key":"","name":""}},"server":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}}` |
-| lightspeed.config.profile | Python profile with prompt templates (rhdh-profile.py). | object | `{"existingConfigMap":{"key":"","name":""}}` |
-| lightspeed.config.profile.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled rhdh-profile.py |
-| lightspeed.config.profile.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (rhdh-profile.py) if not set. | string | `""` |
-| lightspeed.config.profile.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
-| lightspeed.config.server | Llama Stack server configuration (config.yaml). | object | `{"existingConfigMap":{"key":"","name":""}}` |
-| lightspeed.config.server.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled config.yaml |
-| lightspeed.config.server.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (config.yaml) if not set. | string | `""` |
-| lightspeed.config.server.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
-| lightspeed.config.stack | Lightspeed Core service configuration (lightspeed-stack.yaml). | object | `{"existingConfigMap":{"key":"","name":""}}` |
-| lightspeed.config.stack.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled lightspeed-stack.yaml |
-| lightspeed.config.stack.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (lightspeed-stack.yaml) if not set. | string | `""` |
-| lightspeed.config.stack.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
-| lightspeed.core | Lightspeed Core sidecar container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"0.6.2"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}}` |
-| lightspeed.core.argsOverride | Override the container's default args. Leave empty to use the image defaults. | list | `[]` |
-| lightspeed.core.commandOverride | Override the container's default command. Leave empty to use the image entrypoint. | list | `[]` |
-| lightspeed.core.extraArgs | Extra arguments appended after the default arguments. Ignored when argsOverride is set. | list | `[]` |
-| lightspeed.existingSecret | Name of an existing Secret to inject via envFrom into the lightspeed-core container. If empty, no secret is mounted. Expected keys (all optional — only set the ones for the providers you use):   ENABLE_VLLM, VLLM_URL, VLLM_API_KEY, VLLM_MAX_TOKENS, VLLM_TLS_VERIFY,   ENABLE_OPENAI, OPENAI_API_KEY,   ENABLE_VERTEX_AI, VERTEX_AI_PROJECT, VERTEX_AI_LOCATION, GOOGLE_APPLICATION_CREDENTIALS,   ENABLE_OLLAMA, OLLAMA_URL,   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME,   LLAMA_STACK_LOGGING See files/lightspeed/secret.example.yaml for a reference template. | string | `""` |
-| lightspeed.plugins | Lightspeed dynamic plugin packages. | list | `[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-lightspeed-backend:{{ \"{{inherit}}\" }}"}]` |
-| lightspeed.ragInit | RAG data bootstrap init container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"redhat-ai-dev/rag-content","tag":"release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}}` |
-| lightspeed.ragInit.argsOverride | Override the default arguments for the RAG init container. | list | `[]` |
-| lightspeed.ragInit.commandOverride | Override the default command for the RAG init container. | list | `[]` |
-| lightspeed.ragInit.extraArgs | Extra arguments appended after the default arguments. Ignored when argsOverride is set. | list | `[]` |
-| lightspeed.runtimeVolume | Writable scratch volume for the sidecar (/tmp). | object | `{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}` |
-| lightspeed.runtimeVolume.type | Volume type: "emptyDir" or "persistentVolumeClaim". | string | `"emptyDir"` |
+| intelligentAssistant | Built-in Intelligent Assistant feature configuration. | object | `{"config":{"profile":{"existingConfigMap":{"key":"","name":""}},"server":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}},"core":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"0.6.2"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"enabled":true,"existingSecret":"","plugins":[{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"},{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"}],"ragInit":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"redhat-ai-dev/rag-content","tag":"release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"runtimeVolume":{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}}` |
+| intelligentAssistant.config | Configuration files mounted into the sidecar. By default, the chart creates ConfigMaps from bundled source files. Set existingConfigMap to use a pre-existing ConfigMap instead. | object | `{"profile":{"existingConfigMap":{"key":"","name":""}},"server":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}}` |
+| intelligentAssistant.config.profile | Python profile with prompt templates (rhdh-profile.py). | object | `{"existingConfigMap":{"key":"","name":""}}` |
+| intelligentAssistant.config.profile.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled rhdh-profile.py |
+| intelligentAssistant.config.profile.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (rhdh-profile.py) if not set. | string | `""` |
+| intelligentAssistant.config.profile.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
+| intelligentAssistant.config.server | Llama Stack server configuration (config.yaml). | object | `{"existingConfigMap":{"key":"","name":""}}` |
+| intelligentAssistant.config.server.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled config.yaml |
+| intelligentAssistant.config.server.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (config.yaml) if not set. | string | `""` |
+| intelligentAssistant.config.server.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
+| intelligentAssistant.config.stack | Lightspeed Core service configuration (lightspeed-stack.yaml). | object | `{"existingConfigMap":{"key":"","name":""}}` |
+| intelligentAssistant.config.stack.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled lightspeed-stack.yaml |
+| intelligentAssistant.config.stack.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (lightspeed-stack.yaml) if not set. | string | `""` |
+| intelligentAssistant.config.stack.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
+| intelligentAssistant.core | Lightspeed Core sidecar container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"0.6.2"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}}` |
+| intelligentAssistant.core.argsOverride | Override the container's default args. Leave empty to use the image defaults. | list | `[]` |
+| intelligentAssistant.core.commandOverride | Override the container's default command. Leave empty to use the image entrypoint. | list | `[]` |
+| intelligentAssistant.core.extraArgs | Extra arguments appended after the default arguments. Ignored when argsOverride is set. | list | `[]` |
+| intelligentAssistant.existingSecret | Name of an existing Secret to inject via envFrom into the lightspeed-core container. If empty, no secret is mounted. Expected keys (all optional — only set the ones for the providers you use):   ENABLE_VLLM, VLLM_URL, VLLM_API_KEY, VLLM_MAX_TOKENS, VLLM_TLS_VERIFY,   ENABLE_OPENAI, OPENAI_API_KEY,   ENABLE_VERTEX_AI, VERTEX_AI_PROJECT, VERTEX_AI_LOCATION, GOOGLE_APPLICATION_CREDENTIALS,   ENABLE_OLLAMA, OLLAMA_URL,   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME,   LLAMA_STACK_LOGGING See files/intelligent-assistant/secret.example.yaml for a reference template. | string | `""` |
+| intelligentAssistant.plugins | Intelligent Assistant dynamic plugin packages. | list | `[{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"},{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"}]` |
+| intelligentAssistant.ragInit | RAG data bootstrap init container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"redhat-ai-dev/rag-content","tag":"release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}}` |
+| intelligentAssistant.ragInit.argsOverride | Override the default arguments for the RAG init container. | list | `[]` |
+| intelligentAssistant.ragInit.commandOverride | Override the default command for the RAG init container. | list | `[]` |
+| intelligentAssistant.ragInit.extraArgs | Extra arguments appended after the default arguments. Ignored when argsOverride is set. | list | `[]` |
+| intelligentAssistant.runtimeVolume | Writable scratch volume for the sidecar (/tmp). | object | `{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}` |
+| intelligentAssistant.runtimeVolume.type | Volume type: "emptyDir" or "persistentVolumeClaim". | string | `"emptyDir"` |
 | livenessProbe | Liveness probe configuration. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":4}` |
 | metrics | Prometheus metrics configuration. | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"path":"/metrics","port":"http-metrics"}}` |
 | nameOverride | Override the chart name used in resource naming. | string | `""` |
@@ -321,7 +321,7 @@ Features enabled by the default chart configuration:
 1. Uses [rhdh](https://github.com/redhat-developer/rhdh/) that pre-loads a lot of useful plugins and features
 2. Exposes a `Route` for easy access to the instance
 3. Enables OpenShift-compatible PostgreSQL database storage
-4. Built-in Lightspeed AI feature (enabled by default)
+4. Built-in Intelligent Assistant feature (enabled by default)
 5. Dynamic plugins system with catalog index support
 
 For additional instance features please consult the [documentation for `rhdh`](https://github.com/redhat-developer/rhdh/tree/main/showcase-docs).
@@ -354,7 +354,7 @@ System-required volumes, volume mounts, environment variables, init containers, 
 - `extraVolumes` — appended after dynamic-plugins-root, temp, npmcacache, extensions-catalog, etc.
 - `extraVolumeMounts` — appended after dynamic-plugins-root, extensions, temp mounts
 - `extraEnv` — appended after APP_CONFIG_backend_listen_port, BACKEND_SECRET, POSTGRES_* vars
-- `extraInitContainers` — appended after install-dynamic-plugins and Lightspeed RAG init
+- `extraInitContainers` — appended after install-dynamic-plugins and Intelligent Assistant RAG init
 - `extraContainers` — appended after the Lightspeed Core sidecar
 
 This means you never need to copy system defaults to add your own entries.
@@ -409,17 +409,19 @@ You can also configure additional catalog index images via `catalogIndex.extraIm
 
 For detailed information on configuring the catalog index, including how to override the default image, use a private registry, or add extra catalog index images, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
 
-### Lightspeed
+### Intelligent Assistant
 
-Use `lightspeed.enabled` to enable or disable the built-in Lightspeed feature.
+Use `intelligentAssistant.enabled` to enable or disable the built-in Intelligent Assistant feature.
 
-When enabled, the chart adds the default Lightspeed dynamic plugins, a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, a chart-generated Secret, and separate runtime and RAG data volumes. Override `lightspeed.plugins` for disconnected environments.
+When enabled, the chart adds the default Intelligent Assistant dynamic plugins (`ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant` and `ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend`), a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, and separate runtime and RAG data volumes. Override `intelligentAssistant.plugins` for disconnected environments. Configure an LLM provider with `intelligentAssistant.existingSecret`; the chart does not create that Secret. Plugin app-config uses the `intelligent-assistant:` namespace (not `lightspeed:`).
 
-Use `lightspeed.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
+This is a breaking change from chart 1.x: rename `lightspeed:` to `intelligentAssistant:` in your values. Chart-generated ConfigMaps are named `{fullname}-ia-{stack,server,profile}` instead of `{fullname}-lightspeed-*`, so Helm replaces those objects on upgrade. The `ia` infix is used because Kubernetes names are limited to 63 characters.
 
-When using the built-in Lightspeed feature, do not also keep Lightspeed plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `lightspeed.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate Lightspeed plugin entries.
+Use `intelligentAssistant.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
 
-The Lightspeed Core sidecar loads the chart-created Lightspeed Secret as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
+When using the built-in Intelligent Assistant feature, do not also keep those plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed or Intelligent Assistant there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `intelligentAssistant.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate plugin entries.
+
+The Lightspeed Core sidecar loads `intelligentAssistant.existingSecret` as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
 
 ### Vanilla Kubernetes compatibility mode
 

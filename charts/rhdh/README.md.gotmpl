@@ -167,7 +167,7 @@ Features enabled by the default chart configuration:
 1. Uses [rhdh](https://github.com/redhat-developer/rhdh/) that pre-loads a lot of useful plugins and features
 2. Exposes a `Route` for easy access to the instance
 3. Enables OpenShift-compatible PostgreSQL database storage
-4. Built-in Lightspeed AI feature (enabled by default)
+4. Built-in Intelligent Assistant feature (enabled by default)
 5. Dynamic plugins system with catalog index support
 
 For additional instance features please consult the [documentation for `rhdh`](https://github.com/redhat-developer/rhdh/tree/main/showcase-docs).
@@ -200,7 +200,7 @@ System-required volumes, volume mounts, environment variables, init containers, 
 - `extraVolumes` — appended after dynamic-plugins-root, temp, npmcacache, extensions-catalog, etc.
 - `extraVolumeMounts` — appended after dynamic-plugins-root, extensions, temp mounts
 - `extraEnv` — appended after APP_CONFIG_backend_listen_port, BACKEND_SECRET, POSTGRES_* vars
-- `extraInitContainers` — appended after install-dynamic-plugins and Lightspeed RAG init
+- `extraInitContainers` — appended after install-dynamic-plugins and Intelligent Assistant RAG init
 - `extraContainers` — appended after the Lightspeed Core sidecar
 
 This means you never need to copy system defaults to add your own entries.
@@ -255,17 +255,19 @@ You can also configure additional catalog index images via `catalogIndex.extraIm
 
 For detailed information on configuring the catalog index, including how to override the default image, use a private registry, or add extra catalog index images, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
 
-### Lightspeed
+### Intelligent Assistant
 
-Use `lightspeed.enabled` to enable or disable the built-in Lightspeed feature.
+Use `intelligentAssistant.enabled` to enable or disable the built-in Intelligent Assistant feature.
 
-When enabled, the chart adds the default Lightspeed dynamic plugins, a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, a chart-generated Secret, and separate runtime and RAG data volumes. Override `lightspeed.plugins` for disconnected environments.
+When enabled, the chart adds the default Intelligent Assistant dynamic plugins (`ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant` and `ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend`), a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, and separate runtime and RAG data volumes. Override `intelligentAssistant.plugins` for disconnected environments. Configure an LLM provider with `intelligentAssistant.existingSecret`; the chart does not create that Secret. Plugin app-config uses the `intelligent-assistant:` namespace (not `lightspeed:`).
 
-Use `lightspeed.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
+This is a breaking change from chart 1.x: rename `lightspeed:` to `intelligentAssistant:` in your values. Chart-generated ConfigMaps are named `{fullname}-ia-{stack,server,profile}` instead of `{fullname}-lightspeed-*`, so Helm replaces those objects on upgrade. The `ia` infix is used because Kubernetes names are limited to 63 characters.
 
-When using the built-in Lightspeed feature, do not also keep Lightspeed plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `lightspeed.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate Lightspeed plugin entries.
+Use `intelligentAssistant.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
 
-The Lightspeed Core sidecar loads the chart-created Lightspeed Secret as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
+When using the built-in Intelligent Assistant feature, do not also keep those plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed or Intelligent Assistant there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `intelligentAssistant.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate plugin entries.
+
+The Lightspeed Core sidecar loads `intelligentAssistant.existingSecret` as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
 
 ### Vanilla Kubernetes compatibility mode
 
