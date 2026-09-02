@@ -30,14 +30,10 @@ spec:
       - name: okp
         image: {{ include "rhdh.image.render" (dict "image" $ia.okp.image "global" .Values.global) | quote }}
         imagePullPolicy: {{ $ia.okp.image.pullPolicy | default "IfNotPresent" | quote }}
+        {{- with $ia.okp.securityContext }}
         securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          capabilities:
-            drop:
-              - ALL
-          seccompProfile:
-            type: "RuntimeDefault"
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         command: ["/bin/bash", "-c"]
         args:
           - |
@@ -64,4 +60,15 @@ spec:
         resources:
           {{- toYaml . | nindent 10 }}
         {{- end }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: httpd
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: solr
+          initialDelaySeconds: 30
+          periodSeconds: 30
 {{- end }}

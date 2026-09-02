@@ -497,7 +497,7 @@
             "default": []
         },
         "extraInitContainers": {
-            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.",
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins), never replacing them.",
             "type": "array",
             "default": []
         },
@@ -941,9 +941,7 @@
                         "commandOverride": { "title": "Override the container's default command.", "type": "array", "items": { "type": "string" }, "default": [] },
                         "argsOverride": { "title": "Override the chart's default container args.", "type": "array", "items": { "type": "string" }, "default": [] },
                         "extraArgs": { "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "systemArgs": { "title": "System arguments always injected (e.g. synthesized-config-output for OGX LCORE).", "type": "array", "items": { "type": "string" }, "default": ["--synthesized-config-output", "/tmp/.generated/run.yaml"] },
                         "extraEnv": { "title": "Additional environment variables.", "type": "array", "items": { "type": "object" }, "default": [] },
-                        "systemEnv": { "title": "System environment variables always injected into the sidecar.", "type": "array", "items": { "type": "object" }, "default": [{"name": "HF_HOME", "value": "/tmp/hf_cache"}] },
                         "extraVolumeMounts": { "title": "Additional volume mounts.", "type": "array", "items": { "type": "object" }, "default": [] },
                         "resources": {
                             "title": "Resource requests and limits.",
@@ -967,7 +965,7 @@
                             "properties": {
                                 "registry": { "type": "string", "default": "registry.redhat.io" },
                                 "repository": { "type": "string", "default": "offline-knowledge-portal/rhokp-rhel9" },
-                                "tag": { "type": "string", "default": "1.2.10-1786628394" },
+                                "tag": { "type": "string", "default": "1.2.12-1788274041" },
                                 "digest": { "type": "string", "default": "" },
                                 "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["Always", "IfNotPresent", "Never"] }
                             }
@@ -978,7 +976,10 @@
                             "default": {}
                         },
                         "imagePullSecrets": { "type": "array", "items": { "type": "string" }, "default": [] },
-                        "chunkFilterQuery": { "type": "string", "default": "product:*developer_hub*" }
+                        "securityContext": {
+                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+                            "default": {}
+                        }
                     }
                 }
             }

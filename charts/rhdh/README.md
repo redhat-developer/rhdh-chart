@@ -1,7 +1,6 @@
-
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 2.1.1](https://img.shields.io/badge/Version-2.1.1-informational?style=flat-square)
+![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +35,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 2.1.1
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 2.1.0
 ```
 
 ## Introduction
@@ -174,141 +173,137 @@ Kubernetes: `>= 1.31.0-0`
 
 ## Values
 
-| Key | Description | Type | Default |
-|-----|-------------|------|---------|
-| affinity | Affinity rules for pod assignment. | object | `{}` |
-| appConfig | Inline Backstage app-config YAML. Rendered into a ConfigMap and mounted as app-config-from-configmap.yaml. | object | Default config with base URLs, CORS, database connection, and backend auth. |
-| argsOverride | Override the container arguments entirely. When set, system config arguments are NOT added automatically; you must include them yourself. | list | `[]` |
-| auth | Service-to-service authentication configuration. | object | `{"backend":{"enabled":true,"existingSecretRef":{"key":"backend-secret","name":""},"value":""}}` |
-| auth.backend.enabled | Enable backend service-to-service authentication. Generates a random secret unless existingSecretRef is set or value is provided. Disable if you inject the secret via extraEnvFrom or extraEnv instead. | bool | `true` |
-| auth.backend.existingSecretRef | Reference an existing Secret instead of generating one. When not set, the chart auto-generates a random token. | object | `{"key":"backend-secret","name":""}` |
-| auth.backend.existingSecretRef.key | Key within the Secret that holds the backend auth token. | string | `"backend-secret"` |
-| auth.backend.existingSecretRef.name | Name of the existing Secret. When empty, the chart generates one. | string | `""` |
-| auth.backend.value | Use a specific value instead of generating one. | string | `""` |
-| autoscaling | Horizontal Pod Autoscaler configuration. | object | `{"enabled":false,"maxReplicas":3,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
-| catalogIndex | Catalog index configuration for automatic plugin discovery. | object | `{"extraImages":[],"image":{"digest":"","registry":"quay.io","repository":"rhdh/plugin-catalog-index","tag":"next"}}` |
-| catalogIndex.extraImages | Extra catalog index images for additional plugin discovery in the Extensions UI. Each item must include `registry`, `repository`, and `tag` fields; `name` and `digest` are optional. Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling). | list | `[]` |
-| commandOverride | Override the container command. | list | `[]` |
-| commonAnnotations | Annotations applied to ALL chart resources. | object | `{}` |
-| commonLabels | Labels applied to ALL chart resources. | object | `{}` |
-| containerSecurityContext | Security context for the main RHDH container (not the Lightspeed Core sidecar or init containers). | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
-| deploymentAnnotations | Annotations for the Deployment resource (not the pod). | object | `{}` |
-| dynamicPlugins | Dynamic plugin system configuration. | object | `{"includes":["dynamic-plugins.default.yaml"],"initContainer":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}},"maxEntrySize":40000000,"plugins":[],"volume":{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"type":"ephemeral"}}` |
-| dynamicPlugins.includes | Array of YAML files listing dynamic plugins to include. Relative paths are resolved from the working directory of the initContainer (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
-| dynamicPlugins.initContainer | Configuration for the install-dynamic-plugins init container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}}` |
-| dynamicPlugins.initContainer.argsOverride | Override the default arguments. Leave empty to use the defaults. | list | `[]` |
-| dynamicPlugins.initContainer.commandOverride | Override the default command. Leave empty to use the default (./install-dynamic-plugins.sh /dynamic-plugins-root). | list | `[]` |
-| dynamicPlugins.initContainer.extraArgs | Extra arguments appended after the default arguments. Ignored when argsOverride is set. | list | `[]` |
-| dynamicPlugins.initContainer.extraEnv | Extra environment variables appended after the system env vars (NPM_CONFIG_USERCONFIG, MAX_ENTRY_SIZE, CATALOG_INDEX_IMAGE, etc.). | list | `[]` |
-| dynamicPlugins.initContainer.extraVolumeMounts | Additional volume mounts appended after the system mounts (dynamic-plugins-root, npmrc, registry-auth, npmcacache, extensions-catalog, temp). | list | `[]` |
-| dynamicPlugins.initContainer.resources | Resource requests and limits. | object | `{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}}` |
-| dynamicPlugins.initContainer.securityContext | Security context for the init container. | object | Same as containerSecurityContext |
-| dynamicPlugins.maxEntrySize | Maximum uncompressed size (in bytes) of a single dynamic plugin entry. | int | `40000000` |
-| dynamicPlugins.plugins | List of dynamic plugins. Every item defines the plugin `package` as a NPM package spec or OCI reference. | list | `[]` |
-| dynamicPlugins.volume | Volume configuration for the dynamic plugins root directory. | object | `{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"type":"ephemeral"}` |
-| dynamicPlugins.volume.emptyDir | Raw Kubernetes emptyDir volume spec. Used when type is "emptyDir". | object | `{}` |
-| dynamicPlugins.volume.ephemeral | Ephemeral volume configuration. Used when type is "ephemeral". The chart builds the full ephemeral.volumeClaimTemplate.spec from these fields. | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` |
-| dynamicPlugins.volume.ephemeral.accessModes | Access modes for the ephemeral PVC. | list | `["ReadWriteOnce"]` |
-| dynamicPlugins.volume.ephemeral.resources | Resource requests for the ephemeral PVC. | object | `{"requests":{"storage":"5Gi"}}` |
-| dynamicPlugins.volume.ephemeral.storageClassName | StorageClass for the ephemeral volume. When empty, uses global.defaultStorageClass or the cluster default. | string | `""` |
-| dynamicPlugins.volume.pvc | Raw Kubernetes persistentVolumeClaim volume spec. Used when type is "pvc". | object | `{"claimName":""}` |
-| dynamicPlugins.volume.type | Volume type: "ephemeral" (auto-provisioned PVC per pod), "emptyDir" (scratch space, lost on pod restart), or "pvc" (pre-existing PersistentVolumeClaim). | string | `"ephemeral"` |
-| envFromOverride | Override the container envFrom entirely. When set, extraEnvFrom is ignored. Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix). | list | `[]` |
-| envOverride | Override the container environment variables entirely. When set, system env vars (BACKEND_SECRET, DB credentials, etc.) are NOT added automatically. | list | `[]` |
-| externalDatabase | External database connection. Used when postgresql.enabled is false. See docs/external-db.md for TLS setup and privilege requirements. When both postgresql.enabled and externalDatabase.host are false/empty, the chart renders no database env vars (BYO configuration via extraEnv or appConfig). | object | `{"existingSecretRef":{"key":"password","name":""},"host":"","port":5432,"user":"postgres"}` |
-| externalDatabase.existingSecretRef | Reference to an existing Secret containing the database password. | object | `{"key":"password","name":""}` |
-| externalDatabase.existingSecretRef.key | Key within the Secret that holds the password. | string | `"password"` |
-| externalDatabase.existingSecretRef.name | Name of the existing Secret. | string | `""` |
-| externalDatabase.host | External database hostname. | string | `""` |
-| externalDatabase.port | External database port. | int | `5432` |
-| externalDatabase.user | External database user. | string | `"postgres"` |
-| extraAppConfig | Additional app-config files from existing ConfigMaps. | list | `[]` |
-| extraArgs | Extra arguments appended after the system config flags. | list | `[]` |
-| extraContainers | Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them. | list | `[]` |
-| extraEnv | Extra environment variables appended after the system env vars. | list | `[]` |
-| extraEnvFrom | Extra envFrom entries appended to the container. Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix). | list | `[]` |
-| extraInitContainers | Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them. | list | `[]` |
-| extraVolumeMounts | Additional volume mounts to add to the main container. These are ADDED to system-required mounts, never replacing them. | list | `[]` |
-| extraVolumes | Additional volumes to add to the pod. These are ADDED to system-required volumes (dynamic-plugins-root, temp, npmcacache, etc.), never replacing them. | list | `[]` |
-| fullnameOverride | Override the full resource name. | string | `""` |
-| global | Global parameters shared with bitnami subcharts (postgresql, common). | object | `{"defaultStorageClass":"","imagePullSecrets":[],"imageRegistry":""}` |
-| global.defaultStorageClass | Global default StorageClass for PVCs. | string | `""` |
-| global.imagePullSecrets | Global Docker registry secret names. | list | `[]` |
-| global.imageRegistry | Global Docker image registry. Overrides per-image registries for all containers. | string | `""` |
-| host | Custom hostname. Overrides openshift.clusterRouterBase for URL generation. | string | `""` |
-| hostAliases | Host aliases for /etc/hosts entries. | list | `[]` |
-| httpRoute | Gateway API HTTPRoute configuration. | object | `{"annotations":{},"enabled":false,"hostnames":[],"labels":{},"parentRefs":[],"rules":[]}` |
-| httpRoute.labels | Additional labels for the HTTPRoute resource. | object | `{}` |
-| image | Container image configuration. | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"rhdh-community/rhdh","tag":"next"}` |
-| image.digest | Overrides the image tag with an image digest. | string | `""` |
-| imagePullSecrets | Secrets for pulling images from private registries (merged with global.imagePullSecrets). | list | `[]` |
-| ingress | Kubernetes Ingress configuration. | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"{{ .Values.host }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` |
-| intelligentAssistant | Built-in Intelligent Assistant feature configuration. | object | `{"config":{"profile":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}},"core":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"dev-20260824-cbd182b"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"enabled":true,"existingSecret":"","plugins":[{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"},{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"}],"ragInit":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"redhat-ai-dev/rag-content","tag":"release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"runtimeVolume":{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}}` |
-| intelligentAssistant.config | Configuration files mounted into the sidecar. By default, the chart creates ConfigMaps from bundled source files. Set existingConfigMap to use a pre-existing ConfigMap instead. | object | `{"profile":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}}` |
-| intelligentAssistant.config.profile | Python profile with prompt templates (rhdh-profile.py). | object | `{"existingConfigMap":{"key":"","name":""}}` |
-| intelligentAssistant.config.profile.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled rhdh-profile.py |
-| intelligentAssistant.config.profile.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (rhdh-profile.py) if not set. | string | `""` |
-| intelligentAssistant.config.profile.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
-| intelligentAssistant.config.stack | Lightspeed Core service configuration (lightspeed-stack.yaml). | object | `{"existingConfigMap":{"key":"","name":""}}` |
-| intelligentAssistant.config.stack.existingConfigMap | Use an existing ConfigMap instead of the bundled default. | object | Created from bundled lightspeed-stack.yaml |
-| intelligentAssistant.config.stack.existingConfigMap.key | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (lightspeed-stack.yaml) if not set. | string | `""` |
-| intelligentAssistant.config.stack.existingConfigMap.name | Name of the existing ConfigMap. | string | `""` |
-| intelligentAssistant.core | Lightspeed Core sidecar container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"dev-20260824-cbd182b"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}}` |
-| intelligentAssistant.core.argsOverride | Override the container's default args. Leave empty to use the chart defaults. | list | `[]` |
-| intelligentAssistant.core.commandOverride | Override the container's default command. Leave empty to use the image entrypoint. | list | `[]` |
-| intelligentAssistant.core.extraArgs | Extra arguments appended after the default arguments. Ignored when argsOverride is set. | list | `[]` |
-| intelligentAssistant.existingSecret | Name of an existing Secret that supplies credentials and settings to the lightspeed-core container. Configure the provider itself in lightspeed-stack.yaml. If empty, no Secret is loaded. Expected keys (all optional; include only keys used by the configured provider):   VLLM_URL, VLLM_API_KEY, VLLM_MAX_TOKENS, VLLM_TLS_VERIFY,   OPENAI_API_KEY,   VERTEX_AI_PROJECT, VERTEX_AI_LOCATION, GOOGLE_APPLICATION_CREDENTIALS,   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME Set ENABLE_VALIDATION to question_validity to enable validation. GOOGLE_APPLICATION_CREDENTIALS must be a path to a credentials file mounted in the sidecar. See files/intelligent-assistant/secret.example.yaml for a reference template. | string | `""` |
-| intelligentAssistant.plugins | Intelligent Assistant dynamic plugin packages. | list | `[{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"},{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"}]` |
-| intelligentAssistant.ragInit | RAG data bootstrap init container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"redhat-ai-dev/rag-content","tag":"release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"100m","memory":"500Mi"},"requests":{"cpu":"50m","memory":"150Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}}` |
-| intelligentAssistant.ragInit.argsOverride | Override the default arguments for the RAG init container. | list | `[]` |
-| intelligentAssistant.ragInit.commandOverride | Override the default command for the RAG init container. | list | `[]` |
-| intelligentAssistant.ragInit.extraArgs | Extra arguments appended after the default arguments. Ignored when argsOverride is set. | list | `[]` |
-| intelligentAssistant.okp | OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval when Intelligent Assistant is enabled. | object | `{"chunkFilterQuery":"product:*developer_hub*","httpd":{"compressed":"true","encrypt":"false","serverName":"localhost"},"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"registry.redhat.io","repository":"offline-knowledge-portal/rhokp-rhel9","tag":"1.2.10-1786628394"},"imagePullSecrets":[],"ingress":{"annotations":{},"className":"","enabled":true,"host":"","tls":{"enabled":false,"secretName":""}},"replicaCount":1,"resources":{"limits":{"cpu":"2","memory":"4Gi"},"requests":{"cpu":"200m","memory":"2Gi"}},"route":{"enabled":true,"tls":{"insecureEdgeTerminationPolicy":"Allow","termination":"edge"}},"service":{"type":"ClusterIP"},"solr":{"hostBind":"0.0.0.0","memory":"1g"}}` |
-| intelligentAssistant.okp.imagePullSecrets | Image pull secrets for the OKP container image. Required on vanilla Kubernetes to authenticate with registry.redhat.io. Not needed on OpenShift where the cluster-wide pull secret covers Red Hat registries. | list | `[]` |
-| intelligentAssistant.runtimeVolume | Writable scratch volume for the sidecar (/tmp). | object | `{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}` |
-| intelligentAssistant.runtimeVolume.type | Volume type: "emptyDir" or "persistentVolumeClaim". | string | `"emptyDir"` |
-| livenessProbe | Liveness probe configuration. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":4}` |
-| metrics | Prometheus metrics configuration. | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"path":"/metrics","port":"http-metrics"}}` |
-| nameOverride | Override the chart name used in resource naming. | string | `""` |
-| nodeSelector | Node labels for pod assignment. | object | `{}` |
-| openshift | OpenShift-specific configuration. | object | `{"clusterRouterBase":"apps.example.com","route":{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","targetPort":"http-backend","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}}` |
-| openshift.clusterRouterBase | Cluster router base domain used to auto-generate the hostname. | string | `"apps.example.com"` |
-| openshift.route | OpenShift Route configuration. | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","targetPort":"http-backend","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
-| orchestrator | Orchestrator (Serverless workflows) configuration. | object | `{"enabled":false,"plugins":[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ \"{{inherit}}\" }}"}],"serverlessLogicOperator":{"enabled":true},"serverlessOperator":{"enabled":true},"sonataflowPlatform":{"dataIndex":{"image":{"digest":"","registry":"","repository":"","tag":""}},"dbCreationJob":{"activeDeadlineSeconds":120,"backoffLimit":2,"image":{"digest":"{{ .Values.postgresql.image.digest }}","registry":"{{ .Values.postgresql.image.registry }}","repository":"{{ .Values.postgresql.image.repository }}","tag":"{{ .Values.postgresql.image.tag }}"},"ttlSecondsAfterFinished":null},"eventing":{"broker":{"name":"","namespace":""}},"externalDB":{"existingSecret":"","host":"","name":"","port":""},"jobService":{"image":{"digest":"","registry":"","repository":"","tag":""}},"monitoring":{"enabled":true},"resources":{"limits":{"cpu":"500m","memory":"1Gi"},"requests":{"cpu":"250m","memory":"64Mi"}}}}` |
-| orchestrator.sonataflowPlatform.dataIndex | SonataFlow Data Index service configuration. | object | `{"image":{"digest":"","registry":"","repository":"","tag":""}}` |
-| orchestrator.sonataflowPlatform.dataIndex.image | Override the Data Index container image. If empty, the operator default is used. | object | `{"digest":"","registry":"","repository":"","tag":""}` |
-| orchestrator.sonataflowPlatform.dbCreationJob | Database creation Job configuration. | object | `{"activeDeadlineSeconds":120,"backoffLimit":2,"image":{"digest":"{{ .Values.postgresql.image.digest }}","registry":"{{ .Values.postgresql.image.registry }}","repository":"{{ .Values.postgresql.image.repository }}","tag":"{{ .Values.postgresql.image.tag }}"},"ttlSecondsAfterFinished":null}` |
-| orchestrator.sonataflowPlatform.dbCreationJob.image | Container image for the create-db Job. | object | `{"digest":"{{ .Values.postgresql.image.digest }}","registry":"{{ .Values.postgresql.image.registry }}","repository":"{{ .Values.postgresql.image.repository }}","tag":"{{ .Values.postgresql.image.tag }}"}` |
-| orchestrator.sonataflowPlatform.externalDB | External database connection. Used when postgresql.enabled is false. | object | `{"existingSecret":"","host":"","name":"","port":""}` |
-| orchestrator.sonataflowPlatform.externalDB.existingSecret | Name of a Secret containing POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD keys. | string | `""` |
-| orchestrator.sonataflowPlatform.externalDB.host | Database host (used in JDBC URLs). | string | `""` |
-| orchestrator.sonataflowPlatform.externalDB.name | Database name to connect to for the CREATE DATABASE command. | string | `""` |
-| orchestrator.sonataflowPlatform.externalDB.port | Database port (used in JDBC URLs). | string | `""` |
-| orchestrator.sonataflowPlatform.jobService | SonataFlow Job Service configuration. | object | `{"image":{"digest":"","registry":"","repository":"","tag":""}}` |
-| orchestrator.sonataflowPlatform.jobService.image | Override the Job Service container image. If empty, the operator default is used. | object | `{"digest":"","registry":"","repository":"","tag":""}` |
-| podAnnotations | Annotations to add to the pod. | object | `{}` |
-| podDisruptionBudget | Pod Disruption Budget configuration. | object | `{"create":false,"maxUnavailable":1,"minAvailable":""}` |
-| podLabels | Labels to add to the pod. | object | `{}` |
-| podSecurityContext | Pod-level security context. | object | `{}` |
-| postgresql | Built-in PostgreSQL database (bitnami subchart). | object | `{"auth":{"secretKeys":{"adminPasswordKey":"postgres-password","userPasswordKey":"password"}},"enabled":true,"image":{"digest":"","registry":"quay.io","repository":"fedora/postgresql-15","tag":"latest"},"postgresqlDataDir":"/var/lib/pgsql/data/userdata","primary":{"containerSecurityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":false},"extraEnvVars":[{"name":"POSTGRESQL_ADMIN_PASSWORD","valueFrom":{"secretKeyRef":{"key":"{{- include \"rhdh.postgresql.adminPasswordKey\" . }}","name":"{{- include \"rhdh.postgresql.secretName\" . }}"}}}],"persistence":{"enabled":true,"mountPath":"/var/lib/pgsql/data","size":"1Gi"},"podSecurityContext":{"enabled":false},"resources":{"limits":{"cpu":"250m","ephemeral-storage":"20Mi","memory":"1024Mi"},"requests":{"cpu":"250m","memory":"256Mi"}}},"serviceBindings":{"enabled":true}}` |
-| preInitContainers | Init containers to run BEFORE the system init containers (e.g. inject auth credentials before install-dynamic-plugins runs). | list | `[]` |
-| readinessProbe | Readiness probe configuration. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/readiness","port":"backend","scheme":"HTTP"},"periodSeconds":10,"successThreshold":2,"timeoutSeconds":4}` |
-| replicaCount | Number of desired pods. | int | `1` |
-| resources | Resource requests and limits for the main RHDH container. | object | `{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"1Gi"}}` |
-| revisionHistoryLimit | Number of old ReplicaSets to retain. | int | `10` |
-| service | Service configuration. | object | `{"annotations":{},"clusterIP":"","externalTrafficPolicy":"","extraPorts":[{"name":"http-metrics","port":9464,"targetPort":9464}],"ipFamilies":[],"ipFamilyPolicy":"","loadBalancerIP":"","loadBalancerSourceRanges":[],"nodePort":"","port":7007,"sessionAffinity":"","type":"ClusterIP"}` |
-| service.extraPorts | Additional service ports. | list | `[{"name":"http-metrics","port":9464,"targetPort":9464}]` |
-| service.ipFamilies | IP families for dual-stack networking. | list | `[]` |
-| service.ipFamilyPolicy | IP family policy for dual-stack networking. | string | `""` |
-| service.nodePort | Node port for NodePort/LoadBalancer service types (range 30000-32767). | string | `""` |
-| serviceAccount | ServiceAccount configuration. | object | `{"annotations":{},"automount":true,"create":false,"labels":{},"name":""}` |
-| serviceAccount.labels | Additional labels for the ServiceAccount. | object | `{}` |
-| serviceAccount.name | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. | string | `""` |
-| startupProbe | Startup probe configuration. Gives the application time to start before liveness/readiness probes kick in. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":20,"successThreshold":1,"timeoutSeconds":4}` |
-| strategy | Deployment update strategy. | object | `{}` |
-| test | Test pod configuration for `helm test`. | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"curl/curl","tag":"8.21.0"},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}}` |
-| tolerations | Tolerations for pod assignment. | list | `[]` |
-| topologySpreadConstraints | Topology spread constraints for pod scheduling. | list | `[]` |
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` | Affinity rules for pod assignment. |
+| appConfig | object | Default config with base URLs, CORS, database connection, and backend auth. | Inline Backstage app-config YAML. Rendered into a ConfigMap and mounted as app-config-from-configmap.yaml. |
+| argsOverride | list | `[]` | Override the container arguments entirely. When set, system config arguments are NOT added automatically; you must include them yourself. |
+| auth | object | `{"backend":{"enabled":true,"existingSecretRef":{"key":"backend-secret","name":""},"value":""}}` | Service-to-service authentication configuration. |
+| auth.backend.enabled | bool | `true` | Enable backend service-to-service authentication. Generates a random secret unless existingSecretRef is set or value is provided. Disable if you inject the secret via extraEnvFrom or extraEnv instead. |
+| auth.backend.existingSecretRef | object | `{"key":"backend-secret","name":""}` | Reference an existing Secret instead of generating one. When not set, the chart auto-generates a random token. |
+| auth.backend.existingSecretRef.key | string | `"backend-secret"` | Key within the Secret that holds the backend auth token. |
+| auth.backend.existingSecretRef.name | string | `""` | Name of the existing Secret. When empty, the chart generates one. |
+| auth.backend.value | string | `""` | Use a specific value instead of generating one. |
+| autoscaling | object | `{"enabled":false,"maxReplicas":3,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Horizontal Pod Autoscaler configuration. |
+| catalogIndex | object | `{"extraImages":[],"image":{"digest":"","registry":"quay.io","repository":"rhdh/plugin-catalog-index","tag":"next"}}` | Catalog index configuration for automatic plugin discovery. |
+| catalogIndex.extraImages | list | `[]` | Extra catalog index images for additional plugin discovery in the Extensions UI. Each item must include `registry`, `repository`, and `tag` fields; `name` and `digest` are optional. Only catalog entities are extracted from extra images (no `dynamic-plugins.default.yaml` handling). |
+| commandOverride | list | `[]` | Override the container command. |
+| commonAnnotations | object | `{}` | Annotations applied to ALL chart resources. |
+| commonLabels | object | `{}` | Labels applied to ALL chart resources. |
+| containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the main RHDH container (not the Lightspeed Core sidecar or init containers). |
+| deploymentAnnotations | object | `{}` | Annotations for the Deployment resource (not the pod). |
+| dynamicPlugins | object | `{"includes":["dynamic-plugins.default.yaml"],"initContainer":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}},"maxEntrySize":40000000,"plugins":[],"volume":{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"type":"ephemeral"}}` | Dynamic plugin system configuration. |
+| dynamicPlugins.includes | list | `["dynamic-plugins.default.yaml"]` | Array of YAML files listing dynamic plugins to include. Relative paths are resolved from the working directory of the initContainer (`/opt/app-root/src`). |
+| dynamicPlugins.initContainer | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}}` | Configuration for the install-dynamic-plugins init container. |
+| dynamicPlugins.initContainer.argsOverride | list | `[]` | Override the default arguments. Leave empty to use the defaults. |
+| dynamicPlugins.initContainer.commandOverride | list | `[]` | Override the default command. Leave empty to use the default (./install-dynamic-plugins.sh /dynamic-plugins-root). |
+| dynamicPlugins.initContainer.extraArgs | list | `[]` | Extra arguments appended after the default arguments. Ignored when argsOverride is set. |
+| dynamicPlugins.initContainer.extraEnv | list | `[]` | Extra environment variables appended after the system env vars (NPM_CONFIG_USERCONFIG, MAX_ENTRY_SIZE, CATALOG_INDEX_IMAGE, etc.). |
+| dynamicPlugins.initContainer.extraVolumeMounts | list | `[]` | Additional volume mounts appended after the system mounts (dynamic-plugins-root, npmrc, registry-auth, npmcacache, extensions-catalog, temp). |
+| dynamicPlugins.initContainer.resources | object | `{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}}` | Resource requests and limits. |
+| dynamicPlugins.initContainer.securityContext | object | Same as containerSecurityContext | Security context for the init container. |
+| dynamicPlugins.maxEntrySize | int | `40000000` | Maximum uncompressed size (in bytes) of a single dynamic plugin entry. |
+| dynamicPlugins.plugins | list | `[]` | List of dynamic plugins. Every item defines the plugin `package` as a NPM package spec or OCI reference. |
+| dynamicPlugins.volume | object | `{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"type":"ephemeral"}` | Volume configuration for the dynamic plugins root directory. |
+| dynamicPlugins.volume.emptyDir | object | `{}` | Raw Kubernetes emptyDir volume spec. Used when type is "emptyDir". |
+| dynamicPlugins.volume.ephemeral | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Ephemeral volume configuration. Used when type is "ephemeral". The chart builds the full ephemeral.volumeClaimTemplate.spec from these fields. |
+| dynamicPlugins.volume.ephemeral.accessModes | list | `["ReadWriteOnce"]` | Access modes for the ephemeral PVC. |
+| dynamicPlugins.volume.ephemeral.resources | object | `{"requests":{"storage":"5Gi"}}` | Resource requests for the ephemeral PVC. |
+| dynamicPlugins.volume.ephemeral.storageClassName | string | `""` | StorageClass for the ephemeral volume. When empty, uses global.defaultStorageClass or the cluster default. |
+| dynamicPlugins.volume.pvc | object | `{"claimName":""}` | Raw Kubernetes persistentVolumeClaim volume spec. Used when type is "pvc". |
+| dynamicPlugins.volume.type | string | `"ephemeral"` | Volume type: "ephemeral" (auto-provisioned PVC per pod), "emptyDir" (scratch space, lost on pod restart), or "pvc" (pre-existing PersistentVolumeClaim). |
+| envFromOverride | list | `[]` | Override the container envFrom entirely. When set, extraEnvFrom is ignored. Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix). |
+| envOverride | list | `[]` | Override the container environment variables entirely. When set, system env vars (BACKEND_SECRET, DB credentials, etc.) are NOT added automatically. |
+| externalDatabase | object | `{"existingSecretRef":{"key":"password","name":""},"host":"","port":5432,"user":"postgres"}` | External database connection. Used when postgresql.enabled is false. See docs/external-db.md for TLS setup and privilege requirements. When both postgresql.enabled and externalDatabase.host are false/empty, the chart renders no database env vars (BYO configuration via extraEnv or appConfig). |
+| externalDatabase.existingSecretRef | object | `{"key":"password","name":""}` | Reference to an existing Secret containing the database password. |
+| externalDatabase.existingSecretRef.key | string | `"password"` | Key within the Secret that holds the password. |
+| externalDatabase.existingSecretRef.name | string | `""` | Name of the existing Secret. |
+| externalDatabase.host | string | `""` | External database hostname. |
+| externalDatabase.port | int | `5432` | External database port. |
+| externalDatabase.user | string | `"postgres"` | External database user. |
+| extraAppConfig | list | `[]` | Additional app-config files from existing ConfigMaps. |
+| extraArgs | list | `[]` | Extra arguments appended after the system config flags. |
+| extraContainers | list | `[]` | Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them. |
+| extraEnv | list | `[]` | Extra environment variables appended after the system env vars. |
+| extraEnvFrom | list | `[]` | Extra envFrom entries appended to the container. Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix). |
+| extraInitContainers | list | `[]` | Additional init containers. These are ADDED after system init containers (install-dynamic-plugins), never replacing them. |
+| extraVolumeMounts | list | `[]` | Additional volume mounts to add to the main container. These are ADDED to system-required mounts, never replacing them. |
+| extraVolumes | list | `[]` | Additional volumes to add to the pod. These are ADDED to system-required volumes (dynamic-plugins-root, temp, npmcacache, etc.), never replacing them. |
+| fullnameOverride | string | `""` | Override the full resource name. |
+| global | object | `{"defaultStorageClass":"","imagePullSecrets":[],"imageRegistry":""}` | Global parameters shared with bitnami subcharts (postgresql, common). |
+| global.defaultStorageClass | string | `""` | Global default StorageClass for PVCs. |
+| global.imagePullSecrets | list | `[]` | Global Docker registry secret names. |
+| global.imageRegistry | string | `""` | Global Docker image registry. Overrides per-image registries for all containers. |
+| host | string | `""` | Custom hostname. Overrides openshift.clusterRouterBase for URL generation. |
+| hostAliases | list | `[]` | Host aliases for /etc/hosts entries. |
+| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":[],"labels":{},"parentRefs":[],"rules":[]}` | Gateway API HTTPRoute configuration. |
+| httpRoute.labels | object | `{}` | Additional labels for the HTTPRoute resource. |
+| image | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"rhdh-community/rhdh","tag":"next"}` | Container image configuration. |
+| image.digest | string | `""` | Overrides the image tag with an image digest. |
+| imagePullSecrets | list | `[]` | Secrets for pulling images from private registries (merged with global.imagePullSecrets). |
+| ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"{{ .Values.host }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Kubernetes Ingress configuration. |
+| intelligentAssistant | object | `{"config":{"profile":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}},"core":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"dev-20260824-cbd182b"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"enabled":true,"existingSecret":"","okp":{"httpd":{"compressed":"true","encrypt":"false","serverName":"localhost"},"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"registry.redhat.io","repository":"offline-knowledge-portal/rhokp-rhel9","tag":"1.2.12-1788274041"},"imagePullSecrets":[],"ingress":{"annotations":{},"className":"","enabled":true,"host":"","tls":{"enabled":false,"secretName":""}},"replicaCount":1,"resources":{"limits":{"cpu":"2","memory":"4Gi"},"requests":{"cpu":"200m","memory":"2Gi"}},"route":{"enabled":true,"tls":{"insecureEdgeTerminationPolicy":"Allow","termination":"edge"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"service":{"type":"ClusterIP"},"solr":{"hostBind":"0.0.0.0","memory":"1g"}},"plugins":[{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"},{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"}],"runtimeVolume":{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}}` | Built-in Intelligent Assistant feature configuration. |
+| intelligentAssistant.config | object | `{"profile":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}}` | Configuration files mounted into the sidecar. By default, the chart creates ConfigMaps from bundled source files. Set existingConfigMap to use a pre-existing ConfigMap instead. |
+| intelligentAssistant.config.profile | object | `{"existingConfigMap":{"key":"","name":""}}` | Python profile with prompt templates (rhdh-profile.py). |
+| intelligentAssistant.config.profile.existingConfigMap | object | Created from bundled rhdh-profile.py | Use an existing ConfigMap instead of the bundled default. |
+| intelligentAssistant.config.profile.existingConfigMap.key | string | `""` | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (rhdh-profile.py) if not set. |
+| intelligentAssistant.config.profile.existingConfigMap.name | string | `""` | Name of the existing ConfigMap. |
+| intelligentAssistant.config.stack | object | `{"existingConfigMap":{"key":"","name":""}}` | Lightspeed Core service configuration (lightspeed-stack.yaml). |
+| intelligentAssistant.config.stack.existingConfigMap | object | Created from bundled lightspeed-stack.yaml | Use an existing ConfigMap instead of the bundled default. |
+| intelligentAssistant.config.stack.existingConfigMap.key | string | `""` | Key within the ConfigMap that holds the file content. Defaults to the bundled filename (lightspeed-stack.yaml) if not set. |
+| intelligentAssistant.config.stack.existingConfigMap.name | string | `""` | Name of the existing ConfigMap. |
+| intelligentAssistant.core | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"dev-20260824-cbd182b"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}}` | Lightspeed Core sidecar container. |
+| intelligentAssistant.core.argsOverride | list | `[]` | Override the container's default args. Leave empty to use the chart defaults. |
+| intelligentAssistant.core.commandOverride | list | `[]` | Override the container's default command. Leave empty to use the image entrypoint. |
+| intelligentAssistant.core.extraArgs | list | `[]` | Extra arguments appended after the default arguments. Ignored when argsOverride is set. |
+| intelligentAssistant.existingSecret | string | `""` | Name of an existing Secret that supplies credentials and settings to the lightspeed-core container. Configure the provider itself in lightspeed-stack.yaml. If empty, no Secret is loaded. Expected keys (all optional; include only keys used by the configured provider):   VLLM_URL, VLLM_API_KEY, VLLM_MAX_TOKENS, VLLM_TLS_VERIFY,   OPENAI_API_KEY,   VERTEX_AI_PROJECT, VERTEX_AI_LOCATION, GOOGLE_APPLICATION_CREDENTIALS,   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME Set ENABLE_VALIDATION to question_validity to enable validation. GOOGLE_APPLICATION_CREDENTIALS must be a path to a credentials file mounted in the sidecar. See files/intelligent-assistant/secret.example.yaml for a reference template. |
+| intelligentAssistant.okp | object | `{"httpd":{"compressed":"true","encrypt":"false","serverName":"localhost"},"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"registry.redhat.io","repository":"offline-knowledge-portal/rhokp-rhel9","tag":"1.2.12-1788274041"},"imagePullSecrets":[],"ingress":{"annotations":{},"className":"","enabled":true,"host":"","tls":{"enabled":false,"secretName":""}},"replicaCount":1,"resources":{"limits":{"cpu":"2","memory":"4Gi"},"requests":{"cpu":"200m","memory":"2Gi"}},"route":{"enabled":true,"tls":{"insecureEdgeTerminationPolicy":"Allow","termination":"edge"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"service":{"type":"ClusterIP"},"solr":{"hostBind":"0.0.0.0","memory":"1g"}}` | OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval when Intelligent Assistant is enabled. |
+| intelligentAssistant.okp.imagePullSecrets | list | `[]` | Image pull secrets for the OKP container image. Required on vanilla Kubernetes to authenticate with registry.redhat.io. Not needed on OpenShift where the cluster-wide pull secret covers Red Hat registries. |
+| intelligentAssistant.plugins | list | `[{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"},{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"}]` | Intelligent Assistant dynamic plugin packages. |
+| intelligentAssistant.runtimeVolume | object | `{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}` | Writable scratch volume for the sidecar (/tmp). |
+| intelligentAssistant.runtimeVolume.type | string | `"emptyDir"` | Volume type: "emptyDir" or "persistentVolumeClaim". |
+| livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":4}` | Liveness probe configuration. |
+| metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"path":"/metrics","port":"http-metrics"}}` | Prometheus metrics configuration. |
+| nameOverride | string | `""` | Override the chart name used in resource naming. |
+| nodeSelector | object | `{}` | Node labels for pod assignment. |
+| openshift | object | `{"clusterRouterBase":"apps.example.com","route":{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}}` | OpenShift-specific configuration. |
+| openshift.clusterRouterBase | string | `"apps.example.com"` | Cluster router base domain used to auto-generate the hostname. |
+| openshift.route | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` | OpenShift Route configuration. |
+| orchestrator | object | `{"enabled":false,"plugins":[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ \"{{inherit}}\" }}"}],"serverlessLogicOperator":{"enabled":true},"serverlessOperator":{"enabled":true},"sonataflowPlatform":{"dataIndex":{"image":{"digest":"","registry":"","repository":"","tag":""}},"dbCreationJob":{"activeDeadlineSeconds":120,"backoffLimit":2,"image":{"digest":"{{ .Values.postgresql.image.digest }}","registry":"{{ .Values.postgresql.image.registry }}","repository":"{{ .Values.postgresql.image.repository }}","tag":"{{ .Values.postgresql.image.tag }}"},"ttlSecondsAfterFinished":null},"eventing":{"broker":{"name":"","namespace":""}},"externalDB":{"existingSecret":"","host":"","name":"","port":""},"jobService":{"image":{"digest":"","registry":"","repository":"","tag":""}},"monitoring":{"enabled":true},"resources":{"limits":{"cpu":"500m","memory":"1Gi"},"requests":{"cpu":"250m","memory":"64Mi"}}}}` | Orchestrator (Serverless workflows) configuration. |
+| orchestrator.sonataflowPlatform.dataIndex | object | `{"image":{"digest":"","registry":"","repository":"","tag":""}}` | SonataFlow Data Index service configuration. |
+| orchestrator.sonataflowPlatform.dataIndex.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | Override the Data Index container image. If empty, the operator default is used. |
+| orchestrator.sonataflowPlatform.dbCreationJob | object | `{"activeDeadlineSeconds":120,"backoffLimit":2,"image":{"digest":"{{ .Values.postgresql.image.digest }}","registry":"{{ .Values.postgresql.image.registry }}","repository":"{{ .Values.postgresql.image.repository }}","tag":"{{ .Values.postgresql.image.tag }}"},"ttlSecondsAfterFinished":null}` | Database creation Job configuration. |
+| orchestrator.sonataflowPlatform.dbCreationJob.image | object | `{"digest":"{{ .Values.postgresql.image.digest }}","registry":"{{ .Values.postgresql.image.registry }}","repository":"{{ .Values.postgresql.image.repository }}","tag":"{{ .Values.postgresql.image.tag }}"}` | Container image for the create-db Job. |
+| orchestrator.sonataflowPlatform.externalDB | object | `{"existingSecret":"","host":"","name":"","port":""}` | External database connection. Used when postgresql.enabled is false. |
+| orchestrator.sonataflowPlatform.externalDB.existingSecret | string | `""` | Name of a Secret containing POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD keys. |
+| orchestrator.sonataflowPlatform.externalDB.host | string | `""` | Database host (used in JDBC URLs). |
+| orchestrator.sonataflowPlatform.externalDB.name | string | `""` | Database name to connect to for the CREATE DATABASE command. |
+| orchestrator.sonataflowPlatform.externalDB.port | string | `""` | Database port (used in JDBC URLs). |
+| orchestrator.sonataflowPlatform.jobService | object | `{"image":{"digest":"","registry":"","repository":"","tag":""}}` | SonataFlow Job Service configuration. |
+| orchestrator.sonataflowPlatform.jobService.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | Override the Job Service container image. If empty, the operator default is used. |
+| podAnnotations | object | `{}` | Annotations to add to the pod. |
+| podDisruptionBudget | object | `{"create":false,"maxUnavailable":1,"minAvailable":""}` | Pod Disruption Budget configuration. |
+| podLabels | object | `{}` | Labels to add to the pod. |
+| podSecurityContext | object | `{}` | Pod-level security context. |
+| postgresql | object | `{"auth":{"secretKeys":{"adminPasswordKey":"postgres-password","userPasswordKey":"password"}},"enabled":true,"image":{"digest":"","registry":"quay.io","repository":"fedora/postgresql-15","tag":"latest"},"postgresqlDataDir":"/var/lib/pgsql/data/userdata","primary":{"containerSecurityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":false},"extraEnvVars":[{"name":"POSTGRESQL_ADMIN_PASSWORD","valueFrom":{"secretKeyRef":{"key":"{{- include \"rhdh.postgresql.adminPasswordKey\" . }}","name":"{{- include \"rhdh.postgresql.secretName\" . }}"}}}],"persistence":{"enabled":true,"mountPath":"/var/lib/pgsql/data","size":"1Gi"},"podSecurityContext":{"enabled":false},"resources":{"limits":{"cpu":"250m","ephemeral-storage":"20Mi","memory":"1024Mi"},"requests":{"cpu":"250m","memory":"256Mi"}}},"serviceBindings":{"enabled":true}}` | Built-in PostgreSQL database (bitnami subchart). |
+| preInitContainers | list | `[]` | Init containers to run BEFORE the system init containers (e.g. inject auth credentials before install-dynamic-plugins runs). |
+| readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/readiness","port":"backend","scheme":"HTTP"},"periodSeconds":10,"successThreshold":2,"timeoutSeconds":4}` | Readiness probe configuration. |
+| replicaCount | int | `1` | Number of desired pods. |
+| resources | object | `{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"1Gi"}}` | Resource requests and limits for the main RHDH container. |
+| revisionHistoryLimit | int | `10` | Number of old ReplicaSets to retain. |
+| service | object | `{"annotations":{},"clusterIP":"","externalTrafficPolicy":"","extraPorts":[{"name":"http-metrics","port":9464,"targetPort":9464}],"ipFamilies":[],"ipFamilyPolicy":"","loadBalancerIP":"","loadBalancerSourceRanges":[],"nodePort":"","port":7007,"sessionAffinity":"","type":"ClusterIP"}` | Service configuration. |
+| service.extraPorts | list | `[{"name":"http-metrics","port":9464,"targetPort":9464}]` | Additional service ports. |
+| service.ipFamilies | list | `[]` | IP families for dual-stack networking. |
+| service.ipFamilyPolicy | string | `""` | IP family policy for dual-stack networking. |
+| service.nodePort | string | `""` | Node port for NodePort/LoadBalancer service types (range 30000-32767). |
+| serviceAccount | object | `{"annotations":{},"automount":true,"create":false,"labels":{},"name":""}` | ServiceAccount configuration. |
+| serviceAccount.labels | object | `{}` | Additional labels for the ServiceAccount. |
+| serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. |
+| startupProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":20,"successThreshold":1,"timeoutSeconds":4}` | Startup probe configuration. Gives the application time to start before liveness/readiness probes kick in. |
+| strategy | object | `{}` | Deployment update strategy. |
+| test | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"curl/curl","tag":"8.21.0"},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}}` | Test pod configuration for `helm test`. |
+| tolerations | list | `[]` | Tolerations for pod assignment. |
+| topologySpreadConstraints | list | `[]` | Topology spread constraints for pod scheduling. |
 
 ## Opinionated RHDH deployment
 

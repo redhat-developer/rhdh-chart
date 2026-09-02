@@ -1,11 +1,11 @@
-# Lightspeed & OKP Integration
+# Intelligent Assistant & OKP Integration
 
-This document covers the Lightspeed (Intelligent Assistant) and OKP (Offline Knowledge Portal)
+This document covers the Intelligent Assistant (formerly Lightspeed) and OKP (Offline Knowledge Portal)
 integration in the RHDH Helm chart.
 
 ## Architecture
 
-The Lightspeed integration deploys two components alongside the RHDH (Backstage) pod:
+The Intelligent Assistant integration deploys two components alongside the RHDH (Backstage) pod:
 
 1. **Lightspeed Core (LCORE) sidecar** — runs inside the RHDH pod as a sidecar container,
    providing the inference API (`/v1/models`, `/v1/chat/completions`, etc.).
@@ -18,7 +18,7 @@ OKP is **not** part of the RHDH Deployment — it is a separate workload that LC
 
 | Scenario | OKP deployed? | Config used | RAG sources? |
 |---|---|---|---|
-| **OpenShift (auto)** | Yes — automatic when `lightspeed.enabled=true` | `lightspeed-stack.yaml` (with `rag:` + `okp:`) | Yes |
+| **OpenShift (auto)** | Yes — automatic when `intelligentAssistant.enabled=true` | `lightspeed-stack.yaml` (with `rag:` + `okp:`) | Yes |
 | **Vanilla K8s (default)** | No — unless `okp.ingress.host` is set | `lightspeed-stack-no-okp.yaml` | No |
 | **Vanilla K8s (opt-in)** | Yes — when `okp.ingress.host` is provided | `lightspeed-stack.yaml` (with `rag:` + `okp:`) | Yes |
 
@@ -28,8 +28,8 @@ OKP is **not** part of the RHDH Deployment — it is a separate workload that LC
 
 ```bash
 helm install rhdh ./charts/rhdh \
-  --set lightspeed.enabled=true \
-  --set lightspeed.existingSecret=lightspeed-secret \
+  --set intelligentAssistant.enabled=true \
+  --set intelligentAssistant.existingSecret=lightspeed-secret \
   --set openshift.clusterRouterBase=$(oc get ingresses.config/cluster -o jsonpath='{.spec.domain}')
 ```
 
@@ -38,8 +38,8 @@ helm install rhdh ./charts/rhdh \
 ```bash
 helm install rhdh ./charts/rhdh \
   --namespace rhdh \
-  --set lightspeed.enabled=true \
-  --set lightspeed.existingSecret=lightspeed-secret \
+  --set intelligentAssistant.enabled=true \
+  --set intelligentAssistant.existingSecret=lightspeed-secret \
   --set openshift.route.enabled=false \
   --set ingress.enabled=true \
   --set 'ingress.hosts[0].host=rhdh.mydomain.com' \
@@ -53,18 +53,25 @@ helm install rhdh ./charts/rhdh \
 ```bash
 helm install rhdh ./charts/rhdh \
   --namespace rhdh \
-  --set lightspeed.enabled=true \
-  --set lightspeed.existingSecret=lightspeed-secret \
+  --set intelligentAssistant.enabled=true \
+  --set intelligentAssistant.existingSecret=lightspeed-secret \
   --set openshift.route.enabled=false \
   --set ingress.enabled=true \
   --set 'ingress.hosts[0].host=rhdh.mydomain.com' \
   --set 'ingress.hosts[0].paths[0].path=/' \
   --set 'ingress.hosts[0].paths[0].pathType=Prefix' \
   --set ingress.className=nginx \
-  --set lightspeed.okp.ingress.host=okp.mydomain.com \
-  --set lightspeed.okp.ingress.className=nginx \
-  --set lightspeed.okp.imagePullSecrets[0]=rh-registry-secret
+  --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
+  --set intelligentAssistant.okp.ingress.className=nginx \
+  --set intelligentAssistant.okp.imagePullSecrets[0]=rh-registry-secret \
+  --set intelligentAssistant.okp.securityContext.runAsUser=1001
 ```
+
+> **Note — `runAsUser` on vanilla K8s:** The OKP image uses a non-numeric user
+> (`default`, UID 1001). Kubernetes cannot verify `runAsNonRoot` with a non-numeric
+> user, causing `CreateContainerConfigError`. On OpenShift this is handled
+> automatically by the SCC. On vanilla K8s, add
+> `--set intelligentAssistant.okp.securityContext.runAsUser=1001` to resolve it.
 
 > **Tip — local testing with Kind:** If you don't have a real domain, use
 > [nip.io](https://nip.io) for automatic DNS resolution to localhost. For example,
@@ -99,25 +106,24 @@ kubectl create secret generic rh-registry-secret \
   --namespace <namespace>
 ```
 
-Then pass the secret name via `--set lightspeed.okp.imagePullSecrets[0]=rh-registry-secret`.
+Then pass the secret name via `--set intelligentAssistant.okp.imagePullSecrets[0]=rh-registry-secret`.
 No volume mounting is needed — Kubernetes uses `imagePullSecrets` on the Pod spec to
 authenticate with the registry during image pull.
 
 > **Note:** On OpenShift, image pull secrets are typically configured cluster-wide or via
 > the `openshift-config` pull-secret, so `imagePullSecrets` is usually not needed.
 
-## Creating the Lightspeed Secret
+## Creating the Intelligent Assistant Secret
 
 The chart does **not** auto-create a Kubernetes Secret for inference provider credentials.
-You must create it yourself and reference it via `lightspeed.existingSecret`.
+You must create it yourself and reference it via `intelligentAssistant.existingSecret`.
 
-Use `charts/rhdh/files/lightspeed/secret.example.yaml` as a template:
+Use `charts/rhdh/files/intelligent-assistant/secret.example.yaml` as a template:
 
 ```bash
 kubectl create secret generic lightspeed-secret \
   --namespace <namespace> \
-  --from-literal=OPENAI_API_KEY=<your-key> \
-  --from-literal=OTEL_SDK_DISABLED=true
+  --from-literal=OPENAI_API_KEY=<your-key>
 ```
 
 Key environment variables in the secret:
@@ -128,32 +134,31 @@ Key environment variables in the secret:
 | `VLLM_URL`, `VLLM_API_KEY` | vLLM inference endpoint | If using vLLM provider |
 | `VERTEX_AI_PROJECT`, `VERTEX_AI_LOCATION` | Google Vertex AI | If using Vertex AI |
 | `OLLAMA_URL` | Ollama endpoint | If using Ollama |
-| `OTEL_SDK_DISABLED` | Set `"true"` to disable OTEL SDK (prevents LCORE crash) | Recommended |
 | `ENABLE_VALIDATION`, `VALIDATION_PROVIDER`, `VALIDATION_MODEL_NAME` | Input validation | Optional |
 
 ## OKP Configuration
 
-OKP values are under `lightspeed.okp.*`:
+OKP values are under `intelligentAssistant.okp.*`:
 
 | Value | Default | Description |
 |---|---|---|
 | `okp.image.registry` | `registry.redhat.io` | OKP container image registry |
 | `okp.image.repository` | `offline-knowledge-portal/rhokp-rhel9` | OKP image repository |
-| `okp.image.tag` | `1.2.10-1786628394` | Pinned OKP image tag |
+| `okp.image.tag` | `1.2.12-1788274041` | Pinned OKP image tag |
 | `okp.replicaCount` | `1` | Number of OKP replicas |
 | `okp.solr.memory` | `1g` | Solr JVM heap size |
 | `okp.resources.requests.memory` | `2Gi` | Memory request |
 | `okp.resources.limits.memory` | `4Gi` | Memory limit |
+| `okp.securityContext` | restricted | Security context for the OKP container |
 | `okp.imagePullSecrets` | `[]` | Image pull secrets (needed for vanilla K8s) |
 | `okp.route.enabled` | `true` | Create OpenShift Route |
 | `okp.ingress.enabled` | `true` | Create K8s Ingress (requires `host`) |
 | `okp.ingress.host` | `""` | Ingress hostname (triggers OKP opt-in on K8s) |
 | `okp.ingress.className` | `""` | Ingress class (e.g. `nginx`) |
-| `okp.chunkFilterQuery` | `product:*developer_hub*` | Solr filter for RHDH docs |
 
 ## Lightspeed Config Sync
 
-Vendored config files in `charts/rhdh/files/lightspeed/` are synced from the upstream
+Vendored config files in `charts/rhdh/files/intelligent-assistant/` are synced from the upstream
 [lightspeed-configs](https://github.com/redhat-ai-dev/lightspeed-configs) repository:
 
 ```bash

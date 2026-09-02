@@ -1,7 +1,6 @@
 {{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
 {{- if include "rhdh.intelligentAssistant.okp.active" . }}
-{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
-{{- if and $isOpenShift $ia.okp.route.enabled }}
+{{- if and .Values.openshift.route.enabled $ia.okp.route.enabled }}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:

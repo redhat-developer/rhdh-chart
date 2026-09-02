@@ -528,7 +528,7 @@
         },
         "extraInitContainers": {
             "default": [],
-            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.",
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins), never replacing them.",
             "type": "array"
         },
         "extraVolumeMounts": {
@@ -770,6 +770,68 @@
                 },
                 "enabled": true,
                 "existingSecret": "",
+                "okp": {
+                    "httpd": {
+                        "compressed": "true",
+                        "encrypt": "false",
+                        "serverName": "localhost"
+                    },
+                    "image": {
+                        "digest": "",
+                        "pullPolicy": "IfNotPresent",
+                        "registry": "registry.redhat.io",
+                        "repository": "offline-knowledge-portal/rhokp-rhel9",
+                        "tag": "1.2.12-1788274041"
+                    },
+                    "imagePullSecrets": [],
+                    "ingress": {
+                        "annotations": {},
+                        "className": "",
+                        "enabled": true,
+                        "host": "",
+                        "tls": {
+                            "enabled": false,
+                            "secretName": ""
+                        }
+                    },
+                    "replicaCount": 1,
+                    "resources": {
+                        "limits": {
+                            "cpu": "2",
+                            "memory": "4Gi"
+                        },
+                        "requests": {
+                            "cpu": "200m",
+                            "memory": "2Gi"
+                        }
+                    },
+                    "route": {
+                        "enabled": true,
+                        "tls": {
+                            "insecureEdgeTerminationPolicy": "Allow",
+                            "termination": "edge"
+                        }
+                    },
+                    "securityContext": {
+                        "allowPrivilegeEscalation": false,
+                        "capabilities": {
+                            "drop": [
+                                "ALL"
+                            ]
+                        },
+                        "runAsNonRoot": true,
+                        "seccompProfile": {
+                            "type": "RuntimeDefault"
+                        }
+                    },
+                    "service": {
+                        "type": "ClusterIP"
+                    },
+                    "solr": {
+                        "hostBind": "0.0.0.0",
+                        "memory": "1g"
+                    }
+                },
                 "plugins": [
                     {
                         "enabled": true,
@@ -780,43 +842,6 @@
                         "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
                     }
                 ],
-                "ragInit": {
-                    "argsOverride": [],
-                    "commandOverride": [],
-                    "extraArgs": [],
-                    "extraEnv": [],
-                    "extraVolumeMounts": [],
-                    "image": {
-                        "digest": "",
-                        "registry": "quay.io",
-                        "repository": "redhat-ai-dev/rag-content",
-                        "tag": "release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"
-                    },
-                    "imagePullPolicy": "IfNotPresent",
-                    "resources": {
-                        "limits": {
-                            "cpu": "100m",
-                            "memory": "500Mi"
-                        },
-                        "requests": {
-                            "cpu": "50m",
-                            "memory": "150Mi"
-                        }
-                    },
-                    "securityContext": {
-                        "allowPrivilegeEscalation": false,
-                        "capabilities": {
-                            "drop": [
-                                "ALL"
-                            ]
-                        },
-                        "readOnlyRootFilesystem": true,
-                        "runAsNonRoot": true,
-                        "seccompProfile": {
-                            "type": "RuntimeDefault"
-                        }
-                    }
-                },
                 "runtimeVolume": {
                     "emptyDir": {},
                     "persistentVolumeClaim": {},
@@ -1176,118 +1201,49 @@
                     "title": "Name of an existing Secret to inject via envFrom into the lightspeed-core container.",
                     "type": "string"
                 },
-                "plugins": {
-                    "default": [
-                        {
-                            "enabled": true,
-                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"
-                        },
-                        {
-                            "enabled": true,
-                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
-                        }
-                    ],
-                    "items": {
-                        "properties": {
-                            "enabled": {
-                                "default": true,
-                                "title": "Enable the plugin.",
-                                "type": "boolean"
-                            },
-                            "integrity": {
-                                "title": "Integrity checksum of the package.",
-                                "type": "string"
-                            },
-                            "package": {
-                                "title": "Package specification of the dynamic plugin to install.",
-                                "type": "string"
-                            },
-                            "pluginConfig": {
-                                "title": "Optional plugin-specific app-config YAML fragment.",
-                                "type": "object"
-                            }
-                        },
-                        "required": [
-                            "package"
-                        ],
-                        "type": "object"
-                    },
-                    "title": "Intelligent Assistant plugins and their configuration. Override package references for disconnected environments.",
-                    "type": "array"
-                },
-                "ragInit": {
-                    "additionalProperties": false,
+                "okp": {
+                    "additionalProperties": true,
                     "properties": {
-                        "argsOverride": {
-                            "default": [],
-                            "items": {
-                                "type": "string"
-                            },
-                            "title": "Override the default arguments.",
-                            "type": "array"
-                        },
-                        "commandOverride": {
-                            "default": [],
-                            "items": {
-                                "type": "string"
-                            },
-                            "title": "Override the default command.",
-                            "type": "array"
-                        },
-                        "extraArgs": {
-                            "default": [],
-                            "items": {
-                                "type": "string"
-                            },
-                            "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.",
-                            "type": "array"
-                        },
-                        "extraEnv": {
-                            "default": [],
-                            "items": {
-                                "type": "object"
-                            },
-                            "title": "Additional environment variables.",
-                            "type": "array"
-                        },
-                        "extraVolumeMounts": {
-                            "default": [],
-                            "items": {
-                                "type": "object"
-                            },
-                            "title": "Additional volume mounts.",
-                            "type": "array"
-                        },
                         "image": {
-                            "additionalProperties": false,
                             "properties": {
                                 "digest": {
                                     "default": "",
                                     "type": "string"
                                 },
+                                "pullPolicy": {
+                                    "default": "IfNotPresent",
+                                    "enum": [
+                                        "Always",
+                                        "IfNotPresent",
+                                        "Never"
+                                    ],
+                                    "type": "string"
+                                },
                                 "registry": {
-                                    "default": "quay.io",
+                                    "default": "registry.redhat.io",
                                     "type": "string"
                                 },
                                 "repository": {
-                                    "default": "redhat-ai-dev/rag-content",
+                                    "default": "offline-knowledge-portal/rhokp-rhel9",
                                     "type": "string"
                                 },
                                 "tag": {
+                                    "default": "1.2.12-1788274041",
                                     "type": "string"
                                 }
                             },
-                            "title": "Container image for the RAG init container.",
                             "type": "object"
                         },
-                        "imagePullPolicy": {
-                            "default": "IfNotPresent",
-                            "enum": [
-                                "Always",
-                                "IfNotPresent",
-                                "Never"
-                            ],
-                            "type": "string"
+                        "imagePullSecrets": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "replicaCount": {
+                            "default": 1,
+                            "type": "integer"
                         },
                         "resources": {
                             "description": "ResourceRequirements describes the compute resource requirements.",
@@ -1499,8 +1455,47 @@
                             "type": "object"
                         }
                     },
-                    "title": "RAG data bootstrap init container.",
+                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval.",
                     "type": "object"
+                },
+                "plugins": {
+                    "default": [
+                        {
+                            "enabled": true,
+                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"
+                        },
+                        {
+                            "enabled": true,
+                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
+                        }
+                    ],
+                    "items": {
+                        "properties": {
+                            "enabled": {
+                                "default": true,
+                                "title": "Enable the plugin.",
+                                "type": "boolean"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package.",
+                                "type": "string"
+                            },
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install.",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "Intelligent Assistant plugins and their configuration. Override package references for disconnected environments.",
+                    "type": "array"
                 },
                 "runtimeVolume": {
                     "additionalProperties": false,

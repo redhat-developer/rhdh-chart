@@ -296,13 +296,12 @@ The version suffix is preserved in full; only the prefix is truncated.
 
 {{/*
 Return whether OKP should be deployed.
-On OpenShift: always active when Intelligent Assistant is enabled.
+When openshift.route.enabled: always active when Intelligent Assistant is enabled.
 On vanilla K8s: only active when the user opts in by setting okp.ingress.host.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.active" -}}
 {{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
-{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
-{{- if and $ia.enabled (or $isOpenShift $ia.okp.ingress.host) -}}
+{{- if and $ia.enabled (or .Values.openshift.route.enabled $ia.okp.ingress.host) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -311,7 +310,7 @@ true
 Return the OKP deployment/service/route name.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.fullname" -}}
-{{- printf "%s-lightspeed-okp" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-intelligent-assistant-okp" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -319,7 +318,7 @@ Return OKP labels.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.labels" -}}
 {{ include "rhdh.labels" . }}
-app.kubernetes.io/component: lightspeed-okp
+app.kubernetes.io/component: intelligent-assistant-okp
 {{- end -}}
 
 {{/*
@@ -328,20 +327,19 @@ Return OKP selector labels.
 {{- define "rhdh.intelligentAssistant.okp.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "rhdh.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: lightspeed-okp
+app.kubernetes.io/component: intelligent-assistant-okp
 {{- end -}}
 
 {{/*
-Return the OKP internal service URL for the OKP_SERVICE_URL env var.
-On OpenShift: uses the Route URL (via clusterRouterBase) for browser-accessible links.
-On vanilla K8s with Ingress: uses the Ingress host.
+Return the OKP service URL for the OKP_SERVICE_URL env var.
+When openshift.route.enabled is false and okp.ingress.host is set: uses the Ingress host.
+When openshift.clusterRouterBase is set: uses the Route URL.
 Fallback: cluster-internal service URL.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.serviceUrl" -}}
 {{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
 {{- $fullname := include "rhdh.intelligentAssistant.okp.fullname" . -}}
-{{- $isOpenShift := .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
-{{- if and (not $isOpenShift) $ia.okp.ingress.host -}}
+{{- if and (not .Values.openshift.route.enabled) $ia.okp.ingress.host -}}
   {{- if $ia.okp.ingress.tls.enabled -}}
     {{- printf "https://%s" $ia.okp.ingress.host -}}
   {{- else -}}

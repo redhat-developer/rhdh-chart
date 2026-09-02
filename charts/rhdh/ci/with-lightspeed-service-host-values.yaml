@@ -1,8 +1,8 @@
-# CI: test lightspeed with SERVICE_HOST override and OKP disabled.
+# CI: test Intelligent Assistant with SERVICE_HOST override and OKP disabled.
 # The chart features under test (deployment, config, probes, etc.) don't depend on actual plugins.
 dynamicPlugins:
   includes: []
-lightspeed:
+intelligentAssistant:
   plugins: []
   core:
     extraEnv:

@@ -542,17 +542,7 @@ intelligentAssistant:
     argsOverride: []
     # -- Extra arguments appended after the default arguments. Ignored when argsOverride is set.
     extraArgs: []
-    # System arguments required for OGX-based LCORE (readOnlyRootFilesystem).
-    systemArgs:
-      - "--synthesized-config-output"
-      - "/tmp/.generated/run.yaml"
     extraEnv: []
-    # System environment variables always injected into the sidecar.
-    systemEnv:
-      - name: HF_HOME
-        value: /tmp/hf_cache
-      - name: OTEL_SDK_DISABLED
-        value: "true"
     extraVolumeMounts: []
     resources:
       requests:
@@ -571,12 +561,12 @@ intelligentAssistant:
       seccompProfile:
         type: "RuntimeDefault"
   # -- OKP (Offline Knowledge Portal) configuration.
-  # Deploys an OKP instance for document retrieval when lightspeed is enabled.
+  # Deploys an OKP instance for document retrieval when Intelligent Assistant is enabled.
   okp:
     image:
       registry: "registry.redhat.io"
       repository: "offline-knowledge-portal/rhokp-rhel9"
-      tag: "1.2.10-1786628394"
+      tag: "1.2.12-1788274041"
       digest: ""
       pullPolicy: "IfNotPresent"
     replicaCount: 1
@@ -616,7 +606,14 @@ intelligentAssistant:
       tls:
         enabled: false
         secretName: ""
-    chunkFilterQuery: "product:*developer_hub*"
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: "RuntimeDefault"
 
 # -- Orchestrator (Serverless workflows) configuration.
 orchestrator:
