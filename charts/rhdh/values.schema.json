@@ -1650,7 +1650,7 @@
             "type": "object"
         },
         "nameOverride": {
-            "default": "",
+            "default": "developer-hub",
             "title": "Override the chart name used in resource naming.",
             "type": "string"
         },
