@@ -34,5 +34,7 @@ Verify the vendored files are already in sync without writing changes:
 ./hack/sync-lightspeed-configs.sh --ref main --check
 ```
 
-The script copies the upstream `lightspeed-stack.yaml`, `config.yaml`, and `rhdh-profile.py` files into [`charts/rhdh/files/intelligent-assistant`](./charts/rhdh/files/intelligent-assistant). The RHDH chart does not vendor a Lightspeed Core `secret.yaml`; supply provider credentials with `intelligentAssistant.existingSecret`.
+The script copies the upstream `lightspeed-stack.yaml` and `rhdh-profile.py` files into [`charts/rhdh/files/intelligent-assistant`](./charts/rhdh/files/intelligent-assistant). The RHDH chart does not vendor a Lightspeed Core `secret.yaml`; supply provider credentials with `intelligentAssistant.existingSecret`.
+
+After syncing, preserve the chart-specific commented `rag` block and its OKP integration TODO in `lightspeed-stack.yaml`. This temporary downstream patch means `--check` reports a difference for that file.
 Choose the upstream branch or tag that matches the Lightspeed Core release you want to vendor.

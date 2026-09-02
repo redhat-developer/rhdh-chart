@@ -501,15 +501,6 @@ intelligentAssistant:
         name: ""
         # -- Key within the ConfigMap that holds the file content. Defaults to the bundled filename (lightspeed-stack.yaml) if not set.
         key: ""
-    # -- Llama Stack server configuration (config.yaml).
-    server:
-      # -- Use an existing ConfigMap instead of the bundled default.
-      # @default -- Created from bundled config.yaml
-      existingConfigMap:
-        # -- Name of the existing ConfigMap.
-        name: ""
-        # -- Key within the ConfigMap that holds the file content. Defaults to the bundled filename (config.yaml) if not set.
-        key: ""
     # -- Python profile with prompt templates (rhdh-profile.py).
     profile:
       # -- Use an existing ConfigMap instead of the bundled default.
@@ -519,15 +510,15 @@ intelligentAssistant:
         name: ""
         # -- Key within the ConfigMap that holds the file content. Defaults to the bundled filename (rhdh-profile.py) if not set.
         key: ""
-  # -- Name of an existing Secret to inject via envFrom into the lightspeed-core container.
-  # If empty, no secret is mounted.
-  # Expected keys (all optional — only set the ones for the providers you use):
-  #   ENABLE_VLLM, VLLM_URL, VLLM_API_KEY, VLLM_MAX_TOKENS, VLLM_TLS_VERIFY,
-  #   ENABLE_OPENAI, OPENAI_API_KEY,
-  #   ENABLE_VERTEX_AI, VERTEX_AI_PROJECT, VERTEX_AI_LOCATION, GOOGLE_APPLICATION_CREDENTIALS,
-  #   ENABLE_OLLAMA, OLLAMA_URL,
-  #   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME,
-  #   LLAMA_STACK_LOGGING
+  # -- Name of an existing Secret that supplies credentials and settings to the lightspeed-core container.
+  # Configure the provider itself in lightspeed-stack.yaml. If empty, no Secret is loaded.
+  # Expected keys (all optional; include only keys used by the configured provider):
+  #   VLLM_URL, VLLM_API_KEY, VLLM_MAX_TOKENS, VLLM_TLS_VERIFY,
+  #   OPENAI_API_KEY,
+  #   VERTEX_AI_PROJECT, VERTEX_AI_LOCATION, GOOGLE_APPLICATION_CREDENTIALS,
+  #   ENABLE_VALIDATION, VALIDATION_PROVIDER, VALIDATION_MODEL_NAME
+  # Set ENABLE_VALIDATION to question_validity to enable validation.
+  # GOOGLE_APPLICATION_CREDENTIALS must be a path to a credentials file mounted in the sidecar.
   # See files/intelligent-assistant/secret.example.yaml for a reference template.
   existingSecret: ""
   # -- Writable scratch volume for the sidecar (/tmp).
@@ -573,12 +564,12 @@ intelligentAssistant:
     image:
       registry: "quay.io"
       repository: "lightspeed-core/lightspeed-stack"
-      tag: "0.6.2"
+      tag: "dev-20260824-cbd182b"
       digest: ""
     imagePullPolicy: "IfNotPresent"
     # -- Override the container's default command. Leave empty to use the image entrypoint.
     commandOverride: []
-    # -- Override the container's default args. Leave empty to use the image defaults.
+    # -- Override the container's default args. Leave empty to use the chart defaults.
     argsOverride: []
     # -- Extra arguments appended after the default arguments. Ignored when argsOverride is set.
     extraArgs: []

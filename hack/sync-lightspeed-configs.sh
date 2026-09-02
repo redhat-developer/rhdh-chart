@@ -12,7 +12,6 @@ LIGHTSPEED_DIR="${REPO_ROOT}/charts/rhdh/files/intelligent-assistant"
 # Format: upstream_path|destination_path|transform_function
 TARGETS=(
   "lightspeed-core-configs/lightspeed-stack.yaml|${LIGHTSPEED_DIR}/lightspeed-stack.yaml|copy_fetched_file"
-  "llama-stack-configs/config.yaml|${LIGHTSPEED_DIR}/config.yaml|copy_fetched_file"
   "lightspeed-core-configs/rhdh-profile.py|${LIGHTSPEED_DIR}/rhdh-profile.py|copy_fetched_file"
 )
 

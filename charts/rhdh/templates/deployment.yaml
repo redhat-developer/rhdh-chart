@@ -140,7 +140,7 @@ spec:
           {{- end }}
         - name: lightspeed-rag
           emptyDir: {}
-        {{- range $key := list "stack" "server" "profile" }}
+        {{- range $key := list "stack" "profile" }}
         {{- $entry := index $intelligentAssistant.config $key }}
         {{- $cmKey := include "rhdh.intelligentAssistant.configMapKey" (dict "key" $key "entry" $entry) }}
         - name: {{ printf "lightspeed-config-%s" $key }}
@@ -452,8 +452,10 @@ spec:
           {{- if $intelligentAssistant.core.argsOverride }}
           args:
             {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.core.argsOverride "context" $) | nindent 12 }}
-          {{- else if $intelligentAssistant.core.extraArgs }}
+          {{- else }}
           args:
+            - "--synthesized-config-output"
+            - "/tmp/.generated/run.yaml"
             {{- range $intelligentAssistant.core.extraArgs }}
             - {{ . | quote }}
             {{- end }}
@@ -467,10 +469,20 @@ spec:
             - secretRef:
                 name: {{ $intelligentAssistant.existingSecret }}
           {{- end }}
-          {{- with $intelligentAssistant.core.extraEnv }}
           env:
+            - name: KV_STORE_PATH
+              value: "/tmp/kvstore.db"
+            - name: SQL_STORE_PATH
+              value: "/tmp/sql_store.db"
+            - name: SQLITE_STORE_DIR
+              value: "/tmp/llama-stack-files"
+            - name: HF_HOME
+              value: "/tmp/hf_cache"
+            - name: OTEL_SDK_DISABLED
+              value: "true"
+            {{- with $intelligentAssistant.core.extraEnv }}
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
-          {{- end }}
+            {{- end }}
           {{- with $intelligentAssistant.core.resources }}
           resources:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
@@ -480,7 +492,7 @@ spec:
               mountPath: "/tmp"
             - name: lightspeed-rag
               mountPath: "/rag-content"
-            {{- range $key := list "stack" "server" "profile" }}
+            {{- range $key := list "stack" "profile" }}
             {{- $entry := index $intelligentAssistant.config $key }}
             {{- $file := include "rhdh.intelligentAssistant.configFile" $key }}
             {{- $cmKey := include "rhdh.intelligentAssistant.configMapKey" (dict "key" $key "entry" $entry) }}

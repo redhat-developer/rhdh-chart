@@ -258,15 +258,11 @@ runs:
         kubectl create configmap test-lightspeed-stack \
           --namespace ct-charts \
           --from-file=lightspeed-stack.yaml=charts/rhdh/files/intelligent-assistant/lightspeed-stack.yaml
-        kubectl create configmap test-lightspeed-server \
-          --namespace ct-charts \
-          --from-file=config.yaml=charts/rhdh/files/intelligent-assistant/config.yaml
         kubectl create configmap test-lightspeed-profile \
           --namespace ct-charts \
           --from-file=rhdh-profile.py=charts/rhdh/files/intelligent-assistant/rhdh-profile.py
         kubectl create secret generic test-lightspeed-secret \
-          --namespace ct-charts \
-          --from-literal=LLAMA_STACK_LOGGING=info
+          --namespace ct-charts
 
         # Minimal app-config for extraAppConfig test (with-extra-app-config-values.yaml)
         kubectl create configmap my-app-config \

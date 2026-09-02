@@ -854,30 +854,6 @@
                                 }
                             }
                         },
-                        "server": {
-                            "title": "Llama Stack server configuration (config.yaml).",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "existingConfigMap": {
-                                    "title": "Use an existing ConfigMap instead of the bundled default.",
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "name": {
-                                            "title": "Name of the existing ConfigMap.",
-                                            "type": "string",
-                                            "default": ""
-                                        },
-                                        "key": {
-                                            "title": "Key within the ConfigMap. Defaults to the bundled filename if not set.",
-                                            "type": "string",
-                                            "default": ""
-                                        }
-                                    }
-                                }
-                            }
-                        },
                         "profile": {
                             "title": "Python profile with prompt templates (rhdh-profile.py).",
                             "type": "object",
@@ -997,7 +973,7 @@
                         },
                         "imagePullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["Always", "IfNotPresent", "Never"] },
                         "commandOverride": { "title": "Override the container's default command.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "argsOverride": { "title": "Override the container's default args.", "type": "array", "items": { "type": "string" }, "default": [] },
+                        "argsOverride": { "title": "Override the chart's default container args.", "type": "array", "items": { "type": "string" }, "default": [] },
                         "extraArgs": { "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.", "type": "array", "items": { "type": "string" }, "default": [] },
                         "extraEnv": { "title": "Additional environment variables.", "type": "array", "items": { "type": "object" }, "default": [] },
                         "extraVolumeMounts": { "title": "Additional volume mounts.", "type": "array", "items": { "type": "object" }, "default": [] },

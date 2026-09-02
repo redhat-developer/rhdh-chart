@@ -12,9 +12,6 @@ intelligentAssistant:
     stack:
       existingConfigMap:
         name: "test-lightspeed-stack"
-    server:
-      existingConfigMap:
-        name: "test-lightspeed-server"
     profile:
       existingConfigMap:
         name: "test-lightspeed-profile"

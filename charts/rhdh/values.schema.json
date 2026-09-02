@@ -724,12 +724,6 @@
                             "name": ""
                         }
                     },
-                    "server": {
-                        "existingConfigMap": {
-                            "key": "",
-                            "name": ""
-                        }
-                    },
                     "stack": {
                         "existingConfigMap": {
                             "key": "",
@@ -747,7 +741,7 @@
                         "digest": "",
                         "registry": "quay.io",
                         "repository": "lightspeed-core/lightspeed-stack",
-                        "tag": "0.6.2"
+                        "tag": "dev-20260824-cbd182b"
                     },
                     "imagePullPolicy": "IfNotPresent",
                     "resources": {
@@ -857,30 +851,6 @@
                             "title": "Python profile with prompt templates (rhdh-profile.py).",
                             "type": "object"
                         },
-                        "server": {
-                            "additionalProperties": false,
-                            "properties": {
-                                "existingConfigMap": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "key": {
-                                            "default": "",
-                                            "title": "Key within the ConfigMap. Defaults to the bundled filename if not set.",
-                                            "type": "string"
-                                        },
-                                        "name": {
-                                            "default": "",
-                                            "title": "Name of the existing ConfigMap.",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "title": "Use an existing ConfigMap instead of the bundled default.",
-                                    "type": "object"
-                                }
-                            },
-                            "title": "Llama Stack server configuration (config.yaml).",
-                            "type": "object"
-                        },
                         "stack": {
                             "additionalProperties": false,
                             "properties": {
@@ -917,7 +887,7 @@
                             "items": {
                                 "type": "string"
                             },
-                            "title": "Override the container's default args.",
+                            "title": "Override the chart's default container args.",
                             "type": "array"
                         },
                         "commandOverride": {

@@ -1,7 +1,7 @@
 {{- $intelligentAssistant := include "rhdh.intelligentAssistant" . | fromYaml -}}
 {{- if $intelligentAssistant.enabled }}
 {{- $first := true }}
-{{- range $key := list "stack" "server" "profile" }}
+{{- range $key := list "stack" "profile" }}
 {{- $entry := index $intelligentAssistant.config $key }}
 {{- if not $entry.existingConfigMap.name }}
 {{- if not $first }}

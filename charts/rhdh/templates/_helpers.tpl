@@ -202,7 +202,7 @@ Return resolved Intelligent Assistant values from .Values.intelligentAssistant w
 Return the bundled filename for an Intelligent Assistant config key.
 */}}
 {{- define "rhdh.intelligentAssistant.configFile" -}}
-{{- $map := dict "stack" "lightspeed-stack.yaml" "server" "config.yaml" "profile" "rhdh-profile.py" -}}
+{{- $map := dict "stack" "lightspeed-stack.yaml" "profile" "rhdh-profile.py" -}}
 {{- get $map . | required (printf "unknown intelligentAssistant config key: %s" .) -}}
 {{- end -}}
 
@@ -213,9 +213,9 @@ Expects: dict "root" $ "key" <key> "entry" <config entry>
 
 Kubernetes names are limited to 63 characters. Using the infix "-ia-" (Intelligent
 Assistant) instead of "-intelligent-assistant-" leaves more of the fullname intact.
-Still truncate the fullname prefix (not the whole string) so "-ia-stack",
-"-ia-server", and "-ia-profile" are never chopped off the right side — Helm's
-`trunc 63` would otherwise make those three names collide when fullname is long.
+Still truncate the fullname prefix (not the whole string) so "-ia-stack" and
+"-ia-profile" are never chopped off the right side — Helm's `trunc 63` would
+otherwise make those names collide when fullname is long.
 */}}
 {{- define "rhdh.intelligentAssistant.configMapName" -}}
 {{- if .entry.existingConfigMap.name -}}
