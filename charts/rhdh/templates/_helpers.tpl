@@ -296,12 +296,12 @@ The version suffix is preserved in full; only the prefix is truncated.
 
 {{/*
 Return whether OKP should be deployed.
-When openshift.route.enabled: always active when Intelligent Assistant is enabled.
+On OpenShift (openshift.route.enabled): active when IA is enabled and okp.route.enabled is true.
 On vanilla K8s: only active when the user opts in by setting okp.ingress.host.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.active" -}}
 {{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
-{{- if and $ia.enabled (or .Values.openshift.route.enabled $ia.okp.ingress.host) -}}
+{{- if and $ia.enabled (or (and .Values.openshift.route.enabled $ia.okp.route.enabled) $ia.okp.ingress.host) -}}
 true
 {{- end -}}
 {{- end -}}

@@ -4,5 +4,10 @@ dynamicPlugins:
   includes: []
 intelligentAssistant:
   plugins: []
+  okp:
+    route:
+      enabled: false
+    ingress:
+      enabled: false
 orchestrator:
   plugins: []
