@@ -132,6 +132,11 @@ jobs:
         run: |
           TITLE="chore(intelligent-assistant): sync Lightspeed Core config files and bump chart to ${NEW_VERSION}"
           BRANCH="chore/sync-lightspeed-configs-${TARGET_BRANCH}"
+          TARGET_REPO="redhat-developer/rhdh-intelligent-assistant-configs"
+
+          if [[ "${TARGET_BRANCH}" == "release-1.10" ]]; then
+            TARGET_BRANCH="redhat-ai-dev/lightspeed-configs"
+          fi
 
           EXISTING_PR=$(gh pr list --head "${BRANCH}" --base "${TARGET_BRANCH}" --state open --json number --jq '.[0].number // empty')
 
@@ -153,7 +158,7 @@ jobs:
             SYNCED_FILES=$(git diff --name-only HEAD~1 -- "${FILES_DIR}" | sed 's/^/- `/;s/$/`/')
 
             BODY=$(cat <<EOF
-          Automated nightly sync of Lightspeed Core config files from [redhat-developer/rhdh-intelligent-assistant-configs @ ${TARGET_BRANCH}](https://github.com/redhat-developer/rhdh-intelligent-assistant-configs/tree/${TARGET_BRANCH}).
+          Automated nightly sync of Lightspeed Core config files from [${TARGET_REPO} @ ${TARGET_BRANCH}](https://github.com/${TARGET_REPO}/tree/${TARGET_BRANCH}).
 
           Bumped chart version to **${NEW_VERSION}**.
 
