@@ -606,6 +606,8 @@ intelligentAssistant:
       tls:
         enabled: false
         secretName: ""
+    # -- OKP container security context. readOnlyRootFilesystem is not set because
+    # Solr (Lucene) writes a lock file into its pre-built index directory at runtime.
     securityContext:
       allowPrivilegeEscalation: false
       runAsNonRoot: true

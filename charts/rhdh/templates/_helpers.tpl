@@ -310,7 +310,7 @@ true
 Return the OKP deployment/service/route name.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.fullname" -}}
-{{- printf "%s-intelligent-assistant-okp" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-ia-okp" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
