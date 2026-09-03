@@ -25,7 +25,7 @@ spec:
   path: {{ . }}
 {{- end }}
   port:
-    targetPort: http-backend
+    targetPort: {{ .Values.openshift.route.targetPort }}
 {{- if .Values.openshift.route.tls.enabled }}
   tls:
     insecureEdgeTerminationPolicy: {{ .Values.openshift.route.tls.insecureEdgeTerminationPolicy }}

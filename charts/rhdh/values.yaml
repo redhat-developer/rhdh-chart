@@ -393,6 +393,7 @@ openshift:
     host: "{{ .Values.host }}"
     path: "/"
     wildcardPolicy: "None"
+    targetPort: "http-backend"
     tls:
       enabled: true
       termination: "edge"
