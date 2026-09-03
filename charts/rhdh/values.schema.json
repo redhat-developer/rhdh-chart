@@ -1662,7 +1662,7 @@
                         },
                         "targetPort": {
                             "default": "http-backend",
-                            "title": "targetPort",
+                            "title": "Target port of the service to route traffic to.",
                             "type": "string"
                         },
                         "tls": {

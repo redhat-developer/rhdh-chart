@@ -1026,6 +1026,11 @@
                             "type": "string",
                             "default": "/"
                         },
+                        "targetPort": {
+                            "title": "Target port of the service to route traffic to.",
+                            "type": "string",
+                            "default": "http-backend"
+                        },
                         "wildcardPolicy": {
                             "title": "Wildcard policy if any for the route.",
                             "type": "string",

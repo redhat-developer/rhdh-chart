@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square)
+![Version: 2.1.1](https://img.shields.io/badge/Version-2.1.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 2.1.0
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 2.1.1
 ```
 
 ## Introduction
@@ -269,9 +269,9 @@ Kubernetes: `>= 1.31.0-0`
 | metrics | Prometheus metrics configuration. | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"path":"/metrics","port":"http-metrics"}}` |
 | nameOverride | Override the chart name used in resource naming. | string | `""` |
 | nodeSelector | Node labels for pod assignment. | object | `{}` |
-| openshift | OpenShift-specific configuration. | object | `{"clusterRouterBase":"apps.example.com","route":{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}}` |
+| openshift | OpenShift-specific configuration. | object | `{"clusterRouterBase":"apps.example.com","route":{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","targetPort":"http-backend","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}}` |
 | openshift.clusterRouterBase | Cluster router base domain used to auto-generate the hostname. | string | `"apps.example.com"` |
-| openshift.route | OpenShift Route configuration. | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
+| openshift.route | OpenShift Route configuration. | object | `{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","targetPort":"http-backend","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}` |
 | orchestrator | Orchestrator (Serverless workflows) configuration. | object | `{"enabled":false,"plugins":[{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ \"{{inherit}}\" }}"},{"enabled":true,"package":"oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ \"{{inherit}}\" }}"}],"serverlessLogicOperator":{"enabled":true},"serverlessOperator":{"enabled":true},"sonataflowPlatform":{"dataIndex":{"image":{"digest":"","registry":"","repository":"","tag":""}},"dbCreationJob":{"activeDeadlineSeconds":120,"backoffLimit":2,"image":{"digest":"{{ .Values.postgresql.image.digest }}","registry":"{{ .Values.postgresql.image.registry }}","repository":"{{ .Values.postgresql.image.repository }}","tag":"{{ .Values.postgresql.image.tag }}"},"ttlSecondsAfterFinished":null},"eventing":{"broker":{"name":"","namespace":""}},"externalDB":{"existingSecret":"","host":"","name":"","port":""},"jobService":{"image":{"digest":"","registry":"","repository":"","tag":""}},"monitoring":{"enabled":true},"resources":{"limits":{"cpu":"500m","memory":"1Gi"},"requests":{"cpu":"250m","memory":"64Mi"}}}}` |
 | orchestrator.sonataflowPlatform.dataIndex | SonataFlow Data Index service configuration. | object | `{"image":{"digest":"","registry":"","repository":"","tag":""}}` |
 | orchestrator.sonataflowPlatform.dataIndex.image | Override the Data Index container image. If empty, the operator default is used. | object | `{"digest":"","registry":"","repository":"","tag":""}` |
