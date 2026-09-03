@@ -135,7 +135,7 @@ jobs:
           TARGET_REPO="redhat-developer/rhdh-intelligent-assistant-configs"
 
           if [[ "${TARGET_BRANCH}" == "release-1.10" ]]; then
-            TARGET_BRANCH="redhat-ai-dev/lightspeed-configs"
+            TARGET_REPO="redhat-ai-dev/lightspeed-configs"
           fi
 
           EXISTING_PR=$(gh pr list --head "${BRANCH}" --base "${TARGET_BRANCH}" --state open --json number --jq '.[0].number // empty')
