@@ -293,3 +293,87 @@ The version suffix is preserved in full; only the prefix is truncated.
 {{- $prefix := printf "%s-create-sf-db" (include "rhdh.fullname" .) | trunc (int (sub 63 (len $versionSuffix))) | trimSuffix "-" -}}
 {{- printf "%s%s" $prefix $versionSuffix | lower -}}
 {{- end -}}
+
+{{/*
+Merge global.imagePullSecrets and intelligentAssistant.okp.imagePullSecrets into a single block.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.imagePullSecrets" -}}
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- $secrets := list -}}
+{{- range ((.Values.global).imagePullSecrets) -}}
+  {{- if kindIs "map" . -}}
+    {{- $secrets = append $secrets .name -}}
+  {{- else -}}
+    {{- $secrets = append $secrets . -}}
+  {{- end -}}
+{{- end -}}
+{{- range $ia.okp.imagePullSecrets -}}
+  {{- $secrets = append $secrets . -}}
+{{- end -}}
+{{- if $secrets }}
+imagePullSecrets:
+  {{- range $secrets | uniq }}
+  - name: {{ . }}
+  {{- end }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return whether OKP should be deployed.
+On OpenShift (openshift.route.enabled): active when IA is enabled and okp.route.enabled is true.
+On vanilla K8s: only active when the user opts in by setting okp.ingress.host.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.active" -}}
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- if and $ia.enabled (or (and .Values.openshift.route.enabled $ia.okp.route.enabled) $ia.okp.ingress.host) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the OKP deployment/service/route name.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.fullname" -}}
+{{- printf "%s-ia-okp" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Return OKP labels.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.labels" -}}
+{{ include "rhdh.labels" . }}
+app.kubernetes.io/component: intelligent-assistant-okp
+{{- end -}}
+
+{{/*
+Return OKP selector labels.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "rhdh.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: intelligent-assistant-okp
+{{- end -}}
+
+{{/*
+Return the OKP service URL for the OKP_SERVICE_URL env var.
+When openshift.route.enabled is false and okp.ingress.host is set: uses the Ingress host.
+When openshift.clusterRouterBase is set: uses the Route URL (HTTPS, verified via the
+combined CA bundle prepared by the prepare-ca-bundle init container).
+Fallback: cluster-internal service URL (backend-only; citation links will not be
+externally routable in this case).
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.serviceUrl" -}}
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- $fullname := include "rhdh.intelligentAssistant.okp.fullname" . -}}
+{{- if and (not .Values.openshift.route.enabled) $ia.okp.ingress.host -}}
+  {{- if $ia.okp.ingress.tls.enabled -}}
+    {{- printf "https://%s" $ia.okp.ingress.host -}}
+  {{- else -}}
+    {{- printf "http://%s" $ia.okp.ingress.host -}}
+  {{- end -}}
+{{- else if .Values.openshift.clusterRouterBase -}}
+  {{- printf "https://%s-%s.%s" $fullname .Release.Namespace .Values.openshift.clusterRouterBase -}}
+{{- else -}}
+  {{- printf "http://%s.%s.svc.cluster.local:8080" $fullname .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

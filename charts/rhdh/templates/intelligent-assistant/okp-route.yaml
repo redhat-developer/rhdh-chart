@@ -1,0 +1,24 @@
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- if include "rhdh.intelligentAssistant.okp.active" . }}
+{{- if and .Values.openshift.route.enabled $ia.okp.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "rhdh.intelligentAssistant.okp.fullname" . }}
+  labels:
+    {{- include "rhdh.intelligentAssistant.okp.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  to:
+    kind: Service
+    name: {{ include "rhdh.intelligentAssistant.okp.fullname" . }}
+  port:
+    targetPort: httpd
+  tls:
+    termination: {{ $ia.okp.route.tls.termination }}
+    insecureEdgeTerminationPolicy: {{ $ia.okp.route.tls.insecureEdgeTerminationPolicy }}
+{{- end }}
+{{- end }}

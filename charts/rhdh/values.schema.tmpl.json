@@ -497,7 +497,7 @@
             "default": []
         },
         "extraInitContainers": {
-            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.",
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins), never replacing them.",
             "type": "array",
             "default": []
         },
@@ -921,40 +921,6 @@
                         }
                     }
                 },
-                "ragInit": {
-                    "title": "RAG data bootstrap init container.",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "image": {
-                            "title": "Container image for the RAG init container.",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "registry": { "type": "string", "default": "quay.io" },
-                                "repository": { "type": "string", "default": "redhat-ai-dev/rag-content" },
-                                "tag": { "type": "string" },
-                                "digest": { "type": "string", "default": "" }
-                            }
-                        },
-                        "imagePullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["Always", "IfNotPresent", "Never"] },
-                        "commandOverride": { "title": "Override the default command.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "argsOverride": { "title": "Override the default arguments.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "extraArgs": { "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "extraEnv": { "title": "Additional environment variables.", "type": "array", "items": { "type": "object" }, "default": [] },
-                        "extraVolumeMounts": { "title": "Additional volume mounts.", "type": "array", "items": { "type": "object" }, "default": [] },
-                        "resources": {
-                            "title": "Resource requests and limits.",
-                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                            "default": {}
-                        },
-                        "securityContext": {
-                            "title": "Security context for the init container.",
-                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-                            "default": {}
-                        }
-                    }
-                },
                 "core": {
                     "title": "Lightspeed Core sidecar container.",
                     "type": "object",
@@ -984,6 +950,33 @@
                         },
                         "securityContext": {
                             "title": "Security context for the sidecar container.",
+                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+                            "default": {}
+                        }
+                    }
+                },
+                "okp": {
+                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval.",
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "registry": { "type": "string", "default": "registry.redhat.io" },
+                                "repository": { "type": "string", "default": "offline-knowledge-portal/rhokp-rhel9" },
+                                "tag": { "type": "string", "default": "1.2.12-1788274041" },
+                                "digest": { "type": "string", "default": "" },
+                                "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["Always", "IfNotPresent", "Never"] }
+                            }
+                        },
+                        "replicaCount": { "type": "integer", "default": 1 },
+                        "resources": {
+                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+                            "default": {}
+                        },
+                        "imagePullSecrets": { "type": "array", "items": { "type": "string" }, "default": [] },
+                        "securityContext": {
                             "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
                             "default": {}
                         }

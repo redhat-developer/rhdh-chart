@@ -1,9 +1,13 @@
-# CI: skip dynamic plugin downloads and catalog index extraction to speed up tests.
+# CI: test Intelligent Assistant with SERVICE_HOST override and OKP disabled.
 # The chart features under test (deployment, config, probes, etc.) don't depend on actual plugins.
 dynamicPlugins:
   includes: []
 intelligentAssistant:
   plugins: []
+  core:
+    extraEnv:
+      - name: SERVICE_HOST
+        value: "0.0.0.0"
   okp:
     route:
       enabled: false

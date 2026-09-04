@@ -1,0 +1,21 @@
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- if include "rhdh.intelligentAssistant.okp.active" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rhdh.intelligentAssistant.okp.fullname" . }}
+  labels:
+    {{- include "rhdh.intelligentAssistant.okp.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $ia.okp.service.type }}
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: httpd
+  selector:
+    {{- include "rhdh.intelligentAssistant.okp.selectorLabels" . | nindent 4 }}
+{{- end }}

@@ -30,29 +30,28 @@ llama_stack:
         annotation_prompt_params:
           enable_annotations: true
           annotation_instruction_template: >
-            When appropriate, cite sources at the end of sentences using doc_url and doc_title format.
-            Citing sources is not always required because citations are handled externally.
-            Never include any citation that is in the form '<| file-id |>'.
+            When appropriate, cite sources at the end of sentences using doc_url and doc_title format. Citing sources is not always required because citations are handled externally. Never include any citation that is in the form '<| file-id |>'.
+
 inference:
   providers:
     - type: sentence_transformers
-    # - type: vllm
-    #   id: vllm
-    #   api_key_env: VLLM_API_KEY
-    #   extra:
-    #     base_url: ${env.VLLM_URL:=}
-    #     max_tokens: ${env.VLLM_MAX_TOKENS:=4096}
-    #     network:
-    #       tls:
-    #         verify: ${env.VLLM_TLS_VERIFY:=true}
-    # - type: openai
-    #   id: openai
-    #   api_key_env: OPENAI_API_KEY
-    # - type: vertexai
-    #   id: vertexai
-    #   extra:
-    #     project: ${env.VERTEX_AI_PROJECT:=}
-    #     location: ${env.VERTEX_AI_LOCATION:=global}
+      # - type: vllm
+      #   id: vllm
+      #   api_key_env: VLLM_API_KEY
+      #   extra:
+      #     base_url: ${env.VLLM_URL:=}
+      #     max_tokens: ${env.VLLM_MAX_TOKENS:=4096}
+      #     network:
+      #       tls:
+      #         verify: ${env.VLLM_TLS_VERIFY:=true}
+      # - type: openai
+      #   id: openai
+      #   api_key_env: OPENAI_API_KEY
+      # - type: vertexai
+      #   id: vertexai
+      #   extra:
+      #     project: ${env.VERTEX_AI_PROJECT:=}
+      #     location: ${env.VERTEX_AI_LOCATION:=global}
 vector_store:
   default_provider: notebooks
   providers:
@@ -143,12 +142,3 @@ mcp_servers:
     url: 'http://localhost:7007/api/mcp-actions/v1'
     authorization_headers:
       Authorization: 'client'
-rag:
-  okp:
-    rhokp_url: '${env.OKP_SERVICE_URL:=http://localhost:8080}'
-    offline: true
-    chunk_filter_query: 'product:*developer_hub*'
-  retrieval:
-    tool:
-      sources:
-        - okp
