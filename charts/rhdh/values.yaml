@@ -593,11 +593,27 @@ intelligentAssistant:
     imagePullSecrets: []
     # imagePullSecrets:
     #   - "my-rh-registry-secret"
+    # -- Pod scheduling: affinity rules for the OKP pod.
+    affinity: {}
+    # -- Pod scheduling: node selector for the OKP pod.
+    nodeSelector: {}
+    # -- Pod scheduling: tolerations for the OKP pod.
+    tolerations: []
+    # -- Pod scheduling: topology spread constraints for the OKP pod.
+    topologySpreadConstraints: []
+    # -- Readiness probe configuration for the OKP container.
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    # -- Liveness probe configuration for the OKP container.
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 30
     route:
       enabled: true
       tls:
         termination: edge
-        insecureEdgeTerminationPolicy: Allow
+        insecureEdgeTerminationPolicy: Redirect
     ingress:
       enabled: true
       host: ""

@@ -771,6 +771,7 @@
                 "enabled": true,
                 "existingSecret": "",
                 "okp": {
+                    "affinity": {},
                     "httpd": {
                         "compressed": "true",
                         "encrypt": "false",
@@ -794,6 +795,15 @@
                             "secretName": ""
                         }
                     },
+                    "livenessProbe": {
+                        "initialDelaySeconds": 30,
+                        "periodSeconds": 30
+                    },
+                    "nodeSelector": {},
+                    "readinessProbe": {
+                        "initialDelaySeconds": 10,
+                        "periodSeconds": 10
+                    },
                     "replicaCount": 1,
                     "resources": {
                         "limits": {
@@ -808,7 +818,7 @@
                     "route": {
                         "enabled": true,
                         "tls": {
-                            "insecureEdgeTerminationPolicy": "Allow",
+                            "insecureEdgeTerminationPolicy": "Redirect",
                             "termination": "edge"
                         }
                     },
@@ -830,7 +840,9 @@
                     "solr": {
                         "hostBind": "0.0.0.0",
                         "memory": "1g"
-                    }
+                    },
+                    "tolerations": [],
+                    "topologySpreadConstraints": []
                 },
                 "plugins": [
                     {

@@ -20,11 +20,22 @@ spec:
       labels:
         {{- include "rhdh.intelligentAssistant.okp.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if $ia.okp.imagePullSecrets }}
-      imagePullSecrets:
-        {{- range $ia.okp.imagePullSecrets }}
-        - name: {{ . | quote }}
-        {{- end }}
+      {{- include "rhdh.intelligentAssistant.okp.imagePullSecrets" . | nindent 6 }}
+      {{- with $ia.okp.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $ia.okp.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $ia.okp.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $ia.okp.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
       - name: okp
@@ -64,11 +75,11 @@ spec:
           httpGet:
             path: /
             port: httpd
-          initialDelaySeconds: 10
-          periodSeconds: 10
+          initialDelaySeconds: {{ $ia.okp.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ $ia.okp.readinessProbe.periodSeconds }}
         livenessProbe:
           tcpSocket:
             port: solr
-          initialDelaySeconds: 30
-          periodSeconds: 30
+          initialDelaySeconds: {{ $ia.okp.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ $ia.okp.livenessProbe.periodSeconds }}
 {{- end }}

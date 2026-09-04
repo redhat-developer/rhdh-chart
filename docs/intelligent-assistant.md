@@ -48,7 +48,7 @@ helm install rhdh ./charts/rhdh \
   --set ingress.className=nginx
 ```
 
-### Vanilla Kubernetes — OKP Opt-in
+### Vanilla Kubernetes — OKP Opt-in (HTTP)
 
 ```bash
 helm install rhdh ./charts/rhdh \
@@ -63,6 +63,27 @@ helm install rhdh ./charts/rhdh \
   --set ingress.className=nginx \
   --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
   --set intelligentAssistant.okp.ingress.className=nginx \
+  --set intelligentAssistant.okp.imagePullSecrets[0]=rh-registry-secret \
+  --set intelligentAssistant.okp.securityContext.runAsUser=1001
+```
+
+### Vanilla Kubernetes — OKP Opt-in (HTTPS)
+
+```bash
+helm install rhdh ./charts/rhdh \
+  --namespace rhdh \
+  --set intelligentAssistant.enabled=true \
+  --set intelligentAssistant.existingSecret=lightspeed-secret \
+  --set openshift.route.enabled=false \
+  --set ingress.enabled=true \
+  --set 'ingress.hosts[0].host=rhdh.mydomain.com' \
+  --set 'ingress.hosts[0].paths[0].path=/' \
+  --set 'ingress.hosts[0].paths[0].pathType=Prefix' \
+  --set ingress.className=nginx \
+  --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
+  --set intelligentAssistant.okp.ingress.className=nginx \
+  --set intelligentAssistant.okp.ingress.tls.enabled=true \
+  --set intelligentAssistant.okp.ingress.tls.secretName=okp-tls \
   --set intelligentAssistant.okp.imagePullSecrets[0]=rh-registry-secret \
   --set intelligentAssistant.okp.securityContext.runAsUser=1001
 ```
@@ -136,6 +157,61 @@ Key environment variables in the secret:
 | `OLLAMA_URL` | Ollama endpoint | If using Ollama |
 | `ENABLE_VALIDATION`, `VALIDATION_PROVIDER`, `VALIDATION_MODEL_NAME` | Input validation | Optional |
 
+## HTTPS and TLS
+
+### OpenShift
+
+On OpenShift, OKP is exposed via a TLS-terminated Route. The chart sets
+`OKP_SERVICE_URL` to `https://` and `insecureEdgeTerminationPolicy: Redirect`.
+
+Most OpenShift clusters use **self-signed router certificates** by default. LCORE's
+Python SSL stack (`httpx` for Solr, `requests` for other calls) does not trust these
+out of the box. The chart handles this automatically when OKP is active:
+
+1. Combines the system CA bundle (`/etc/pki/tls/certs/ca-bundle.crt`) with the
+   cluster's service account CA (`/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`)
+   into `/tmp/combined-ca-bundle.crt`.
+2. Sets `SSL_CERT_FILE` and `REQUESTS_CA_BUNDLE` to point to the combined bundle.
+
+This is done via a command override on the LCORE container — the chart replaces the
+default entrypoint with a shell script that prepares the CA bundle before calling the
+original entrypoint. If `commandOverride` or `argsOverride` is set on the LCORE core
+container, the CA bundle logic is skipped (the user is responsible for their own setup).
+
+### Vanilla Kubernetes
+
+On vanilla K8s, `OKP_SERVICE_URL` is `http://` by default (no TLS on the Ingress).
+To enable HTTPS, provide a TLS secret and enable TLS on the OKP Ingress:
+
+```bash
+# Create a TLS secret (from cert-manager, or manually with openssl)
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /tmp/okp-tls.key -out /tmp/okp-tls.crt \
+  -subj "/CN=okp.mydomain.com" \
+  -addext "subjectAltName=DNS:okp.mydomain.com"
+
+kubectl create secret tls okp-tls -n <namespace> \
+  --cert=/tmp/okp-tls.crt --key=/tmp/okp-tls.key
+
+# Then set TLS on the OKP Ingress
+helm install rhdh ./charts/rhdh \
+  ... \
+  --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
+  --set intelligentAssistant.okp.ingress.tls.enabled=true \
+  --set intelligentAssistant.okp.ingress.tls.secretName=okp-tls
+```
+
+When `okp.ingress.tls.enabled=true`, the chart sets `OKP_SERVICE_URL` to `https://`.
+The nginx ingress controller terminates TLS at the Ingress — traffic from Ingress to
+OKP is still HTTP on port 8080 (same as OpenShift edge termination). In production,
+use [cert-manager](https://cert-manager.io/) for automatic certificate management.
+
+The LCORE command override (CA bundle script) runs whenever OKP is active, regardless
+of platform. On K8s the `if` guard checks for the service account CA file — if it
+exists, the combined bundle is created; otherwise LCORE falls back to default system CAs.
+
+When OKP is **not** active, LCORE uses default arguments with no command override.
+
 ## OKP Configuration
 
 OKP values are under `intelligentAssistant.okp.*`:
@@ -150,11 +226,22 @@ OKP values are under `intelligentAssistant.okp.*`:
 | `okp.resources.requests.memory` | `2Gi` | Memory request |
 | `okp.resources.limits.memory` | `4Gi` | Memory limit |
 | `okp.securityContext` | restricted | Security context for the OKP container |
-| `okp.imagePullSecrets` | `[]` | Image pull secrets (needed for vanilla K8s) |
+| `okp.imagePullSecrets` | `[]` | Image pull secrets (merged with `global.imagePullSecrets`) |
 | `okp.route.enabled` | `true` | Create OpenShift Route |
 | `okp.ingress.enabled` | `true` | Create K8s Ingress (requires `host`) |
 | `okp.ingress.host` | `""` | Ingress hostname (triggers OKP opt-in on K8s) |
 | `okp.ingress.className` | `""` | Ingress class (e.g. `nginx`) |
+| `okp.ingress.tls.enabled` | `false` | Enable TLS on the OKP Ingress |
+| `okp.ingress.tls.secretName` | `""` | TLS secret name (cert+key) |
+| `okp.ingress.annotations` | `{}` | Annotations on the OKP Ingress |
+| `okp.affinity` | `{}` | Affinity rules for OKP pod assignment |
+| `okp.nodeSelector` | `{}` | Node labels for OKP pod assignment |
+| `okp.tolerations` | `[]` | Tolerations for OKP pod scheduling |
+| `okp.topologySpreadConstraints` | `[]` | Topology spread constraints for OKP pods |
+| `okp.readinessProbe.initialDelaySeconds` | `10` | Readiness probe initial delay |
+| `okp.readinessProbe.periodSeconds` | `10` | Readiness probe period |
+| `okp.livenessProbe.initialDelaySeconds` | `30` | Liveness probe initial delay |
+| `okp.livenessProbe.periodSeconds` | `30` | Liveness probe period |
 
 ## Lightspeed Config Sync
 

@@ -397,13 +397,24 @@ spec:
           securityContext:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
-          {{- with $intelligentAssistant.core.commandOverride }}
+          {{- if $intelligentAssistant.core.commandOverride }}
           command:
-            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+            {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.core.commandOverride "context" $) | nindent 12 }}
+          {{- else if and (include "rhdh.intelligentAssistant.okp.active" $) (not $intelligentAssistant.core.argsOverride) }}
+          command: ["/bin/sh", "-c"]
           {{- end }}
           {{- if $intelligentAssistant.core.argsOverride }}
           args:
             {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.core.argsOverride "context" $) | nindent 12 }}
+          {{- else if and (include "rhdh.intelligentAssistant.okp.active" $) (not $intelligentAssistant.core.commandOverride) }}
+          args:
+            - |
+              if [ -f /var/run/secrets/kubernetes.io/serviceaccount/ca.crt ]; then
+                cat /etc/pki/tls/certs/ca-bundle.crt /var/run/secrets/kubernetes.io/serviceaccount/ca.crt > /tmp/combined-ca-bundle.crt
+                export SSL_CERT_FILE=/tmp/combined-ca-bundle.crt
+                export REQUESTS_CA_BUNDLE=/tmp/combined-ca-bundle.crt
+              fi
+              exec /app-root/entrypoint.sh --synthesized-config-output /tmp/.generated/run.yaml{{ range $intelligentAssistant.core.extraArgs }} {{ . | quote }}{{ end }}
           {{- else }}
           args:
             - "--synthesized-config-output"

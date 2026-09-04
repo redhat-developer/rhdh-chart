@@ -295,6 +295,30 @@ The version suffix is preserved in full; only the prefix is truncated.
 {{- end -}}
 
 {{/*
+Merge global.imagePullSecrets and intelligentAssistant.okp.imagePullSecrets into a single block.
+*/}}
+{{- define "rhdh.intelligentAssistant.okp.imagePullSecrets" -}}
+{{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
+{{- $secrets := list -}}
+{{- range ((.Values.global).imagePullSecrets) -}}
+  {{- if kindIs "map" . -}}
+    {{- $secrets = append $secrets .name -}}
+  {{- else -}}
+    {{- $secrets = append $secrets . -}}
+  {{- end -}}
+{{- end -}}
+{{- range $ia.okp.imagePullSecrets -}}
+  {{- $secrets = append $secrets . -}}
+{{- end -}}
+{{- if $secrets }}
+imagePullSecrets:
+  {{- range $secrets | uniq }}
+  - name: {{ . }}
+  {{- end }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return whether OKP should be deployed.
 On OpenShift (openshift.route.enabled): active when IA is enabled and okp.route.enabled is true.
 On vanilla K8s: only active when the user opts in by setting okp.ingress.host.
@@ -333,8 +357,10 @@ app.kubernetes.io/component: intelligent-assistant-okp
 {{/*
 Return the OKP service URL for the OKP_SERVICE_URL env var.
 When openshift.route.enabled is false and okp.ingress.host is set: uses the Ingress host.
-When openshift.clusterRouterBase is set: uses the Route URL.
-Fallback: cluster-internal service URL.
+When openshift.clusterRouterBase is set: uses the Route URL (HTTPS, verified via the
+combined CA bundle prepared by the prepare-ca-bundle init container).
+Fallback: cluster-internal service URL (backend-only; citation links will not be
+externally routable in this case).
 */}}
 {{- define "rhdh.intelligentAssistant.okp.serviceUrl" -}}
 {{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
@@ -346,7 +372,7 @@ Fallback: cluster-internal service URL.
     {{- printf "http://%s" $ia.okp.ingress.host -}}
   {{- end -}}
 {{- else if .Values.openshift.clusterRouterBase -}}
-  {{- printf "http://%s-%s.%s" $fullname .Release.Namespace .Values.openshift.clusterRouterBase -}}
+  {{- printf "https://%s-%s.%s" $fullname .Release.Namespace .Values.openshift.clusterRouterBase -}}
 {{- else -}}
   {{- printf "http://%s.%s.svc.cluster.local:8080" $fullname .Release.Namespace -}}
 {{- end -}}
