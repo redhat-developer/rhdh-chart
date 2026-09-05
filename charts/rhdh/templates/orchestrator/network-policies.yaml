@@ -1,12 +1,10 @@
-{{- /*
-TODO: these Orchestrator policies use podSelector: {} (namespace-wide) and conflict with
-the ADR's "default deny with selective allow" and "label-scoped policies" principles.
-They weaken per-component ingress isolation for RHDH backend and DB pods in the same namespace.
-Even though only one Orchestrator-flavoured RHDH instance is supported per namespace (the
-SonataFlow Operator enforces one SonataFlowPlatform per namespace), a non-Orchestrator RHDH
-instance could coexist in the same namespace; these namespace-wide policies would affect it too.
-Review and make stricter by scoping to SonataFlow-specific labels where possible.
-*/ -}}
+# TODO: these Orchestrator policies use podSelector: {} (namespace-wide) and conflict with
+# the ADR's "default deny with selective allow" and "label-scoped policies" principles.
+# They weaken per-component ingress isolation for RHDH backend and DB pods in the same namespace.
+# Even though only one Orchestrator-flavoured RHDH instance is supported per namespace (the
+# SonataFlow Operator enforces one SonataFlowPlatform per namespace), a non-Orchestrator RHDH
+# instance could coexist in the same namespace; these namespace-wide policies would affect it too.
+# Review and make stricter by scoping to SonataFlow-specific labels where possible.
 {{- if .Values.orchestrator.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -74,12 +72,10 @@ spec:
     - from:
       - podSelector: {}
 {{- end }}
+# Allow all egress from all pods in the namespace.
+# The Orchestrator backend plugin needs HTTP egress to reach SonataFlow and Data Index services;
+# SonataFlow workflows may also need arbitrary outbound access.
 ---
-{{- /*
-Allow all egress from all pods in the namespace.
-The Orchestrator backend plugin needs HTTP egress to reach SonataFlow and Data Index services;
-SonataFlow workflows may also need arbitrary outbound access.
-*/ -}}
 {{- if .Values.orchestrator.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
