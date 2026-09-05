@@ -1,3 +1,12 @@
+{{- /*
+TODO: these Orchestrator policies use podSelector: {} (namespace-wide) and conflict with
+the ADR's "default deny with selective allow" and "label-scoped policies" principles.
+They weaken per-component ingress isolation for RHDH backend and DB pods in the same namespace.
+Even though only one Orchestrator-flavoured RHDH instance is supported per namespace (the
+SonataFlow Operator enforces one SonataFlowPlatform per namespace), a non-Orchestrator RHDH
+instance could coexist in the same namespace; these namespace-wide policies would affect it too.
+Review and make stricter by scoping to SonataFlow-specific labels where possible.
+*/ -}}
 {{- if .Values.orchestrator.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -15,12 +24,15 @@ spec:
     - from:
       - namespaceSelector:
           matchLabels:
+            # Allow knative events to be delivered to workflows.
             kubernetes.io/metadata.name: knative-eventing
       - namespaceSelector:
           matchLabels:
+            # Allow auxiliary knative function for workflow (such as m2k-save-transformation)
             kubernetes.io/metadata.name: knative-serving
       - namespaceSelector:
           matchLabels:
+            # Allow openshift serverless logic operator controller pod to access all pods in sonataflow
             kubernetes.io/metadata.name: openshift-serverless-logic
 ---
 apiVersion: networking.k8s.io/v1
@@ -41,6 +53,7 @@ spec:
     - from:
       - namespaceSelector:
           matchLabels:
+            # Allow knative events to be delivered to workflows.
             policy-group.network.openshift.io/ingress: ""
 ---
 apiVersion: networking.k8s.io/v1
@@ -62,6 +75,11 @@ spec:
       - podSelector: {}
 {{- end }}
 ---
+{{- /*
+Allow all egress from all pods in the namespace.
+The Orchestrator backend plugin needs HTTP egress to reach SonataFlow and Data Index services;
+SonataFlow workflows may also need arbitrary outbound access.
+*/ -}}
 {{- if .Values.orchestrator.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -100,5 +118,6 @@ spec:
     - from:
       - namespaceSelector:
           matchLabels:
+            # Allow openshift-user-workload-monitoring pods to access the workflow.
             kubernetes.io/metadata.name: openshift-user-workload-monitoring
 {{- end }}
