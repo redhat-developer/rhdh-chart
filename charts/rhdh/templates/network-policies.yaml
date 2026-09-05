@@ -71,7 +71,7 @@ Redis is part of the recommended checklist for production deployments
 RHDH does not deploy Redis OOTB; users bring their own, which could be in the same
 namespace, a different namespace, or an external managed service. The rule therefore
 has no pod or namespace selector.
-*/ -}}
+*/}}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
