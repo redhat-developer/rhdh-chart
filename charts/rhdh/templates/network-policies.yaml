@@ -166,6 +166,35 @@ spec:
       ports:
         - port: 7007
           protocol: TCP
+
+{{- if .Values.test.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rhdh.fullname" . }}-allow-test-connection
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "rhdh.selectorLabels" . | nindent 6 }}
+      rhdh.redhat.com/test-connection: "true"
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "rhdh.selectorLabels" . | nindent 14 }}
+      ports:
+        - port: 7007
+          protocol: TCP
+{{- end }}
 {{- /*
 The following db-* policies are only created when the built-in PostgreSQL is enabled.
 When using an external database (postgresql.enabled=false), only the backend NPs above
