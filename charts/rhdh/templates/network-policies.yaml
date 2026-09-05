@@ -1,10 +1,3 @@
-{{- /*
-Base NetworkPolicies for RHDH backend and built-in PostgreSQL.
-These cover the network requirements of a base RHDH deployment with all enabled-by-default plugins.
-See https://github.com/redhat-developer/rhdh-plugin-export-overlays/blob/main/default.packages.yaml
-Disabled plugins (e.g. LDAP catalog, email notifications, scaffolder HTTP requests) may need
-additional user-created additive NetworkPolicies for ports not covered here.
-*/ -}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -173,9 +166,6 @@ spec:
       ports:
         - port: 7007
           protocol: TCP
-{{- if .Values.postgresql.enabled }}
-{{- $isReplication := eq (default "standalone" .Values.postgresql.architecture) "replication" }}
----
 {{- /*
 The following db-* policies are only created when the built-in PostgreSQL is enabled.
 When using an external database (postgresql.enabled=false), only the backend NPs above
@@ -186,6 +176,10 @@ postgresql.primary.networkPolicy.enabled=false and
 postgresql.readReplicas.networkPolicy.enabled=false in values.yaml)
 so we can enforce tighter rules.
 */ -}}
+{{- if .Values.postgresql.enabled }}
+{{- $isReplication := eq (default "standalone" .Values.postgresql.architecture) "replication" }}
+
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
