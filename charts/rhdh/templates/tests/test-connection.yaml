@@ -5,6 +5,7 @@ metadata:
   name: "{{ include "rhdh.fullname" . }}-test-connection"
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
+    rhdh.redhat.com/test-connection: "true"
   annotations:
     {{- with .Values.commonAnnotations }}
     {{- toYaml . | nindent 4 }}
