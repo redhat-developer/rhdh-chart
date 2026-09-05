@@ -65,6 +65,35 @@ spec:
     - ports:
         - port: 443
           protocol: TCP
+{{- /*
+Redis is part of the recommended checklist for production deployments
+(see https://docs.redhat.com/en/documentation/red_hat_developer_hub/1.10/html/setting_up_and_configuring_your_first_red_hat_developer_hub_instance/checklist-to-run-your-first-rhdh-instance-in-production_setting-up-and-configuring-your-first-red-hat-developer-hub-instance).
+RHDH does not deploy Redis OOTB; users bring their own, which could be in the same
+namespace, a different namespace, or an external managed service. The rule therefore
+has no pod or namespace selector.
+*/ -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rhdh.fullname" . }}-allow-redis-egress
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "rhdh.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - port: 6379
+          protocol: TCP
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
