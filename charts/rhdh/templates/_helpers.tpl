@@ -321,11 +321,11 @@ imagePullSecrets:
 {{/*
 Return whether OKP should be deployed.
 On OpenShift (openshift.route.enabled): active when IA is enabled and okp.route.enabled is true.
-On vanilla K8s: only active when the user opts in by setting okp.ingress.host.
+On vanilla K8s: only active when okp.ingress.enabled is true and okp.ingress.host is set.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.active" -}}
 {{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
-{{- if and $ia.enabled (or (and .Values.openshift.route.enabled $ia.okp.route.enabled) $ia.okp.ingress.host) -}}
+{{- if and $ia.enabled (or (and .Values.openshift.route.enabled $ia.okp.route.enabled) (and (not .Values.openshift.route.enabled) $ia.okp.ingress.enabled $ia.okp.ingress.host)) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -356,7 +356,7 @@ app.kubernetes.io/component: intelligent-assistant-okp
 
 {{/*
 Return the OKP service URL for the OKP_SERVICE_URL env var.
-When openshift.route.enabled is false and okp.ingress.host is set: uses the Ingress host.
+When openshift.route.enabled is false and OKP Ingress is enabled with a host: uses the Ingress host.
 When openshift.clusterRouterBase is set: uses the Route URL (HTTPS, verified via the
 combined CA bundle prepared by the prepare-ca-bundle init container).
 Fallback: cluster-internal service URL (backend-only; citation links will not be

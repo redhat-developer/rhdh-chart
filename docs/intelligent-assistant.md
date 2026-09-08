@@ -18,9 +18,9 @@ OKP is **not** part of the RHDH Deployment — it is a separate workload that LC
 
 | Scenario | OKP deployed? | Config used | RAG sources? |
 |---|---|---|---|
-| **OpenShift (auto)** | Yes — automatic when `intelligentAssistant.enabled=true` | `lightspeed-stack.yaml` (with `rag:` + `okp:`) | Yes |
-| **Vanilla K8s (default)** | No — unless `okp.ingress.host` is set | `lightspeed-stack-no-okp.yaml` | No |
-| **Vanilla K8s (opt-in)** | Yes — when `okp.ingress.host` is provided | `lightspeed-stack.yaml` (with `rag:` + `okp:`) | Yes |
+| **OpenShift (auto)** | Yes — automatic when `intelligentAssistant.enabled=true` | `lightspeed-stack.yaml` (with OKP RAG configuration) | Yes |
+| **Vanilla K8s (default)** | No — unless OKP Ingress is enabled and `okp.ingress.host` is set | `lightspeed-stack-no-okp.yaml` | No |
+| **Vanilla K8s (opt-in)** | Yes — when `okp.ingress.enabled=true` and `okp.ingress.host` is provided | `lightspeed-stack.yaml` (with OKP RAG configuration) | Yes |
 
 ## Helm Install Flags
 
@@ -61,6 +61,7 @@ helm install rhdh ./charts/rhdh \
   --set 'ingress.hosts[0].paths[0].path=/' \
   --set 'ingress.hosts[0].paths[0].pathType=Prefix' \
   --set ingress.className=nginx \
+  --set intelligentAssistant.okp.ingress.enabled=true \
   --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
   --set intelligentAssistant.okp.ingress.className=nginx \
   --set intelligentAssistant.okp.imagePullSecrets[0]=rh-registry-secret \
@@ -80,6 +81,7 @@ helm install rhdh ./charts/rhdh \
   --set 'ingress.hosts[0].paths[0].path=/' \
   --set 'ingress.hosts[0].paths[0].pathType=Prefix' \
   --set ingress.className=nginx \
+  --set intelligentAssistant.okp.ingress.enabled=true \
   --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
   --set intelligentAssistant.okp.ingress.className=nginx \
   --set intelligentAssistant.okp.ingress.tls.enabled=true \
@@ -108,7 +110,9 @@ On vanilla Kubernetes (unlike OpenShift), the chart requires additional setup:
    creates a Route by default, which requires the OpenShift Route CRD).
 2. **Enable Ingress** — set `ingress.enabled=true` with a hostname and ingress class.
    An ingress controller (e.g. [ingress-nginx](https://kubernetes.github.io/ingress-nginx/))
-   must be installed in the cluster.
+   must be installed in the cluster. To opt in to OKP, also set
+   `intelligentAssistant.okp.ingress.enabled=true` and provide a non-empty
+   `intelligentAssistant.okp.ingress.host`.
 3. **OKP image pull secret** — the OKP image is hosted on `registry.redhat.io`, which
    requires authentication. Create a pull secret from your Red Hat registry credentials
    or Podman auth:
@@ -196,6 +200,7 @@ kubectl create secret tls okp-tls -n <namespace> \
 # Then set TLS on the OKP Ingress
 helm install rhdh ./charts/rhdh \
   ... \
+  --set intelligentAssistant.okp.ingress.enabled=true \
   --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
   --set intelligentAssistant.okp.ingress.tls.enabled=true \
   --set intelligentAssistant.okp.ingress.tls.secretName=okp-tls
@@ -229,7 +234,7 @@ OKP values are under `intelligentAssistant.okp.*`:
 | `okp.imagePullSecrets` | `[]` | Image pull secrets (merged with `global.imagePullSecrets`) |
 | `okp.route.enabled` | `true` | Create OpenShift Route |
 | `okp.ingress.enabled` | `true` | Create K8s Ingress (requires `host`) |
-| `okp.ingress.host` | `""` | Ingress hostname (triggers OKP opt-in on K8s) |
+| `okp.ingress.host` | `""` | Ingress hostname (required with `okp.ingress.enabled=true` to opt in on K8s) |
 | `okp.ingress.className` | `""` | Ingress class (e.g. `nginx`) |
 | `okp.ingress.tls.enabled` | `false` | Enable TLS on the OKP Ingress |
 | `okp.ingress.tls.secretName` | `""` | TLS secret name (cert+key) |
@@ -255,7 +260,7 @@ hack/sync-lightspeed-configs.sh --ref v1.0 # sync from a specific ref
 ```
 
 The sync produces two stack config variants:
-- `lightspeed-stack.yaml` — full config with `rag:` and `okp:` sections
-- `lightspeed-stack-no-okp.yaml` — same file with `rag:`/`okp:` stripped via `yq`
+- `lightspeed-stack.yaml` — full config with the `rag:` section, including nested `okp:` settings
+- `lightspeed-stack-no-okp.yaml` — same file with the `rag:` section stripped via `yq`
 
 The chart's ConfigMap template automatically selects the correct variant based on whether OKP is active.

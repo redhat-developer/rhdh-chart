@@ -138,8 +138,6 @@ spec:
           emptyDir:
             {{- include "common.tplvalues.render" (dict "value" $intelligentAssistant.runtimeVolume.emptyDir "context" $) | nindent 12 }}
           {{- end }}
-        - name: lightspeed-rag
-          emptyDir: {}
         {{- range $key := list "stack" "profile" }}
         {{- $entry := index $intelligentAssistant.config $key }}
         {{- $cmKey := include "rhdh.intelligentAssistant.configMapKey" (dict "key" $key "entry" $entry) }}
@@ -457,8 +455,6 @@ spec:
           volumeMounts:
             - name: lightspeed-data
               mountPath: "/tmp"
-            - name: lightspeed-rag
-              mountPath: "/rag-content"
             {{- range $key := list "stack" "profile" }}
             {{- $entry := index $intelligentAssistant.config $key }}
             {{- $file := include "rhdh.intelligentAssistant.configFile" $key }}

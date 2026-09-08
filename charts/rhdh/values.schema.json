@@ -1214,9 +1214,32 @@
                     "type": "string"
                 },
                 "okp": {
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
+                        "affinity": {
+                            "default": {},
+                            "type": "object"
+                        },
+                        "httpd": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "compressed": {
+                                    "default": "true",
+                                    "type": "string"
+                                },
+                                "encrypt": {
+                                    "default": "false",
+                                    "type": "string"
+                                },
+                                "serverName": {
+                                    "default": "localhost",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
                         "image": {
+                            "additionalProperties": false,
                             "properties": {
                                 "digest": {
                                     "default": "",
@@ -1253,8 +1276,87 @@
                             },
                             "type": "array"
                         },
+                        "ingress": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "annotations": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "default": {},
+                                    "type": "object"
+                                },
+                                "className": {
+                                    "default": "",
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "host": {
+                                    "default": "",
+                                    "type": "string"
+                                },
+                                "tls": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "default": false,
+                                            "type": "boolean"
+                                        },
+                                        "secretName": {
+                                            "default": "",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "livenessProbe": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "initialDelaySeconds": {
+                                    "default": 30,
+                                    "minimum": 0,
+                                    "type": "integer"
+                                },
+                                "periodSeconds": {
+                                    "default": 30,
+                                    "minimum": 1,
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "nodeSelector": {
+                            "additionalProperties": {
+                                "type": "string"
+                            },
+                            "default": {},
+                            "type": "object"
+                        },
+                        "readinessProbe": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "initialDelaySeconds": {
+                                    "default": 10,
+                                    "minimum": 0,
+                                    "type": "integer"
+                                },
+                                "periodSeconds": {
+                                    "default": 10,
+                                    "minimum": 1,
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        },
                         "replicaCount": {
                             "default": 1,
+                            "minimum": 0,
                             "type": "integer"
                         },
                         "resources": {
@@ -1311,6 +1413,40 @@
                                         ]
                                     },
                                     "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "route": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "tls": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "insecureEdgeTerminationPolicy": {
+                                            "default": "Redirect",
+                                            "enum": [
+                                                "Allow",
+                                                "Redirect",
+                                                "None"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "termination": {
+                                            "default": "edge",
+                                            "enum": [
+                                                "edge",
+                                                "reencrypt",
+                                                "passthrough"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
                                     "type": "object"
                                 }
                             },
@@ -1465,6 +1601,38 @@
                                 }
                             },
                             "type": "object"
+                        },
+                        "service": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "type": {
+                                    "default": "ClusterIP",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "solr": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "hostBind": {
+                                    "default": "0.0.0.0",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "default": "1g",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "tolerations": {
+                            "default": [],
+                            "type": "array"
+                        },
+                        "topologySpreadConstraints": {
+                            "default": [],
+                            "type": "array"
                         }
                     },
                     "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval.",
