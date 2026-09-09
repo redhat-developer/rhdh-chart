@@ -56,6 +56,8 @@ rbac:
     knative: true
     # -- networking.k8s.io — Ingresses, NetworkPolicies
     ingresses: true
+    # -- monitoring.coreos.com — ServiceMonitors (Prometheus Operator)
+    monitoring: true
     # -- config.openshift.io — ClusterVersions, Infrastructures (cluster scope only)
     platform: true
 

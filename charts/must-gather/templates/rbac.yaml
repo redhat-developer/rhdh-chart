@@ -26,6 +26,18 @@ rules:
     resources: ["ingresses", "networkpolicies"]
     verbs: ["get", "list"]
   {{- end }}
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list"]
   {{- if .Values.rbac.rules.routes }}
   - apiGroups: ["route.openshift.io"]
     resources: ["routes"]
@@ -63,6 +75,11 @@ rules:
     verbs: ["get", "list"]
   - apiGroups: ["operator.serverless.openshift.io"]
     resources: ["knativekafkas"]
+    verbs: ["get", "list"]
+  {{- end }}
+  {{- if .Values.rbac.rules.monitoring }}
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["servicemonitors"]
     verbs: ["get", "list"]
   {{- end }}
 ---
