@@ -206,14 +206,17 @@ metadata:
   name: {{ include "rhdh.fullname" . }}-allow-test-connection
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
-  {{- with .Values.commonAnnotations }}
   annotations:
+    {{- with .Values.commonAnnotations }}
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
-  {{- end }}
+    {{- end }}
+    helm.sh/hook: test
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   podSelector:
     matchLabels:
-      {{- include "rhdh.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
       rhdh.redhat.com/test-connection: "true"
   policyTypes:
     - Egress
@@ -233,10 +236,13 @@ metadata:
   name: {{ include "rhdh.fullname" . }}-allow-test-connection-ingress
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
-  {{- with .Values.commonAnnotations }}
   annotations:
+    {{- with .Values.commonAnnotations }}
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
-  {{- end }}
+    {{- end }}
+    helm.sh/hook: test
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   podSelector:
     matchLabels:
@@ -247,7 +253,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              {{- include "rhdh.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/instance: {{ .Release.Name }}
               rhdh.redhat.com/test-connection: "true"
       ports:
         - port: 7007
