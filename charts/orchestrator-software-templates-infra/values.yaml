@@ -8,7 +8,7 @@ openshiftPipelines:
     name: openshift-pipelines-operator-rh
     spec:
       # -- channel of an operator package to subscribe to
-      channel: latest
+      channel: pipelines-1.21
       # --  whether the update should be installed automatically
       installPlanApproval: Automatic
       # -- name of the operator package
