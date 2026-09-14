@@ -1,7 +1,7 @@
 
 # Must Gather Chart for Red Hat Developer Hub (RHDH)
 
-![Version: 0.6.0](https://img.shields.io/badge/Version-0.6.0-informational?style=flat-square)
+![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for running the RHDH Must-Gather diagnostic tool on Kubernetes
@@ -27,7 +27,7 @@ Kubernetes: `>= 1.27.0-0`
 ```console
 helm upgrade --install my-rhdh-must-gather redhat-developer-hub-must-gather \
   --repo https://redhat-developer.github.io/rhdh-chart \
-  --version 0.6.0 \
+  --version 0.7.0 \
   [--wait --timeout=$duration]
 ```
 
@@ -141,12 +141,13 @@ The command removes all the Kubernetes resources associated with the chart and d
 | podAnnotations | Pod annotations | object | `{}` |
 | podLabels | Pod labels | object | `{}` |
 | podSecurityContext | Pod security context | object | `{"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
-| rbac | RBAC configuration | object | `{"create":true,"rules":{"backstages":true,"ingresses":true,"knative":true,"olm":true,"platform":true,"routes":true,"sonataflow":true},"scope":"cluster"}` |
+| rbac | RBAC configuration | object | `{"create":true,"rules":{"backstages":true,"ingresses":true,"knative":true,"monitoring":true,"olm":true,"platform":true,"routes":true,"sonataflow":true},"scope":"cluster"}` |
 | rbac.create | Create RBAC resources (Role/ClusterRole and bindings) | bool | `true` |
-| rbac.rules | a rule here does not require disabling the corresponding gather.with* flag. | object | `{"backstages":true,"ingresses":true,"knative":true,"olm":true,"platform":true,"routes":true,"sonataflow":true}` |
+| rbac.rules | a rule here does not require disabling the corresponding gather.with* flag. | object | `{"backstages":true,"ingresses":true,"knative":true,"monitoring":true,"olm":true,"platform":true,"routes":true,"sonataflow":true}` |
 | rbac.rules.backstages | rhdh.redhat.com — Backstage custom resources | bool | `true` |
 | rbac.rules.ingresses | networking.k8s.io — Ingresses, NetworkPolicies | bool | `true` |
 | rbac.rules.knative | operator.knative.dev, operator.serverless.openshift.io — Knative/Serverless | bool | `true` |
+| rbac.rules.monitoring | monitoring.coreos.com — ServiceMonitors (Prometheus Operator) | bool | `true` |
 | rbac.rules.olm | operators.coreos.com — OLM resources (subscriptions, CSVs, etc.) | bool | `true` |
 | rbac.rules.platform | config.openshift.io — ClusterVersions, Infrastructures (cluster scope only) | bool | `true` |
 | rbac.rules.routes | route.openshift.io — OpenShift Routes | bool | `true` |

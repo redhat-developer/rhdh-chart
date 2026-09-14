@@ -497,7 +497,7 @@
             "default": []
         },
         "extraInitContainers": {
-            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.",
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins), never replacing them.",
             "type": "array",
             "default": []
         },
@@ -921,40 +921,6 @@
                         }
                     }
                 },
-                "ragInit": {
-                    "title": "RAG data bootstrap init container.",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "image": {
-                            "title": "Container image for the RAG init container.",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "registry": { "type": "string", "default": "quay.io" },
-                                "repository": { "type": "string", "default": "redhat-ai-dev/rag-content" },
-                                "tag": { "type": "string" },
-                                "digest": { "type": "string", "default": "" }
-                            }
-                        },
-                        "imagePullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["Always", "IfNotPresent", "Never"] },
-                        "commandOverride": { "title": "Override the default command.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "argsOverride": { "title": "Override the default arguments.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "extraArgs": { "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.", "type": "array", "items": { "type": "string" }, "default": [] },
-                        "extraEnv": { "title": "Additional environment variables.", "type": "array", "items": { "type": "object" }, "default": [] },
-                        "extraVolumeMounts": { "title": "Additional volume mounts.", "type": "array", "items": { "type": "object" }, "default": [] },
-                        "resources": {
-                            "title": "Resource requests and limits.",
-                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-                            "default": {}
-                        },
-                        "securityContext": {
-                            "title": "Security context for the init container.",
-                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-                            "default": {}
-                        }
-                    }
-                },
                 "core": {
                     "title": "Lightspeed Core sidecar container.",
                     "type": "object",
@@ -984,6 +950,128 @@
                         },
                         "securityContext": {
                             "title": "Security context for the sidecar container.",
+                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+                            "default": {}
+                        }
+                    }
+                },
+                "okp": {
+                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "image": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "registry": { "type": "string", "default": "registry.redhat.io" },
+                                "repository": { "type": "string", "default": "offline-knowledge-portal/rhokp-rhel9" },
+                                "tag": { "type": "string", "default": "1.2.12-1788274041" },
+                                "digest": { "type": "string", "default": "" },
+                                "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["Always", "IfNotPresent", "Never"] }
+                            }
+                        },
+                        "replicaCount": { "type": "integer", "minimum": 0, "default": 1 },
+                        "solr": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "memory": { "type": "string", "default": "1g" },
+                                "hostBind": { "type": "string", "default": "0.0.0.0" }
+                            }
+                        },
+                        "httpd": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "serverName": { "type": "string", "default": "localhost" },
+                                "compressed": { "type": "string", "default": "true" },
+                                "encrypt": { "type": "string", "default": "false" }
+                            }
+                        },
+                        "resources": {
+                            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+                            "default": {}
+                        },
+                        "service": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "type": { "type": "string", "default": "ClusterIP" }
+                            }
+                        },
+                        "imagePullSecrets": { "type": "array", "items": { "type": "string" }, "default": [] },
+                        "affinity": {
+                            "type": "object",
+                            "default": {}
+                        },
+                        "nodeSelector": {
+                            "type": "object",
+                            "additionalProperties": { "type": "string" },
+                            "default": {}
+                        },
+                        "tolerations": {
+                            "type": "array",
+                            "default": []
+                        },
+                        "topologySpreadConstraints": {
+                            "type": "array",
+                            "default": []
+                        },
+                        "readinessProbe": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "initialDelaySeconds": { "type": "integer", "minimum": 0, "default": 10 },
+                                "periodSeconds": { "type": "integer", "minimum": 1, "default": 10 }
+                            }
+                        },
+                        "livenessProbe": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "initialDelaySeconds": { "type": "integer", "minimum": 0, "default": 30 },
+                                "periodSeconds": { "type": "integer", "minimum": 1, "default": 30 }
+                            }
+                        },
+                        "route": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": { "type": "boolean", "default": true },
+                                "tls": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "termination": { "type": "string", "default": "edge", "enum": ["edge", "reencrypt", "passthrough"] },
+                                        "insecureEdgeTerminationPolicy": { "type": "string", "default": "Redirect", "enum": ["Allow", "Redirect", "None"] }
+                                    }
+                                }
+                            }
+                        },
+                        "ingress": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": { "type": "boolean", "default": true },
+                                "host": { "type": "string", "default": "" },
+                                "className": { "type": "string", "default": "" },
+                                "annotations": {
+                                    "type": "object",
+                                    "additionalProperties": { "type": "string" },
+                                    "default": {}
+                                },
+                                "tls": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": { "type": "boolean", "default": false },
+                                        "secretName": { "type": "string", "default": "" }
+                                    }
+                                }
+                            }
+                        },
+                        "securityContext": {
                             "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
                             "default": {}
                         }

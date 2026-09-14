@@ -1354,6 +1354,11 @@
                             "title": "operator.knative.dev, operator.serverless.openshift.io \u2014 Knative/Serverless.",
                             "type": "boolean"
                         },
+                        "monitoring": {
+                            "default": true,
+                            "title": "monitoring.coreos.com \u2014 ServiceMonitors (Prometheus Operator).",
+                            "type": "boolean"
+                        },
                         "olm": {
                             "default": true,
                             "title": "operators.coreos.com \u2014 OLM resources (subscriptions, CSVs, etc.).",

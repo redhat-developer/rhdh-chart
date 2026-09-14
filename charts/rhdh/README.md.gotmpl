@@ -259,7 +259,7 @@ For detailed information on configuring the catalog index, including how to over
 
 Use `intelligentAssistant.enabled` to enable or disable the built-in Intelligent Assistant feature.
 
-When enabled, the chart adds the default Intelligent Assistant dynamic plugins (`ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant` and `ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend`), a RAG bootstrap init container, a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, and separate runtime and RAG data volumes. Override `intelligentAssistant.plugins` for disconnected environments. Plugin app-config uses the `intelligent-assistant:` namespace (not `lightspeed:`).
+When enabled, the chart adds the default Intelligent Assistant dynamic plugins (`ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant` and `ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend`), a Lightspeed Core sidecar listening on port `8080`, chart-generated ConfigMaps, and a writable runtime volume. Override `intelligentAssistant.plugins` for disconnected environments. Plugin app-config uses the `intelligent-assistant:` namespace (not `lightspeed:`).
 
 The bundled `lightspeed-stack.yaml` does not enable an LLM inference provider. Create a provider-enabled stack in a ConfigMap and reference it with `intelligentAssistant.config.stack.existingConfigMap`. Supply that provider's credentials and settings with `intelligentAssistant.existingSecret`; the chart does not create the Secret.
 
@@ -267,7 +267,7 @@ This is a breaking change from chart 1.x: rename `lightspeed:` to `intelligentAs
 
 Chart 2.1.0 removes `intelligentAssistant.config.server` and the separate Llama Stack `config.yaml`. Remove the `server` entry from existing values. Move custom Llama Stack settings into the `lightspeed-stack.yaml` supplied through `intelligentAssistant.config.stack.existingConfigMap`.
 
-Use `intelligentAssistant.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temp files and `/tmp/data` remain writable. The `/rag-content` volume stays chart-managed and `emptyDir`-backed because the RAG assets are repopulated by the init container on each Pod start.
+Use `intelligentAssistant.runtimeVolume` to change the writable `/tmp` runtime storage between `emptyDir` and an existing PVC reference. The chart mounts that volume at `/tmp` so both generated temporary files and `/tmp/data` remain writable.
 
 When using the built-in Intelligent Assistant feature, do not also keep those plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed or Intelligent Assistant there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `intelligentAssistant.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate plugin entries.
 

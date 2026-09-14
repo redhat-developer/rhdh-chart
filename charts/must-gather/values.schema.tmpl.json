@@ -141,6 +141,11 @@
                             "type": "boolean",
                             "default": true
                         },
+                        "monitoring": {
+                            "title": "monitoring.coreos.com — ServiceMonitors (Prometheus Operator).",
+                            "type": "boolean",
+                            "default": true
+                        },
                         "platform": {
                             "title": "config.openshift.io — ClusterVersions, Infrastructures (cluster scope only).",
                             "type": "boolean",

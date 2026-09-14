@@ -9,5 +9,46 @@
     "charts/backstage/**",
     "charts/orchestrator-software-templates/**",
     "charts/orchestrator-software-templates-infra/**"
+  ],
+  "baseBranchPatterns": ["main", "/^release-.*/"],
+  "packageRules": [
+    {
+      "description": "Disable all updates on release branches by default",
+      "matchBaseBranches": ["/^release-.*/"],
+      "enabled": false
+    },
+    {
+      "description": "Re-enable only patch updates on release branches",
+      "matchBaseBranches": ["/^release-.*/"],
+      "matchUpdateTypes": ["patch"],
+      "enabled": true
+    },
+    {
+      "description": "Re-enable digest updates for GitHub Actions on release branches",
+      "matchBaseBranches": ["/^release-.*/"],
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["digest"],
+      "enabled": true
+    },
+    {
+      "description": "EOL: disable all updates on release-1.8",
+      "matchBaseBranches": ["release-1.8"],
+      "enabled": false
+    },
+    {
+      "description": "EOL: disable all updates on release-1.7",
+      "matchBaseBranches": ["release-1.7"],
+      "enabled": false
+    },
+    {
+      "description": "EOL: disable all updates on release-1.6",
+      "matchBaseBranches": ["release-1.6"],
+      "enabled": false
+    },
+    {
+      "description": "EOL: disable all updates on release-1.5",
+      "matchBaseBranches": ["release-1.5"],
+      "enabled": false
+    }
   ]
 }

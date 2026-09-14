@@ -528,7 +528,7 @@
         },
         "extraInitContainers": {
             "default": [],
-            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.",
+            "title": "Additional init containers. These are ADDED after system init containers (install-dynamic-plugins), never replacing them.",
             "type": "array"
         },
         "extraVolumeMounts": {
@@ -770,6 +770,80 @@
                 },
                 "enabled": true,
                 "existingSecret": "",
+                "okp": {
+                    "affinity": {},
+                    "httpd": {
+                        "compressed": "true",
+                        "encrypt": "false",
+                        "serverName": "localhost"
+                    },
+                    "image": {
+                        "digest": "",
+                        "pullPolicy": "IfNotPresent",
+                        "registry": "registry.redhat.io",
+                        "repository": "offline-knowledge-portal/rhokp-rhel9",
+                        "tag": "1.2.12-1788274041"
+                    },
+                    "imagePullSecrets": [],
+                    "ingress": {
+                        "annotations": {},
+                        "className": "",
+                        "enabled": true,
+                        "host": "",
+                        "tls": {
+                            "enabled": false,
+                            "secretName": ""
+                        }
+                    },
+                    "livenessProbe": {
+                        "initialDelaySeconds": 30,
+                        "periodSeconds": 30
+                    },
+                    "nodeSelector": {},
+                    "readinessProbe": {
+                        "initialDelaySeconds": 10,
+                        "periodSeconds": 10
+                    },
+                    "replicaCount": 1,
+                    "resources": {
+                        "limits": {
+                            "cpu": "2",
+                            "memory": "4Gi"
+                        },
+                        "requests": {
+                            "cpu": "200m",
+                            "memory": "2Gi"
+                        }
+                    },
+                    "route": {
+                        "enabled": true,
+                        "tls": {
+                            "insecureEdgeTerminationPolicy": "Redirect",
+                            "termination": "edge"
+                        }
+                    },
+                    "securityContext": {
+                        "allowPrivilegeEscalation": false,
+                        "capabilities": {
+                            "drop": [
+                                "ALL"
+                            ]
+                        },
+                        "runAsNonRoot": true,
+                        "seccompProfile": {
+                            "type": "RuntimeDefault"
+                        }
+                    },
+                    "service": {
+                        "type": "ClusterIP"
+                    },
+                    "solr": {
+                        "hostBind": "0.0.0.0",
+                        "memory": "1g"
+                    },
+                    "tolerations": [],
+                    "topologySpreadConstraints": []
+                },
                 "plugins": [
                     {
                         "enabled": true,
@@ -780,43 +854,6 @@
                         "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
                     }
                 ],
-                "ragInit": {
-                    "argsOverride": [],
-                    "commandOverride": [],
-                    "extraArgs": [],
-                    "extraEnv": [],
-                    "extraVolumeMounts": [],
-                    "image": {
-                        "digest": "",
-                        "registry": "quay.io",
-                        "repository": "redhat-ai-dev/rag-content",
-                        "tag": "release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"
-                    },
-                    "imagePullPolicy": "IfNotPresent",
-                    "resources": {
-                        "limits": {
-                            "cpu": "100m",
-                            "memory": "500Mi"
-                        },
-                        "requests": {
-                            "cpu": "50m",
-                            "memory": "150Mi"
-                        }
-                    },
-                    "securityContext": {
-                        "allowPrivilegeEscalation": false,
-                        "capabilities": {
-                            "drop": [
-                                "ALL"
-                            ]
-                        },
-                        "readOnlyRootFilesystem": true,
-                        "runAsNonRoot": true,
-                        "seccompProfile": {
-                            "type": "RuntimeDefault"
-                        }
-                    }
-                },
                 "runtimeVolume": {
                     "emptyDir": {},
                     "persistentVolumeClaim": {},
@@ -1176,87 +1213,30 @@
                     "title": "Name of an existing Secret to inject via envFrom into the lightspeed-core container.",
                     "type": "string"
                 },
-                "plugins": {
-                    "default": [
-                        {
-                            "enabled": true,
-                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"
-                        },
-                        {
-                            "enabled": true,
-                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
-                        }
-                    ],
-                    "items": {
-                        "properties": {
-                            "enabled": {
-                                "default": true,
-                                "title": "Enable the plugin.",
-                                "type": "boolean"
-                            },
-                            "integrity": {
-                                "title": "Integrity checksum of the package.",
-                                "type": "string"
-                            },
-                            "package": {
-                                "title": "Package specification of the dynamic plugin to install.",
-                                "type": "string"
-                            },
-                            "pluginConfig": {
-                                "title": "Optional plugin-specific app-config YAML fragment.",
-                                "type": "object"
-                            }
-                        },
-                        "required": [
-                            "package"
-                        ],
-                        "type": "object"
-                    },
-                    "title": "Intelligent Assistant plugins and their configuration. Override package references for disconnected environments.",
-                    "type": "array"
-                },
-                "ragInit": {
+                "okp": {
                     "additionalProperties": false,
                     "properties": {
-                        "argsOverride": {
-                            "default": [],
-                            "items": {
-                                "type": "string"
-                            },
-                            "title": "Override the default arguments.",
-                            "type": "array"
+                        "affinity": {
+                            "default": {},
+                            "type": "object"
                         },
-                        "commandOverride": {
-                            "default": [],
-                            "items": {
-                                "type": "string"
+                        "httpd": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "compressed": {
+                                    "default": "true",
+                                    "type": "string"
+                                },
+                                "encrypt": {
+                                    "default": "false",
+                                    "type": "string"
+                                },
+                                "serverName": {
+                                    "default": "localhost",
+                                    "type": "string"
+                                }
                             },
-                            "title": "Override the default command.",
-                            "type": "array"
-                        },
-                        "extraArgs": {
-                            "default": [],
-                            "items": {
-                                "type": "string"
-                            },
-                            "title": "Extra arguments appended after the default arguments. Ignored when argsOverride is set.",
-                            "type": "array"
-                        },
-                        "extraEnv": {
-                            "default": [],
-                            "items": {
-                                "type": "object"
-                            },
-                            "title": "Additional environment variables.",
-                            "type": "array"
-                        },
-                        "extraVolumeMounts": {
-                            "default": [],
-                            "items": {
-                                "type": "object"
-                            },
-                            "title": "Additional volume mounts.",
-                            "type": "array"
+                            "type": "object"
                         },
                         "image": {
                             "additionalProperties": false,
@@ -1265,29 +1245,119 @@
                                     "default": "",
                                     "type": "string"
                                 },
+                                "pullPolicy": {
+                                    "default": "IfNotPresent",
+                                    "enum": [
+                                        "Always",
+                                        "IfNotPresent",
+                                        "Never"
+                                    ],
+                                    "type": "string"
+                                },
                                 "registry": {
-                                    "default": "quay.io",
+                                    "default": "registry.redhat.io",
                                     "type": "string"
                                 },
                                 "repository": {
-                                    "default": "redhat-ai-dev/rag-content",
+                                    "default": "offline-knowledge-portal/rhokp-rhel9",
                                     "type": "string"
                                 },
                                 "tag": {
+                                    "default": "1.2.12-1788274041",
                                     "type": "string"
                                 }
                             },
-                            "title": "Container image for the RAG init container.",
                             "type": "object"
                         },
-                        "imagePullPolicy": {
-                            "default": "IfNotPresent",
-                            "enum": [
-                                "Always",
-                                "IfNotPresent",
-                                "Never"
-                            ],
-                            "type": "string"
+                        "imagePullSecrets": {
+                            "default": [],
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "ingress": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "annotations": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "default": {},
+                                    "type": "object"
+                                },
+                                "className": {
+                                    "default": "",
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "host": {
+                                    "default": "",
+                                    "type": "string"
+                                },
+                                "tls": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "enabled": {
+                                            "default": false,
+                                            "type": "boolean"
+                                        },
+                                        "secretName": {
+                                            "default": "",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "livenessProbe": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "initialDelaySeconds": {
+                                    "default": 30,
+                                    "minimum": 0,
+                                    "type": "integer"
+                                },
+                                "periodSeconds": {
+                                    "default": 30,
+                                    "minimum": 1,
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "nodeSelector": {
+                            "additionalProperties": {
+                                "type": "string"
+                            },
+                            "default": {},
+                            "type": "object"
+                        },
+                        "readinessProbe": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "initialDelaySeconds": {
+                                    "default": 10,
+                                    "minimum": 0,
+                                    "type": "integer"
+                                },
+                                "periodSeconds": {
+                                    "default": 10,
+                                    "minimum": 1,
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "replicaCount": {
+                            "default": 1,
+                            "minimum": 0,
+                            "type": "integer"
                         },
                         "resources": {
                             "description": "ResourceRequirements describes the compute resource requirements.",
@@ -1343,6 +1413,40 @@
                                         ]
                                     },
                                     "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "route": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "tls": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "insecureEdgeTerminationPolicy": {
+                                            "default": "Redirect",
+                                            "enum": [
+                                                "Allow",
+                                                "Redirect",
+                                                "None"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "termination": {
+                                            "default": "edge",
+                                            "enum": [
+                                                "edge",
+                                                "reencrypt",
+                                                "passthrough"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
                                     "type": "object"
                                 }
                             },
@@ -1497,10 +1601,81 @@
                                 }
                             },
                             "type": "object"
+                        },
+                        "service": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "type": {
+                                    "default": "ClusterIP",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "solr": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "hostBind": {
+                                    "default": "0.0.0.0",
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "default": "1g",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "tolerations": {
+                            "default": [],
+                            "type": "array"
+                        },
+                        "topologySpreadConstraints": {
+                            "default": [],
+                            "type": "array"
                         }
                     },
-                    "title": "RAG data bootstrap init container.",
+                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval.",
                     "type": "object"
+                },
+                "plugins": {
+                    "default": [
+                        {
+                            "enabled": true,
+                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"
+                        },
+                        {
+                            "enabled": true,
+                            "package": "ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"
+                        }
+                    ],
+                    "items": {
+                        "properties": {
+                            "enabled": {
+                                "default": true,
+                                "title": "Enable the plugin.",
+                                "type": "boolean"
+                            },
+                            "integrity": {
+                                "title": "Integrity checksum of the package.",
+                                "type": "string"
+                            },
+                            "package": {
+                                "title": "Package specification of the dynamic plugin to install.",
+                                "type": "string"
+                            },
+                            "pluginConfig": {
+                                "title": "Optional plugin-specific app-config YAML fragment.",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "package"
+                        ],
+                        "type": "object"
+                    },
+                    "title": "Intelligent Assistant plugins and their configuration. Override package references for disconnected environments.",
+                    "type": "array"
                 },
                 "runtimeVolume": {
                     "additionalProperties": false,

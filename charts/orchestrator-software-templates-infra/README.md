@@ -1,7 +1,7 @@
 
 # Orchestrator Software Templates Infra Chart for OpenShift (Community Version)
 
-![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square)
+![Version: 0.5.1](https://img.shields.io/badge/Version-0.5.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart to install Openshift GitOps and Openshift Pipelines, which are required operators for installing the Orchestrator Software Templates to be available on RHDH.
@@ -25,7 +25,7 @@ Kubernetes: `>= 1.25.0-0`
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-software-templates-infra redhat-developer/orchestrator-software-templates-infra --version 0.5.0
+helm install my-orchestrator-software-templates-infra redhat-developer/orchestrator-software-templates-infra --version 0.5.1
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -131,7 +131,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | openshiftPipelines.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | openshiftPipelines.subscription.name | name of the operator package | string | `"openshift-pipelines-operator-rh"` |
 | openshiftPipelines.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-operators"` |
-| openshiftPipelines.subscription.spec.channel | channel of an operator package to subscribe to | string | `"latest"` |
+| openshiftPipelines.subscription.spec.channel | channel of an operator package to subscribe to | string | `"pipelines-1.21"` |
 | openshiftPipelines.subscription.spec.installPlanApproval | whether the update should be installed automatically | string | `"Automatic"` |
 | openshiftPipelines.subscription.spec.name | name of the operator package | string | `"openshift-pipelines-operator-rh"` |
 | openshiftPipelines.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |

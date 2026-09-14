@@ -294,7 +294,7 @@ extraContainers: []
 preInitContainers: []
 
 # -- Additional init containers. These are ADDED after system init containers
-# (install-dynamic-plugins, Intelligent Assistant RAG init), never replacing them.
+# (install-dynamic-plugins), never replacing them.
 extraInitContainers: []
 
 # -- Node labels for pod assignment.
@@ -528,38 +528,6 @@ intelligentAssistant:
     type: "emptyDir"
     emptyDir: {}
     persistentVolumeClaim: {}
-  # -- RAG data bootstrap init container.
-  ragInit:
-    image:
-      registry: "quay.io"
-      repository: "redhat-ai-dev/rag-content"
-      tag: "release-1.10-lls-0.5.0-8c231a3b5177f12fff9db042dfa4091d8f2f26b3"
-      digest: ""
-    imagePullPolicy: "IfNotPresent"
-    # -- Override the default command for the RAG init container.
-    commandOverride: []
-    # -- Override the default arguments for the RAG init container.
-    argsOverride: []
-    # -- Extra arguments appended after the default arguments. Ignored when argsOverride is set.
-    extraArgs: []
-    extraEnv: []
-    extraVolumeMounts: []
-    resources:
-      requests:
-        cpu: 50m
-        memory: 150Mi
-      limits:
-        cpu: 100m
-        memory: 500Mi
-    securityContext:
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-      runAsNonRoot: true
-      seccompProfile:
-        type: "RuntimeDefault"
   # -- Lightspeed Core sidecar container.
   core:
     image:
@@ -590,6 +558,78 @@ intelligentAssistant:
         drop:
           - ALL
       runAsNonRoot: true
+      seccompProfile:
+        type: "RuntimeDefault"
+  # -- OKP (Offline Knowledge Portal) configuration.
+  # Deploys an OKP instance for document retrieval when Intelligent Assistant is enabled.
+  okp:
+    image:
+      registry: "registry.redhat.io"
+      repository: "offline-knowledge-portal/rhokp-rhel9"
+      tag: "1.2.12-1788274041"
+      digest: ""
+      pullPolicy: "IfNotPresent"
+    replicaCount: 1
+    solr:
+      memory: "1g"
+      hostBind: "0.0.0.0"
+    httpd:
+      serverName: "localhost"
+      compressed: "true"
+      encrypt: "false"
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+    service:
+      type: ClusterIP
+    # -- Image pull secrets for the OKP container image.
+    # Required on vanilla Kubernetes to authenticate with registry.redhat.io.
+    # Not needed on OpenShift where the cluster-wide pull secret covers Red Hat registries.
+    # @default -- `[]`
+    imagePullSecrets: []
+    # imagePullSecrets:
+    #   - "my-rh-registry-secret"
+    # -- Pod scheduling: affinity rules for the OKP pod.
+    affinity: {}
+    # -- Pod scheduling: node selector for the OKP pod.
+    nodeSelector: {}
+    # -- Pod scheduling: tolerations for the OKP pod.
+    tolerations: []
+    # -- Pod scheduling: topology spread constraints for the OKP pod.
+    topologySpreadConstraints: []
+    # -- Readiness probe configuration for the OKP container.
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    # -- Liveness probe configuration for the OKP container.
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    route:
+      enabled: true
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
+    ingress:
+      enabled: true
+      host: ""
+      className: ""
+      annotations: {}
+      tls:
+        enabled: false
+        secretName: ""
+    # -- OKP container security context. readOnlyRootFilesystem is not set because
+    # Solr (Lucene) writes a lock file into its pre-built index directory at runtime.
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      capabilities:
+        drop:
+          - ALL
       seccompProfile:
         type: "RuntimeDefault"
 

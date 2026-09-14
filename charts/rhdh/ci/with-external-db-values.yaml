@@ -13,6 +13,11 @@ externalDatabase:
     key: "password"
 intelligentAssistant:
   plugins: []
+  okp:
+    route:
+      enabled: false
+    ingress:
+      enabled: false
 orchestrator:
   enabled: true
   plugins: []
