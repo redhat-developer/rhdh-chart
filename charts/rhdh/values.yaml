@@ -421,6 +421,11 @@ postgresql:
       adminPasswordKey: "postgres-password"
       userPasswordKey: "password"
   primary:
+    # The bitnami subchart ships its own NP, but it defaults to allow-all egress
+    # and unrestricted ingress on 5432. We disable it and provide tighter
+    # replacements in templates/network-policies.yaml.
+    networkPolicy:
+      enabled: false
     podSecurityContext:
       enabled: false
     containerSecurityContext:
@@ -447,6 +452,11 @@ postgresql:
           secretKeyRef:
             key: '{{- include "rhdh.postgresql.adminPasswordKey" . }}'
             name: '{{- include "rhdh.postgresql.secretName" . }}'
+  readReplicas:
+    # Same rationale as primary.networkPolicy above; our own read-replica NPs
+    # in templates/network-policies.yaml are tighter.
+    networkPolicy:
+      enabled: false
 
 # -- External database connection. Used when postgresql.enabled is false.
 # See docs/external-db.md for TLS setup and privilege requirements.

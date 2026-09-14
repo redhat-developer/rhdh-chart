@@ -255,6 +255,31 @@ You can also configure additional catalog index images via `catalogIndex.extraIm
 
 For detailed information on configuring the catalog index, including how to override the default image, use a private registry, or add extra catalog index images, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
 
+### NetworkPolicies
+
+This chart deploys a **default-deny** NetworkPolicy for the RHDH backend pod, blocking all ingress and egress traffic that is not explicitly allowed. When the built-in PostgreSQL is enabled (`postgresql.enabled=true`), the database pods also get their own default-deny policy with selective allow rules.
+
+The following traffic is allowed out of the box:
+
+| Direction | Port | Destination / Source | Purpose |
+|-----------|------|----------------------|---------|
+| Egress | 53, 5353 (UDP/TCP) | Any | DNS resolution |
+| Egress | 443 (TCP) | Any | HTTPS (Git forges, auth providers, external APIs) |
+| Egress | 5432 (TCP) | Built-in PostgreSQL pods (scoped) or any (external DB) | Database access |
+| Egress | 6379 (TCP) | Any | Redis (BYO — no pod/namespace selector) |
+| Ingress | 7007 (TCP) | OpenShift router namespace or any namespace (non-OCP) | User traffic via Route / Ingress |
+| Ingress | 9464 (TCP) | `openshift-monitoring`, `openshift-user-workload-monitoring`, `gmp-system`, `gke-gmp-system`, `monitoring` | Prometheus metrics scraping |
+
+**Redis egress is intentionally unscoped.** RHDH does not deploy Redis; users bring their own instance, which may live in the same namespace, a different namespace, or an external managed service. The rule therefore allows egress on port 6379 to any destination.
+
+**Bitnami subchart NetworkPolicies are disabled** (`postgresql.primary.networkPolicy.enabled=false`, `postgresql.readReplicas.networkPolicy.enabled=false`) because this chart provides its own tighter policies for the built-in database pods.
+
+**Helm test NetworkPolicies** (`allow-test-connection` and `allow-test-connection-ingress`) are Helm test hooks: they are created just before `helm test` runs and cleaned up automatically on success.
+
+**Adding your own NetworkPolicies.** Kubernetes evaluates NetworkPolicies additively — if any policy allows a connection, the connection is permitted. You **cannot** tighten an existing allow rule by adding another NetworkPolicy; you can only broaden access. To restrict traffic further, you would need to modify or remove the chart's policies via values overrides or post-render patches.
+
+For more information on user workload monitoring on OpenShift, see [Configuring user workload monitoring](https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.22/html/configuring_user_workload_monitoring/preparing-to-configure-the-monitoring-stack-uwm).
+
 ### Intelligent Assistant
 
 Use `intelligentAssistant.enabled` to enable or disable the built-in Intelligent Assistant feature.
