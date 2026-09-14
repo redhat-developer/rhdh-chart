@@ -131,7 +131,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | openshiftPipelines.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | openshiftPipelines.subscription.name | name of the operator package | string | `"openshift-pipelines-operator-rh"` |
 | openshiftPipelines.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-operators"` |
-| openshiftPipelines.subscription.spec.channel | channel of an operator package to subscribe to | string | `"latest"` |
+| openshiftPipelines.subscription.spec.channel | channel of an operator package to subscribe to | string | `"pipelines-1.21"` |
 | openshiftPipelines.subscription.spec.installPlanApproval | whether the update should be installed automatically | string | `"Automatic"` |
 | openshiftPipelines.subscription.spec.name | name of the operator package | string | `"openshift-pipelines-operator-rh"` |
 | openshiftPipelines.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
