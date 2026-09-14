@@ -46,6 +46,11 @@
       "enabled": false
     },
     {
+      "description": "EOL: disable all updates on release-1.5",
+      "matchBaseBranches": ["release-1.5"],
+      "enabled": false
+    },
+    {
       "description": "EOL: disable all updates on release-1.4",
       "matchBaseBranches": ["release-1.4"],
       "enabled": false
