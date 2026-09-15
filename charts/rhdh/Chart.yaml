@@ -1,7 +1,7 @@
 apiVersion: v2
 name: redhat-developer-hub
 type: application
-version: 2.3.0
+version: 2.3.1
 appVersion: 2.1.0
 annotations:
   artifacthub.io/category: integration-delivery
@@ -28,7 +28,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
-    version: "2.40.0"
+    version: "2.41.0"
   # Pinned to 16.2.x: starting with 16.3.0, the bitnami common library
   # rejects non-bitnami images unless global.security.allowInsecureImages
   # is set, which might be confusing for users. Since this chart ships a
