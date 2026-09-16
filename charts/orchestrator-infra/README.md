@@ -83,8 +83,8 @@ The command removes all the Kubernetes components associated with the chart and 
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
-| olmVersion | OLM API version to use for operator installation (`v0`, `v1`, or `auto`) | string | `"v0"` |
-| olm.catalog.selector.matchLabels."olm\.operatorframework\.io/metadata\.name" | ClusterCatalog selector for OLM v1 ClusterExtension resources | string | `"openshift-redhat-operators"` |
+| olm.catalog.selector | ClusterCatalog selector for OLM v1 ClusterExtension resources | object | `{"matchLabels":{"olm.operatorframework.io/metadata.name":"openshift-redhat-operators"}}` |
+| olmVersion | OLM API version to use for operator installation (`v0`, `v1`, or `auto`) Use `v0` on clusters without OLM v1, or until the v1 path is fully validated end-to-end. | string | `"v0"` |
 | serverlessLogicOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-logic-operator-installer"` |
 | serverlessLogicOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessLogicOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless-logic"` |
@@ -94,8 +94,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
 | serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
 | serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.38.0"` |
-| serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-operator-installer"` |
+| serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
 | serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
 | serverlessOperator.subscription.spec.installPlanApproval | whether the update should be installed automatically | string | `"Manual"` |
@@ -107,7 +107,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ### OLM v0 and OLM v1 operator installation
 
-By default, the chart uses `olmVersion: auto` to select the OLM API:
+By default, the chart uses `olmVersion: v0` (classic OLM Subscriptions). Set `olmVersion: auto` on OLM v1 clusters once the v1 path is validated end-to-end.
 
 - **`v0`** — creates `Subscription` resources (classic OLM)
 - **`v1`** — creates `ClusterExtension` resources with installer ServiceAccount and ClusterRoleBinding (OLM v1)
@@ -116,20 +116,20 @@ By default, the chart uses `olmVersion: auto` to select the OLM API:
 Examples:
 
 ```bash
-# Force classic OLM Subscriptions
+# Force classic OLM Subscriptions (default)
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v0
 
 # Force OLM v1 ClusterExtensions (requires OLM v1 on the cluster)
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
 ```
 
+> **Note:** On OLM v1 clusters, use a clean cluster (no prior helm-managed Knative CRDs from a v0 install). After ClusterExtensions report `Installed=True`, create KnativeServing/KnativeEventing instances manually or via a follow-up release upgrade.
+
 ### Installing Knative Eventing and Knative Serving CRDs
 
-The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving. These CRDs will be applied prior to installing the chart, ensuring that Knative CRs can be created as part of the chart's deployment process. This approach eliminates the need to wait for the OpenShift Serverless Operator's subscription to install them beforehand.
+The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving when using `olmVersion=v0`. These CRDs are installed from the `files/` directory via a Helm hook before the operator Subscriptions are applied.
 
-The KnativeEventing and KnativeServing CRDs are required for this chart to run when using `olmVersion=v0`. These CRDs are installed from the `files/` directory via a Helm hook before the operator Subscriptions are applied.
-
-When using `olmVersion=v1`, the chart does not pre-install Knative CRDs or create KnativeServing/KnativeEventing instances in the same Helm transaction. The operator bundle installed via ClusterExtension provides the CRDs first; create the Knative instances after the ClusterExtensions report `Installed=True`.
+When using `olmVersion=v1`, the chart does not pre-install Knative CRDs or create KnativeServing/KnativeEventing instances in the same Helm transaction. The operator bundle installed via ClusterExtension provides the CRDs first.
 
 In order to verify the correct CRD versions for the v0 path, use this following command to extract the CRD:
 

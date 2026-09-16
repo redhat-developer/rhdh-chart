@@ -5,10 +5,39 @@
   "type": "object",
   "properties": {
     "olmVersion": {
-      "default": "auto",
+      "default": "v0",
       "enum": ["auto", "v0", "v1"],
       "title": "OLM API version to use for operator installation",
       "type": "string"
+    },
+    "olm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "catalog": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "selector": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "matchLabels": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "olm.operatorframework.io/metadata.name": {
+                      "default": "openshift-redhat-operators",
+                      "title": "ClusterCatalog selector for OLM v1 ClusterExtension resources",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "serverlessLogicOperator": {
       "type": "object",
