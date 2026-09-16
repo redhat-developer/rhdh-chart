@@ -1,4 +1,4 @@
-{{- if .Values.serverlessOperator.enabled }}
+{{- if and .Values.serverlessOperator.enabled (eq (include "olm-version" .) "v0") }}
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:

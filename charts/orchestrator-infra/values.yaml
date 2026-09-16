@@ -1,5 +1,11 @@
 # -- OLM API version to use for operator installation (`v0`, `v1`, or `auto`)
 olmVersion: auto
+olm:
+  catalog:
+    # -- ClusterCatalog selector for OLM v1 ClusterExtension resources
+    selector:
+      matchLabels:
+        olm.operatorframework.io/metadata.name: openshift-redhat-operators
 
 serverlessLogicOperator:
   # -- whether the operator should be deployed by the chart

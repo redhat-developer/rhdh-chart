@@ -36,6 +36,10 @@ metadata:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 spec:
+  install:
+    preflight:
+      crdUpgradeSafety:
+        enforcement: None
   namespace: {{ $namespace }}
   serviceAccount:
     name: {{ $serviceAccountName }}
@@ -45,5 +49,7 @@ spec:
       packageName: {{ $packageName }}
       channels:
         - {{ .Values.serverlessOperator.subscription.spec.channel }}
+      selector:
+        {{- toYaml .Values.olm.catalog.selector | nindent 8 }}
       upgradeConstraintPolicy: CatalogProvided
 {{- end }}

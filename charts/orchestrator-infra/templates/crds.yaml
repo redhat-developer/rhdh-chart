@@ -1,0 +1,5 @@
+{{- if eq (include "olm-version" .) "v0" }}
+{{ .Files.Get "files/knative-serving-crd.yaml" }}
+---
+{{ .Files.Get "files/knative-eventing-crd.yaml" }}
+{{- end }}
