@@ -93,17 +93,15 @@ With `olmVersion=v1`, remove helm-managed Knative CRDs from a prior v0 install b
 
 ### Installing Knative Eventing and Knative Serving CRDs
 
-With `olmVersion=v0`, the chart installs Knative Eventing and Knative Serving CRDs from `files/` using a Helm hook before the operator Subscriptions.
+The chart ships Knative Eventing and Knative Serving CRDs under `crds/`. Helm installs them before the rest of the chart on every install or upgrade.
 
-With `olmVersion=v1`, the chart does not install those CRDs or create `KnativeServing`/`KnativeEventing` resources. The operator bundle installed by the ClusterExtension installs the CRDs.
-
-To verify CRD versions for the v0 path, run:
+To verify CRD versions, run:
 
 ```bash
 export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.38.0
-podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > files/knative-eventing-crd.yaml
+podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > crds/knative-eventing/knative-eventing-crd.yaml
 
-podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > files/knative-serving-crd.yaml
+podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > crds/knative-serving/knative-serving-crd.yaml
 ```
 
 After running these commands, you may need to re-add the `helm.sh/hook` annotations.
