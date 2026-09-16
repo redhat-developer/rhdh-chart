@@ -35,3 +35,44 @@
         {{- "false" -}}
     {{- end -}}
 {{- end -}}
+
+{{- define "olm-version" -}}
+    {{- $requested := default "auto" .Values.olmVersion -}}
+    {{- if eq $requested "auto" -}}
+        {{- if .Capabilities.APIVersions.Has "olm.operatorframework.io/v1/ClusterExtension" -}}
+            {{- "v1" -}}
+        {{- else -}}
+            {{- "v0" -}}
+        {{- end -}}
+    {{- else -}}
+        {{- $requested -}}
+    {{- end -}}
+{{- end -}}
+
+{{- define "unmanaged-clusterextension-exists" -}}
+    {{- $name := index . 0 -}}
+    {{- $releaseName := index . 1 -}}
+    {{- $apiCapabilities := index . 2 -}}
+    {{- if $apiCapabilities.Has "olm.operatorframework.io/v1/ClusterExtension" -}}
+        {{- $existingExtension := lookup "olm.operatorframework.io/v1" "ClusterExtension" "" $name -}}
+        {{- if empty $existingExtension -}}
+            {{- "false" -}}
+        {{- else -}}
+            {{- $isManagedResource := include "is-managed-resource" (list $existingExtension $releaseName) -}}
+            {{- if eq $isManagedResource "true" -}}
+                {{- "false" -}}
+            {{- else -}}
+                {{- "true" -}}
+            {{- end -}}
+        {{- end -}}
+    {{- else -}}
+        {{- "false" -}}
+    {{- end -}}
+{{- end -}}
+
+{{- define "csv-version" -}}
+    {{- $csv := index . 0 -}}
+    {{- $packageName := index . 1 -}}
+    {{- $version := trimPrefix (printf "%s." $packageName) $csv -}}
+    {{- trimPrefix "v" $version -}}
+{{- end -}}

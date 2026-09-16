@@ -1,7 +1,7 @@
 
 # Orchestrator Infra Chart for OpenShift
 
-![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square)
+![Version: 0.6.2](https://img.shields.io/badge/Version-0.6.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless Logic Operator, both required to configure Red Hat Developer Hub to use the Orchestrator.
@@ -25,7 +25,7 @@ Kubernetes: `>= 1.25.0-0`
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.6.1
+helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.6.2
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -83,6 +83,8 @@ The command removes all the Kubernetes components associated with the chart and 
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
+| olmVersion | OLM API version to use for operator installation (`v0`, `v1`, or `auto`) | string | `"auto"` |
+| serverlessLogicOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-logic-operator-installer"` |
 | serverlessLogicOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessLogicOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless-logic"` |
 | serverlessLogicOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
@@ -92,6 +94,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
 | serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.38.0"` |
 | serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
+| serverlessOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-operator-installer"` |
 | serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
 | serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
 | serverlessOperator.subscription.spec.installPlanApproval | whether the update should be installed automatically | string | `"Manual"` |
@@ -100,6 +103,24 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
 | tests.enabled | Whether to create the test pod used for testing the Release using `helm test`. | bool | `true` |
 | tests.image | Test pod image | string | `"bitnami/kubectl:latest"` |
+
+### OLM v0 and OLM v1 operator installation
+
+By default, the chart uses `olmVersion: auto` to select the OLM API:
+
+- **`v0`** — creates `Subscription` resources (classic OLM)
+- **`v1`** — creates `ClusterExtension` resources with installer ServiceAccount and ClusterRoleBinding (OLM v1)
+- **`auto`** — uses OLM v1 when the `clusterextensions.olm.operatorframework.io` CRD is present, otherwise OLM v0
+
+Examples:
+
+```bash
+# Force classic OLM Subscriptions
+helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v0
+
+# Force OLM v1 ClusterExtensions (requires OLM v1 on the cluster)
+helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
+```
 
 ### Installing Knative Eventing and Knative Serving CRDs
 
