@@ -78,31 +78,26 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ### OLM v0 and OLM v1 operator installation
 
-By default, the chart uses `olmVersion: v0` (classic OLM Subscriptions). Set `olmVersion: auto` on OLM v1 clusters once the v1 path is validated end-to-end.
+The chart defaults to `olmVersion: v0`.
 
-- **`v0`** — creates `Subscription` resources (classic OLM)
-- **`v1`** — creates `ClusterExtension` resources with installer ServiceAccount and ClusterRoleBinding (OLM v1)
-- **`auto`** — uses OLM v1 when the `clusterextensions.olm.operatorframework.io` CRD is present, otherwise OLM v0
-
-Examples:
+- `v0`: creates `Subscription` resources
+- `v1`: creates `ClusterExtension` resources with an installer ServiceAccount and ClusterRoleBinding
+- `auto`: uses OLM v1 when the `clusterextensions.olm.operatorframework.io` CRD is present; otherwise OLM v0
 
 ```bash
-# Force classic OLM Subscriptions (default)
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v0
-
-# Force OLM v1 ClusterExtensions (requires OLM v1 on the cluster)
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
 ```
 
-> **Note:** On OLM v1 clusters, use a clean cluster (no prior helm-managed Knative CRDs from a v0 install). After ClusterExtensions report `Installed=True`, create KnativeServing/KnativeEventing instances manually or via a follow-up release upgrade.
+With `olmVersion=v1`, remove helm-managed Knative CRDs from a prior v0 install before upgrading. After the ClusterExtensions report `Installed=True`, create `KnativeServing` and `KnativeEventing` separately.
 
 ### Installing Knative Eventing and Knative Serving CRDs
 
-The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving when using `olmVersion=v0`. These CRDs are installed from the `files/` directory via a Helm hook before the operator Subscriptions are applied.
+With `olmVersion=v0`, the chart installs Knative Eventing and Knative Serving CRDs from `files/` using a Helm hook before the operator Subscriptions.
 
-When using `olmVersion=v1`, the chart does not pre-install Knative CRDs or create KnativeServing/KnativeEventing instances in the same Helm transaction. The operator bundle installed via ClusterExtension provides the CRDs first.
+With `olmVersion=v1`, the chart does not install those CRDs or create `KnativeServing`/`KnativeEventing` resources. The operator bundle installed by the ClusterExtension installs the CRDs.
 
-In order to verify the correct CRD versions for the v0 path, use this following command to extract the CRD:
+To verify CRD versions for the v0 path, run:
 
 ```bash
 export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.38.0
