@@ -1,5 +1,5 @@
 {{- if .Values.serverlessOperator.enabled }}
-{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-serving" .Release.Name .Capabilities.APIVersions) }}
+{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-serving" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
 {{- if eq $unmanagedNamespaceExists "false" }}
 ---
 apiVersion: v1
@@ -12,7 +12,7 @@ metadata:
     "helm.sh/resource-policy": keep
 {{- end }}
 
-{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-eventing" .Release.Name .Capabilities.APIVersions) }}
+{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-eventing" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
 {{- if eq $unmanagedNamespaceExists "false" }}
 ---
 apiVersion: v1
@@ -25,7 +25,7 @@ metadata:
     "helm.sh/resource-policy": keep
 {{- end }}
 
-{{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Capabilities.APIVersions) }}
+{{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
 {{- if and (eq $unmanagedKnativeEventingExists "false") (ne (include "olm-version" .) "v1") }}
 ---
 apiVersion: operator.knative.dev/v1beta1
@@ -37,7 +37,7 @@ spec:
   Registry:
 {{- end }}
 
-{{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Capabilities.APIVersions) }}
+{{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
 {{- if and (eq $unmanagedKnativeServingExists "false") (ne (include "olm-version" .) "v1") }}
 ---
 apiVersion: operator.knative.dev/v1beta1
