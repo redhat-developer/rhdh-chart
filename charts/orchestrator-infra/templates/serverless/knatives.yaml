@@ -26,7 +26,7 @@ metadata:
 {{- end }}
 
 {{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Capabilities.APIVersions) }}
-{{- if eq $unmanagedKnativeEventingExists "false" }}
+{{- if and (eq $unmanagedKnativeEventingExists "false") (ne (include "olm-version" .) "v1") }}
 ---
 apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
@@ -38,7 +38,7 @@ spec:
 {{- end }}
 
 {{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Capabilities.APIVersions) }}
-{{- if eq $unmanagedKnativeServingExists "false" }}
+{{- if and (eq $unmanagedKnativeServingExists "false") (ne (include "olm-version" .) "v1") }}
 ---
 apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing

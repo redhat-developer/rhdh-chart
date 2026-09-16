@@ -83,7 +83,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
-| olmVersion | OLM API version to use for operator installation (`v0`, `v1`, or `auto`) | string | `"auto"` |
+| olmVersion | OLM API version to use for operator installation (`v0`, `v1`, or `auto`) | string | `"v0"` |
 | olm.catalog.selector.matchLabels."olm\.operatorframework\.io/metadata\.name" | ClusterCatalog selector for OLM v1 ClusterExtension resources | string | `"openshift-redhat-operators"` |
 | serverlessLogicOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-logic-operator-installer"` |
 | serverlessLogicOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
@@ -129,7 +129,7 @@ The orchestrator-infra chart requires several CRDs for Knative Eventing and Knat
 
 The KnativeEventing and KnativeServing CRDs are required for this chart to run when using `olmVersion=v0`. These CRDs are installed from the `files/` directory via a Helm hook before the operator Subscriptions are applied.
 
-When using `olmVersion=v1`, the chart does not pre-install Knative CRDs. They are installed by the operator bundle resolved through the ClusterExtension.
+When using `olmVersion=v1`, the chart does not pre-install Knative CRDs or create KnativeServing/KnativeEventing instances in the same Helm transaction. The operator bundle installed via ClusterExtension provides the CRDs first; create the Knative instances after the ClusterExtensions report `Installed=True`.
 
 In order to verify the correct CRD versions for the v0 path, use this following command to extract the CRD:
 

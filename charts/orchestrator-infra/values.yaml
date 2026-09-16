@@ -1,5 +1,6 @@
 # -- OLM API version to use for operator installation (`v0`, `v1`, or `auto`)
-olmVersion: auto
+# Use `v0` on clusters without OLM v1, or until the v1 path is fully validated end-to-end.
+olmVersion: v0
 olm:
   catalog:
     # -- ClusterCatalog selector for OLM v1 ClusterExtension resources
