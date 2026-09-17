@@ -3,5 +3,7 @@ kind: KnativeEventing
 metadata:
   name: knative-eventing
   namespace: knative-eventing
+  labels:
+    orchestrator-infra.redhat.com/chart-provisioned: "true"
 spec:
   Registry: {}

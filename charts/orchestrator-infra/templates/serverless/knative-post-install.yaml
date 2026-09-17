@@ -1,57 +1,59 @@
-{{- if and .Values.serverlessOperator.enabled (eq (include "olm-version" .) "v1") }}
+{{- if .Values.serverlessOperator.enabled }}
 {{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
 {{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
 {{- if or (eq $unmanagedKnativeEventingExists "false") (eq $unmanagedKnativeServingExists "false") }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: knative-v1-post-install
+  name: knative-post-install
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-install
+    helm.sh/hook: post-install,pre-delete
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Name }}-knative-v1-post-install
+  name: {{ .Release.Name }}-knative-post-install
   annotations:
-    helm.sh/hook: post-install
+    helm.sh/hook: post-install,pre-delete
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 rules:
+  {{- if eq (include "olm-version" .) "v1" }}
   - apiGroups: ["olm.operatorframework.io"]
     resources: ["clusterextensions"]
     verbs: ["get", "list", "watch"]
+  {{- end }}
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["operator.knative.dev"]
     resources: ["knativeservings", "knativeeventings"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Release.Name }}-knative-v1-post-install
+  name: {{ .Release.Name }}-knative-post-install
   annotations:
-    helm.sh/hook: post-install
+    helm.sh/hook: post-install,pre-delete
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Release.Name }}-knative-v1-post-install
+  name: {{ .Release.Name }}-knative-post-install
 subjects:
   - kind: ServiceAccount
-    name: knative-v1-post-install
+    name: knative-post-install
     namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knative-v1-post-install
+  name: knative-post-install
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-install
@@ -70,7 +72,7 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: knative-v1-post-install
+  name: knative-post-install
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: post-install
@@ -80,12 +82,12 @@ spec:
   backoffLimit: 1
   template:
     spec:
-      serviceAccountName: knative-v1-post-install
+      serviceAccountName: knative-post-install
       restartPolicy: Never
       volumes:
         - name: manifests
           configMap:
-            name: knative-v1-post-install
+            name: knative-post-install
       containers:
         - name: provision-knative
           image: {{ .Values.tests.image }}
@@ -104,20 +106,30 @@ spec:
             - |
               set -euo pipefail
 
+              {{- if eq (include "olm-version" .) "v1" }}
               if kubectl get clusterextension {{ .Values.serverlessOperator.subscription.spec.name }} >/dev/null 2>&1; then
                 echo "Waiting for ClusterExtension/{{ .Values.serverlessOperator.subscription.spec.name }} to be Installed..."
                 kubectl wait "clusterextension/{{ .Values.serverlessOperator.subscription.spec.name }}" \
                   --for=condition=Installed --timeout=600s
               fi
+              {{- end }}
 
               echo "Waiting for Knative CRDs to be established..."
               kubectl wait --for=condition=Established "crd/knativeservings.operator.knative.dev" --timeout=300s
               kubectl wait --for=condition=Established "crd/knativeeventings.operator.knative.dev" --timeout=300s
 
+              annotate_release() {
+                kubectl annotate "$1" "$2" -n "$3" \
+                  --overwrite \
+                  meta.helm.sh/release-name={{ .Release.Name }} \
+                  meta.helm.sh/release-namespace={{ .Release.Namespace }}
+              }
+
               {{- if eq $unmanagedKnativeEventingExists "false" }}
               if ! kubectl get knativeeventing knative-eventing -n knative-eventing >/dev/null 2>&1; then
                 echo "Creating KnativeEventing/knative-eventing..."
                 kubectl apply -f /manifests/knative-eventing.yaml
+                annotate_release knativeeventing knative-eventing knative-eventing
               fi
               {{- end }}
 
@@ -125,6 +137,7 @@ spec:
               if ! kubectl get knativeserving knative-serving -n knative-serving >/dev/null 2>&1; then
                 echo "Creating KnativeServing/knative-serving..."
                 kubectl apply -f /manifests/knative-serving.yaml
+                annotate_release knativeserving knative-serving knative-serving
               fi
               {{- end }}
 

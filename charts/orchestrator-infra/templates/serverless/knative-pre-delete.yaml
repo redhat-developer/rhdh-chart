@@ -1,0 +1,74 @@
+{{- if .Values.serverlessOperator.enabled }}
+{{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
+{{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
+{{- if or (eq $unmanagedKnativeEventingExists "false") (eq $unmanagedKnativeServingExists "false") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: knative-pre-delete
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-weight: "10"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: knative-post-install
+      restartPolicy: Never
+      containers:
+        - name: cleanup-knative
+          image: {{ .Values.tests.image }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: false
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -euo pipefail
+
+              RELEASE_NAME="{{ .Release.Name }}"
+              RELEASE_NAMESPACE="{{ .Release.Namespace }}"
+
+              is_chart_provisioned() {
+                local kind=$1
+                local name=$2
+                local namespace=$3
+                local release_name
+                local release_namespace
+
+                release_name=$(kubectl get "$kind" "$name" -n "$namespace" -o jsonpath='{.metadata.annotations.meta\.helm\.sh/release-name}' 2>/dev/null || true)
+                release_namespace=$(kubectl get "$kind" "$name" -n "$namespace" -o jsonpath='{.metadata.annotations.meta\.helm\.sh/release-namespace}' 2>/dev/null || true)
+
+                [ "$release_name" = "$RELEASE_NAME" ] && [ "$release_namespace" = "$RELEASE_NAMESPACE" ]
+              }
+
+              delete_if_provisioned() {
+                local kind=$1
+                local name=$2
+                local namespace=$3
+
+                if is_chart_provisioned "$kind" "$name" "$namespace"; then
+                  echo "Deleting ${kind}/${name} provisioned by this release..."
+                  kubectl delete "$kind" "$name" -n "$namespace" --ignore-not-found
+                  kubectl wait --for=delete "$kind/$name" -n "$namespace" --timeout=300s || true
+                else
+                  echo "Skipping ${kind}/${name}; not provisioned by this release."
+                fi
+              }
+
+              {{- if eq $unmanagedKnativeEventingExists "false" }}
+              delete_if_provisioned knativeeventing knative-eventing knative-eventing
+              {{- end }}
+
+              {{- if eq $unmanagedKnativeServingExists "false" }}
+              delete_if_provisioned knativeserving knative-serving knative-serving
+              {{- end }}
+
+              echo "Knative pre-delete cleanup completed."
+{{- end }}
+{{- end }}

@@ -24,32 +24,4 @@ metadata:
     "helm.sh/hook-weight": "-5"
     "helm.sh/resource-policy": keep
 {{- end }}
-
-{{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
-{{- if and (eq $unmanagedKnativeEventingExists "false") (ne (include "olm-version" .) "v1") }}
----
-apiVersion: operator.knative.dev/v1beta1
-kind: KnativeEventing
-metadata:
-  name: knative-eventing
-  namespace: knative-eventing
-spec:
-  Registry:
-{{- end }}
-
-{{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Release.Namespace .Capabilities.APIVersions) }}
-{{- if and (eq $unmanagedKnativeServingExists "false") (ne (include "olm-version" .) "v1") }}
----
-apiVersion: operator.knative.dev/v1beta1
-kind: KnativeServing
-metadata:
-  name: knative-serving
-  namespace: knative-serving
-spec:
-  controller-custom-certs:
-    name: ""
-    type: ""
-  registry: {}
-
-{{- end }}
 {{- end }}

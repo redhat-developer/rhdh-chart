@@ -3,6 +3,8 @@ kind: KnativeServing
 metadata:
   name: knative-serving
   namespace: knative-serving
+  labels:
+    orchestrator-infra.redhat.com/chart-provisioned: "true"
 spec:
   controller-custom-certs:
     name: ""
