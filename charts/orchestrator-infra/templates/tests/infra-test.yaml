@@ -136,7 +136,7 @@ spec:
             {{- if eq (include "olm-version" .) "v1" }}
             kubectl get clusterextension {{ .Values.serverlessOperator.subscription.spec.name }} || exit 1
             {{- else }}
-            kubectl get subscription {{ .Values.serverlessOperator.subscription.spec.name }} -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
+            kubectl get subscription.operators.coreos.com {{ .Values.serverlessOperator.subscription.spec.name }} -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
             {{- end }}
           {{- end }}
             
@@ -144,7 +144,7 @@ spec:
             {{- if eq (include "olm-version" .) "v1" }}
             kubectl get clusterextension {{ .Values.serverlessLogicOperator.subscription.spec.name }} || exit 1
             {{- else }}
-            kubectl get subscription {{ .Values.serverlessLogicOperator.subscription.spec.name }} -n {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
+            kubectl get subscription.operators.coreos.com {{ .Values.serverlessLogicOperator.subscription.spec.name }} -n {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
             {{- end }}
           {{- end }}
       
