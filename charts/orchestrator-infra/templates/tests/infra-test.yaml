@@ -138,8 +138,6 @@ spec:
             {{- else }}
             kubectl get subscription.operators.coreos.com {{ .Values.serverlessOperator.subscription.spec.name }} -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
             {{- end }}
-            kubectl get knativeeventing knative-eventing -n knative-eventing || exit 1
-            kubectl get knativeserving knative-serving -n knative-serving || exit 1
           {{- end }}
             
           {{- if .Values.serverlessLogicOperator.enabled }}

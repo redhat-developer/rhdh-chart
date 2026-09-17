@@ -89,7 +89,7 @@ helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
 ```
 
-With `olmVersion=v1`, remove helm-managed Knative CRDs from a prior v0 install before upgrading. Post-install and post-upgrade hooks wait for the Serverless ClusterExtension and operator CRDs, then create `KnativeServing` and `KnativeEventing`.
+With `olmVersion=v1`, remove helm-managed Knative CRDs from a prior v0 install before upgrading. The chart does not create `KnativeServing` or `KnativeEventing` on the OLM v1 path; once the Serverless ClusterExtension reports `Installed=True` and its CRDs are established, create these instances manually.
 
 ### Installing Knative Eventing and Knative Serving CRDs
 
