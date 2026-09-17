@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 2.2.1](https://img.shields.io/badge/Version-2.2.1-informational?style=flat-square)
+![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,14 +36,14 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 2.2.1
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 2.3.0
 ```
 
 ## Introduction
 
 This chart bootstraps a [Red Hat Developer Hub](https://developers.redhat.com/rhdh) deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
-Unlike the legacy `backstage` chart, this chart owns all Kubernetes templates directly (Deployment, Service, ConfigMap, etc.) without depending on an upstream Backstage subchart. It uses an **"add, don't replace"** pattern: system-required volumes, volume mounts, environment variables, and init containers are hardcoded in the Deployment template, while user-provided values (`extraVolumes`, `extraVolumeMounts`, `extraEnv`, `extraInitContainers`, `extraContainers`) are always appended — never replacing the defaults.
+Unlike the legacy `backstage` chart, this chart owns all Kubernetes templates directly (Deployment or StatefulSet, Service, ConfigMap, etc.) without depending on an upstream Backstage subchart. The Backstage pod specification is shared across workload kinds via a common template. It uses an **"add, don't replace"** pattern: system-required volumes, volume mounts, environment variables, and init containers are hardcoded in the pod template, while user-provided values (`extraVolumes`, `extraVolumeMounts`, `extraEnv`, `extraInitContainers`, `extraContainers`) are always appended — never replacing the defaults.
 
 ## Prerequisites
 
@@ -312,6 +312,12 @@ Kubernetes: `>= 1.31.0-0`
 | test | Test pod configuration for `helm test`. | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"curl/curl","tag":"8.21.0"},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}}` |
 | tolerations | Tolerations for pod assignment. | list | `[]` |
 | topologySpreadConstraints | Topology spread constraints for pod scheduling. | list | `[]` |
+| workload | Kubernetes workload controller for Backstage pod. | object | `{"kind":"Deployment","statefulSet":{"annotations":{},"persistentVolumeClaimRetentionPolicy":{},"podManagementPolicy":"","serviceName":"","updateStrategy":{}}}` |
+| workload.kind | Workload kind: Deployment (default) or StatefulSet. | string | `"Deployment"` |
+| workload.statefulSet.annotations | Annotations on the StatefulSet resource. | object | `{}` |
+| workload.statefulSet.podManagementPolicy | Pod management policy for the StatefulSet. | string | `""` |
+| workload.statefulSet.serviceName | Required for StatefulSet and must match an existing service. | string | `""` |
+| workload.statefulSet.updateStrategy | StatefulSet update strategy. | object | `{}` |
 
 ## Opinionated RHDH deployment
 
@@ -350,7 +356,7 @@ quay.io/rhdh-community/rhdh:next
 
 ### "Add, don't replace" pattern
 
-System-required volumes, volume mounts, environment variables, init containers, and sidecar containers are hardcoded in the Deployment template. User-provided `extra*` values are always **appended** after the system defaults:
+System-required volumes, volume mounts, environment variables, init containers, and sidecar containers are hardcoded in the Backstage pod template (used by both Deployment and StatefulSet). User-provided `extra*` values are always **appended** after the system defaults:
 
 - `extraVolumes` — appended after dynamic-plugins-root, temp, npmcacache, extensions-catalog, etc.
 - `extraVolumeMounts` — appended after dynamic-plugins-root, extensions, temp mounts
@@ -361,6 +367,16 @@ System-required volumes, volume mounts, environment variables, init containers, 
 This means you never need to copy system defaults to add your own entries.
 
 If you need full control, the corresponding `*Override` fields (`envOverride`, `envFromOverride`, `commandOverride`, `argsOverride`) **replace** the system defaults entirely — nothing is auto-injected when an override is set.
+
+### Workload kind (Deployment or StatefulSet)
+
+By default, the chart creates a Kubernetes **Deployment** (`workload.kind: Deployment`). You can change the workload kind to **StatefulSet** (`workload.kind: StatefulSet`) by setting `workload.kind` to `StatefulSet` in your values.yaml.
+
+```yaml
+# values.yaml
+workload:
+  kind: StatefulSet
+```
 
 ### OpenShift Routes
 

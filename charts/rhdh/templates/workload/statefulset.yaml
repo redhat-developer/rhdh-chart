@@ -1,26 +1,33 @@
-{{- if not (eq (include "rhdh.workloadKind" .) "StatefulSet") }}
+{{- if eq (include "rhdh.workloadKind" .) "StatefulSet" }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "rhdh.fullname" . }}
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
-  {{- if or .Values.commonAnnotations .Values.deploymentAnnotations }}
+  {{- if or .Values.commonAnnotations .Values.workload.statefulSet.annotations }}
   annotations:
     {{- with .Values.commonAnnotations }}
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
     {{- end }}
-    {{- with .Values.deploymentAnnotations }}
+    {{- with .Values.workload.statefulSet.annotations }}
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:
+  serviceName: {{ include "rhdh.statefulSetServiceName" . }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
-  {{- with .Values.strategy }}
-  strategy:
+  {{- with .Values.workload.statefulSet.podManagementPolicy }}
+  podManagementPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.workload.statefulSet.updateStrategy }}
+  updateStrategy:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+  {{- with .Values.workload.statefulSet.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
   selector:
@@ -28,4 +35,4 @@ spec:
       {{- include "rhdh.selectorLabels" . | nindent 6 }}
   template:
     {{- include "rhdh.backstagePodTemplate" . | nindent 4 }}
-  {{- end }}
+{{- end }}

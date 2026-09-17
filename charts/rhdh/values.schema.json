@@ -2537,6 +2537,54 @@
             "default": [],
             "title": "Topology spread constraints for pod scheduling.",
             "type": "array"
+        },
+        "workload": {
+            "additionalProperties": false,
+            "properties": {
+                "kind": {
+                    "default": "Deployment",
+                    "enum": [
+                        "Deployment",
+                        "StatefulSet"
+                    ],
+                    "title": "Workload kind: Deployment (default) or StatefulSet.",
+                    "type": "string"
+                },
+                "statefulSet": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "annotations": {
+                            "default": {},
+                            "title": "Annotations on the StatefulSet resource (not the pod).",
+                            "type": "object"
+                        },
+                        "persistentVolumeClaimRetentionPolicy": {
+                            "default": {},
+                            "title": "Optional PVC retention policy for the StatefulSet.",
+                            "type": "object"
+                        },
+                        "podManagementPolicy": {
+                            "default": "",
+                            "title": "Pod management policy for the StatefulSet.",
+                            "type": "string"
+                        },
+                        "serviceName": {
+                            "default": "",
+                            "title": "Service name for the StatefulSet. Defaults to the main service name.",
+                            "type": "string"
+                        },
+                        "updateStrategy": {
+                            "default": {},
+                            "title": "StatefulSet update strategy.",
+                            "type": "object"
+                        }
+                    },
+                    "title": "StatefulSet specific settings (ignored when kind is Deployment).",
+                    "type": "object"
+                }
+            },
+            "title": "Kubernetes workload controller for Backstage pod.",
+            "type": "object"
         }
     },
     "title": "Red Hat Developer Hub Helm Chart Values",

@@ -408,6 +408,52 @@
             "type": "object",
             "default": {}
         },
+
+        "workload": {
+            "title": "Kubernetes workload controller for Backstage pod.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "kind": {
+                    "title": "Workload kind: Deployment (default) or StatefulSet.",
+                    "type": "string",
+                    "default": "Deployment",
+                    "enum": ["Deployment", "StatefulSet"]
+                },
+                "statefulSet": {
+                    "title": "StatefulSet specific settings (ignored when kind is Deployment).",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "serviceName": {
+                            "title": "Service name for the StatefulSet. Defaults to the main service name.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "podManagementPolicy": {
+                            "title": "Pod management policy for the StatefulSet.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "updateStrategy": {
+                            "title": "StatefulSet update strategy.",
+                            "type": "object",
+                            "default": {}
+                        },
+                        "persistentVolumeClaimRetentionPolicy": {
+                            "title": "Optional PVC retention policy for the StatefulSet.",
+                            "type": "object",
+                            "default": {}
+                        },
+                        "annotations": {
+                            "title": "Annotations on the StatefulSet resource (not the pod).",
+                            "type": "object",
+                            "default": {}
+                        }
+                    }
+                }
+            }
+        },
         "commandOverride": {
             "title": "Override the container command.",
             "type": "array",
