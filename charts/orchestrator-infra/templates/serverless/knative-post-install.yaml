@@ -8,7 +8,7 @@ metadata:
   name: knative-post-install
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-install,pre-delete
+    helm.sh/hook: post-install,post-upgrade,pre-delete
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 ---
@@ -17,7 +17,7 @@ kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-knative-post-install
   annotations:
-    helm.sh/hook: post-install,pre-delete
+    helm.sh/hook: post-install,post-upgrade,pre-delete
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 rules:
@@ -38,7 +38,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ .Release.Name }}-knative-post-install
   annotations:
-    helm.sh/hook: post-install,pre-delete
+    helm.sh/hook: post-install,post-upgrade,pre-delete
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 roleRef:
@@ -56,7 +56,7 @@ metadata:
   name: knative-post-install
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-install
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 data:
@@ -75,7 +75,7 @@ metadata:
   name: knative-post-install
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-install
+    helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "10"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
 spec:

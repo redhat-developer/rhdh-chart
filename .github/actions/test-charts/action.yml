@@ -361,3 +361,33 @@ runs:
           CT_ARGS+=(--all)
         fi
         ct install "${CT_ARGS[@]}"
+
+    - name: Test orchestrator-infra OLM v0 to v1 upgrade
+      if: steps.list-changed.outputs.changed == 'true' && inputs.chart == 'charts/orchestrator-infra'
+      shell: bash
+      run: |
+        if ! kubectl api-resources -o name | grep -q '^clusterextensions\.olm\.operatorframework\.io$'; then
+          echo "ClusterExtension API not available; skipping OLM v0 to v1 upgrade test"
+          exit 0
+        fi
+
+        CHART="charts/orchestrator-infra"
+        NS="ct-charts"
+        RELEASE="orchestrator-infra-v0-v1-upgrade"
+        V0_VALUES="$CHART/ci/fresh-cluster-v0-values.yaml"
+        V1_VALUES="$CHART/test/olm-v1-upgrade-values.yaml"
+
+        helm uninstall "$RELEASE" -n "$NS" --ignore-not-found
+        helm install "$RELEASE" "$CHART" \
+          --namespace "$NS" \
+          --values "$V0_VALUES" \
+          --wait \
+          --timeout 500s
+        helm test "$RELEASE" --namespace "$NS"
+
+        helm upgrade "$RELEASE" "$CHART" \
+          --namespace "$NS" \
+          --values "$V1_VALUES" \
+          --wait \
+          --timeout 500s
+        helm test "$RELEASE" --namespace "$NS"
