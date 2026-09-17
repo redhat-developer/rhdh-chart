@@ -304,6 +304,8 @@ When using the built-in Intelligent Assistant feature, do not also keep those pl
 
 The Lightspeed Core sidecar loads `intelligentAssistant.existingSecret` as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
 
+RHDH documentation retrieval is disabled by default in Intelligent Assistant. To enable it, set `intelligentAssistant.okp.enabled=true`. This deploys the OKP workload and uses the OKP-enabled Lightspeed Stack configuration. The OKP container image is large, so enabling it can significantly increase the initial installation time while the image is downloaded. On vanilla Kubernetes, you must also configure the OKP Ingress and Red Hat registry credentials. See [Intelligent Assistant and OKP integration](../../docs/intelligent-assistant.md) for platform-specific configuration.
+
 ### Vanilla Kubernetes compatibility mode
 
 To deploy this chart on vanilla Kubernetes or any other non-OCP platform, apply the following changes. Note that further customizations might be required, depending on your exact Kubernetes setup:

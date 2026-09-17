@@ -320,12 +320,13 @@ imagePullSecrets:
 
 {{/*
 Return whether OKP should be deployed.
-On OpenShift (openshift.route.enabled): active when IA is enabled and okp.route.enabled is true.
-On vanilla K8s: only active when okp.ingress.enabled is true and okp.ingress.host is set.
+OKP must be explicitly enabled on every platform.
+On OpenShift (openshift.route.enabled): also requires okp.route.enabled.
+On vanilla K8s: also requires okp.ingress.enabled and a non-empty okp.ingress.host.
 */}}
 {{- define "rhdh.intelligentAssistant.okp.active" -}}
 {{- $ia := include "rhdh.intelligentAssistant" . | fromYaml -}}
-{{- if and $ia.enabled (or (and .Values.openshift.route.enabled $ia.okp.route.enabled) (and (not .Values.openshift.route.enabled) $ia.okp.ingress.enabled $ia.okp.ingress.host)) -}}
+{{- if and $ia.enabled $ia.okp.enabled (or (and .Values.openshift.route.enabled $ia.okp.route.enabled) (and (not .Values.openshift.route.enabled) $ia.okp.ingress.enabled $ia.okp.ingress.host)) -}}
 true
 {{- end -}}
 {{- end -}}

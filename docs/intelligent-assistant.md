@@ -14,17 +14,24 @@ The Intelligent Assistant integration deploys two components alongside the RHDH 
 
 OKP is **not** part of the RHDH Deployment — it is a separate workload that LCORE talks to via `OKP_SERVICE_URL`.
 
+> **Important:** RHDH documentation retrieval is disabled by default in Intelligent Assistant
+> on both OpenShift and vanilla Kubernetes. Enable OKP explicitly to ground responses in the
+> bundled Red Hat product documentation and provide clickable citations. The OKP container
+> image is large, so enabling it can significantly increase the initial installation time while
+> the image is downloaded.
+
 ## Deployment Scenarios
 
 | Scenario | OKP deployed? | Config used | RAG sources? |
 |---|---|---|---|
-| **OpenShift (auto)** | Yes — automatic when `intelligentAssistant.enabled=true` | `lightspeed-stack.yaml` (with OKP RAG configuration) | Yes |
-| **Vanilla K8s (default)** | No — unless OKP Ingress is enabled and `okp.ingress.host` is set | `lightspeed-stack-no-okp.yaml` | No |
-| **Vanilla K8s (opt-in)** | Yes — when `okp.ingress.enabled=true` and `okp.ingress.host` is provided | `lightspeed-stack.yaml` (with OKP RAG configuration) | Yes |
+| **OpenShift (default)** | No | `lightspeed-stack-no-okp.yaml` | No |
+| **OpenShift (opt-in)** | Yes — when `okp.enabled=true` | `lightspeed-stack.yaml` (with OKP RAG configuration) | Yes |
+| **Vanilla K8s (default)** | No | `lightspeed-stack-no-okp.yaml` | No |
+| **Vanilla K8s (opt-in)** | Yes — when `okp.enabled=true`, `okp.ingress.enabled=true`, and `okp.ingress.host` is provided | `lightspeed-stack.yaml` (with OKP RAG configuration) | Yes |
 
 ## Helm Install Flags
 
-### OpenShift (OKP auto-enabled)
+### OpenShift — No OKP (default)
 
 ```bash
 helm install rhdh ./charts/rhdh \
@@ -33,11 +40,22 @@ helm install rhdh ./charts/rhdh \
   --set openshift.clusterRouterBase=$(oc get ingresses.config/cluster -o jsonpath='{.spec.domain}')
 ```
 
+### OpenShift — OKP Opt-in
+
+```bash
+helm install rhdh ./charts/rhdh \
+  --set intelligentAssistant.enabled=true \
+  --set intelligentAssistant.existingSecret=lightspeed-secret \
+  --set intelligentAssistant.okp.enabled=true \
+  --set openshift.clusterRouterBase=$(oc get ingresses.config/cluster -o jsonpath='{.spec.domain}')
+```
+
 ### Vanilla Kubernetes — No OKP (default)
 
 ```bash
 helm install rhdh ./charts/rhdh \
   --namespace rhdh \
+  --set host=rhdh.mydomain.com \
   --set intelligentAssistant.enabled=true \
   --set intelligentAssistant.existingSecret=lightspeed-secret \
   --set openshift.route.enabled=false \
@@ -53,6 +71,7 @@ helm install rhdh ./charts/rhdh \
 ```bash
 helm install rhdh ./charts/rhdh \
   --namespace rhdh \
+  --set host=rhdh.mydomain.com \
   --set intelligentAssistant.enabled=true \
   --set intelligentAssistant.existingSecret=lightspeed-secret \
   --set openshift.route.enabled=false \
@@ -61,6 +80,7 @@ helm install rhdh ./charts/rhdh \
   --set 'ingress.hosts[0].paths[0].path=/' \
   --set 'ingress.hosts[0].paths[0].pathType=Prefix' \
   --set ingress.className=nginx \
+  --set intelligentAssistant.okp.enabled=true \
   --set intelligentAssistant.okp.ingress.enabled=true \
   --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
   --set intelligentAssistant.okp.ingress.className=nginx \
@@ -73,6 +93,7 @@ helm install rhdh ./charts/rhdh \
 ```bash
 helm install rhdh ./charts/rhdh \
   --namespace rhdh \
+  --set host=rhdh.mydomain.com \
   --set intelligentAssistant.enabled=true \
   --set intelligentAssistant.existingSecret=lightspeed-secret \
   --set openshift.route.enabled=false \
@@ -81,6 +102,7 @@ helm install rhdh ./charts/rhdh \
   --set 'ingress.hosts[0].paths[0].path=/' \
   --set 'ingress.hosts[0].paths[0].pathType=Prefix' \
   --set ingress.className=nginx \
+  --set intelligentAssistant.okp.enabled=true \
   --set intelligentAssistant.okp.ingress.enabled=true \
   --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
   --set intelligentAssistant.okp.ingress.className=nginx \
@@ -111,7 +133,8 @@ On vanilla Kubernetes (unlike OpenShift), the chart requires additional setup:
 2. **Enable Ingress** — set `ingress.enabled=true` with a hostname and ingress class.
    An ingress controller (e.g. [ingress-nginx](https://kubernetes.github.io/ingress-nginx/))
    must be installed in the cluster. To opt in to OKP, also set
-   `intelligentAssistant.okp.ingress.enabled=true` and provide a non-empty
+   `intelligentAssistant.okp.enabled=true`, set
+   `intelligentAssistant.okp.ingress.enabled=true`, and provide a non-empty
    `intelligentAssistant.okp.ingress.host`.
 3. **OKP image pull secret** — the OKP image is hosted on `registry.redhat.io`, which
    requires authentication. Create a pull secret from your Red Hat registry credentials
@@ -200,6 +223,7 @@ kubectl create secret tls okp-tls -n <namespace> \
 # Then set TLS on the OKP Ingress
 helm install rhdh ./charts/rhdh \
   ... \
+  --set intelligentAssistant.okp.enabled=true \
   --set intelligentAssistant.okp.ingress.enabled=true \
   --set intelligentAssistant.okp.ingress.host=okp.mydomain.com \
   --set intelligentAssistant.okp.ingress.tls.enabled=true \
@@ -223,6 +247,7 @@ OKP values are under `intelligentAssistant.okp.*`:
 
 | Value | Default | Description |
 |---|---|---|
+| `okp.enabled` | `false` | Enable OKP-backed RHDH documentation retrieval. Enabling it downloads and runs the large OKP image. |
 | `okp.image.registry` | `registry.redhat.io` | OKP container image registry |
 | `okp.image.repository` | `offline-knowledge-portal/rhokp-rhel9` | OKP image repository |
 | `okp.image.tag` | `1.2.12-1788274041` | Pinned OKP image tag |
@@ -232,9 +257,9 @@ OKP values are under `intelligentAssistant.okp.*`:
 | `okp.resources.limits.memory` | `4Gi` | Memory limit |
 | `okp.securityContext` | restricted | Security context for the OKP container |
 | `okp.imagePullSecrets` | `[]` | Image pull secrets (merged with `global.imagePullSecrets`) |
-| `okp.route.enabled` | `true` | Create OpenShift Route |
-| `okp.ingress.enabled` | `true` | Create K8s Ingress (requires `host`) |
-| `okp.ingress.host` | `""` | Ingress hostname (required with `okp.ingress.enabled=true` to opt in on K8s) |
+| `okp.route.enabled` | `true` | Create an OpenShift Route when OKP is enabled |
+| `okp.ingress.enabled` | `true` | Create a K8s Ingress when OKP is enabled (requires `host`) |
+| `okp.ingress.host` | `""` | Ingress hostname (required with `okp.enabled=true` on K8s) |
 | `okp.ingress.className` | `""` | Ingress class (e.g. `nginx`) |
 | `okp.ingress.tls.enabled` | `false` | Enable TLS on the OKP Ingress |
 | `okp.ingress.tls.secretName` | `""` | TLS secret name (cert+key) |

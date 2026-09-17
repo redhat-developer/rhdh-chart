@@ -772,6 +772,7 @@
                 "existingSecret": "",
                 "okp": {
                     "affinity": {},
+                    "enabled": false,
                     "httpd": {
                         "compressed": "true",
                         "encrypt": "false",
@@ -1220,6 +1221,11 @@
                             "default": {},
                             "type": "object"
                         },
+                        "enabled": {
+                            "default": false,
+                            "title": "Enable OKP-backed RHDH documentation retrieval. The large OKP image can significantly increase initial installation time.",
+                            "type": "boolean"
+                        },
                         "httpd": {
                             "additionalProperties": false,
                             "properties": {
@@ -1635,7 +1641,7 @@
                             "type": "array"
                         }
                     },
-                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval.",
+                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for RHDH documentation retrieval when explicitly enabled.",
                     "type": "object"
                 },
                 "plugins": {

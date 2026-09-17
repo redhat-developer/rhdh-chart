@@ -571,8 +571,11 @@ intelligentAssistant:
       seccompProfile:
         type: "RuntimeDefault"
   # -- OKP (Offline Knowledge Portal) configuration.
-  # Deploys an OKP instance for document retrieval when Intelligent Assistant is enabled.
+  # Deploys an OKP instance for RHDH documentation retrieval when explicitly enabled.
+  # The image is large and can significantly increase initial installation time.
   okp:
+    # -- Enable OKP-backed RHDH documentation retrieval. Disabled by default on all platforms.
+    enabled: false
     image:
       registry: "registry.redhat.io"
       repository: "offline-knowledge-portal/rhokp-rhel9"
