@@ -316,7 +316,7 @@ Kubernetes: `>= 1.31.0-0`
 | workload.kind | Workload kind: Deployment (default) or StatefulSet. | string | `"Deployment"` |
 | workload.statefulSet.annotations | Annotations on the StatefulSet resource. | object | `{}` |
 | workload.statefulSet.podManagementPolicy | Pod management policy for the StatefulSet. | string | `""` |
-| workload.statefulSet.serviceName | Required for StatefulSet and must match an existing service. | string | `""` |
+| workload.statefulSet.serviceName | Service ({fullname}-headless) must match an existing service. | string | `""` |
 | workload.statefulSet.updateStrategy | StatefulSet update strategy. | object | `{}` |
 
 ## Opinionated RHDH deployment
@@ -385,7 +385,7 @@ Both kinds render the **same** Backstage pod (containers, volumes, probes, dynam
 - You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, or optional PVC retention policy).
 - You want parity with the [RHDH Operator](https://github.com/redhat-developer/rhdh-operator), which supports `spec.deployment.kind: StatefulSet` ([operator documentation](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/configuration.md#deployment-kind)).
 
-Most installs should keep the default **Deployment**.
+Most installs should keep the default **Deployment** (no app StatefulSet and no headless Service).
 
 **Values that behave the same for both kinds**
 
@@ -402,14 +402,17 @@ Most installs should keep the default **Deployment**.
 
 **StatefulSet-only settings**
 
-`serviceName` is required on a StatefulSet. The chart defaults it to the main Service for this release (see `workload.statefulSet.serviceName` in the parameters table). Example with common options:
+When `workload.kind` is `StatefulSet`, the chart also renders a **headless Service** (`{fullname}-headless`, `clusterIP: None`). The StatefulSet `serviceName` points at that Service (stable pod network identity).
 
+The existing **ClusterIP Service** (`templates/service.yaml`) is unchanged — OpenShift Routes, Ingress, and `helm test` still use it for application traffic.
+
+Override `workload.statefulSet.serviceName` only if you create your own governing Service.
 ```yaml
 # values.yaml
 workload:
   kind: StatefulSet
   statefulSet:
-    serviceName: ""   # default: main chart Service
+    serviceName: ""   # default: {fullname}-headless
     podManagementPolicy: OrderedReady   # or Parallel; omit when empty
     updateStrategy:
       type: RollingUpdate
