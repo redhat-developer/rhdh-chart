@@ -65,8 +65,12 @@ Workload kind helpers
 {{- eq (include "rhdh.workloadKind" .) "StatefulSet" -}}
 {{- end -}}
 
+{{- define "rhdh.statefulSetHeadlessServiceName" -}}
+{{- printf "%s-headless" (include "rhdh.fullname" .) -}}
+{{- end -}}
+
 {{- define "rhdh.statefulSetServiceName" -}}
-{{- default (include "rhdh.fullname" .) .Values.workload.statefulSet.serviceName -}}
+{{- default (include "rhdh.statefulSetHeadlessServiceName" .) .Values.workload.statefulSet.serviceName -}}
 {{- end -}}
 
 {{/*

@@ -426,7 +426,7 @@
                     "additionalProperties": false,
                     "properties": {
                         "serviceName": {
-                            "title": "Service name for the StatefulSet. Defaults to the main service name.",
+                            "title": "serviceName for the StatefulSet spec. Defaults to the headless Service ({fullname}-headless).",
                             "type": "string",
                             "default": ""
                         },
