@@ -9,7 +9,7 @@ Before making a contribution to the charts in this repository, you will need to 
 - For each Chart updated, version bumped in the corresponding `Chart.yaml` according to [Semantic Versioning](http://semver.org/).
 - For each Chart updated, ensure variables are documented in the corresponding `values.yaml` file and the [pre-commit](https://pre-commit.com/) hook has been run with `pre-commit run --all-files` to generate the corresponding `README.md` documentation. The [pre-commit Workflow](./.github/workflows/pre-commit.yaml) will enforce this and warn you if needed.
 - JSON Schema template updated and re-generated the raw schema via the `pre-commit` hook.
-- [ ] If you updated the [orchestrator-infra](./charts/orchestrator-infra) chart, make sure the versions of the [Knative CRDs](./charts/orchestrator-infra/crds) are aligned with the versions of the CRDs installed by the OpenShift Serverless operators declared in the [values.yaml](./charts/orchestrator-infra/values.yaml) file. See [Installing Knative Eventing and Knative Serving CRDs](./charts/orchestrator-infra/README.md#installing-knative-eventing-and-knative-serving-crds) for more details.
+- [ ] If you updated the [orchestrator-infra](./charts/orchestrator-infra) chart, make sure the versions of the [Knative CRDs](./charts/orchestrator-infra/files) are aligned with the versions of the CRDs installed by the OpenShift Serverless operators declared in the [values.yaml](./charts/orchestrator-infra/values.yaml) file. See [Installing Knative Eventing and Knative Serving CRDs](./charts/orchestrator-infra/README.md#installing-knative-eventing-and-knative-serving-crds) for more details.
 
 ## Sync Lightspeed Core vendored config files
 

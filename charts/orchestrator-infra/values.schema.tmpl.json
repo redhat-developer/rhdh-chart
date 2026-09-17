@@ -24,13 +24,37 @@
               "properties": {
                 "matchLabels": {
                   "type": "object",
-                  "additionalProperties": false,
+                  "additionalProperties": {
+                    "type": "string"
+                  },
                   "properties": {
                     "olm.operatorframework.io/metadata.name": {
                       "default": "openshift-redhat-operators",
                       "title": "ClusterCatalog selector for OLM v1 ClusterExtension resources",
                       "type": "string"
                     }
+                  }
+                },
+                "matchExpressions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "operator": {
+                        "type": "string"
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": ["key", "operator"]
                   }
                 }
               }
