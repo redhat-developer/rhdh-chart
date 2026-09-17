@@ -28,5 +28,4 @@ spec:
       {{- include "rhdh.selectorLabels" . | nindent 6 }}
   template:
     {{- include "rhdh.backstagePodTemplate" . | nindent 4 }}
-  {{- end }}
 {{- end }}
