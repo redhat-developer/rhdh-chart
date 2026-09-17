@@ -1,7 +1,7 @@
 
 # Orchestrator Infra Chart for OpenShift
 
-![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square)
+![Version: 0.6.2](https://img.shields.io/badge/Version-0.6.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless Logic Operator, both required to configure Red Hat Developer Hub to use the Orchestrator.
@@ -25,7 +25,7 @@ Kubernetes: `>= 1.25.0-0`
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.6.1
+helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.6.2
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -83,6 +83,9 @@ The command removes all the Kubernetes components associated with the chart and 
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
+| olm.catalog.selector | ClusterCatalog selector for OLM v1 ClusterExtension resources | object | `{"matchLabels":{"olm.operatorframework.io/metadata.name":"openshift-redhat-operators"}}` |
+| olmVersion | OLM API version to use for operator installation (`v0`, `v1`, or `auto`) | string | `"v0"` |
+| serverlessLogicOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-logic-operator-installer"` |
 | serverlessLogicOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessLogicOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless-logic"` |
 | serverlessLogicOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
@@ -91,6 +94,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
 | serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
 | serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.38.0"` |
+| serverlessOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-operator-installer"` |
 | serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
 | serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
@@ -101,20 +105,32 @@ The command removes all the Kubernetes components associated with the chart and 
 | tests.enabled | Whether to create the test pod used for testing the Release using `helm test`. | bool | `true` |
 | tests.image | Test pod image | string | `"bitnami/kubectl:latest"` |
 
+### OLM v0 and OLM v1 operator installation
+
+The chart defaults to `olmVersion: v0`.
+
+- `v0`: creates `Subscription` resources
+- `v1`: creates `ClusterExtension` resources with an installer ServiceAccount and ClusterRoleBinding
+- `auto`: uses OLM v1 when the `clusterextensions.olm.operatorframework.io` CRD is present; otherwise OLM v0
+
+```bash
+helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v0
+helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
+```
+
+With `olmVersion=v1`, remove helm-managed Knative CRDs from a prior v0 install before upgrading. The chart does not create `KnativeServing` or `KnativeEventing` on the OLM v1 path; once the Serverless ClusterExtension reports `Installed=True` and its CRDs are established, create these instances manually.
+
 ### Installing Knative Eventing and Knative Serving CRDs
 
-The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving. These CRDs will be applied prior to installing the chart, ensuring that Knative CRs can be created as part of the chart's deployment process. This approach eliminates the need to wait for the OpenShift Serverless Operator's subscription to install them beforehand.
+The chart ships Knative Eventing and Knative Serving CRDs under `files/`. On the OLM v0 path, Helm applies them via pre-install hooks. On the OLM v1 path, the Serverless operator bundle installs the CRDs instead.
 
-The KnativeEventing and KnativeServing CRDs are required for this chart to run. These CRDs need to be present under the `crds/` directory before running `helm install`.
-After installing the openshift-serverless subscription, more Knative CRDs will be installed on the cluster.
-
-The versions of the CRDs present in the chart and the ones in the subscription must match. In order to verify the correct CRD, use this following command to extract the CRD:
+To verify CRD versions, run:
 
 ```bash
 export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.38.0
-podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > crds/knative-eventing/knative-eventing-crd.yaml
+podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > files/knative-eventing/knative-eventing-crd.yaml
 
-podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > crds/knative-serving/knative-serving-crd.yaml
+podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > files/knative-serving/knative-serving-crd.yaml
 ```
 
-After running these commands, you may need to re-add the `helm.sh/hook` annotations.
+After running these commands, you may need to re-add the `helm.sh/hook` annotations on the OLM v0 path.

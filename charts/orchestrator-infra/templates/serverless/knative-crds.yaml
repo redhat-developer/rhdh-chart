@@ -1,0 +1,9 @@
+{{- if and .Values.serverlessOperator.enabled (ne (include "olm-version" .) "v1") }}
+{{- if not (lookup "apiextensions.k8s.io/v1" "CustomResourceDefinition" "" "knativeservings.operator.knative.dev") }}
+{{ .Files.Get "files/knative-serving/knative-serving-crd.yaml" }}
+---
+{{- end }}
+{{- if not (lookup "apiextensions.k8s.io/v1" "CustomResourceDefinition" "" "knativeeventings.operator.knative.dev") }}
+{{ .Files.Get "files/knative-eventing/knative-eventing-crd.yaml" }}
+{{- end }}
+{{- end }}
