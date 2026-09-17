@@ -443,6 +443,11 @@ postgresql:
       adminPasswordKey: "postgres-password"
       userPasswordKey: "password"
   primary:
+    # The bitnami subchart ships its own NP, but it defaults to allow-all egress
+    # and unrestricted ingress on 5432. We disable it and provide tighter
+    # replacements in templates/network-policies.yaml.
+    networkPolicy:
+      enabled: false
     podSecurityContext:
       enabled: false
     containerSecurityContext:
@@ -469,6 +474,11 @@ postgresql:
           secretKeyRef:
             key: '{{- include "rhdh.postgresql.adminPasswordKey" . }}'
             name: '{{- include "rhdh.postgresql.secretName" . }}'
+  readReplicas:
+    # Same rationale as primary.networkPolicy above; our own read-replica NPs
+    # in templates/network-policies.yaml are tighter.
+    networkPolicy:
+      enabled: false
 
 # -- External database connection. Used when postgresql.enabled is false.
 # See docs/external-db.md for TLS setup and privilege requirements.
@@ -714,13 +724,13 @@ orchestrator:
         tag: ""
         digest: ""
   plugins:
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-backend:{{ "{{inherit}}" }}'
+    - package: 'ref://red-hat-developer-hub-backstage-plugin-orchestrator-backend'
       enabled: true
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets:{{ "{{inherit}}" }}'
+    - package: 'ref://red-hat-developer-hub-backstage-plugin-orchestrator-form-widgets'
       enabled: true
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-orchestrator:{{ "{{inherit}}" }}'
+    - package: 'ref://red-hat-developer-hub-backstage-plugin-orchestrator'
       enabled: true
-    - package: 'oci://registry.access.redhat.com/rhdh/red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator:{{ "{{inherit}}" }}'
+    - package: 'ref://red-hat-developer-hub-backstage-plugin-scaffolder-backend-module-orchestrator'
       enabled: true
 
 # ── Testing ─────────────────────────────────────────────────
@@ -731,7 +741,7 @@ test:
   image:
     registry: "quay.io"
     repository: "curl/curl"
-    tag: "8.21.0"
+    tag: "8.22.0"
     digest: ""
     pullPolicy: "IfNotPresent"
   securityContext:
