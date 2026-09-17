@@ -34,7 +34,7 @@ helm install my-rhdh redhat-developer/redhat-developer-hub --version {{ template
 
 This chart bootstraps a [Red Hat Developer Hub](https://developers.redhat.com/rhdh) deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
-Unlike the legacy `backstage` chart, this chart owns all Kubernetes templates directly (Deployment, Service, ConfigMap, etc.) without depending on an upstream Backstage subchart. It uses an **"add, don't replace"** pattern: system-required volumes, volume mounts, environment variables, and init containers are hardcoded in the Deployment template, while user-provided values (`extraVolumes`, `extraVolumeMounts`, `extraEnv`, `extraInitContainers`, `extraContainers`) are always appended — never replacing the defaults.
+Unlike the legacy `backstage` chart, this chart owns all Kubernetes templates directly (Deployment or StatefulSet, Service, ConfigMap, etc.) without depending on an upstream Backstage subchart. The Backstage pod specification is shared across workload kinds via a common template. It uses an **"add, don't replace"** pattern: system-required volumes, volume mounts, environment variables, and init containers are hardcoded in the pod template, while user-provided values (`extraVolumes`, `extraVolumeMounts`, `extraEnv`, `extraInitContainers`, `extraContainers`) are always appended — never replacing the defaults.
 
 ## Prerequisites
 
@@ -195,7 +195,7 @@ quay.io/rhdh-community/rhdh:next
 
 ### "Add, don't replace" pattern
 
-System-required volumes, volume mounts, environment variables, init containers, and sidecar containers are hardcoded in the Deployment template. User-provided `extra*` values are always **appended** after the system defaults:
+System-required volumes, volume mounts, environment variables, init containers, and sidecar containers are hardcoded in the Backstage pod template (used by both Deployment and StatefulSet). User-provided `extra*` values are always **appended** after the system defaults:
 
 - `extraVolumes` — appended after dynamic-plugins-root, temp, npmcacache, extensions-catalog, etc.
 - `extraVolumeMounts` — appended after dynamic-plugins-root, extensions, temp mounts
@@ -206,6 +206,68 @@ System-required volumes, volume mounts, environment variables, init containers, 
 This means you never need to copy system defaults to add your own entries.
 
 If you need full control, the corresponding `*Override` fields (`envOverride`, `envFromOverride`, `commandOverride`, `argsOverride`) **replace** the system defaults entirely — nothing is auto-injected when an override is set.
+
+### Workload kind (Deployment or StatefulSet)
+
+By default, the chart creates a Kubernetes **Deployment** (`workload.kind: Deployment`). To use a **StatefulSet** instead:
+
+```yaml
+# values.yaml
+workload:
+  kind: StatefulSet
+```
+
+Both kinds render the **same** Backstage pod (containers, volumes, probes, dynamic plugins, Intelligent Assistant, init containers). Only the workload controller changes; the pod definition is shared.
+
+**When to use StatefulSet**
+
+- You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, or optional PVC retention policy).
+- You want parity with the [RHDH Operator](https://github.com/redhat-developer/rhdh-operator), which supports `spec.deployment.kind: StatefulSet` ([operator documentation](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/configuration.md#deployment-kind)).
+
+Most installs should keep the default **Deployment** (no app StatefulSet and no headless Service).
+
+**Values that behave the same for both kinds**
+
+`replicaCount`, `autoscaling`, probes, `resources`, `dynamicPlugins`, `extraVolumes`, `podLabels`, `podAnnotations`, and other pod-level settings apply regardless of `workload.kind`. When `autoscaling.enabled` is `true`, the HorizontalPodAutoscaler scales the selected kind (`Deployment` or `StatefulSet`).
+
+**Values that depend on the workload kind**
+
+| Helm value | Deployment | StatefulSet |
+| ---------- | ---------- | ----------- |
+| Update strategy | `strategy` | `workload.statefulSet.updateStrategy` |
+| ReplicaSet revision history | `revisionHistoryLimit` | Not used |
+| Controller annotations (not the pod) | `deploymentAnnotations` | `workload.statefulSet.annotations` |
+| Shared controller annotations | `commonAnnotations` | `commonAnnotations` |
+
+**StatefulSet-only settings**
+
+When `workload.kind` is `StatefulSet`, the chart also renders a **headless Service** (`{fullname}-headless`, `clusterIP: None`). The StatefulSet `serviceName` points at that Service (stable pod network identity).
+
+The existing **ClusterIP Service** (`templates/service.yaml`) is unchanged — OpenShift Routes, Ingress, and `helm test` still use it for application traffic.
+
+Override `workload.statefulSet.serviceName` only if you create your own governing Service.
+```yaml
+# values.yaml
+workload:
+  kind: StatefulSet
+  statefulSet:
+    serviceName: ""   # default: {fullname}-headless
+    podManagementPolicy: OrderedReady   # or Parallel; omit when empty
+    updateStrategy:
+      type: RollingUpdate
+    annotations: {}
+```
+
+**Changing `workload.kind` on an existing release**
+
+For a normal Helm-managed release, changing `workload.kind` and running `helm upgrade` replaces the rendered manifest: Helm removes the old workload kind (Deployment or StatefulSet) and creates the new one. Expect a brief cutover while pods are recreated. If you applied manifests outside Helm (for example GitOps that keeps both objects) or an old controller was left behind, delete the obsolete Deployment or StatefulSet so two controllers do not target the same selector.
+
+**Example install**
+
+```console
+helm upgrade -i my-rhdh redhat-developer/redhat-developer-hub \
+  --set workload.kind=StatefulSet
+```
 
 ### OpenShift Routes
 
@@ -296,7 +358,7 @@ Use `intelligentAssistant.runtimeVolume` to change the writable `/tmp` runtime s
 
 When using the built-in Intelligent Assistant feature, do not also keep those plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed or Intelligent Assistant there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `intelligentAssistant.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate plugin entries.
 
-The Lightspeed Core sidecar loads `intelligentAssistant.existingSecret` as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
+The Lightspeed Core sidecar loads `intelligentAssistant.existingSecret` as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage workload (Deployment or StatefulSet) after changing the secret data.
 
 ### Vanilla Kubernetes compatibility mode
 

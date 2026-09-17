@@ -204,6 +204,28 @@ revisionHistoryLimit: 10
 # -- Deployment update strategy.
 strategy: {}
 
+# -- Kubernetes workload controller for Backstage pod.
+workload:
+  # -- Workload kind: Deployment (default) or StatefulSet.
+  kind: "Deployment"
+
+  statefulSet:
+    # -- service name for the StatefulSet. Defaults to headless when empty.
+    # -- Service ({fullname}-headless) must match an existing service.
+    serviceName: ""
+
+    # -- Pod management policy for the StatefulSet.
+    podManagementPolicy: ""
+
+    # -- StatefulSet update strategy.
+    updateStrategy: {}
+
+    #  -- Optional PVC retention policy for the StatefulSet.
+    persistentVolumeClaimRetentionPolicy: {}
+
+    # -- Annotations on the StatefulSet resource.
+    annotations: {}
+
 # -- ServiceAccount configuration.
 serviceAccount:
   create: false

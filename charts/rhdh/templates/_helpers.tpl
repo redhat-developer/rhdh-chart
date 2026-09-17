@@ -55,6 +55,25 @@ app.kubernetes.io/component: backstage
 {{- end }}
 
 {{/*
+Workload kind helpers
+*/}}
+{{- define "rhdh.workloadKind" -}}
+{{- default "Deployment" .Values.workload.kind -}}
+{{- end -}}
+
+{{- define "rhdh.isStatefulSet" -}}
+{{- eq (include "rhdh.workloadKind" .) "StatefulSet" -}}
+{{- end -}}
+
+{{- define "rhdh.statefulSetHeadlessServiceName" -}}
+{{- printf "%s-headless" (include "rhdh.fullname" .) -}}
+{{- end -}}
+
+{{- define "rhdh.statefulSetServiceName" -}}
+{{- default (include "rhdh.statefulSetHeadlessServiceName" .) .Values.workload.statefulSet.serviceName -}}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use.
 */}}
 {{- define "rhdh.serviceAccountName" -}}
