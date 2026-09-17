@@ -421,7 +421,7 @@ workload:
 
 **Changing `workload.kind` on an existing release**
 
-Upgrading with a different `workload.kind` renders the new controller but does **not** remove the previous Deployment or StatefulSet. After switching kinds, delete the obsolete workload object once (or reinstall cleanly) so two controllers do not manage pods with the same selector.
+For a normal Helm-managed release, changing `workload.kind` and running `helm upgrade` replaces the rendered manifest: Helm removes the old workload kind (Deployment or StatefulSet) and creates the new one. Expect a brief cutover while pods are recreated. If you applied manifests outside Helm (for example GitOps that keeps both objects) or an old controller was left behind, delete the obsolete Deployment or StatefulSet so two controllers do not target the same selector.
 
 **Example install**
 

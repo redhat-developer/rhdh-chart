@@ -29,3 +29,4 @@ spec:
   template:
     {{- include "rhdh.backstagePodTemplate" . | nindent 4 }}
   {{- end }}
+{{- end }}
