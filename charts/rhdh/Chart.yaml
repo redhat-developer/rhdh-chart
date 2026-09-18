@@ -2,7 +2,7 @@ apiVersion: v2
 name: redhat-developer-hub
 type: application
 version: 2.5.0
-appVersion: 2.2.0
+appVersion: 2.1.0
 annotations:
   artifacthub.io/category: integration-delivery
   artifacthub.io/license: Apache-2.0
