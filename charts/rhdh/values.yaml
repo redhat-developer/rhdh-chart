@@ -220,7 +220,7 @@ workload:
     # -- StatefulSet update strategy.
     updateStrategy: {}
 
-    #  -- Optional PVC retention policy for the StatefulSet.
+    # -- Optional PVC retention policy for the StatefulSet.
     persistentVolumeClaimRetentionPolicy: {}
 
     # -- Annotations on the StatefulSet resource.

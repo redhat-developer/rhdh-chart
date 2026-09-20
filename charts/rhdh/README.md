@@ -315,6 +315,7 @@ Kubernetes: `>= 1.31.0-0`
 | workload | Kubernetes workload controller for Backstage pod. | object | `{"kind":"Deployment","statefulSet":{"annotations":{},"persistentVolumeClaimRetentionPolicy":{},"podManagementPolicy":"","serviceName":"","updateStrategy":{}}}` |
 | workload.kind | Workload kind: Deployment (default) or StatefulSet. | string | `"Deployment"` |
 | workload.statefulSet.annotations | Annotations on the StatefulSet resource. | object | `{}` |
+| workload.statefulSet.persistentVolumeClaimRetentionPolicy | Optional PVC retention policy for the StatefulSet. | object | `{}` |
 | workload.statefulSet.podManagementPolicy | Pod management policy for the StatefulSet. | string | `""` |
 | workload.statefulSet.serviceName | Service ({fullname}-headless) must match an existing service. | string | `""` |
 | workload.statefulSet.updateStrategy | StatefulSet update strategy. | object | `{}` |
