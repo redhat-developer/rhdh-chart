@@ -54,19 +54,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: backstage
 {{- end }}
 
-{{/*
-Workload kind helpers
-*/}}
-{{- define "rhdh.workloadKind" -}}
-{{- default "Deployment" .Values.workload.kind -}}
-{{- end -}}
-
-{{- define "rhdh.isStatefulSet" -}}
-{{- eq (include "rhdh.workloadKind" .) "StatefulSet" -}}
-{{- end -}}
-
 {{- define "rhdh.statefulSetHeadlessServiceName" -}}
-{{- printf "%s-headless" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-headless" (include "rhdh.fullname" .) |-}}
 {{- end -}}
 
 {{- define "rhdh.statefulSetServiceName" -}}
