@@ -257,7 +257,7 @@ For detailed information on configuring the catalog index, including how to over
 
 ### NetworkPolicies
 
-This chart deploys a **default-deny** NetworkPolicy for the RHDH backend pod, blocking all ingress and egress traffic that is not explicitly allowed. When the built-in PostgreSQL is enabled (`postgresql.enabled=true`), the database pods also get their own default-deny policy with selective allow rules.
+This chart deploys a **default-deny** NetworkPolicy for the RHDH backend pod, blocking all ingress and egress traffic that is not explicitly allowed. When the built-in PostgreSQL is enabled (`postgresql.enabled=true`), the database pods also get their own default-deny policy with selective allow rules. When OKP is active, its pods receive a separate default-deny ingress and egress policy with rules allowing only the required HTTP ingress.
 
 The following traffic is allowed out of the box:
 
@@ -267,8 +267,15 @@ The following traffic is allowed out of the box:
 | Egress | 443 (TCP) | Any | HTTPS (Git forges, auth providers, external APIs) |
 | Egress | 5432 (TCP) | Built-in PostgreSQL pods (scoped) or any (external DB) | Database access |
 | Egress | 6379 (TCP) | Any | Redis (BYO — no pod/namespace selector) |
+| Egress | 80 (TCP) | Any destination | LCORE access to an HTTP OKP Ingress |
+| Egress | 8080 (TCP) | OKP pods | LCORE access to the internal OKP Service fallback |
 | Ingress | 7007 (TCP) | OpenShift router namespace or any namespace (non-OCP) | User traffic via Route / Ingress |
+| Ingress | 8080 (TCP) | RHDH pods and the OpenShift router namespace or any namespace (non-OCP) | OKP queries and product-document citations via Route / Ingress |
 | Ingress | 9464 (TCP) | `openshift-monitoring`, `openshift-user-workload-monitoring`, `gmp-system`, `gke-gmp-system`, `monitoring` | Prometheus metrics scraping |
+
+OKP initiates no outbound connections: its HTTP server and Solr process run in the same pod and serve the documentation embedded in the image. Its default-deny policy therefore blocks all new egress connections. NetworkPolicy is stateful, so response traffic for allowed ingress connections remains permitted.
+
+RHDH already permits HTTPS egress on port 443. When OKP uses HTTP instead, the chart permits RHDH egress on port 80 for a Kubernetes Ingress or restricts port 8080 egress to OKP pods for the internal Service fallback. No additional RHDH egress policy is created when `OKP_SERVICE_URL` uses HTTPS.
 
 **Redis egress is intentionally unscoped.** RHDH does not deploy Redis; users bring their own instance, which may live in the same namespace, a different namespace, or an external managed service. The rule therefore allows egress on port 6379 to any destination.
 
@@ -297,6 +304,8 @@ Use `intelligentAssistant.runtimeVolume` to change the writable `/tmp` runtime s
 When using the built-in Intelligent Assistant feature, do not also keep those plugin packages in `dynamicPlugins.plugins`. Existing installations that previously configured Lightspeed or Intelligent Assistant there should remove those entries if the built-in defaults are sufficient, or move their custom package definitions to `intelligentAssistant.plugins`; otherwise the rendered `dynamic-plugins.yaml` will contain duplicate plugin entries.
 
 The Lightspeed Core sidecar loads `intelligentAssistant.existingSecret` as environment variables. If you update that Secret outside of Helm, Kubernetes does not guarantee that the Backstage Pod restarts automatically. Use a no-op `helm upgrade` or manually restart the Backstage deployment after changing the secret data.
+
+RHDH documentation retrieval is disabled by default in Intelligent Assistant. To enable it, set `intelligentAssistant.okp.enabled=true`. This deploys the OKP workload and uses the OKP-enabled Lightspeed Stack configuration. The OKP container image is large, so enabling it can significantly increase the initial installation time while the image is downloaded. On vanilla Kubernetes, you must also configure the OKP Ingress and Red Hat registry credentials. See [Intelligent Assistant and OKP integration](../../docs/intelligent-assistant.md) for platform-specific configuration.
 
 ### Vanilla Kubernetes compatibility mode
 

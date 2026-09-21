@@ -956,10 +956,15 @@
                     }
                 },
                 "okp": {
-                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for document retrieval.",
+                    "title": "OKP (Offline Knowledge Portal) configuration. Deploys an OKP instance for RHDH documentation retrieval when explicitly enabled.",
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "enabled": {
+                            "title": "Enable OKP-backed RHDH documentation retrieval. The large OKP image can significantly increase initial installation time.",
+                            "type": "boolean",
+                            "default": false
+                        },
                         "image": {
                             "type": "object",
                             "additionalProperties": false,
