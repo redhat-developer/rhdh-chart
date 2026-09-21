@@ -54,7 +54,13 @@ spec:
       {{- else if eq .Values.dynamicPlugins.volume.type "pvc" }}
       persistentVolumeClaim:
         {{- include "common.tplvalues.render" (dict "value" .Values.dynamicPlugins.volume.pvc "context" $) | nindent 8 }}
-      {{- else }}
+      {{- else if eq .Values.dynamicPlugins.volume.type "statefulSetPVC"}}
+      {{- if ne .Values.workload.kind "StatefulSet" }}
+      {{- fail "dynamicPlugins.volume.type=statefulSetPVC requires workload.kind=StatefulSet"}}
+      {{- end }}
+      persistentVolumeClaim:
+        claimName: dynamic-plugins-root
+      {{- else if eq .Values.dynamicPlugins.volume.type "ephemeral" }}
       ephemeral:
         volumeClaimTemplate:
           spec:
@@ -71,6 +77,8 @@ spec:
             resources:
               {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 14 }}
             {{- end }}
+      {{- else }}
+      {{- fail (printf "dynamicPlugins.volume.type must be ephemeral, emptyDir, pvc, or statefulSetPVC (got %q)" .Values.dynamicPlugins.volume.type) }}
       {{- end }}
     - name: dynamic-plugins
       configMap:
