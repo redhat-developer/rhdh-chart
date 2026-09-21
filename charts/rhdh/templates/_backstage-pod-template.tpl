@@ -54,9 +54,9 @@ spec:
       {{- else if eq .Values.dynamicPlugins.volume.type "pvc" }}
       persistentVolumeClaim:
         {{- include "common.tplvalues.render" (dict "value" .Values.dynamicPlugins.volume.pvc "context" $) | nindent 8 }}
-      {{- else if eq .Values.dynamicPlugins.volume.type "statefulSetPVC"}}
+      {{- else if eq .Values.dynamicPlugins.volume.type "statefulSetPVC" }}
       {{- if ne .Values.workload.kind "StatefulSet" }}
-      {{- fail "dynamicPlugins.volume.type=statefulSetPVC requires workload.kind=StatefulSet"}}
+      {{- fail "dynamicPlugins.volume.type=statefulSetPVC requires workload.kind=StatefulSet" }}
       {{- end }}
       persistentVolumeClaim:
         claimName: dynamic-plugins-root

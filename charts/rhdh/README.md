@@ -432,7 +432,7 @@ workload:
 
 **Stable dynamic-plugins storage**
 
-To give each pod a StatefulSet-owned PVC for `dynamic-plugins-root` (Operator parity):
+To give each pod a StatefulSet-owned PVC for `dynamic-plugins-root`:
 
 ```yaml
 workload:
@@ -448,9 +448,9 @@ dynamicPlugins:
           storage: 5Gi
 ```
 
-The PVCs are created for each pod in the StatefulSet and are named `{fullname}-dynamic-plugins-root-{0..N-1}`.
+The chart injects a `volumeClaimTemplate` named `dynamic-plugins-root` and mounts it on the pod. Kubernetes creates one PVC per pod named `dynamic-plugins-root-{fullname}-{ordinal}` (for example `dynamic-plugins-root-my-rhdh-redhat-developer-hub-0`). This requires `workload.kind=StatefulSet`.
 
-To add extra PVCs for other dynamic plugins, use `workload.statefulSet.extraVolumeClaimTemplates`.
+To add additional StatefulSet-owned PVCs, use `workload.statefulSet.extraVolumeClaimTemplates`.
 
 **Changing `workload.kind` on an existing release**
 

@@ -155,7 +155,7 @@ dynamicPlugins:
       resources:
         requests:
           storage: "5Gi"
-    
+
   # -- Configuration for the install-dynamic-plugins init container.
   initContainer:
     # -- Override the default command. Leave empty to use the default (./install-dynamic-plugins.sh /dynamic-plugins-root).
