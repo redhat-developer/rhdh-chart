@@ -1,4 +1,4 @@
-{{- if not (eq (include "rhdh.workloadKind" .) "StatefulSet") }}
+{{- if ne .Values.workload.kind "StatefulSet" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
