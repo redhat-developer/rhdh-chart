@@ -35,8 +35,30 @@ spec:
       {{- include "rhdh.selectorLabels" . | nindent 6 }}
   template:
     {{- include "rhdh.backstagePodTemplate" . | nindent 4 }}
-  {{- with .Values.workload.statefulSet.volumeClaimTemplates }}
+  {{- $injectPluginsPVC := eq .Values.dynamicPlugins.volume.type "statefulSetPVC" }}
+  {{- $extraVCTs := .Values.workload.statefulSet.extraVolumeClaimTemplates | default list }}
+  {{- if or $injectPluginsPVC $extraVCTs }}
   volumeClaimTemplates:
+    {{- if $injectPluginsPVC }}
+    - metadata:
+        name: dynamic-plugins-root
+      spec:
+        {{- $persistence := dict "storageClass" (.Values.dynamicPlugins.volume.statefulSetPVC.storageClassName | default "") }}
+        {{- $sc := include "common.storage.class" (dict "persistence" $persistence "global" .Values.global) }}
+        {{- if $sc }}
+        {{ $sc }}
+        {{- end }}
+        {{- with .Values.dynamicPlugins.volume.statefulSetPVC.accessModes }}
+        accessModes:
+          {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 10 }}
+        {{- end }}
+        {{- with .Values.dynamicPlugins.volume.statefulSetPVC.resources }}
+        resources:
+          {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 10 }}
+        {{- end }}
+    {{- end }}
+    {{- with $extraVCTs }}
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
   {{- end }}
 {{- end }}

@@ -55,7 +55,7 @@ app.kubernetes.io/component: backstage
 {{- end }}
 
 {{- define "rhdh.statefulSetHeadlessServiceName" -}}
-{{- printf "%s-headless" (include "rhdh.fullname" .) |-}}
+{{- printf "%s-headless" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "rhdh.statefulSetServiceName" -}}
