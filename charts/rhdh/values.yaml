@@ -235,7 +235,7 @@ workload:
     # -- Optional PVC retention policy for the StatefulSet.
     persistentVolumeClaimRetentionPolicy: {}
 
-    # -- StatefulSet extraVolumeClaimTemplates. PVCs created for each pod.
+    # -- Extra volumeClaimTemplates appended after the chart-managed dynamic-plugins-root claim (when type=statefulSetPVC).
     extraVolumeClaimTemplates: []
 
     # -- Annotations on the StatefulSet resource.

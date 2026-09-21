@@ -320,7 +320,7 @@ Kubernetes: `>= 1.31.0-0`
 | workload | Kubernetes workload controller for Backstage pod. | object | `{"kind":"Deployment","statefulSet":{"annotations":{},"extraVolumeClaimTemplates":[],"persistentVolumeClaimRetentionPolicy":{},"podManagementPolicy":"","serviceName":"","updateStrategy":{}}}` |
 | workload.kind | Workload kind: Deployment (default) or StatefulSet. | string | `"Deployment"` |
 | workload.statefulSet.annotations | Annotations on the StatefulSet resource. | object | `{}` |
-| workload.statefulSet.extraVolumeClaimTemplates | StatefulSet extraVolumeClaimTemplates. PVCs created for each pod. | list | `[]` |
+| workload.statefulSet.extraVolumeClaimTemplates | Extra volumeClaimTemplates appended after the chart-managed dynamic-plugins-root claim (when type=statefulSetPVC). | list | `[]` |
 | workload.statefulSet.persistentVolumeClaimRetentionPolicy | Optional PVC retention policy for the StatefulSet. | object | `{}` |
 | workload.statefulSet.podManagementPolicy | Pod management policy for the StatefulSet. | string | `""` |
 | workload.statefulSet.serviceName | service name for the StatefulSet. Defaults to headless when empty. Service ({fullname}-headless) must match an existing service. | string | `""` |
