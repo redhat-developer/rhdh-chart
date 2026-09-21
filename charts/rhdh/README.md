@@ -312,13 +312,14 @@ Kubernetes: `>= 1.31.0-0`
 | test | Test pod configuration for `helm test`. | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"curl/curl","tag":"8.22.0"},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}}` |
 | tolerations | Tolerations for pod assignment. | list | `[]` |
 | topologySpreadConstraints | Topology spread constraints for pod scheduling. | list | `[]` |
-| workload | Kubernetes workload controller for Backstage pod. | object | `{"kind":"Deployment","statefulSet":{"annotations":{},"persistentVolumeClaimRetentionPolicy":{},"podManagementPolicy":"","serviceName":"","updateStrategy":{}}}` |
+| workload | Kubernetes workload controller for Backstage pod. | object | `{"kind":"Deployment","statefulSet":{"annotations":{},"persistentVolumeClaimRetentionPolicy":{},"podManagementPolicy":"","serviceName":"","updateStrategy":{},"volumeClaimTemplates":[]}}` |
 | workload.kind | Workload kind: Deployment (default) or StatefulSet. | string | `"Deployment"` |
 | workload.statefulSet.annotations | Annotations on the StatefulSet resource. | object | `{}` |
 | workload.statefulSet.persistentVolumeClaimRetentionPolicy | Optional PVC retention policy for the StatefulSet. | object | `{}` |
 | workload.statefulSet.podManagementPolicy | Pod management policy for the StatefulSet. | string | `""` |
 | workload.statefulSet.serviceName | Service ({fullname}-headless) must match an existing service. | string | `""` |
 | workload.statefulSet.updateStrategy | StatefulSet update strategy. | object | `{}` |
+| workload.statefulSet.volumeClaimTemplates | StatefulSet volumeClaimTemplates. PVCs created for each pod. | list | `[]` |
 
 ## Opinionated RHDH deployment
 
@@ -383,7 +384,7 @@ Both kinds render the **same** Backstage pod (containers, volumes, probes, dynam
 
 **When to use StatefulSet**
 
-- You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, or optional PVC retention policy).
+- You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, `volumeClaimTemplates`, or optional PVC retention policy).
 - You want parity with the [RHDH Operator](https://github.com/redhat-developer/rhdh-operator), which supports `spec.deployment.kind: StatefulSet` ([operator documentation](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/configuration.md#deployment-kind)).
 
 Most installs should keep the default **Deployment** (no app StatefulSet and no headless Service).
@@ -400,6 +401,8 @@ Most installs should keep the default **Deployment** (no app StatefulSet and no 
 | ReplicaSet revision history | `revisionHistoryLimit` | Not used |
 | Controller annotations (not the pod) | `deploymentAnnotations` | `workload.statefulSet.annotations` |
 | Shared controller annotations | `commonAnnotations` | `commonAnnotations` |
+| PVC claim templates | Not used | `workload.statefulSet.volumeClaimTemplates` |
+| PVC retention policy | Not used | `workload.statefulSet.persistentVolumeClaimRetentionPolicy` |
 
 **StatefulSet-only settings**
 
@@ -417,6 +420,8 @@ workload:
     podManagementPolicy: OrderedReady   # or Parallel; omit when empty
     updateStrategy:
       type: RollingUpdate
+    volumeClaimTemplates: []
+    persistentVolumeClaimRetentionPolicy: {}
     annotations: {}
 ```
 

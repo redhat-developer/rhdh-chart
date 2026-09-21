@@ -221,7 +221,7 @@ Both kinds render the **same** Backstage pod (containers, volumes, probes, dynam
 
 **When to use StatefulSet**
 
-- You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, or optional PVC retention policy).
+- You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, `volumeClaimTemplates`, or optional PVC retention policy).
 - You want parity with the [RHDH Operator](https://github.com/redhat-developer/rhdh-operator), which supports `spec.deployment.kind: StatefulSet` ([operator documentation](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/configuration.md#deployment-kind)).
 
 Most installs should keep the default **Deployment** (no app StatefulSet and no headless Service).
@@ -238,6 +238,8 @@ Most installs should keep the default **Deployment** (no app StatefulSet and no 
 | ReplicaSet revision history | `revisionHistoryLimit` | Not used |
 | Controller annotations (not the pod) | `deploymentAnnotations` | `workload.statefulSet.annotations` |
 | Shared controller annotations | `commonAnnotations` | `commonAnnotations` |
+| PVC claim templates | Not used | `workload.statefulSet.volumeClaimTemplates` |
+| PVC retention policy | Not used | `workload.statefulSet.persistentVolumeClaimRetentionPolicy` |
 
 **StatefulSet-only settings**
 
@@ -255,6 +257,8 @@ workload:
     podManagementPolicy: OrderedReady   # or Parallel; omit when empty
     updateStrategy:
       type: RollingUpdate
+    volumeClaimTemplates: []
+    persistentVolumeClaimRetentionPolicy: {}
     annotations: {}
 ```
 

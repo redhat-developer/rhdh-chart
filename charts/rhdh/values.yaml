@@ -223,6 +223,9 @@ workload:
     # -- Optional PVC retention policy for the StatefulSet.
     persistentVolumeClaimRetentionPolicy: {}
 
+    # -- StatefulSet volumeClaimTemplates. PVCs created for each pod.
+    volumeClaimTemplates: []
+
     # -- Annotations on the StatefulSet resource.
     annotations: {}
 

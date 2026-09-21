@@ -2577,6 +2577,14 @@
                             "default": {},
                             "title": "StatefulSet update strategy.",
                             "type": "object"
+                        },
+                        "volumeClaimTemplates": {
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            },
+                            "title": "VolumeClaimTemplates for the StatefulSet.",
+                            "type": "array"
                         }
                     },
                     "title": "StatefulSet specific settings (ignored when kind is Deployment).",

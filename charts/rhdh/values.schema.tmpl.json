@@ -445,6 +445,14 @@
                             "type": "object",
                             "default": {}
                         },
+                        "volumeClaimTemplates": {
+                            "title": "VolumeClaimTemplates for the StatefulSet.",
+                            "type": "array",
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            }
+                        },
                         "annotations": {
                             "title": "Annotations on the StatefulSet resource (not the pod).",
                             "type": "object",
