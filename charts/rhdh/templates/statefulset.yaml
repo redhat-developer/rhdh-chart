@@ -37,6 +37,6 @@ spec:
     {{- include "rhdh.backstagePodTemplate" . | nindent 4 }}
   {{- with .Values.workload.statefulSet.volumeClaimTemplates }}
   volumeClaimTemplates:
-    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 6 }}
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
 {{- end }}
