@@ -25,7 +25,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "rhdh.fullname" . }}-okp-allow-http-ingress-egress
+  name: {{ include "rhdh.fullname" . }}-okp-allow-http-egress
   labels:
     {{- include "rhdh.intelligentAssistant.okp.labels" . | nindent 4 }}
   {{- with .Values.commonAnnotations }}
