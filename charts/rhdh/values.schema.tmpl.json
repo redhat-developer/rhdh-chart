@@ -445,8 +445,8 @@
                             "type": "object",
                             "default": {}
                         },
-                        "volumeClaimTemplates": {
-                            "title": "VolumeClaimTemplates for the StatefulSet.",
+                        "extraVolumeClaimTemplates": {
+                            "title": "Extra VolumeClaimTemplates appended after the chart-managed dynamic-plugins-root claim.",
                             "type": "array",
                             "default": [],
                             "items": {
@@ -676,7 +676,7 @@
                         "type": {
                             "title": "Volume type.",
                             "type": "string",
-                            "enum": ["ephemeral", "emptyDir", "pvc"],
+                            "enum": ["ephemeral", "emptyDir", "pvc", "statefulSetPVC"],
                             "default": "ephemeral"
                         },
                         "ephemeral": {
@@ -709,6 +709,29 @@
                         "pvc": {
                             "title": "Raw Kubernetes persistentVolumeClaim volume spec. Used when type is pvc.",
                             "type": "object"
+                        },
+                        "statefulSetPVC": {
+                            "title": "StatefulSet volumeClaimTemplate settings for dynamic-plugins-root. Used when type is statefulSetPVC. Requires workload.kind=StatefulSet.",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "storageClassName": {
+                                    "title": "StorageClass for the StatefulSet PVC. When empty, uses global.defaultStorageClass or the cluster default.",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "accessModes": {
+                                    "title": "Access modes for the StatefulSet PVC.",
+                                    "type": "array",
+                                    "items": { "type": "string" },
+                                    "default": ["ReadWriteOnce"]
+                                },
+                                "resources": {
+                                    "title": "Resource requests for the StatefulSet PVC.",
+                                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.4/_definitions.json#/definitions/io.k8s.api.core.v1.VolumeResourceRequirements",
+                                    "default": { "requests": { "storage": "5Gi" } }
+                                }
+                            }
                         }
                     }
                 },

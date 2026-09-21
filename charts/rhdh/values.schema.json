@@ -411,12 +411,69 @@
                             "title": "Raw Kubernetes persistentVolumeClaim volume spec. Used when type is pvc.",
                             "type": "object"
                         },
+                        "statefulSetPVC": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "accessModes": {
+                                    "default": [
+                                        "ReadWriteOnce"
+                                    ],
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Access modes for the StatefulSet PVC.",
+                                    "type": "array"
+                                },
+                                "resources": {
+                                    "description": "VolumeResourceRequirements describes the storage resource requirements for a volume.",
+                                    "properties": {
+                                        "limits": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        },
+                                        "requests": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "storageClassName": {
+                                    "default": "",
+                                    "title": "StorageClass for the StatefulSet PVC. When empty, uses global.defaultStorageClass or the cluster default.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "StatefulSet volumeClaimTemplate settings for dynamic-plugins-root. Used when type is statefulSetPVC. Requires workload.kind=StatefulSet.",
+                            "type": "object"
+                        },
                         "type": {
                             "default": "ephemeral",
                             "enum": [
                                 "ephemeral",
                                 "emptyDir",
-                                "pvc"
+                                "pvc",
+                                "statefulSetPVC"
                             ],
                             "title": "Volume type.",
                             "type": "string"
@@ -2564,6 +2621,14 @@
                             "title": "Annotations on the StatefulSet resource (not the pod).",
                             "type": "object"
                         },
+                        "extraVolumeClaimTemplates": {
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            },
+                            "title": "Extra VolumeClaimTemplates appended after the chart-managed dynamic-plugins-root claim.",
+                            "type": "array"
+                        },
                         "persistentVolumeClaimRetentionPolicy": {
                             "default": {},
                             "title": "Optional PVC retention policy for the StatefulSet.",
@@ -2583,14 +2648,6 @@
                             "default": {},
                             "title": "StatefulSet update strategy.",
                             "type": "object"
-                        },
-                        "volumeClaimTemplates": {
-                            "default": [],
-                            "items": {
-                                "type": "object"
-                            },
-                            "title": "VolumeClaimTemplates for the StatefulSet.",
-                            "type": "array"
                         }
                     },
                     "title": "StatefulSet specific settings (ignored when kind is Deployment).",

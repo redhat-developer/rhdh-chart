@@ -154,7 +154,7 @@ dynamicPlugins:
       # -- Resource requests for the StatefulSet-owned PVC.
       resources:
         requests:
-          storage: "2Gi"
+          storage: "5Gi"
     
   # -- Configuration for the install-dynamic-plugins init container.
   initContainer:

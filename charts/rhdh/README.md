@@ -193,7 +193,7 @@ Kubernetes: `>= 1.31.0-0`
 | commonLabels | Labels applied to ALL chart resources. | object | `{}` |
 | containerSecurityContext | Security context for the main RHDH container (not the Lightspeed Core sidecar or init containers). | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
 | deploymentAnnotations | Annotations for the Deployment resource (not the pod). | object | `{}` |
-| dynamicPlugins | Dynamic plugin system configuration. | object | `{"includes":["dynamic-plugins.default.yaml"],"initContainer":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}},"maxEntrySize":40000000,"plugins":[],"volume":{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"statefulSetPVC":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}},"storageClassName":""},"type":"ephemeral"}}` |
+| dynamicPlugins | Dynamic plugin system configuration. | object | `{"includes":["dynamic-plugins.default.yaml"],"initContainer":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}},"maxEntrySize":40000000,"plugins":[],"volume":{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"statefulSetPVC":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"type":"ephemeral"}}` |
 | dynamicPlugins.includes | Array of YAML files listing dynamic plugins to include. Relative paths are resolved from the working directory of the initContainer (`/opt/app-root/src`). | list | `["dynamic-plugins.default.yaml"]` |
 | dynamicPlugins.initContainer | Configuration for the install-dynamic-plugins init container. | object | `{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"resources":{"limits":{"cpu":"1000m","ephemeral-storage":"5Gi","memory":"2.5Gi"},"requests":{"cpu":"250m","memory":"256Mi"}},"securityContext":{}}` |
 | dynamicPlugins.initContainer.argsOverride | Override the default arguments. Leave empty to use the defaults. | list | `[]` |
@@ -205,16 +205,16 @@ Kubernetes: `>= 1.31.0-0`
 | dynamicPlugins.initContainer.securityContext | Security context for the init container. | object | Same as containerSecurityContext |
 | dynamicPlugins.maxEntrySize | Maximum uncompressed size (in bytes) of a single dynamic plugin entry. | int | `40000000` |
 | dynamicPlugins.plugins | List of dynamic plugins. Every item defines the plugin `package` as a NPM package spec or OCI reference. | list | `[]` |
-| dynamicPlugins.volume | Volume configuration for the dynamic plugins root directory. | object | `{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"statefulSetPVC":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}},"storageClassName":""},"type":"ephemeral"}` |
+| dynamicPlugins.volume | Volume configuration for the dynamic plugins root directory. | object | `{"emptyDir":{},"ephemeral":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"pvc":{"claimName":""},"statefulSetPVC":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""},"type":"ephemeral"}` |
 | dynamicPlugins.volume.emptyDir | Raw Kubernetes emptyDir volume spec. Used when type is "emptyDir". | object | `{}` |
 | dynamicPlugins.volume.ephemeral | Ephemeral volume configuration. Used when type is "ephemeral". The chart builds the full ephemeral.volumeClaimTemplate.spec from these fields. | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` |
 | dynamicPlugins.volume.ephemeral.accessModes | Access modes for the ephemeral PVC. | list | `["ReadWriteOnce"]` |
 | dynamicPlugins.volume.ephemeral.resources | Resource requests for the ephemeral PVC. | object | `{"requests":{"storage":"5Gi"}}` |
 | dynamicPlugins.volume.ephemeral.storageClassName | StorageClass for the ephemeral volume. When empty, uses global.defaultStorageClass or the cluster default. | string | `""` |
 | dynamicPlugins.volume.pvc | Raw Kubernetes persistentVolumeClaim volume spec. Used when type is "pvc". | object | `{"claimName":""}` |
-| dynamicPlugins.volume.statefulSetPVC | StatefulSet-owned PVC volume spec. Used when type is "statefulSetPVC". | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"2Gi"}},"storageClassName":""}` |
+| dynamicPlugins.volume.statefulSetPVC | StatefulSet-owned PVC volume spec. Used when type is "statefulSetPVC". | object | `{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` |
 | dynamicPlugins.volume.statefulSetPVC.accessModes | Access modes for the StatefulSet-owned PVC. | list | `["ReadWriteOnce"]` |
-| dynamicPlugins.volume.statefulSetPVC.resources | Resource requests for the StatefulSet-owned PVC. | object | `{"requests":{"storage":"2Gi"}}` |
+| dynamicPlugins.volume.statefulSetPVC.resources | Resource requests for the StatefulSet-owned PVC. | object | `{"requests":{"storage":"5Gi"}}` |
 | dynamicPlugins.volume.statefulSetPVC.storageClassName | StorageClass. When empty, uses global.defaultStorageClass or the cluster default. | string | `""` |
 | dynamicPlugins.volume.type | Volume type: "ephemeral" (auto-provisioned PVC per pod), "emptyDir" (scratch space, lost on pod restart), "pvc" (pre-existing PersistentVolumeClaim), or "statefulSetPVC" (StatefulSet volumeClaimTemplate; requires workload.kind=StatefulSet). | string | `"ephemeral"` |
 | envFromOverride | Override the container envFrom entirely. When set, extraEnvFrom is ignored. Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix). | list | `[]` |
@@ -389,7 +389,7 @@ Both kinds render the **same** Backstage pod (containers, volumes, probes, dynam
 
 **When to use StatefulSet**
 
-- You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, `volumeClaimTemplates`, or optional PVC retention policy).
+- You need StatefulSet-specific settings (`workload.statefulSet.updateStrategy`, `podManagementPolicy`, `extraVolumeClaimTemplates`, or optional PVC retention policy).
 - You want parity with the [RHDH Operator](https://github.com/redhat-developer/rhdh-operator), which supports `spec.deployment.kind: StatefulSet` ([operator documentation](https://github.com/redhat-developer/rhdh-operator/blob/main/docs/configuration.md#deployment-kind)).
 
 Most installs should keep the default **Deployment** (no app StatefulSet and no headless Service).
@@ -406,7 +406,7 @@ Most installs should keep the default **Deployment** (no app StatefulSet and no 
 | ReplicaSet revision history | `revisionHistoryLimit` | Not used |
 | Controller annotations (not the pod) | `deploymentAnnotations` | `workload.statefulSet.annotations` |
 | Shared controller annotations | `commonAnnotations` | `commonAnnotations` |
-| PVC claim templates | Not used | `workload.statefulSet.volumeClaimTemplates` |
+| PVC claim templates | Not used | `workload.statefulSet.extraVolumeClaimTemplates` |
 | PVC retention policy | Not used | `workload.statefulSet.persistentVolumeClaimRetentionPolicy` |
 
 **StatefulSet-only settings**
@@ -425,10 +425,32 @@ workload:
     podManagementPolicy: OrderedReady   # or Parallel; omit when empty
     updateStrategy:
       type: RollingUpdate
-    volumeClaimTemplates: []
+    extraVolumeClaimTemplates: []
     persistentVolumeClaimRetentionPolicy: {}
     annotations: {}
 ```
+
+**Stable dynamic-plugins storage**
+
+To give each pod a StatefulSet-owned PVC for `dynamic-plugins-root` (Operator parity):
+
+```yaml
+workload:
+  kind: StatefulSet
+dynamicPlugins:
+  volume:
+    type: statefulSetPVC
+    statefulSetPVC:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+```
+
+The PVCs are created for each pod in the StatefulSet and are named `{fullname}-dynamic-plugins-root-{0..N-1}`.
+
+To add extra PVCs for other dynamic plugins, use `workload.statefulSet.extraVolumeClaimTemplates`.
 
 **Changing `workload.kind` on an existing release**
 
