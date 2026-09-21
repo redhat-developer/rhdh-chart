@@ -124,7 +124,7 @@ dynamicPlugins:
   # -- Volume configuration for the dynamic plugins root directory.
   volume:
     # -- Volume type: "ephemeral" (auto-provisioned PVC per pod), "emptyDir" (scratch space, lost on pod restart),
-    # or "pvc" (pre-existing PersistentVolumeClaim).
+    # "pvc" (pre-existing PersistentVolumeClaim), or "statefulSetPVC" (StatefulSet volumeClaimTemplate; requires workload.kind=StatefulSet).
     type: "ephemeral"
     # -- Ephemeral volume configuration. Used when type is "ephemeral".
     # The chart builds the full ephemeral.volumeClaimTemplate.spec from these fields.
@@ -144,6 +144,18 @@ dynamicPlugins:
     # -- Raw Kubernetes persistentVolumeClaim volume spec. Used when type is "pvc".
     pvc:
       claimName: ""
+    # -- StatefulSet-owned PVC volume spec. Used when type is "statefulSetPVC".
+    statefulSetPVC:
+      # -- StorageClass. When empty, uses global.defaultStorageClass or the cluster default.
+      storageClassName: ""
+      # -- Access modes for the StatefulSet-owned PVC.
+      accessModes:
+        - "ReadWriteOnce"
+      # -- Resource requests for the StatefulSet-owned PVC.
+      resources:
+        requests:
+          storage: "2Gi"
+    
   # -- Configuration for the install-dynamic-plugins init container.
   initContainer:
     # -- Override the default command. Leave empty to use the default (./install-dynamic-plugins.sh /dynamic-plugins-root).
@@ -211,7 +223,7 @@ workload:
 
   statefulSet:
     # -- service name for the StatefulSet. Defaults to headless when empty.
-    # -- Service ({fullname}-headless) must match an existing service.
+    # Service ({fullname}-headless) must match an existing service.
     serviceName: ""
 
     # -- Pod management policy for the StatefulSet.
@@ -223,8 +235,8 @@ workload:
     # -- Optional PVC retention policy for the StatefulSet.
     persistentVolumeClaimRetentionPolicy: {}
 
-    # -- StatefulSet volumeClaimTemplates. PVCs created for each pod.
-    volumeClaimTemplates: []
+    # -- StatefulSet extraVolumeClaimTemplates. PVCs created for each pod.
+    extraVolumeClaimTemplates: []
 
     # -- Annotations on the StatefulSet resource.
     annotations: {}
