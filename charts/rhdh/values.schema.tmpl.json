@@ -88,7 +88,7 @@
         "nameOverride": {
             "title": "Override the chart name used in resource naming.",
             "type": "string",
-            "default": ""
+            "default": "developer-hub"
         },
         "fullnameOverride": {
             "title": "Override the full resource name.",

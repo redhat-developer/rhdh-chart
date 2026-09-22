@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.2.0](https://img.shields.io/badge/Version-3.2.0-informational?style=flat-square)
+![Version: 3.2.1](https://img.shields.io/badge/Version-3.2.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.2.0
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.2.1
 ```
 
 ## Introduction
@@ -277,7 +277,7 @@ Kubernetes: `>= 1.31.0-0`
 | intelligentAssistant.runtimeVolume.type | Volume type: "emptyDir" or "persistentVolumeClaim". | string | `"emptyDir"` |
 | livenessProbe | Liveness probe configuration. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":4}` |
 | metrics | Prometheus metrics configuration. | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"path":"/metrics","port":"http-metrics"}}` |
-| nameOverride | Override the chart name used in resource naming. | string | `""` |
+| nameOverride | Override the chart name used in resource naming. | string | `"developer-hub"` |
 | nodeSelector | Node labels for pod assignment. | object | `{}` |
 | openshift | OpenShift-specific configuration. | object | `{"clusterRouterBase":"apps.example.com","route":{"annotations":{},"enabled":true,"host":"{{ .Values.host }}","path":"/","targetPort":"http-backend","tls":{"caCertificate":"","certificate":"","destinationCACertificate":"","enabled":true,"insecureEdgeTerminationPolicy":"Redirect","key":"","termination":"edge"},"wildcardPolicy":"None"}}` |
 | openshift.clusterRouterBase | Cluster router base domain used to auto-generate the hostname. | string | `"apps.example.com"` |

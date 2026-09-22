@@ -14,7 +14,7 @@ global:
 # ── Chart metadata overrides ────────────────────────────────
 
 # -- Override the chart name used in resource naming.
-nameOverride: ""
+nameOverride: developer-hub
 # -- Override the full resource name.
 fullnameOverride: ""
 # -- Labels applied to ALL chart resources.
