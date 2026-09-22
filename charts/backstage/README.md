@@ -3,7 +3,7 @@
 
 > **:exclamation: This Helm Chart is deprecated!**
 
-![Version: 7.0.99](https://img.shields.io/badge/Version-7.0.99-informational?style=flat-square)
+![Version: 7.1.0](https://img.shields.io/badge/Version-7.1.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -33,7 +33,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-backstage redhat-developer/backstage --version 7.0.99
+helm install my-backstage redhat-developer/backstage --version 7.1.0
 ```
 
 ## Introduction
