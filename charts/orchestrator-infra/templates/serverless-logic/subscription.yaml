@@ -1,8 +1,6 @@
 {{- $packageName := .Values.serverlessLogicOperator.subscription.spec.name -}}
 {{- $subscriptionNamespace := .Values.serverlessLogicOperator.subscription.namespace -}}
-{{- $unmanagedSubscriptionExists := include "unmanaged-resource-exists" (list "operators.coreos.com/v1alpha1" "Subscription" $subscriptionNamespace $packageName .Release.Name .Release.Namespace .Capabilities.APIVersions ) -}}
-{{- $unmanagedClusterExtensionExists := include "unmanaged-clusterextension-exists" (list $packageName .Release.Name .Release.Namespace .Capabilities.APIVersions) -}}
-{{- if and (eq (include "olm-version" .) "v0") (eq $unmanagedSubscriptionExists "false") (eq $unmanagedClusterExtensionExists "false") .Values.serverlessLogicOperator.enabled }}
+{{- if and (eq (include "olm-version" .) "v0") .Values.serverlessLogicOperator.enabled }}
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
