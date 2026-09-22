@@ -39,16 +39,8 @@
 {{- end -}}
 
 {{- define "olm-version" -}}
-    {{- $requested := default "auto" .Values.olmVersion -}}
-    {{- if eq $requested "auto" -}}
-        {{- if .Capabilities.APIVersions.Has "olm.operatorframework.io/v1/ClusterExtension" -}}
-            {{- "v1" -}}
-        {{- else -}}
-            {{- "v0" -}}
-        {{- end -}}
-    {{- else -}}
-        {{- $requested -}}
-    {{- end -}}
+    {{- $requested := default "v0" .Values.olmVersion -}}
+    {{- $requested -}}
 {{- end -}}
 
 {{- define "unmanaged-clusterextension-exists" -}}

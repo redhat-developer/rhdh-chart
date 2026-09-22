@@ -1,4 +1,4 @@
-# -- OLM API version to use for operator installation (`v0`, `v1`, or `auto`)
+# -- OLM API version to use for operator installation (`v0` or `v1`)
 olmVersion: v0
 olm:
   catalog:

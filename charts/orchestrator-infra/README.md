@@ -84,7 +84,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | olm.catalog.selector | ClusterCatalog selector for OLM v1 ClusterExtension resources | object | `{"matchLabels":{"olm.operatorframework.io/metadata.name":"openshift-redhat-operators"}}` |
-| olmVersion | OLM API version to use for operator installation (`v0`, `v1`, or `auto`) | string | `"v0"` |
+| olmVersion | OLM API version to use for operator installation (`v0` or `v1`) | string | `"v0"` |
 | serverlessLogicOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-logic-operator-installer"` |
 | serverlessLogicOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessLogicOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless-logic"` |

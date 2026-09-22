@@ -6,7 +6,7 @@
   "properties": {
     "olmVersion": {
       "default": "v0",
-      "enum": ["auto", "v0", "v1"],
+      "enum": ["v0", "v1"],
       "title": "OLM API version to use for operator installation",
       "type": "string"
     },

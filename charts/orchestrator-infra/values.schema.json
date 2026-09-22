@@ -60,7 +60,6 @@
         "olmVersion": {
             "default": "v0",
             "enum": [
-                "auto",
                 "v0",
                 "v1"
             ],
