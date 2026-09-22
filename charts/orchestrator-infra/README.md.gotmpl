@@ -82,26 +82,24 @@ The chart defaults to `olmVersion: v0`.
 
 - `v0`: creates `Subscription` resources
 - `v1`: creates `ClusterExtension` resources with an installer ServiceAccount and ClusterRoleBinding
-- `auto`: uses OLM v1 when the `clusterextensions.olm.operatorframework.io` CRD is present; otherwise OLM v0
 
 ```bash
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v0
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
 ```
 
-With `olmVersion=v1`, remove helm-managed Knative CRDs from a prior v0 install before upgrading. The chart does not create `KnativeServing` or `KnativeEventing` on the OLM v1 path; once the Serverless ClusterExtension reports `Installed=True` and its CRDs are established, create these instances manually.
-
 ### Installing Knative Eventing and Knative Serving CRDs
 
-The chart ships Knative Eventing and Knative Serving CRDs under `files/`. On the OLM v0 path, Helm applies them via pre-install hooks. On the OLM v1 path, the Serverless operator bundle installs the CRDs instead.
+The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving. These CRDs will be applied prior to installing the chart, ensuring that Knative CRs can be created as part of the chart's deployment process. This approach eliminates the need to wait for the OpenShift Serverless Operator's subscription to install them beforehand.
 
-To verify CRD versions, run:
+The KnativeEventing and KnativeServing CRDs are required for this chart to run. These CRDs need to be present under the `crds/` directory before running `helm install`.
+After installing the openshift-serverless subscription, more Knative CRDs will be installed on the cluster.
+
+The versions of the CRDs present in the chart and the ones in the subscription must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
 ```bash
 export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.38.0
-podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > files/knative-eventing/knative-eventing-crd.yaml
+podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > crds/knative-eventing/knative-eventing-crd.yaml
 
-podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > files/knative-serving/knative-serving-crd.yaml
+podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > crds/knative-serving/knative-serving-crd.yaml
 ```
-
-After running these commands, you may need to re-add the `helm.sh/hook` annotations on the OLM v0 path.

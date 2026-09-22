@@ -1,5 +1,0 @@
-{{- if and .Values.serverlessOperator.enabled (ne (include "olm-version" .) "v1") }}
-{{ .Files.Get "files/knative-serving/knative-serving-crd.yaml" }}
----
-{{ .Files.Get "files/knative-eventing/knative-eventing-crd.yaml" }}
-{{- end }}
