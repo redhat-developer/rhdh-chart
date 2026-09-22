@@ -1,6 +1,4 @@
 {{- if .Values.serverlessOperator.enabled }}
-{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-serving" .Release.Name .Capabilities.APIVersions) }}
-{{- if eq $unmanagedNamespaceExists "false" }}
 ---
 apiVersion: v1
 kind: Namespace
@@ -10,10 +8,6 @@ metadata:
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-5"
     "helm.sh/resource-policy": keep
-{{- end }}
-
-{{- $unmanagedNamespaceExists := include "unmanaged-resource-exists" (list "v1" "Namespace" "" "knative-eventing" .Release.Name .Capabilities.APIVersions) }}
-{{- if eq $unmanagedNamespaceExists "false" }}
 ---
 apiVersion: v1
 kind: Namespace
@@ -23,10 +17,7 @@ metadata:
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-5"
     "helm.sh/resource-policy": keep
-{{- end }}
 
-{{- $unmanagedKnativeEventingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeEventing" "knative-eventing" "knative-eventing" .Release.Name .Capabilities.APIVersions) }}
-{{- if eq $unmanagedKnativeEventingExists "false" }}
 ---
 apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
@@ -34,11 +25,7 @@ metadata:
   name: knative-eventing
   namespace: knative-eventing
 spec:
-  Registry:
-{{- end }}
-
-{{- $unmanagedKnativeServingExists := include "unmanaged-resource-exists" (list "operator.knative.dev/v1beta1" "KnativeServing" "knative-serving" "knative-serving" .Release.Name .Capabilities.APIVersions) }}
-{{- if eq $unmanagedKnativeServingExists "false" }}
+  Registry: {}
 ---
 apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
@@ -50,6 +37,4 @@ spec:
     name: ""
     type: ""
   registry: {}
-
-{{- end }}
 {{- end }}

@@ -1,9 +1,96 @@
 {
     "$id": "https://raw.githubusercontent.com/redhat-developer/rhdh-chart/main/charts/orchestrator-infra/values.schema.json",
     "properties": {
+        "olm": {
+            "additionalProperties": false,
+            "properties": {
+                "catalog": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "selector": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "matchExpressions": {
+                                    "items": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "key": {
+                                                "type": "string"
+                                            },
+                                            "operator": {
+                                                "type": "string"
+                                            },
+                                            "values": {
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "type": "array"
+                                            }
+                                        },
+                                        "required": [
+                                            "key",
+                                            "operator"
+                                        ],
+                                        "type": "object"
+                                    },
+                                    "type": "array"
+                                },
+                                "matchLabels": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "properties": {
+                                        "olm.operatorframework.io/metadata.name": {
+                                            "default": "openshift-redhat-operators",
+                                            "title": "ClusterCatalog selector for OLM v1 ClusterExtension resources",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "olmVersion": {
+            "default": "v0",
+            "enum": [
+                "v0",
+                "v1"
+            ],
+            "title": "OLM API version to use for operator installation",
+            "type": "string"
+        },
         "serverlessLogicOperator": {
             "additionalProperties": false,
             "properties": {
+                "clusterExtension": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "serviceAccount": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "default": "serverless-logic-operator-installer",
+                                    "title": "Service account used by OLM v1 to install the operator",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "createNamespace": {
+                    "default": true,
+                    "title": "Whether to create the operator namespace (set to false if namespace already exists)",
+                    "type": "boolean"
+                },
                 "enabled": {
                     "default": true,
                     "title": "Whether the operator should be deployed by the chart",
@@ -62,6 +149,28 @@
         "serverlessOperator": {
             "additionalProperties": false,
             "properties": {
+                "clusterExtension": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "serviceAccount": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "default": "serverless-operator-installer",
+                                    "title": "Service account used by OLM v1 to install the operator",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
+                "createNamespace": {
+                    "default": true,
+                    "title": "Whether to create the operator namespace (set to false if namespace already exists)",
+                    "type": "boolean"
+                },
                 "enabled": {
                     "default": true,
                     "title": "Whether the operator should be deployed by the chart",

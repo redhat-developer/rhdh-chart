@@ -190,9 +190,8 @@ runs:
       env:
         SONATAFLOW_OPERATOR_VERSION: "10.1.0"
       run: |
-        for crdDir in charts/orchestrator-infra/crds/*; do
-          kubectl create -f "${crdDir}"
-        done
+        kubectl create -f charts/orchestrator-infra/crds/knative-eventing/knative-eventing-crd.yaml
+        kubectl create -f charts/orchestrator-infra/crds/knative-serving/knative-serving-crd.yaml
         kubectl create -f "https://github.com/apache/incubator-kie-tools/releases/download/${SONATAFLOW_OPERATOR_VERSION}/apache-kie-${SONATAFLOW_OPERATOR_VERSION}-incubating-sonataflow-operator.yaml"
 
     - name: Set up external services and test resources for rhdh

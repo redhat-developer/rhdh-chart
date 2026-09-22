@@ -4,17 +4,10 @@ Helm Release {{ .Release.Name }} installed in namespace {{ .Release.Namespace }}
 {{- $yes := "YES" }}
 {{- $no := "NO " }}
 {{- $serverlessOperatorInstalled := $no }}
-{{- $knativeServingInstalled := $no }}
-{{- $knativeEventingInstalled := $no }}
 {{- $serverlessLogicOperatorInstalled := $no }}
-{{- $sonataFlowPlatformInstalled := $no }}
-{{- $timeout := "--timeout=5m" }}
 
 {{- if .Values.serverlessOperator.enabled }}
-{{- $unmanagedSubscriptionExists := include "unmanaged-resource-exists" (list "operators.coreos.com/v1alpha1" "Subscription" .Values.serverlessOperator.subscription.namespace "serverless-operator" .Release.Name .Capabilities.APIVersions ) }}
-{{- if eq $unmanagedSubscriptionExists "false" }}
 {{- $serverlessOperatorInstalled = $yes }}
-{{- end }}
 {{- end }}
 
 {{- if .Values.serverlessLogicOperator.enabled }}

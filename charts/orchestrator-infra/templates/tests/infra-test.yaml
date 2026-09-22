@@ -68,6 +68,36 @@ roleRef:
   name: test-role-osl
   apiGroup: rbac.authorization.k8s.io
 ---
+{{- if eq (include "olm-version" .) "v1" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-role-clusterextensions
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+rules:
+  - apiGroups: ["olm.operatorframework.io"]
+    resources: ["clusterextensions"]
+    verbs: ["list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: test-role-binding-clusterextensions
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded, hook-failed
+subjects:
+  - kind: ServiceAccount
+    name: test-service-account
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: test-role-clusterextensions
+  apiGroup: rbac.authorization.k8s.io
+---
+{{- end }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -102,12 +132,20 @@ spec:
       
           echo "Starting Test"
 
-          {{- if .Values.serverlessLogicOperator.enabled }}
-            kubectl get subscription {{ .Values.serverlessOperator.subscription.spec.name }} -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
+          {{- if .Values.serverlessOperator.enabled }}
+            {{- if eq (include "olm-version" .) "v1" }}
+            kubectl get clusterextension {{ .Values.serverlessOperator.subscription.spec.name }} || exit 1
+            {{- else }}
+            kubectl get subscription.operators.coreos.com {{ .Values.serverlessOperator.subscription.spec.name }} -n {{ .Values.serverlessOperator.subscription.namespace }} || exit 1
+            {{- end }}
           {{- end }}
             
           {{- if .Values.serverlessLogicOperator.enabled }}
-          kubectl get subscription {{ .Values.serverlessLogicOperator.subscription.name }} -n {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
+            {{- if eq (include "olm-version" .) "v1" }}
+            kubectl get clusterextension {{ .Values.serverlessLogicOperator.subscription.spec.name }} || exit 1
+            {{- else }}
+            kubectl get subscription.operators.coreos.com {{ .Values.serverlessLogicOperator.subscription.spec.name }} -n {{ .Values.serverlessLogicOperator.subscription.namespace }} || exit 1
+            {{- end }}
           {{- end }}
       
           echo "Test passed!"

@@ -4,6 +4,65 @@
   "title": "Root Schema",
   "type": "object",
   "properties": {
+    "olmVersion": {
+      "default": "v0",
+      "enum": ["v0", "v1"],
+      "title": "OLM API version to use for operator installation",
+      "type": "string"
+    },
+    "olm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "catalog": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "selector": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "matchLabels": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "olm.operatorframework.io/metadata.name": {
+                      "default": "openshift-redhat-operators",
+                      "title": "ClusterCatalog selector for OLM v1 ClusterExtension resources",
+                      "type": "string"
+                    }
+                  }
+                },
+                "matchExpressions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "operator": {
+                        "type": "string"
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": ["key", "operator"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "serverlessLogicOperator": {
       "type": "object",
       "additionalProperties": false,
@@ -11,6 +70,11 @@
         "enabled": {
           "default": true,
           "title": "Whether the operator should be deployed by the chart",
+          "type": "boolean"
+        },
+        "createNamespace": {
+          "default": true,
+          "title": "Whether to create the operator namespace (set to false if namespace already exists)",
           "type": "boolean"
         },
         "subscription": {
@@ -59,6 +123,23 @@
               }
             }
           }
+        },
+        "clusterExtension": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "serviceAccount": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "serverless-logic-operator-installer",
+                  "title": "Service account used by OLM v1 to install the operator",
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -69,6 +150,11 @@
         "enabled": {
           "default": true,
           "title": "Whether the operator should be deployed by the chart",
+          "type": "boolean"
+        },
+        "createNamespace": {
+          "default": true,
+          "title": "Whether to create the operator namespace (set to false if namespace already exists)",
           "type": "boolean"
         },
         "subscription": {
@@ -107,6 +193,23 @@
                 "sourceNamespace": {
                   "default": "openshift-marketplace",
                   "title": "Name of the catalog source Namespace",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "clusterExtension": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "serviceAccount": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "default": "serverless-operator-installer",
+                  "title": "Service account used by OLM v1 to install the operator",
                   "type": "string"
                 }
               }

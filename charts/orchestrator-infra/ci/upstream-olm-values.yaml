@@ -1,11 +1,13 @@
 serverlessLogicOperator:
   enabled: true
+  createNamespace: false
   subscription:
     namespace: operators
     spec:
       sourceNamespace: olm
 
 serverlessOperator:
+  createNamespace: false
   subscription:
     namespace: operators
     spec:
