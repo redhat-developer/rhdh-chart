@@ -1,3 +1,4 @@
+
 # Orchestrator Infra Chart for OpenShift
 
 ![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square)
@@ -80,31 +81,31 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Values
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| olm.catalog.selector | object | `{"matchLabels":{"olm.operatorframework.io/metadata.name":"openshift-redhat-operators"}}` | ClusterCatalog selector for OLM v1 ClusterExtension resources |
-| olmVersion | string | `"v0"` | OLM API version to use for operator installation (`v0` or `v1`) |
-| serverlessLogicOperator.clusterExtension.serviceAccount.name | string | `"serverless-logic-operator-installer"` | service account used by OLM v1 to install the operator |
-| serverlessLogicOperator.createNamespace | bool | `true` | whether to create the operator namespace (set to false if namespace already exists) |
-| serverlessLogicOperator.enabled | bool | `true` | whether the operator should be deployed by the chart |
-| serverlessLogicOperator.subscription.namespace | string | `"openshift-serverless-logic"` | namespace where the operator should be deployed |
-| serverlessLogicOperator.subscription.spec.channel | string | `"stable"` | channel of an operator package to subscribe to |
-| serverlessLogicOperator.subscription.spec.installPlanApproval | string | `"Manual"` | whether the update should be installed automatically |
-| serverlessLogicOperator.subscription.spec.name | string | `"logic-operator"` | name of the operator package |
-| serverlessLogicOperator.subscription.spec.source | string | `"redhat-operators"` | name of the catalog source |
-| serverlessLogicOperator.subscription.spec.sourceNamespace | string | `"openshift-marketplace"` |  |
-| serverlessLogicOperator.subscription.spec.startingCSV | string | `"logic-operator.v1.38.0"` | The initial version of the operator, must match CRDs installed by the chart |
-| serverlessOperator.clusterExtension.serviceAccount.name | string | `"serverless-operator-installer"` | service account used by OLM v1 to install the operator |
-| serverlessOperator.createNamespace | bool | `true` | whether to create the operator namespace (set to false if namespace already exists) |
-| serverlessOperator.enabled | bool | `true` | whether the operator should be deployed by the chart |
-| serverlessOperator.subscription.namespace | string | `"openshift-serverless"` | namespace where the operator should be deployed |
-| serverlessOperator.subscription.spec.channel | string | `"stable"` | channel of an operator package to subscribe to |
-| serverlessOperator.subscription.spec.installPlanApproval | string | `"Manual"` | whether the update should be installed automatically |
-| serverlessOperator.subscription.spec.name | string | `"serverless-operator"` | name of the operator package |
-| serverlessOperator.subscription.spec.source | string | `"redhat-operators"` | name of the catalog source |
-| serverlessOperator.subscription.spec.sourceNamespace | string | `"openshift-marketplace"` |  |
-| tests.enabled | bool | `true` | Whether to create the test pod used for testing the Release using `helm test`. |
-| tests.image | string | `"bitnami/kubectl:latest"` | Test pod image |
+| Key | Description | Type | Default |
+|-----|-------------|------|---------|
+| olm.catalog.selector | ClusterCatalog selector for OLM v1 ClusterExtension resources | object | `{"matchLabels":{"olm.operatorframework.io/metadata.name":"openshift-redhat-operators"}}` |
+| olmVersion | OLM API version to use for operator installation (`v0` or `v1`) | string | `"v0"` |
+| serverlessLogicOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-logic-operator-installer"` |
+| serverlessLogicOperator.createNamespace | whether to create the operator namespace (set to false if namespace already exists) | bool | `true` |
+| serverlessLogicOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
+| serverlessLogicOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless-logic"` |
+| serverlessLogicOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
+| serverlessLogicOperator.subscription.spec.installPlanApproval | whether the update should be installed automatically | string | `"Manual"` |
+| serverlessLogicOperator.subscription.spec.name | name of the operator package | string | `"logic-operator"` |
+| serverlessLogicOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
+| serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
+| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.38.0"` |
+| serverlessOperator.clusterExtension.serviceAccount.name | service account used by OLM v1 to install the operator | string | `"serverless-operator-installer"` |
+| serverlessOperator.createNamespace | whether to create the operator namespace (set to false if namespace already exists) | bool | `true` |
+| serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
+| serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
+| serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
+| serverlessOperator.subscription.spec.installPlanApproval | whether the update should be installed automatically | string | `"Manual"` |
+| serverlessOperator.subscription.spec.name | name of the operator package | string | `"serverless-operator"` |
+| serverlessOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
+| serverlessOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
+| tests.enabled | Whether to create the test pod used for testing the Release using `helm test`. | bool | `true` |
+| tests.image | Test pod image | string | `"bitnami/kubectl:latest"` |
 
 ### OLM v0 and OLM v1 operator installation
 
