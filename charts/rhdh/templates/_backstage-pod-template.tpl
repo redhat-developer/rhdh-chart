@@ -77,8 +77,6 @@ spec:
             resources:
               {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 14 }}
             {{- end }}
-      {{- else }}
-      {{- fail (printf "dynamicPlugins.volume.type must be ephemeral, emptyDir, pvc, or statefulSetPVC (got %q)" .Values.dynamicPlugins.volume.type) }}
       {{- end }}
     - name: dynamic-plugins
       configMap:

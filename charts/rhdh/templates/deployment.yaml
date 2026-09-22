@@ -1,4 +1,4 @@
-{{- if ne .Values.workload.kind "StatefulSet" }}
+{{- if eq .Values.workload.kind "Deployment" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
