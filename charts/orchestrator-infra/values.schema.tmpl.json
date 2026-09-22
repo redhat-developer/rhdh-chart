@@ -72,6 +72,11 @@
           "title": "Whether the operator should be deployed by the chart",
           "type": "boolean"
         },
+        "createNamespace": {
+          "default": true,
+          "title": "Whether to create the operator namespace (set to false if namespace already exists)",
+          "type": "boolean"
+        },
         "subscription": {
           "type": "object",
           "additionalProperties": false,
@@ -145,6 +150,11 @@
         "enabled": {
           "default": true,
           "title": "Whether the operator should be deployed by the chart",
+          "type": "boolean"
+        },
+        "createNamespace": {
+          "default": true,
+          "title": "Whether to create the operator namespace (set to false if namespace already exists)",
           "type": "boolean"
         },
         "subscription": {

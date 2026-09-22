@@ -1,4 +1,4 @@
-{{- if and .Values.serverlessLogicOperator.enabled (ne .Values.serverlessLogicOperator.subscription.namespace .Values.serverlessOperator.subscription.namespace) }}
+{{- if and .Values.serverlessLogicOperator.enabled .Values.serverlessLogicOperator.createNamespace (ne .Values.serverlessLogicOperator.subscription.namespace .Values.serverlessOperator.subscription.namespace) }}
 ---
 apiVersion: v1
 kind: Namespace

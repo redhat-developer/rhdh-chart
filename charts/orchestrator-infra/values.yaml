@@ -10,6 +10,8 @@ olm:
 serverlessLogicOperator:
   # -- whether the operator should be deployed by the chart
   enabled: true
+  # -- whether to create the operator namespace (set to false if namespace already exists)
+  createNamespace: true
   subscription:
     # -- namespace where the operator should be deployed
     namespace: openshift-serverless-logic
@@ -33,6 +35,8 @@ serverlessLogicOperator:
 serverlessOperator:
   # -- whether the operator should be deployed by the chart
   enabled: true
+  # -- whether to create the operator namespace (set to false if namespace already exists)
+  createNamespace: true
   subscription:
     # -- namespace where the operator should be deployed
     namespace: openshift-serverless

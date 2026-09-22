@@ -85,6 +85,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | olm.catalog.selector | object | `{"matchLabels":{"olm.operatorframework.io/metadata.name":"openshift-redhat-operators"}}` | ClusterCatalog selector for OLM v1 ClusterExtension resources |
 | olmVersion | string | `"v0"` | OLM API version to use for operator installation (`v0` or `v1`) |
 | serverlessLogicOperator.clusterExtension.serviceAccount.name | string | `"serverless-logic-operator-installer"` | service account used by OLM v1 to install the operator |
+| serverlessLogicOperator.createNamespace | bool | `true` | whether to create the operator namespace (set to false if namespace already exists) |
 | serverlessLogicOperator.enabled | bool | `true` | whether the operator should be deployed by the chart |
 | serverlessLogicOperator.subscription.namespace | string | `"openshift-serverless-logic"` | namespace where the operator should be deployed |
 | serverlessLogicOperator.subscription.spec.channel | string | `"stable"` | channel of an operator package to subscribe to |
@@ -94,6 +95,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.sourceNamespace | string | `"openshift-marketplace"` |  |
 | serverlessLogicOperator.subscription.spec.startingCSV | string | `"logic-operator.v1.38.0"` | The initial version of the operator, must match CRDs installed by the chart |
 | serverlessOperator.clusterExtension.serviceAccount.name | string | `"serverless-operator-installer"` | service account used by OLM v1 to install the operator |
+| serverlessOperator.createNamespace | bool | `true` | whether to create the operator namespace (set to false if namespace already exists) |
 | serverlessOperator.enabled | bool | `true` | whether the operator should be deployed by the chart |
 | serverlessOperator.subscription.namespace | string | `"openshift-serverless"` | namespace where the operator should be deployed |
 | serverlessOperator.subscription.spec.channel | string | `"stable"` | channel of an operator package to subscribe to |

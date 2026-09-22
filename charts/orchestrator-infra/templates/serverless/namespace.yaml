@@ -1,4 +1,4 @@
-{{- if .Values.serverlessOperator.enabled }}
+{{- if and .Values.serverlessOperator.enabled .Values.serverlessOperator.createNamespace }}
 ---
 apiVersion: v1
 kind: Namespace
