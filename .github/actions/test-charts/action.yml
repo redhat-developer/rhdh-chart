@@ -64,9 +64,14 @@ runs:
             echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
             echo "externalDbNeeded=true" >> "$GITHUB_OUTPUT"
           fi
+          if [[ "$INPUT_CHART" == "charts/orchestrator-infra" ]]; then
+            echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
+            echo "orchestratorOlmV1CrdsNeeded=true" >> "$GITHUB_OUTPUT"
+          fi
         elif [[ "$INPUT_ALL_CHARTS" == "true" ]]; then
           echo "changed=true" >> "$GITHUB_OUTPUT"
           echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
+          echo "orchestratorOlmV1CrdsNeeded=true" >> "$GITHUB_OUTPUT"
           echo "externalDbNeeded=true" >> "$GITHUB_OUTPUT"
         else
           listChanged=$(ct list-changed --target-branch "$INPUT_TARGET_BRANCH")
@@ -75,6 +80,10 @@ runs:
             if grep -q 'charts/rhdh' <<< "$listChanged"; then
               echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
               echo "externalDbNeeded=true" >> "$GITHUB_OUTPUT"
+            fi
+            if grep -q 'charts/orchestrator-infra' <<< "$listChanged"; then
+              echo "orchestratorCrdsNeeded=true" >> "$GITHUB_OUTPUT"
+              echo "orchestratorOlmV1CrdsNeeded=true" >> "$GITHUB_OUTPUT"
             fi
           fi
         fi
@@ -110,6 +119,19 @@ runs:
           output=$(helm template test-release "$INPUT_CHART" \
             --values "$ci_values" \
             --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
+        done
+
+    - name: Helm template sanity check (orchestrator-infra ci values)
+      if: steps.list-changed.outputs.changed == 'true' && inputs.chart == 'charts/orchestrator-infra'
+      shell: bash
+      env:
+        INPUT_CHART: ${{ inputs.chart }}
+      run: |
+        for ci_values in "$INPUT_CHART"/ci/*-values.yaml; do
+          [[ -f "$ci_values" ]] || continue
+          echo "==> helm template: $(basename "$ci_values")"
+          output=$(helm template test-release "$INPUT_CHART" --values "$ci_values" 2>&1) || { echo "$output"; exit 1; }
+          echo "$output" | grep -E '^kind:' | sort | uniq -c
         done
 
     - name: Generate KinD Config
@@ -193,6 +215,12 @@ runs:
         kubectl create -f charts/orchestrator-infra/crds/knative-eventing/knative-eventing-crd.yaml
         kubectl create -f charts/orchestrator-infra/crds/knative-serving/knative-serving-crd.yaml
         kubectl create -f "https://github.com/apache/incubator-kie-tools/releases/download/${SONATAFLOW_OPERATOR_VERSION}/apache-kie-${SONATAFLOW_OPERATOR_VERSION}-incubating-sonataflow-operator.yaml"
+
+    - name: Install OLM v1 API CRDs (orchestrator-infra chart-testing)
+      if: steps.list-changed.outputs.orchestratorOlmV1CrdsNeeded == 'true'
+      shell: bash
+      run: |
+        kubectl create -f .github/fixtures/olm-v1-api-crds.yaml
 
     - name: Set up external services and test resources for rhdh
       if: steps.list-changed.outputs.externalDbNeeded == 'true'

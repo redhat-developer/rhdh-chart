@@ -1,0 +1,18 @@
+# Chart-testing values for the OLM v1 install path (ClusterExtension resources).
+# Mirrors upstream-olm-values.yaml namespace overrides for KinD + upstream OLM.
+olmVersion: v1
+
+serverlessLogicOperator:
+  enabled: true
+  createNamespace: false
+  subscription:
+    namespace: operators
+    spec:
+      sourceNamespace: olm
+
+serverlessOperator:
+  createNamespace: false
+  subscription:
+    namespace: operators
+    spec:
+      sourceNamespace: olm

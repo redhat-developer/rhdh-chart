@@ -1,0 +1,1172 @@
+# OLM v1 API CRDs for orchestrator-infra chart-testing (olmVersion=v1).
+# Source: operator-framework/operator-controller v1.11.0 (CRDs only; controller not installed).
+# https://github.com/operator-framework/operator-controller/releases/tag/v1.11.0
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.20.1
+    olm.operatorframework.io/generator: standard
+  name: clustercatalogs.olm.operatorframework.io
+spec:
+  group: olm.operatorframework.io
+  names:
+    kind: ClusterCatalog
+    listKind: ClusterCatalogList
+    plural: clustercatalogs
+    singular: clustercatalog
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.lastUnpacked
+      name: LastUnpacked
+      type: date
+    - jsonPath: .status.conditions[?(@.type=="Serving")].status
+      name: Serving
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: 'ClusterCatalog makes File-Based Catalog (FBC) data available
+          to your cluster.
+
+          For more information on FBC, see https://olm.operatorframework.io/docs/reference/file-based-catalogs/#docs'
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object.
+
+              Servers should convert recognized schemas to the latest internal value,
+              and
+
+              may reject unrecognized values.
+
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents.
+
+              Servers may infer this from the endpoint the client submits requests
+              to.
+
+              Cannot be updated.
+
+              In CamelCase.
+
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: 'spec is a required field that defines the desired state
+              of the ClusterCatalog.
+
+              The controller ensures that the catalog is unpacked and served over
+              the catalog content HTTP server.'
+            properties:
+              availabilityMode:
+                default: Available
+                description: 'availabilityMode is an optional field that defines how
+                  the ClusterCatalog is made available to clients on the cluster.
+
+
+                  Allowed values are "Available", "Unavailable", or omitted.
+
+
+                  When omitted, the default value is "Available".
+
+
+                  When set to "Available", the catalog contents are unpacked and served
+                  over the catalog content HTTP server.
+
+                  Clients should consider this ClusterCatalog and its contents as
+                  usable.
+
+
+                  When set to "Unavailable", the catalog contents are no longer served
+                  over the catalog content HTTP server.
+
+                  Treat this the same as if the ClusterCatalog does not exist.
+
+                  Use "Unavailable" when you want to keep the ClusterCatalog but treat
+                  it as if it doesn''t exist.'
+                enum:
+                - Unavailable
+                - Available
+                type: string
+              priority:
+                default: 0
+                description: 'priority is an optional field that defines a priority
+                  for this ClusterCatalog.
+
+
+                  Clients use the ClusterCatalog priority as a tie-breaker between
+                  ClusterCatalogs that meet their requirements.
+
+                  Higher numbers mean higher priority.
+
+
+                  Clients decide how to handle scenarios where multiple ClusterCatalogs
+                  with the same priority meet their requirements.
+
+                  Clients should prompt users for additional input to break the tie.
+
+
+                  When omitted, the default priority is 0.
+
+
+                  Use negative numbers to specify a priority lower than the default.
+
+                  Use positive numbers to specify a priority higher than the default.
+
+
+                  The lowest possible value is -2147483648.
+
+                  The highest possible value is 2147483647.'
+                format: int32
+                maximum: 2147483647
+                minimum: -2147483648
+                type: integer
+              source:
+                description: "source is a required field that defines the source of\
+                  \ a catalog.\nA catalog contains information on content that can\
+                  \ be installed on a cluster.\nThe catalog source makes catalog contents\
+                  \ discoverable and usable by other on-cluster components.\nThese\
+                  \ components can present the content in a GUI dashboard or install\
+                  \ content from the catalog on the cluster.\nThe catalog source must\
+                  \ contain catalog metadata in the File-Based Catalog (FBC) format.\n\
+                  For more information on FBC, see https://olm.operatorframework.io/docs/reference/file-based-catalogs/#docs.\n\
+                  \nBelow is a minimal example of a ClusterCatalogSpec that sources\
+                  \ a catalog from an image:\n\n source:\n   type: Image\n   image:\n\
+                  \     ref: quay.io/operatorhubio/catalog:latest"
+                properties:
+                  image:
+                    description: 'image configures how catalog contents are sourced
+                      from an OCI image.
+
+                      It is required when type is Image, and forbidden otherwise.'
+                    properties:
+                      pollIntervalMinutes:
+                        description: 'pollIntervalMinutes is an optional field that
+                          sets the interval, in minutes, at which the image source
+                          is polled for new content.
+
+                          You cannot specify pollIntervalMinutes when ref is a digest-based
+                          reference.
+
+
+                          When omitted, the image is not polled for new content.'
+                        minimum: 1
+                        type: integer
+                      ref:
+                        description: 'ref is a required field that defines the reference
+                          to a container image containing catalog contents.
+
+                          It cannot be more than 1000 characters.
+
+
+                          A reference has 3 parts: the domain, name, and identifier.
+
+
+                          The domain is typically the registry where an image is located.
+
+                          It must be alphanumeric characters (lowercase and uppercase)
+                          separated by the "." character.
+
+                          Hyphenation is allowed, but the domain must start and end
+                          with alphanumeric characters.
+
+                          Specifying a port to use is also allowed by adding the ":"
+                          character followed by numeric values.
+
+                          The port must be the last value in the domain.
+
+                          Some examples of valid domain values are "registry.mydomain.io",
+                          "quay.io", "my-registry.io:8080".
+
+
+                          The name is typically the repository in the registry where
+                          an image is located.
+
+                          It must contain lowercase alphanumeric characters separated
+                          only by the ".", "_", "__", "-" characters.
+
+                          Multiple names can be concatenated with the "/" character.
+
+                          The domain and name are combined using the "/" character.
+
+                          Some examples of valid name values are "operatorhubio/catalog",
+                          "catalog", "my-catalog.prod".
+
+                          An example of the domain and name parts of a reference being
+                          combined is "quay.io/operatorhubio/catalog".
+
+
+                          The identifier is typically the tag or digest for an image
+                          reference and is present at the end of the reference.
+
+                          It starts with a separator character used to distinguish
+                          the end of the name and beginning of the identifier.
+
+                          For a digest-based reference, the "@" character is the separator.
+
+                          For a tag-based reference, the ":" character is the separator.
+
+                          An identifier is required in the reference.
+
+
+                          Digest-based references must contain an algorithm reference
+                          immediately after the "@" separator.
+
+                          The algorithm reference must be followed by the ":" character
+                          and an encoded string.
+
+                          The algorithm must start with an uppercase or lowercase
+                          alpha character followed by alphanumeric characters and
+                          may contain the "-", "_", "+", and "." characters.
+
+                          Some examples of valid algorithm values are "sha256", "sha256+b64u",
+                          "multihash+base58".
+
+                          The encoded string following the algorithm must be hex digits
+                          (a-f, A-F, 0-9) and must be a minimum of 32 characters.
+
+
+                          Tag-based references must begin with a word character (alphanumeric
+                          + "_") followed by word characters or ".", and "-" characters.
+
+                          The tag must not be longer than 127 characters.
+
+
+                          An example of a valid digest-based image reference is "quay.io/operatorhubio/catalog@sha256:200d4ddb2a73594b91358fe6397424e975205bfbe44614f5846033cad64b3f05"
+
+                          An example of a valid tag-based image reference is "quay.io/operatorhubio/catalog:latest"'
+                        maxLength: 1000
+                        type: string
+                        x-kubernetes-validations:
+                        - message: must start with a valid domain. valid domains must
+                            be alphanumeric characters (lowercase and uppercase) separated
+                            by the "." character.
+                          rule: self.matches('^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])((\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]))+)?(:[0-9]+)?\\b')
+                        - message: a valid name is required. valid names must contain
+                            lowercase alphanumeric characters separated only by the
+                            ".", "_", "__", "-" characters.
+                          rule: self.find('(\\/[a-z0-9]+((([._]|__|[-]*)[a-z0-9]+)+)?((\\/[a-z0-9]+((([._]|__|[-]*)[a-z0-9]+)+)?)+)?)')
+                            != ""
+                        - message: must end with a digest or a tag
+                          rule: self.find('(@.*:)') != "" || self.find(':.*$') !=
+                            ""
+                        - message: tag is invalid. the tag must not be more than 127
+                            characters
+                          rule: 'self.find(''(@.*:)'') == "" ? (self.find('':.*$'')
+                            != "" ? self.find('':.*$'').substring(1).size() <= 127
+                            : true) : true'
+                        - message: tag is invalid. valid tags must begin with a word
+                            character (alphanumeric + "_") followed by word characters
+                            or ".", and "-" characters
+                          rule: 'self.find(''(@.*:)'') == "" ? (self.find('':.*$'')
+                            != "" ? self.find('':.*$'').matches('':[\\w][\\w.-]*$'')
+                            : true) : true'
+                        - message: digest algorithm is not valid. valid algorithms
+                            must start with an uppercase or lowercase alpha character
+                            followed by alphanumeric characters and may contain the
+                            "-", "_", "+", and "." characters.
+                          rule: 'self.find(''(@.*:)'') != "" ? self.find(''(@.*:)'').matches(''(@[A-Za-z][A-Za-z0-9]*([-_+.][A-Za-z][A-Za-z0-9]*)*[:])'')
+                            : true'
+                        - message: digest is not valid. the encoded string must be
+                            at least 32 characters
+                          rule: 'self.find(''(@.*:)'') != "" ? self.find('':.*$'').substring(1).size()
+                            >= 32 : true'
+                        - message: digest is not valid. the encoded string must only
+                            contain hex characters (A-F, a-f, 0-9)
+                          rule: 'self.find(''(@.*:)'') != "" ? self.find('':.*$'').matches('':[0-9A-Fa-f]*$'')
+                            : true'
+                    required:
+                    - ref
+                    type: object
+                    x-kubernetes-validations:
+                    - message: cannot specify pollIntervalMinutes while using digest-based
+                        image
+                      rule: 'self.ref.find(''(@.*:)'') != "" ? !has(self.pollIntervalMinutes)
+                        : true'
+                  type:
+                    description: 'type is a required field that specifies the type
+                      of source for the catalog.
+
+
+                      The only allowed value is "Image".
+
+
+                      When set to "Image", the ClusterCatalog content is sourced from
+                      an OCI image.
+
+                      When using an image source, the image field must be set and
+                      must be the only field defined for this type.'
+                    enum:
+                    - Image
+                    type: string
+                required:
+                - type
+                type: object
+                x-kubernetes-validations:
+                - message: image is required when source type is Image, and forbidden
+                    otherwise
+                  rule: 'has(self.type) && self.type == ''Image'' ? has(self.image)
+                    : !has(self.image)'
+            required:
+            - source
+            type: object
+          status:
+            description: "status contains the following information about the state\
+              \ of the ClusterCatalog:\n  - Whether the catalog contents are being\
+              \ served via the catalog content HTTP server\n  - Whether the ClusterCatalog\
+              \ is progressing to a new state\n  - A reference to the source from\
+              \ which the catalog contents were retrieved"
+            properties:
+              conditions:
+                description: "conditions represents the current state of this ClusterCatalog.\n\
+                  \nThe current condition types are Serving and Progressing.\n\nThe\
+                  \ Serving condition represents whether the catalog contents are\
+                  \ being served via the HTTP(S) web server:\n  - When status is True\
+                  \ and reason is Available, the catalog contents are being served.\n\
+                  \  - When status is False and reason is Unavailable, the catalog\
+                  \ contents are not being served because the contents are not yet\
+                  \ available.\n  - When status is False and reason is UserSpecifiedUnavailable,\
+                  \ the catalog contents are not being served because the catalog\
+                  \ has been intentionally marked as unavailable.\n\nThe Progressing\
+                  \ condition represents whether the ClusterCatalog is progressing\
+                  \ or is ready to progress towards a new state:\n  - When status\
+                  \ is True and reason is Retrying, an error occurred that may be\
+                  \ resolved on subsequent reconciliation attempts.\n  - When status\
+                  \ is True and reason is Succeeded, the ClusterCatalog has successfully\
+                  \ progressed to a new state and is ready to continue progressing.\n\
+                  \  - When status is False and reason is Blocked, an error occurred\
+                  \ that requires manual intervention for recovery.\n\nIf the system\
+                  \ initially fetched contents and polling identifies updates, both\
+                  \ conditions can be active simultaneously:\n  - The Serving condition\
+                  \ remains True with reason Available because the previous contents\
+                  \ are still served via the HTTP(S) web server.\n  - The Progressing\
+                  \ condition is True with reason Retrying because the system is working\
+                  \ to serve the new version."
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: 'lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+
+                        This should be when the underlying condition changed.  If
+                        that is not known, then using the time when the API field
+                        changed is acceptable.'
+                      format: date-time
+                      type: string
+                    message:
+                      description: 'message is a human readable message indicating
+                        details about the transition.
+
+                        This may be an empty string.'
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: 'observedGeneration represents the .metadata.generation
+                        that the condition was set based upon.
+
+                        For instance, if .metadata.generation is currently 12, but
+                        the .status.conditions[x].observedGeneration is 9, the condition
+                        is out of date
+
+                        with respect to the current state of the instance.'
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: 'reason contains a programmatic identifier indicating
+                        the reason for the condition''s last transition.
+
+                        Producers of specific condition types may define expected
+                        values and meanings for this field,
+
+                        and whether the values are considered a guaranteed API.
+
+                        The value should be a CamelCase string.
+
+                        This field may not be empty.'
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - 'True'
+                      - 'False'
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              lastUnpacked:
+                description: 'lastUnpacked represents the last time the catalog contents
+                  were extracted from their source format.
+
+                  For example, when using an Image source, the OCI image is pulled
+                  and image layers are written to a file-system backed cache.
+
+                  This extraction from the source format is called "unpacking".'
+                format: date-time
+                type: string
+              resolvedSource:
+                description: resolvedSource contains information about the resolved
+                  source based on the source type.
+                properties:
+                  image:
+                    description: 'image contains resolution information for a catalog
+                      sourced from an image.
+
+                      It must be set when type is Image, and forbidden otherwise.'
+                    properties:
+                      ref:
+                        description: 'ref contains the resolved image digest-based
+                          reference.
+
+                          The digest format allows you to use other tooling to fetch
+                          the exact OCI manifests
+
+                          that were used to extract the catalog contents.'
+                        maxLength: 1000
+                        type: string
+                        x-kubernetes-validations:
+                        - message: must start with a valid domain. valid domains must
+                            be alphanumeric characters (lowercase and uppercase) separated
+                            by the "." character.
+                          rule: self.matches('^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])((\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]))+)?(:[0-9]+)?\\b')
+                        - message: a valid name is required. valid names must contain
+                            lowercase alphanumeric characters separated only by the
+                            ".", "_", "__", "-" characters.
+                          rule: self.find('(\\/[a-z0-9]+((([._]|__|[-]*)[a-z0-9]+)+)?((\\/[a-z0-9]+((([._]|__|[-]*)[a-z0-9]+)+)?)+)?)')
+                            != ""
+                        - message: must end with a digest
+                          rule: self.find('(@.*:)') != ""
+                        - message: digest algorithm is not valid. valid algorithms
+                            must start with an uppercase or lowercase alpha character
+                            followed by alphanumeric characters and may contain the
+                            "-", "_", "+", and "." characters.
+                          rule: 'self.find(''(@.*:)'') != "" ? self.find(''(@.*:)'').matches(''(@[A-Za-z][A-Za-z0-9]*([-_+.][A-Za-z][A-Za-z0-9]*)*[:])'')
+                            : true'
+                        - message: digest is not valid. the encoded string must be
+                            at least 32 characters
+                          rule: 'self.find(''(@.*:)'') != "" ? self.find('':.*$'').substring(1).size()
+                            >= 32 : true'
+                        - message: digest is not valid. the encoded string must only
+                            contain hex characters (A-F, a-f, 0-9)
+                          rule: 'self.find(''(@.*:)'') != "" ? self.find('':.*$'').matches('':[0-9A-Fa-f]*$'')
+                            : true'
+                    required:
+                    - ref
+                    type: object
+                  type:
+                    description: 'type is a required field that specifies the type
+                      of source for the catalog.
+
+
+                      The only allowed value is "Image".
+
+
+                      When set to "Image", information about the resolved image source
+                      is set in the image field.'
+                    enum:
+                    - Image
+                    type: string
+                required:
+                - image
+                - type
+                type: object
+                x-kubernetes-validations:
+                - message: image is required when source type is Image, and forbidden
+                    otherwise
+                  rule: 'has(self.type) && self.type == ''Image'' ? has(self.image)
+                    : !has(self.image)'
+              urls:
+                description: urls contains the URLs that can be used to access the
+                  catalog.
+                properties:
+                  base:
+                    description: "base is a cluster-internal URL that provides endpoints\
+                      \ for accessing the catalog content.\n\nClients should append\
+                      \ the path for the endpoint they want to access.\n\nCurrently,\
+                      \ only a single endpoint is served and is accessible at the\
+                      \ path /api/v1.\n\nThe endpoints served for the v1 API are:\n\
+                      \  - /all - this endpoint returns the entire catalog contents\
+                      \ in the FBC format\n\nNew endpoints may be added as needs evolve."
+                    maxLength: 525
+                    type: string
+                    x-kubernetes-validations:
+                    - message: must be a valid URL
+                      rule: isURL(self)
+                    - message: scheme must be either http or https
+                      rule: 'isURL(self) ? (url(self).getScheme() == "http" || url(self).getScheme()
+                        == "https") : true'
+                required:
+                - base
+                type: object
+            type: object
+        required:
+        - metadata
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.21.0
+    olm.operatorframework.io/generator: standard
+  name: clusterextensions.olm.operatorframework.io
+spec:
+  group: olm.operatorframework.io
+  names:
+    kind: ClusterExtension
+    listKind: ClusterExtensionList
+    plural: clusterextensions
+    singular: clusterextension
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.install.bundle.name
+      name: Installed Bundle
+      type: string
+    - jsonPath: .status.install.bundle.version
+      name: Version
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Installed')].status
+      name: Installed
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Progressing')].status
+      name: Progressing
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: ClusterExtension is the Schema for the clusterextensions API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object.
+
+              Servers should convert recognized schemas to the latest internal value,
+              and
+
+              may reject unrecognized values.
+
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents.
+
+              Servers may infer this from the endpoint the client submits requests
+              to.
+
+              Cannot be updated.
+
+              In CamelCase.
+
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: spec is an optional field that defines the desired state
+              of the ClusterExtension.
+            properties:
+              install:
+                description: 'install is optional and configures installation options
+                  for the ClusterExtension,
+
+                  such as the pre-flight check configuration.'
+                properties:
+                  preflight:
+                    description: 'preflight is optional and configures the checks
+                      that run before installation or upgrade
+
+                      of the content for the package specified in the packageName
+                      field.
+
+
+                      When specified, it replaces the default preflight configuration
+                      for install/upgrade actions.
+
+                      When not specified, the default configuration is used.'
+                    properties:
+                      crdUpgradeSafety:
+                        description: 'crdUpgradeSafety configures the CRD Upgrade
+                          Safety pre-flight checks that run
+
+                          before upgrades of installed content.
+
+
+                          The CRD Upgrade Safety pre-flight check safeguards from
+                          unintended consequences of upgrading a CRD,
+
+                          such as data loss.'
+                        properties:
+                          enforcement:
+                            description: 'enforcement is required and configures the
+                              state of the CRD Upgrade Safety pre-flight check.
+
+
+                              Allowed values are "None" or "Strict". The default value
+                              is "Strict".
+
+
+                              When set to "None", the CRD Upgrade Safety pre-flight
+                              check is skipped during an upgrade operation.
+
+                              Use this option with caution as unintended consequences
+                              such as data loss can occur.
+
+
+                              When set to "Strict", the CRD Upgrade Safety pre-flight
+                              check runs during an upgrade operation.'
+                            enum:
+                            - None
+                            - Strict
+                            type: string
+                        required:
+                        - enforcement
+                        type: object
+                    required:
+                    - crdUpgradeSafety
+                    type: object
+                    x-kubernetes-validations:
+                    - message: at least one of [crdUpgradeSafety] are required when
+                        preflight is specified
+                      rule: has(self.crdUpgradeSafety)
+                type: object
+                x-kubernetes-validations:
+                - message: at least one of [preflight] are required when install is
+                    specified
+                  rule: has(self.preflight)
+              namespace:
+                description: 'namespace specifies a Kubernetes namespace.
+
+                  It designates the default namespace where namespace-scoped resources
+                  for the extension are applied to the cluster.
+
+                  Some extensions may contain namespace-scoped resources to be applied
+                  in other namespaces.
+
+                  This namespace must exist.
+
+
+                  The namespace field is required, immutable, and follows the DNS
+                  label standard as defined in [RFC 1123].
+
+                  It must contain only lowercase alphanumeric characters or hyphens
+                  (-), start and end with an alphanumeric character,
+
+                  and be no longer than 63 characters.
+
+
+                  [RFC 1123]: https://tools.ietf.org/html/rfc1123'
+                maxLength: 63
+                type: string
+                x-kubernetes-validations:
+                - message: namespace is immutable
+                  rule: self == oldSelf
+                - message: namespace must be a valid DNS1123 label
+                  rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")
+              serviceAccount:
+                description: 'serviceAccount is a deprecated field and is completely
+                  ignored.
+
+                  OLMv1 is a single-tenant system where users with ClusterExtension
+                  write access are
+
+                  effectively delegated cluster-admin trust. The operator-controller
+                  runs with
+
+                  cluster-admin privileges and uses its own service account for all
+                  cluster interactions.
+
+
+                  Deprecated: serviceAccount is no longer used and will be removed
+                  in a future release.'
+                minProperties: 1
+                properties:
+                  name:
+                    description: "name is a deprecated field and is completely ignored.\n\
+                      \nDeprecated: name is no longer used and will be removed in\
+                      \ a future release.\n\nThe name field follows the DNS subdomain\
+                      \ standard as defined in [RFC 1123].\nIt must contain only lowercase\
+                      \ alphanumeric characters, hyphens (-) or periods (.),\nstart\
+                      \ and end with an alphanumeric character, and be no longer than\
+                      \ 253 characters.\n\nSome examples of valid values are:\n  -\
+                      \ some-serviceaccount\n  - 123-serviceaccount\n  - 1-serviceaccount-2\n\
+                      \  - someserviceaccount\n  - some.serviceaccount\n\nSome examples\
+                      \ of invalid values are:\n  - -some-serviceaccount\n  - some-serviceaccount-\n\
+                      \n[RFC 1123]: https://tools.ietf.org/html/rfc1123"
+                    maxLength: 253
+                    minLength: 1
+                    type: string
+                    x-kubernetes-validations:
+                    - message: name is immutable once set but may be cleared
+                      rule: self == oldSelf
+                    - message: name must be a valid DNS1123 subdomain. It must contain
+                        only lowercase alphanumeric characters, hyphens (-) or periods
+                        (.), start and end with an alphanumeric character, and be
+                        no longer than 253 characters
+                      rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
+                type: object
+              source:
+                description: "source is required and selects the installation source\
+                  \ of content for this ClusterExtension.\nSet the sourceType field\
+                  \ to perform the selection.\n\nCatalog is currently the only implemented\
+                  \ sourceType.\nSetting sourceType to \"Catalog\" requires the catalog\
+                  \ field to also be defined.\n\nBelow is a minimal example of a source\
+                  \ definition (in yaml):\n\nsource:\n  sourceType: Catalog\n  catalog:\n\
+                  \    packageName: example-package"
+                properties:
+                  catalog:
+                    description: 'catalog configures how information is sourced from
+                      a catalog.
+
+                      It is required when sourceType is "Catalog", and forbidden otherwise.'
+                    properties:
+                      channels:
+                        description: "channels is optional and specifies a set of\
+                          \ channels belonging to the package\nspecified in the packageName\
+                          \ field.\n\nA channel is a package-author-defined stream\
+                          \ of updates for an extension.\n\nEach channel in the list\
+                          \ must follow the DNS subdomain standard as defined in [RFC\
+                          \ 1123].\nIt must contain only lowercase alphanumeric characters,\
+                          \ hyphens (-) or periods (.),\nstart and end with an alphanumeric\
+                          \ character, and be no longer than 253 characters.\nYou\
+                          \ can specify no more than 256 channels.\n\nWhen specified,\
+                          \ it constrains the set of installable bundles and the automated\
+                          \ upgrade path.\nThis constraint is an AND operation with\
+                          \ the version field. For example:\n  - Given channel is\
+                          \ set to \"foo\"\n  - Given version is set to \">=1.0.0,\
+                          \ <1.5.0\"\n  - Only bundles that exist in channel \"foo\"\
+                          \ AND satisfy the version range comparison are considered\
+                          \ installable\n  - Automatic upgrades are constrained to\
+                          \ upgrade edges defined by the selected channel\n\nWhen\
+                          \ unspecified, upgrade edges across all channels are used\
+                          \ to identify valid automatic upgrade paths.\n\nSome examples\
+                          \ of valid values are:\n  - 1.1.x\n  - alpha\n  - stable\n\
+                          \  - stable-v1\n  - v1-stable\n  - dev-preview\n  - preview\n\
+                          \  - community\n\nSome examples of invalid values are:\n\
+                          \  - -some-channel\n  - some-channel-\n  - thisisareallylongchannelnamethatisgreaterthanthemaximumlength\n\
+                          \  - original_40\n  - --default-channel\n\n[RFC 1123]: https://tools.ietf.org/html/rfc1123"
+                        items:
+                          maxLength: 253
+                          type: string
+                          x-kubernetes-validations:
+                          - message: channels entries must be valid DNS1123 subdomains
+                            rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
+                        maxItems: 256
+                        type: array
+                      packageName:
+                        description: "packageName specifies the name of the package\
+                          \ to be installed and is used to filter\nthe content from\
+                          \ catalogs.\n\nIt is required, immutable, and follows the\
+                          \ DNS subdomain standard as defined in [RFC 1123].\nIt must\
+                          \ contain only lowercase alphanumeric characters, hyphens\
+                          \ (-) or periods (.),\nstart and end with an alphanumeric\
+                          \ character, and be no longer than 253 characters.\n\nSome\
+                          \ examples of valid values are:\n  - some-package\n  - 123-package\n\
+                          \  - 1-package-2\n  - somepackage\n\nSome examples of invalid\
+                          \ values are:\n  - -some-package\n  - some-package-\n  -\
+                          \ thisisareallylongpackagenamethatisgreaterthanthemaximumlength\n\
+                          \  - some.package\n\n[RFC 1123]: https://tools.ietf.org/html/rfc1123"
+                        maxLength: 253
+                        type: string
+                        x-kubernetes-validations:
+                        - message: packageName is immutable
+                          rule: self == oldSelf
+                        - message: packageName must be a valid DNS1123 subdomain.
+                            It must contain only lowercase alphanumeric characters,
+                            hyphens (-) or periods (.), start and end with an alphanumeric
+                            character, and be no longer than 253 characters
+                          rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
+                      selector:
+                        description: 'selector is optional and filters the set of
+                          ClusterCatalogs used in the bundle selection process.
+
+
+                          When unspecified, all ClusterCatalogs are used in the bundle
+                          selection process.'
+                        properties:
+                          matchExpressions:
+                            description: matchExpressions is a list of label selector
+                              requirements. The requirements are ANDed.
+                            items:
+                              description: 'A label selector requirement is a selector
+                                that contains values, a key, and an operator that
+
+                                relates the key and values.'
+                              properties:
+                                key:
+                                  description: key is the label key that the selector
+                                    applies to.
+                                  type: string
+                                operator:
+                                  description: 'operator represents a key''s relationship
+                                    to a set of values.
+
+                                    Valid operators are In, NotIn, Exists and DoesNotExist.'
+                                  type: string
+                                values:
+                                  description: 'values is an array of string values.
+                                    If the operator is In or NotIn,
+
+                                    the values array must be non-empty. If the operator
+                                    is Exists or DoesNotExist,
+
+                                    the values array must be empty. This array is
+                                    replaced during a strategic
+
+                                    merge patch.'
+                                  items:
+                                    type: string
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                            x-kubernetes-list-type: atomic
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            description: 'matchLabels is a map of {key,value} pairs.
+                              A single {key,value} in the matchLabels
+
+                              map is equivalent to an element of matchExpressions,
+                              whose key field is "key", the
+
+                              operator is "In", and the values array contains only
+                              "value". The requirements are ANDed.'
+                            type: object
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      upgradeConstraintPolicy:
+                        default: CatalogProvided
+                        description: 'upgradeConstraintPolicy is optional and controls
+                          whether the upgrade paths defined in the catalog
+
+                          are enforced for the package referenced in the packageName
+                          field.
+
+
+                          Allowed values are "CatalogProvided", "SelfCertified", or
+                          omitted.
+
+
+                          When set to "CatalogProvided", automatic upgrades only occur
+                          when upgrade constraints specified by the package
+
+                          author are met.
+
+
+                          When set to "SelfCertified", the upgrade constraints specified
+                          by the package author are ignored.
+
+                          This allows upgrades and downgrades to any version of the
+                          package.
+
+                          This is considered a dangerous operation as it can lead
+                          to unknown and potentially disastrous outcomes,
+
+                          such as data loss.
+
+                          Use this option only if you have independently verified
+                          the changes.
+
+
+                          When omitted, the default value is "CatalogProvided".'
+                        enum:
+                        - CatalogProvided
+                        - SelfCertified
+                        type: string
+                      version:
+                        description: "version is an optional semver constraint (a\
+                          \ specific version or range of versions).\nWhen unspecified,\
+                          \ the latest version available is installed.\n\nAcceptable\
+                          \ version ranges are no longer than 64 characters.\nVersion\
+                          \ ranges are composed of comma- or space-delimited values\
+                          \ and one or more comparison operators,\nknown as comparison\
+                          \ strings.\nYou can add additional comparison strings using\
+                          \ the OR operator (||).\n\n# Range Comparisons\n\nTo specify\
+                          \ a version range, you can use a comparison string like\
+                          \ \">=3.0,\n<3.6\". When specifying a range, automatic updates\
+                          \ will occur within that\nrange. The example comparison\
+                          \ string means \"install any version greater than\nor equal\
+                          \ to 3.0.0 but less than 3.6.0.\". It also states intent\
+                          \ that if any\nupgrades are available within the version\
+                          \ range after initial installation,\nthose upgrades should\
+                          \ be automatically performed.\n\n# Pinned Versions\n\nTo\
+                          \ specify an exact version to install you can use a version\
+                          \ range that\n\"pins\" to a specific version. When pinning\
+                          \ to a specific version, no\nautomatic updates will occur.\
+                          \ An example of a pinned version range is\n\"0.6.0\", which\
+                          \ means \"only install version 0.6.0 and never\nupgrade\
+                          \ from this version\".\n\n# Basic Comparison Operators\n\
+                          \nThe basic comparison operators and their meanings are:\n\
+                          \  - \"=\", equal (not aliased to an operator)\n  - \"!=\"\
+                          , not equal\n  - \"<\", less than\n  - \">\", greater than\n\
+                          \  - \">=\", greater than OR equal to\n  - \"<=\", less\
+                          \ than OR equal to\n\n# Wildcard Comparisons\n\nYou can\
+                          \ use the \"x\", \"X\", and \"*\" characters as wildcard\
+                          \ characters in all\ncomparison operations. Some examples\
+                          \ of using the wildcard characters:\n  - \"1.2.x\", \"1.2.X\"\
+                          , and \"1.2.*\" is equivalent to \">=1.2.0, < 1.3.0\"\n\
+                          \  - \">= 1.2.x\", \">= 1.2.X\", and \">= 1.2.*\" is equivalent\
+                          \ to \">= 1.2.0\"\n  - \"<= 2.x\", \"<= 2.X\", and \"<=\
+                          \ 2.*\" is equivalent to \"< 3\"\n  - \"x\", \"X\", and\
+                          \ \"*\" is equivalent to \">= 0.0.0\"\n\n# Patch Release\
+                          \ Comparisons\n\nWhen you want to specify a minor version\
+                          \ up to the next major version you\ncan use the \"~\" character\
+                          \ to perform patch comparisons. Some examples:\n  - \"~1.2.3\"\
+                          \ is equivalent to \">=1.2.3, <1.3.0\"\n  - \"~1\" and \"\
+                          ~1.x\" is equivalent to \">=1, <2\"\n  - \"~2.3\" is equivalent\
+                          \ to \">=2.3, <2.4\"\n  - \"~1.2.x\" is equivalent to \"\
+                          >=1.2.0, <1.3.0\"\n\n# Major Release Comparisons\n\nYou\
+                          \ can use the \"^\" character to make major release comparisons\
+                          \ after a\nstable 1.0.0 version is published. If there is\
+                          \ no stable version published, // minor versions define\
+                          \ the stability level. Some examples:\n  - \"^1.2.3\" is\
+                          \ equivalent to \">=1.2.3, <2.0.0\"\n  - \"^1.2.x\" is equivalent\
+                          \ to \">=1.2.0, <2.0.0\"\n  - \"^2.3\" is equivalent to\
+                          \ \">=2.3, <3\"\n  - \"^2.x\" is equivalent to \">=2.0.0,\
+                          \ <3\"\n  - \"^0.2.3\" is equivalent to \">=0.2.3, <0.3.0\"\
+                          \n  - \"^0.2\" is equivalent to \">=0.2.0, <0.3.0\"\n  -\
+                          \ \"^0.0.3\" is equvalent to \">=0.0.3, <0.0.4\"\n  - \"\
+                          ^0.0\" is equivalent to \">=0.0.0, <0.1.0\"\n  - \"^0\"\
+                          \ is equivalent to \">=0.0.0, <1.0.0\"\n\n# OR Comparisons\n\
+                          You can use the \"||\" character to represent an OR operation\
+                          \ in the version\nrange. Some examples:\n  - \">=1.2.3,\
+                          \ <2.0.0 || >3.0.0\"\n  - \"^0 || ^3 || ^5\"\n\nFor more\
+                          \ information on semver, please see https://semver.org/"
+                        maxLength: 64
+                        type: string
+                        x-kubernetes-validations:
+                        - message: invalid version expression
+                          rule: self.matches("^(\\s*(=||!=|>|<|>=|=>|<=|=<|~|~>|\\^)\\s*(v?(0|[1-9]\\d*|[x|X|\\*])(\\.(0|[1-9]\\d*|x|X|\\*]))?(\\.(0|[1-9]\\d*|x|X|\\*))?(-([0-9A-Za-z\\-]+(\\.[0-9A-Za-z\\-]+)*))?(\\+([0-9A-Za-z\\-]+(\\.[0-9A-Za-z\\-]+)*))?)\\s*)((?:\\s+|,\\s*|\\s*\\|\\|\\s*)(=||!=|>|<|>=|=>|<=|=<|~|~>|\\^)\\s*(v?(0|[1-9]\\d*|x|X|\\*])(\\.(0|[1-9]\\d*|x|X|\\*))?(\\.(0|[1-9]\\d*|x|X|\\*]))?(-([0-9A-Za-z\\-]+(\\.[0-9A-Za-z\\-]+)*))?(\\+([0-9A-Za-z\\-]+(\\.[0-9A-Za-z\\-]+)*))?)\\s*)*$")
+                    required:
+                    - packageName
+                    type: object
+                  sourceType:
+                    description: 'sourceType is required and specifies the type of
+                      install source.
+
+
+                      The only allowed value is "Catalog".
+
+
+                      When set to "Catalog", information for determining the appropriate
+                      bundle of content to install
+
+                      is fetched from ClusterCatalog resources on the cluster.
+
+                      When using the Catalog sourceType, the catalog field must also
+                      be set.'
+                    enum:
+                    - Catalog
+                    type: string
+                required:
+                - sourceType
+                type: object
+                x-kubernetes-validations:
+                - message: catalog is required when sourceType is Catalog, and forbidden
+                    otherwise
+                  rule: 'has(self.sourceType) && self.sourceType == ''Catalog'' ?
+                    has(self.catalog) : !has(self.catalog)'
+            required:
+            - namespace
+            - source
+            type: object
+          status:
+            description: status is an optional field that defines the observed state
+              of the ClusterExtension.
+            properties:
+              conditions:
+                description: "conditions represents the current state of the ClusterExtension.\n\
+                  \nThe set of condition types which apply to all spec.source variations\
+                  \ are Installed and Progressing.\n\nThe Installed condition represents\
+                  \ whether the bundle has been installed for this ClusterExtension:\n\
+                  \  - When Installed is True and the Reason is Succeeded, the bundle\
+                  \ has been successfully installed.\n  - When Installed is False\
+                  \ and the Reason is Failed, the bundle has failed to install.\n\n\
+                  The Progressing condition represents whether or not the ClusterExtension\
+                  \ is advancing towards a new state.\nWhen Progressing is True and\
+                  \ the Reason is Succeeded, the ClusterExtension is making progress\
+                  \ towards a new state.\nWhen Progressing is True and the Reason\
+                  \ is Retrying, the ClusterExtension has encountered an error that\
+                  \ could be resolved on subsequent reconciliation attempts.\nWhen\
+                  \ Progressing is False and the Reason is Blocked, the ClusterExtension\
+                  \ has encountered an error that requires manual intervention for\
+                  \ recovery.\n\nWhen the ClusterExtension is sourced from a catalog,\
+                  \ it surfaces deprecation conditions based on catalog metadata.\n\
+                  These are indications from a package owner to guide users away from\
+                  \ a particular package, channel, or bundle:\n  - BundleDeprecated\
+                  \ is True if the installed bundle is marked deprecated, False if\
+                  \ not deprecated, or Unknown if no bundle is installed yet or if\
+                  \ catalog data is unavailable.\n  - ChannelDeprecated is True if\
+                  \ any requested channel is marked deprecated, False if not deprecated,\
+                  \ or Unknown if catalog data is unavailable.\n  - PackageDeprecated\
+                  \ is True if the requested package is marked deprecated, False if\
+                  \ not deprecated, or Unknown if catalog data is unavailable.\n \
+                  \ - Deprecated is a rollup condition that is True when any deprecation\
+                  \ exists, False when none exist, or Unknown when catalog data is\
+                  \ unavailable."
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: 'lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+
+                        This should be when the underlying condition changed.  If
+                        that is not known, then using the time when the API field
+                        changed is acceptable.'
+                      format: date-time
+                      type: string
+                    message:
+                      description: 'message is a human readable message indicating
+                        details about the transition.
+
+                        This may be an empty string.'
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: 'observedGeneration represents the .metadata.generation
+                        that the condition was set based upon.
+
+                        For instance, if .metadata.generation is currently 12, but
+                        the .status.conditions[x].observedGeneration is 9, the condition
+                        is out of date
+
+                        with respect to the current state of the instance.'
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: 'reason contains a programmatic identifier indicating
+                        the reason for the condition''s last transition.
+
+                        Producers of specific condition types may define expected
+                        values and meanings for this field,
+
+                        and whether the values are considered a guaranteed API.
+
+                        The value should be a CamelCase string.
+
+                        This field may not be empty.'
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - 'True'
+                      - 'False'
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              install:
+                description: install is a representation of the current installation
+                  status for this ClusterExtension.
+                properties:
+                  bundle:
+                    description: 'bundle is required and represents the identifying
+                      attributes of a bundle.
+
+
+                      A "bundle" is a versioned set of content that represents the
+                      resources that need to be applied
+
+                      to a cluster to install a package.'
+                    properties:
+                      name:
+                        description: 'name is required and follows the DNS subdomain
+                          standard as defined in [RFC 1123].
+
+                          It must contain only lowercase alphanumeric characters,
+                          hyphens (-) or periods (.),
+
+                          start and end with an alphanumeric character, and be no
+                          longer than 253 characters.'
+                        type: string
+                        x-kubernetes-validations:
+                        - message: packageName must be a valid DNS1123 subdomain.
+                            It must contain only lowercase alphanumeric characters,
+                            hyphens (-) or periods (.), start and end with an alphanumeric
+                            character, and be no longer than 253 characters
+                          rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
+                      version:
+                        description: 'version is required and references the version
+                          that this bundle represents.
+
+                          It follows the semantic versioning standard as defined in
+                          https://semver.org/.'
+                        type: string
+                        x-kubernetes-validations:
+                        - message: version must be well-formed semver
+                          rule: self.matches("^([0-9]+)(\\.[0-9]+)?(\\.[0-9]+)?(-([-0-9A-Za-z]+(\\.[-0-9A-Za-z]+)*))?(\\+([-0-9A-Za-z]+(-\\.[-0-9A-Za-z]+)*))?")
+                    required:
+                    - name
+                    - version
+                    type: object
+                required:
+                - bundle
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
