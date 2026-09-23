@@ -496,6 +496,14 @@
             "type": "object",
             "default": {}
         },
+        "extraDeploy": {
+            "title": "Array of extra objects to deploy with the release (rendered through tpl).",
+            "type": "array",
+            "default": [],
+            "items": {
+                "oneOf": [{"type": "object"}, {"type": "string"}]
+            }
+        },
         "appConfig": {
             "title": "Inline Backstage app-config YAML. Rendered into a ConfigMap and mounted as app-config-from-configmap.yaml.",
             "type": "object",

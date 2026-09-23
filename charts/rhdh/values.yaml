@@ -21,6 +21,9 @@ fullnameOverride: ""
 commonLabels: {}
 # -- Annotations applied to ALL chart resources.
 commonAnnotations: {}
+# -- Array of extra objects to deploy with the release (rendered through `tpl`).
+# Each element is a complete Kubernetes manifest; Helm template expressions are supported.
+extraDeploy: []
 
 # ── Container image ─────────────────────────────────────────
 

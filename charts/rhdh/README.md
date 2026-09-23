@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.2.1](https://img.shields.io/badge/Version-3.2.1-informational?style=flat-square)
+![Version: 3.3.0](https://img.shields.io/badge/Version-3.3.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.2.1
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.3.0
 ```
 
 ## Introduction
@@ -229,6 +229,7 @@ Kubernetes: `>= 1.31.0-0`
 | extraAppConfig | Additional app-config files from existing ConfigMaps. | list | `[]` |
 | extraArgs | Extra arguments appended after the system config flags. | list | `[]` |
 | extraContainers | Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them. | list | `[]` |
+| extraDeploy | Array of extra objects to deploy with the release (rendered through `tpl`). Each element is a complete Kubernetes manifest; Helm template expressions are supported. | list | `[]` |
 | extraEnv | Extra environment variables appended after the system env vars. | list | `[]` |
 | extraEnvFrom | Extra envFrom entries appended to the container. Accepts raw Kubernetes envFrom entries (configMapRef, secretRef, prefix). | list | `[]` |
 | extraInitContainers | Additional init containers. These are ADDED after system init containers (install-dynamic-plugins), never replacing them. | list | `[]` |
@@ -351,6 +352,8 @@ extraVolumes:
   # Additional volumes (appended to system defaults)
 extraVolumeMounts:
   # Additional volume mounts (appended to system defaults)
+extraDeploy:
+  # Additional Kubernetes resources deployed with the release
 ```
 
 ## Features
@@ -511,6 +514,49 @@ You can also configure additional catalog index images via `catalogIndex.extraIm
 
 For detailed information on configuring the catalog index, including how to override the default image, use a private registry, or add extra catalog index images, see the [Catalog Index Configuration documentation](../../docs/catalog-index-configuration.md).
 
+### Extra Deployed Resources (`extraDeploy`)
+
+Use `extraDeploy` to ship arbitrary Kubernetes resources alongside the chart release — NetworkPolicies, ConfigMaps, Secrets, Jobs, or any other kind. Each entry is rendered through `tpl`, so Helm template expressions are supported.
+
+These resources are fully managed by Helm: they are created on install, updated on upgrade, and deleted on uninstall. Removing an entry from `extraDeploy` and running `helm upgrade` will delete the corresponding resource. This is in contrast to resources applied externally (e.g., via `kubectl apply`), which Helm does not track.
+
+Entries can be **objects** (plain YAML) or **strings** (block scalars for multi-line template helpers like `include`).
+
+**Object form** — template expressions work in individual string values:
+
+```yaml
+extraDeploy:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: '{{ include "rhdh.fullname" . }}-my-config'
+    data:
+      key: value
+```
+
+**String form** — required when using helpers that expand into multiple YAML keys (e.g., `rhdh.selectorLabels`, `rhdh.labels`):
+
+```yaml
+extraDeploy:
+  - |
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: {{ include "rhdh.fullname" . }}-allow-http-egress
+      labels:
+        {{- include "rhdh.labels" . | nindent 8 }}
+    spec:
+      podSelector:
+        matchLabels:
+          {{- include "rhdh.selectorLabels" . | nindent 10 }}
+      policyTypes:
+        - Egress
+      egress:
+        - ports:
+            - port: 80
+              protocol: TCP
+```
+
 ### NetworkPolicies
 
 This chart deploys a **default-deny** NetworkPolicy for the RHDH backend pod, blocking all ingress and egress traffic that is not explicitly allowed. When the built-in PostgreSQL is enabled (`postgresql.enabled=true`), the database pods also get their own default-deny policy with selective allow rules. When OKP is active, its pods receive a separate default-deny ingress and egress policy with rules allowing only the required HTTP ingress.
@@ -539,7 +585,26 @@ RHDH already permits HTTPS egress on port 443. When OKP uses HTTP instead, the c
 
 **Helm test NetworkPolicies** (`allow-test-connection` and `allow-test-connection-ingress`) are Helm test hooks: they are created just before `helm test` runs and cleaned up automatically on success.
 
-**Adding your own NetworkPolicies.** Kubernetes evaluates NetworkPolicies additively — if any policy allows a connection, the connection is permitted. You **cannot** tighten an existing allow rule by adding another NetworkPolicy; you can only broaden access. To restrict traffic further, you would need to modify or remove the chart's policies via values overrides or post-render patches.
+**Adding your own NetworkPolicies.** Kubernetes evaluates NetworkPolicies additively — if any policy allows a connection, the connection is permitted. You **cannot** tighten an existing allow rule by adding another NetworkPolicy; you can only broaden access. To add extra allow rules (for example, allowing HTTP egress to an internal auth provider), use [`extraDeploy`](#extra-deployed-resources-extradeploy) or apply your own NetworkPolicy resources externally:
+
+```yaml
+extraDeploy:
+  - |
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: {{ include "rhdh.fullname" . }}-allow-http-egress
+    spec:
+      podSelector:
+        matchLabels:
+          {{- include "rhdh.selectorLabels" . | nindent 10 }}
+      policyTypes:
+        - Egress
+      egress:
+        - ports:
+            - port: 80
+              protocol: TCP
+```
 
 For more information on user workload monitoring on OpenShift, see [Configuring user workload monitoring](https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.22/html/configuring_user_workload_monitoring/preparing-to-configure-the-monitoring-stack-uwm).
 

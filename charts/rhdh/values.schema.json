@@ -573,6 +573,21 @@
             "title": "Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them.",
             "type": "array"
         },
+        "extraDeploy": {
+            "default": [],
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "object"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "title": "Array of extra objects to deploy with the release (rendered through tpl).",
+            "type": "array"
+        },
         "extraEnv": {
             "default": [],
             "title": "Extra environment variables appended after the system env vars.",
