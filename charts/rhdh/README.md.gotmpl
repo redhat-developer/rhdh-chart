@@ -280,7 +280,7 @@ dynamicPlugins:
           storage: 5Gi
 ```
 
-The chart injects a `volumeClaimTemplate` named `dynamic-plugins-root` and mounts it on the pod. Kubernetes creates one PVC per pod named `dynamic-plugins-root-{fullname}-{ordinal}` (for example `dynamic-plugins-root-my-rhdh-redhat-developer-hub-0`). This requires `workload.kind=StatefulSet`.
+The chart injects a `volumeClaimTemplate` named `dynamic-plugins-root` and mounts it on the pod. Kubernetes creates one PVC per pod named `dynamic-plugins-root-{fullname}-{ordinal}` (for example `dynamic-plugins-root-my-rhdh-developer-hub-0`). This requires `workload.kind=StatefulSet`.
 
 To add additional StatefulSet-owned PVCs, use `workload.statefulSet.extraVolumeClaimTemplates`.
 
