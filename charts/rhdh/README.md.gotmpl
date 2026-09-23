@@ -150,9 +150,9 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Upgrading from the backstage chart (RHDH 1.y)
 
-> **Note:** This section is a work in progress. A detailed migration guide will be provided before the GA release of RHDH 2.y.
+If you are upgrading from the legacy `backstage` chart (used in RHDH 1.y), the new `redhat-developer-hub` chart is a clean break. The values structure has changed significantly — all `global.*` and `upstream.backstage.*` nesting has been flattened to root-level keys. You cannot pass your old values file directly to the new chart; you must migrate your values first, then `helm upgrade` the release in place.
 
-If you are upgrading from the legacy `backstage` chart (used in RHDH 1.y), the new `redhat-developer-hub` chart is a clean break. The values structure has changed significantly — all `global.*` and `upstream.backstage.*` nesting has been flattened to root-level keys. A `helm upgrade` from the old chart to this one is **not** supported; you will need to perform a fresh install with migrated values.
+See the [Migration guide](docs/migration-from-backstage-chart.md) for step-by-step instructions and a complete values mapping reference.
 
 {{ template "chart.requirementsSection" . }}
 

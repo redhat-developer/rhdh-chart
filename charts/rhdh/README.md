@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.2.1](https://img.shields.io/badge/Version-3.2.1-informational?style=flat-square)
+![Version: 3.2.2](https://img.shields.io/badge/Version-3.2.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.2.1
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.2.2
 ```
 
 ## Introduction
@@ -159,9 +159,9 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Upgrading from the backstage chart (RHDH 1.y)
 
-> **Note:** This section is a work in progress. A detailed migration guide will be provided before the GA release of RHDH 2.y.
+If you are upgrading from the legacy `backstage` chart (used in RHDH 1.y), the new `redhat-developer-hub` chart is a clean break. The values structure has changed significantly — all `global.*` and `upstream.backstage.*` nesting has been flattened to root-level keys. You cannot pass your old values file directly to the new chart; you must migrate your values first, then `helm upgrade` the release in place.
 
-If you are upgrading from the legacy `backstage` chart (used in RHDH 1.y), the new `redhat-developer-hub` chart is a clean break. The values structure has changed significantly — all `global.*` and `upstream.backstage.*` nesting has been flattened to root-level keys. A `helm upgrade` from the old chart to this one is **not** supported; you will need to perform a fresh install with migrated values.
+See the [Migration guide](docs/migration-from-backstage-chart.md) for step-by-step instructions and a complete values mapping reference.
 
 ## Requirements
 
