@@ -137,12 +137,6 @@ podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1b
 
 ### OLM v1 API CRDs (chart-testing CI)
 
-KinD chart-testing with `olmVersion: v1` (see `ci/upstream-olm-v1-values.yaml`) requires the OLM v1 API CRDs (`ClusterCatalog`, `ClusterExtension`) so the chart's `ClusterExtension` resources can be admitted. CI applies `.github/fixtures/olm-v1-api-crds.yaml` (CRD definitions only; `operator-controller` is not installed).
+KinD chart-testing with `olmVersion: v1` (see `ci/upstream-olm-v1-values.yaml`) requires the OLM v1 API CRDs (`ClusterCatalog`, `ClusterExtension`) so the chart's `ClusterExtension` resources can be admitted. CI downloads the pinned `operator-framework/operator-controller` release, keeps `CustomResourceDefinition` objects only, and applies them (`operator-controller` is not installed).
 
-To refresh that fixture after bumping the OLM v1 API version, set `OPERATOR_CONTROLLER_VERSION` if needed (default `v1.11.0` in the script) and run from the repository root:
-
-```bash
-./hack/fetch-olm-v1-api-crds.sh
-```
-
-Then commit `.github/fixtures/olm-v1-api-crds.yaml`.
+Bump the OLM v1 API version used in chart-testing by updating `OPERATOR_CONTROLLER_VERSION` in the `Install OLM v1 API CRDs` step of [`.github/actions/test-charts/action.yml`](../../.github/actions/test-charts/action.yml).

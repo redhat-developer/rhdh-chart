@@ -206,8 +206,12 @@ runs:
     - name: Install OLM v1 API CRDs (orchestrator-infra chart-testing)
       if: steps.list-changed.outputs.orchestratorOlmV1CrdsNeeded == 'true'
       shell: bash
+      env:
+        OPERATOR_CONTROLLER_VERSION: "v1.11.0"
       run: |
-        kubectl create -f .github/fixtures/olm-v1-api-crds.yaml
+        url="https://github.com/operator-framework/operator-controller/releases/download/${OPERATOR_CONTROLLER_VERSION}/operator-controller.yaml"
+        curl -fsSL --proto '=https' "${url}" -o /tmp/operator-controller.yaml
+        yq ea 'select(.kind == "CustomResourceDefinition")' /tmp/operator-controller.yaml | kubectl create -f -
 
     - name: Set up external services and test resources for rhdh
       if: steps.list-changed.outputs.externalDbNeeded == 'true'
