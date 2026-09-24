@@ -121,19 +121,6 @@ runs:
             --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
         done
 
-    - name: Helm template sanity check (orchestrator-infra ci values)
-      if: steps.list-changed.outputs.changed == 'true' && inputs.chart == 'charts/orchestrator-infra'
-      shell: bash
-      env:
-        INPUT_CHART: ${{ inputs.chart }}
-      run: |
-        for ci_values in "$INPUT_CHART"/ci/*-values.yaml; do
-          [[ -f "$ci_values" ]] || continue
-          echo "==> helm template: $(basename "$ci_values")"
-          output=$(helm template test-release "$INPUT_CHART" --values "$ci_values" 2>&1) || { echo "$output"; exit 1; }
-          echo "$output" | grep -E '^kind:' | sort | uniq -c
-        done
-
     - name: Generate KinD Config
       if: steps.list-changed.outputs.changed == 'true'
       shell: bash

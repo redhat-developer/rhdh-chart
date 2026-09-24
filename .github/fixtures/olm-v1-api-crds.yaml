@@ -1,8 +1,8 @@
 # OLM v1 API CRDs for orchestrator-infra chart-testing (olmVersion=v1).
 # Source: operator-framework/operator-controller v1.11.0 (CRDs only; controller not installed).
-# Regenerate: ./hack/fetch-olm-v1-api-crds.sh
+# Regenerate from repo root: hack/fetch-olm-v1-api-crds.sh
+# See charts/orchestrator-infra/README.md — "OLM v1 API CRDs (chart-testing CI)".
 # Upstream: https://github.com/operator-framework/operator-controller/releases/tag/v1.11.0
-# sha256(crds): 79cf2241267b6ca9a35da5dd64beadd6d8a8f5c371405251a204392f3112924c
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
