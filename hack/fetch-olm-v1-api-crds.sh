@@ -15,7 +15,7 @@ Usage: $(basename "$0") [--check]
 Fetches OLM v1 API CRDs (CustomResourceDefinition only) from operator-controller
 ${OPERATOR_CONTROLLER_VERSION} and writes ${OUTPUT_FILE#"${REPO_ROOT}/"}.
 
-  --check   Regenerate to a temp file and fail if it differs from the committed fixture.
+  --check   Fail if the committed fixture CRDs differ from upstream.
 
 Environment:
   OPERATOR_CONTROLLER_VERSION   Release tag (default: v1.11.0)
@@ -35,41 +35,23 @@ if ! command -v yq >/dev/null 2>&1; then
   exit 1
 fi
 
+canonical_crds() {
+  local source_file=$1
+  yq -o=json -I=0 ea 'select(.kind == "CustomResourceDefinition")' "${source_file}"
+}
+
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
 curl -fsSL --proto '=https' "${UPSTREAM_URL}" -o "${tmpdir}/operator-controller.yaml"
-yq ea 'select(.kind == "CustomResourceDefinition")' "${tmpdir}/operator-controller.yaml" \
-  > "${tmpdir}/crds.yaml"
-
-canonical_crds() {
-  yq -o=json -I=0 ea 'select(.kind == "CustomResourceDefinition")' "$1"
-}
-
 upstream_canonical="$(canonical_crds "${tmpdir}/operator-controller.yaml")"
-sha256="$(printf '%s' "${upstream_canonical}" | sha256sum | awk '{print $1}')"
-
-write_fixture() {
-  local dest=$1
-  {
-    cat <<EOF
-# OLM v1 API CRDs for orchestrator-infra chart-testing (olmVersion=v1).
-# Source: operator-framework/operator-controller ${OPERATOR_CONTROLLER_VERSION} (CRDs only; controller not installed).
-# Regenerate: ./hack/fetch-olm-v1-api-crds.sh
-# Upstream: https://github.com/operator-framework/operator-controller/releases/tag/${OPERATOR_CONTROLLER_VERSION}
-# sha256(crds): ${sha256}
-EOF
-    cat "${tmpdir}/crds.yaml"
-  } > "${dest}"
-}
 
 if [[ "${check_only}" == true ]]; then
   if [[ ! -f "${OUTPUT_FILE}" ]]; then
     echo "Missing ${OUTPUT_FILE#"${REPO_ROOT}/"}" >&2
     exit 1
   fi
-  fixture_canonical="$(canonical_crds "${OUTPUT_FILE}")"
-  if [[ "${fixture_canonical}" != "${upstream_canonical}" ]]; then
+  if [[ "$(canonical_crds "${OUTPUT_FILE}")" != "${upstream_canonical}" ]]; then
     echo "Fixture CRDs differ from operator-controller ${OPERATOR_CONTROLLER_VERSION}." >&2
     echo "Run ./hack/fetch-olm-v1-api-crds.sh and commit the result." >&2
     exit 1
@@ -78,5 +60,19 @@ if [[ "${check_only}" == true ]]; then
   exit 0
 fi
 
-write_fixture "${OUTPUT_FILE}"
+yq ea 'select(.kind == "CustomResourceDefinition")' "${tmpdir}/operator-controller.yaml" \
+  > "${tmpdir}/crds.yaml"
+sha256="$(printf '%s' "${upstream_canonical}" | sha256sum | awk '{print $1}')"
+
+{
+  cat <<EOF
+# OLM v1 API CRDs for orchestrator-infra chart-testing (olmVersion=v1).
+# Source: operator-framework/operator-controller ${OPERATOR_CONTROLLER_VERSION} (CRDs only; controller not installed).
+# Regenerate: ./hack/fetch-olm-v1-api-crds.sh
+# Upstream: https://github.com/operator-framework/operator-controller/releases/tag/${OPERATOR_CONTROLLER_VERSION}
+# sha256(crds): ${sha256}
+EOF
+  cat "${tmpdir}/crds.yaml"
+} > "${OUTPUT_FILE}"
+
 echo "Wrote ${OUTPUT_FILE#"${REPO_ROOT}/"} (sha256(crds)=${sha256})"
