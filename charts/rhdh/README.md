@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.4.0](https://img.shields.io/badge/Version-3.4.0-informational?style=flat-square)
+![Version: 3.4.1](https://img.shields.io/badge/Version-3.4.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.0
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.1
 ```
 
 ## Introduction
@@ -572,8 +572,8 @@ The following traffic is allowed out of the box:
 | Egress | 443 (TCP) | Any | HTTPS (Git forges, auth providers, external APIs) |
 | Egress | 5432 (TCP) | Built-in PostgreSQL pods (scoped) or any (external DB) | Database access |
 | Egress | 6379 (TCP) | Any | Redis (BYO — no pod/namespace selector) |
-| Egress | 80 (TCP) | Any destination | LCORE access to an HTTP OKP Ingress |
-| Egress | 8080 (TCP) | OKP pods | LCORE access to the internal OKP Service fallback |
+| Egress | 80 (TCP) | Any destination | LCORE access to an HTTP OKP Ingress (NP created only when OKP is enabled; disabled by default) |
+| Egress | 8080 (TCP) | OKP pods | LCORE access to the internal OKP Service fallback (NP created only when OKP is enabled; disabled by default) |
 | Ingress | 7007 (TCP) | OpenShift router namespace or any namespace (non-OCP) | User traffic via Route / Ingress |
 | Ingress | 8080 (TCP) | RHDH pods and the OpenShift router namespace or any namespace (non-OCP) | OKP queries and product-document citations via Route / Ingress |
 | Ingress | 9464 (TCP) | `openshift-monitoring`, `openshift-user-workload-monitoring`, `gmp-system`, `gke-gmp-system`, `monitoring` | Prometheus metrics scraping |
