@@ -54,6 +54,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: backstage
 {{- end }}
 
+{{- define "rhdh.statefulSetHeadlessServiceName" -}}
+{{- printf "%s-headless" (include "rhdh.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "rhdh.statefulSetServiceName" -}}
+{{- default (include "rhdh.statefulSetHeadlessServiceName" .) .Values.workload.statefulSet.serviceName -}}
+{{- end -}}
+
 {{/*
 Create the name of the service account to use.
 */}}

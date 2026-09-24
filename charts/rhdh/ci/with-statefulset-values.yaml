@@ -1,0 +1,16 @@
+# CI: render/install with workload.kind=StatefulSet (expects headless Service + StatefulSet + plugins VCT).
+dynamicPlugins:
+  includes: []
+  volume:
+    type: statefulSetPVC
+workload:
+  kind: StatefulSet
+intelligentAssistant:
+  plugins: []
+  okp:
+    route:
+      enabled: false
+    ingress:
+      enabled: false
+orchestrator:
+  plugins: []

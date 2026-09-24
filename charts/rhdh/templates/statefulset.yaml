@@ -1,0 +1,64 @@
+{{- if eq .Values.workload.kind "StatefulSet" }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "rhdh.fullname" . }}
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.workload.statefulSet.annotations }}
+  annotations:
+    {{- with .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
+    {{- with .Values.workload.statefulSet.annotations }}
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  serviceName: {{ include "rhdh.statefulSetServiceName" . }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- with .Values.workload.statefulSet.podManagementPolicy }}
+  podManagementPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.workload.statefulSet.updateStrategy }}
+  updateStrategy:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+  {{- with .Values.workload.statefulSet.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rhdh.selectorLabels" . | nindent 6 }}
+  template:
+    {{- include "rhdh.backstagePodTemplate" . | nindent 4 }}
+  {{- $injectPluginsPVC := eq .Values.dynamicPlugins.volume.type "statefulSetPVC" }}
+  {{- $extraVCTs := .Values.workload.statefulSet.extraVolumeClaimTemplates | default list }}
+  {{- if or $injectPluginsPVC $extraVCTs }}
+  volumeClaimTemplates:
+    {{- if $injectPluginsPVC }}
+    - metadata:
+        name: dynamic-plugins-root
+      spec:
+        {{- $persistence := dict "storageClass" (.Values.dynamicPlugins.volume.statefulSetPVC.storageClassName | default "") }}
+        {{- $sc := include "common.storage.class" (dict "persistence" $persistence "global" .Values.global) }}
+        {{- if $sc }}
+        {{ $sc }}
+        {{- end }}
+        {{- with .Values.dynamicPlugins.volume.statefulSetPVC.accessModes }}
+        accessModes:
+          {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 10 }}
+        {{- end }}
+        {{- with .Values.dynamicPlugins.volume.statefulSetPVC.resources }}
+        resources:
+          {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 10 }}
+        {{- end }}
+    {{- end }}
+    {{- with $extraVCTs }}
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

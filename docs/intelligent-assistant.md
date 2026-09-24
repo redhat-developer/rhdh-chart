@@ -181,7 +181,6 @@ Key environment variables in the secret:
 | `OPENAI_API_KEY` | OpenAI inference key | If using OpenAI provider |
 | `VLLM_URL`, `VLLM_API_KEY` | vLLM inference endpoint | If using vLLM provider |
 | `VERTEX_AI_PROJECT`, `VERTEX_AI_LOCATION` | Google Vertex AI | If using Vertex AI |
-| `OLLAMA_URL` | Ollama endpoint | If using Ollama |
 | `ENABLE_VALIDATION`, `VALIDATION_PROVIDER`, `VALIDATION_MODEL_NAME` | Input validation | Optional |
 
 ## HTTPS and TLS

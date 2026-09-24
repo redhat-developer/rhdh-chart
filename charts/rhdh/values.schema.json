@@ -411,12 +411,69 @@
                             "title": "Raw Kubernetes persistentVolumeClaim volume spec. Used when type is pvc.",
                             "type": "object"
                         },
+                        "statefulSetPVC": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "accessModes": {
+                                    "default": [
+                                        "ReadWriteOnce"
+                                    ],
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Access modes for the StatefulSet PVC.",
+                                    "type": "array"
+                                },
+                                "resources": {
+                                    "description": "VolumeResourceRequirements describes the storage resource requirements for a volume.",
+                                    "properties": {
+                                        "limits": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        },
+                                        "requests": {
+                                            "additionalProperties": {
+                                                "oneOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "number"
+                                                    }
+                                                ]
+                                            },
+                                            "description": "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "storageClassName": {
+                                    "default": "",
+                                    "title": "StorageClass for the StatefulSet PVC. When empty, uses global.defaultStorageClass or the cluster default.",
+                                    "type": "string"
+                                }
+                            },
+                            "title": "StatefulSet volumeClaimTemplate settings for dynamic-plugins-root. Used when type is statefulSetPVC. Requires workload.kind=StatefulSet.",
+                            "type": "object"
+                        },
                         "type": {
                             "default": "ephemeral",
                             "enum": [
                                 "ephemeral",
                                 "emptyDir",
-                                "pvc"
+                                "pvc",
+                                "statefulSetPVC"
                             ],
                             "title": "Volume type.",
                             "type": "string"
@@ -514,6 +571,21 @@
         "extraContainers": {
             "default": [],
             "title": "Additional sidecar containers. These are ADDED to system containers (e.g. Lightspeed Core sidecar), never replacing them.",
+            "type": "array"
+        },
+        "extraDeploy": {
+            "default": [],
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "object"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "title": "Array of extra objects to deploy with the release (rendered through tpl).",
             "type": "array"
         },
         "extraEnv": {
@@ -741,7 +813,7 @@
                         "digest": "",
                         "registry": "quay.io",
                         "repository": "lightspeed-core/lightspeed-stack",
-                        "tag": "dev-20260824-cbd182b"
+                        "tag": "0.7.0rc3"
                     },
                     "imagePullPolicy": "IfNotPresent",
                     "resources": {
@@ -1741,6 +1813,12 @@
             "title": "Built-in Intelligent Assistant feature configuration.",
             "type": "object"
         },
+        "lifecycleHooks": {
+            "default": {},
+            "description": "Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/",
+            "title": "Lifecycle hooks for the main RHDH container.",
+            "type": "object"
+        },
         "livenessProbe": {
             "default": {
                 "failureThreshold": 3,
@@ -1801,7 +1879,7 @@
             "type": "object"
         },
         "nameOverride": {
-            "default": "",
+            "default": "developer-hub",
             "title": "Override the chart name used in resource naming.",
             "type": "string"
         },
@@ -2260,6 +2338,12 @@
             "title": "Init containers to run BEFORE the system init containers (e.g. inject auth credentials before install-dynamic-plugins runs).",
             "type": "array"
         },
+        "priorityClassName": {
+            "default": "",
+            "description": "Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/",
+            "title": "Priority class name for pod scheduling.",
+            "type": "string"
+        },
         "readinessProbe": {
             "default": {
                 "failureThreshold": 3,
@@ -2456,6 +2540,16 @@
             "title": "Deployment update strategy.",
             "type": "object"
         },
+        "terminationGracePeriodSeconds": {
+            "default": null,
+            "description": "Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination",
+            "minimum": 0,
+            "title": "Duration in seconds the pod needs to terminate gracefully before being force killed.",
+            "type": [
+                "integer",
+                "null"
+            ]
+        },
         "test": {
             "additionalProperties": false,
             "properties": {
@@ -2543,6 +2637,62 @@
             "default": [],
             "title": "Topology spread constraints for pod scheduling.",
             "type": "array"
+        },
+        "workload": {
+            "additionalProperties": false,
+            "properties": {
+                "kind": {
+                    "default": "Deployment",
+                    "enum": [
+                        "Deployment",
+                        "StatefulSet"
+                    ],
+                    "title": "Workload kind: Deployment (default) or StatefulSet.",
+                    "type": "string"
+                },
+                "statefulSet": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "annotations": {
+                            "default": {},
+                            "title": "Annotations on the StatefulSet resource (not the pod).",
+                            "type": "object"
+                        },
+                        "extraVolumeClaimTemplates": {
+                            "default": [],
+                            "items": {
+                                "type": "object"
+                            },
+                            "title": "Extra VolumeClaimTemplates appended after the chart-managed dynamic-plugins-root claim.",
+                            "type": "array"
+                        },
+                        "persistentVolumeClaimRetentionPolicy": {
+                            "default": {},
+                            "title": "Optional PVC retention policy for the StatefulSet.",
+                            "type": "object"
+                        },
+                        "podManagementPolicy": {
+                            "default": "",
+                            "title": "Pod management policy for the StatefulSet.",
+                            "type": "string"
+                        },
+                        "serviceName": {
+                            "default": "",
+                            "title": "serviceName for the StatefulSet spec. Defaults to the headless Service ({fullname}-headless).",
+                            "type": "string"
+                        },
+                        "updateStrategy": {
+                            "default": {},
+                            "title": "StatefulSet update strategy.",
+                            "type": "object"
+                        }
+                    },
+                    "title": "StatefulSet specific settings (ignored when kind is Deployment).",
+                    "type": "object"
+                }
+            },
+            "title": "Kubernetes workload controller for Backstage pod.",
+            "type": "object"
         }
     },
     "title": "Red Hat Developer Hub Helm Chart Values",

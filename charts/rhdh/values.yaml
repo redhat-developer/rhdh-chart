@@ -14,13 +14,16 @@ global:
 # ── Chart metadata overrides ────────────────────────────────
 
 # -- Override the chart name used in resource naming.
-nameOverride: ""
+nameOverride: developer-hub
 # -- Override the full resource name.
 fullnameOverride: ""
 # -- Labels applied to ALL chart resources.
 commonLabels: {}
 # -- Annotations applied to ALL chart resources.
 commonAnnotations: {}
+# -- Array of extra objects to deploy with the release (rendered through `tpl`).
+# Each element is a complete Kubernetes manifest; Helm template expressions are supported.
+extraDeploy: []
 
 # ── Container image ─────────────────────────────────────────
 
@@ -124,7 +127,7 @@ dynamicPlugins:
   # -- Volume configuration for the dynamic plugins root directory.
   volume:
     # -- Volume type: "ephemeral" (auto-provisioned PVC per pod), "emptyDir" (scratch space, lost on pod restart),
-    # or "pvc" (pre-existing PersistentVolumeClaim).
+    # "pvc" (pre-existing PersistentVolumeClaim), or "statefulSetPVC" (StatefulSet volumeClaimTemplate; requires workload.kind=StatefulSet).
     type: "ephemeral"
     # -- Ephemeral volume configuration. Used when type is "ephemeral".
     # The chart builds the full ephemeral.volumeClaimTemplate.spec from these fields.
@@ -144,6 +147,18 @@ dynamicPlugins:
     # -- Raw Kubernetes persistentVolumeClaim volume spec. Used when type is "pvc".
     pvc:
       claimName: ""
+    # -- StatefulSet-owned PVC volume spec. Used when type is "statefulSetPVC".
+    statefulSetPVC:
+      # -- StorageClass. When empty, uses global.defaultStorageClass or the cluster default.
+      storageClassName: ""
+      # -- Access modes for the StatefulSet-owned PVC.
+      accessModes:
+        - "ReadWriteOnce"
+      # -- Resource requests for the StatefulSet-owned PVC.
+      resources:
+        requests:
+          storage: "5Gi"
+
   # -- Configuration for the install-dynamic-plugins init container.
   initContainer:
     # -- Override the default command. Leave empty to use the default (./install-dynamic-plugins.sh /dynamic-plugins-root).
@@ -203,6 +218,31 @@ revisionHistoryLimit: 10
 
 # -- Deployment update strategy.
 strategy: {}
+
+# -- Kubernetes workload controller for Backstage pod.
+workload:
+  # -- Workload kind: Deployment (default) or StatefulSet.
+  kind: "Deployment"
+
+  statefulSet:
+    # -- service name for the StatefulSet. Defaults to headless when empty.
+    # Service ({fullname}-headless) must match an existing service.
+    serviceName: ""
+
+    # -- Pod management policy for the StatefulSet.
+    podManagementPolicy: ""
+
+    # -- StatefulSet update strategy.
+    updateStrategy: {}
+
+    # -- Optional PVC retention policy for the StatefulSet.
+    persistentVolumeClaimRetentionPolicy: {}
+
+    # -- Extra volumeClaimTemplates appended after the chart-managed dynamic-plugins-root claim (when type=statefulSetPVC).
+    extraVolumeClaimTemplates: []
+
+    # -- Annotations on the StatefulSet resource.
+    annotations: {}
 
 # -- ServiceAccount configuration.
 serviceAccount:
@@ -311,6 +351,23 @@ topologySpreadConstraints: []
 
 # -- Host aliases for /etc/hosts entries.
 hostAliases: []
+
+# -- Priority class name for pod scheduling.
+# Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+priorityClassName: ""
+
+# -- Duration in seconds the pod needs to terminate gracefully before being force killed.
+# Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
+# @default -- `nil`
+terminationGracePeriodSeconds:
+
+# -- Lifecycle hooks for the main RHDH container.
+# Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+lifecycleHooks: {}
+# lifecycleHooks:
+#   preStop:
+#     exec:
+#       command: ["/bin/sh", "-c", "sleep 10"]
 
 # -- Annotations for the Deployment resource (not the pod).
 deploymentAnnotations: {}
@@ -543,7 +600,7 @@ intelligentAssistant:
     image:
       registry: "quay.io"
       repository: "lightspeed-core/lightspeed-stack"
-      tag: "dev-20260824-cbd182b"
+      tag: "0.7.0rc3"
       digest: ""
     imagePullPolicy: "IfNotPresent"
     # -- Override the container's default command. Leave empty to use the image entrypoint.

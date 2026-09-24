@@ -1,0 +1,24 @@
+{{- if eq .Values.workload.kind "StatefulSet" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rhdh.statefulSetHeadlessServiceName" . }}
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: backend
+      protocol: TCP
+      name: http-backend
+    {{- with .Values.service.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
+  selector:
+    {{- include "rhdh.selectorLabels" . | nindent 4 }}
+{{- end }}

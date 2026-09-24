@@ -32,6 +32,25 @@ strip_okp_config() {
 render_secret_yaml_from_env() {
   local source_file=$1
   local destination_file=$2
+  
+  cat > "${destination_file}" << 'EOF'
+# This file is a reference template — it is NOT deployed by the chart.
+#
+# Use it as a starting point to create a Kubernetes Secret containing credentials
+# and settings for providers configured in lightspeed-stack.yaml. The Secret does
+# not enable a provider. Supply a provider-enabled stack through
+# intelligentAssistant.config.stack.existingConfigMap.
+#
+# Example:
+#   kubectl create secret generic my-lightspeed-secret \
+#     --from-env-file=<(grep -v '^#' secret.example.yaml | grep -v '^$')
+#
+# Then set in your values override:
+#   intelligentAssistant:
+#     existingSecret: "my-lightspeed-secret"
+#
+# Set to question_validity to enable question validation.
+EOF
 
   awk '
     /^[[:space:]]*$/ { next }
@@ -55,7 +74,7 @@ render_secret_yaml_from_env() {
       gsub(/"/, "\\\"", value)
       printf "%s: \"%s\"\n", key, value
     }
-  ' "${source_file}" > "${destination_file}"
+  ' "${source_file}" >> "${destination_file}"
 }
 
 usage() {
