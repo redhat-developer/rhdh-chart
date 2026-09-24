@@ -1,7 +1,7 @@
 
 # Orchestrator Infra Chart for OpenShift
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square)
+![Version: 0.7.1](https://img.shields.io/badge/Version-0.7.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless Logic Operator, both required to configure Red Hat Developer Hub to use the Orchestrator.
@@ -25,7 +25,7 @@ Kubernetes: `>= 1.25.0-0`
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.7.0
+helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.7.1
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -118,6 +118,16 @@ The chart defaults to `olmVersion: v0`.
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v0
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
 ```
+
+### OLM v1 API CRDs (chart-testing only)
+
+With `olmVersion: v1`, this chart creates `ClusterExtension` resources (see the previous section). Before Kubernetes can accept those objects, the cluster must already expose the OLM v1 API types `ClusterExtension` and `ClusterCatalog`.
+
+On OpenShift, those APIs usually come from the platform (you do not install them as part of this chart). The `rhdh-operator` plugin-infra flow assumes they are already present when it applies its own `ClusterExtension` manifests.
+
+Pull request CI tests this chart on a KinD cluster using `ci/upstream-olm-v1-values.yaml`. KinD does not ship OLM v1, so the shared test workflow downloads a pinned [operator-controller](https://github.com/operator-framework/operator-controller) release, applies only the `CustomResourceDefinition` manifests from that bundle, and does **not** install the operator-controller controller. That is enough for `helm template`, `ct install`, and `helm test` to validate the v1 chart output.
+
+To change which operator-controller release CI uses, update `OPERATOR_CONTROLLER_VERSION` in the `Install OLM v1 API CRDs (orchestrator-infra chart-testing)` step in [`.github/actions/test-charts/action.yml`](../../.github/actions/test-charts/action.yml).
 
 ### Installing Knative Eventing and Knative Serving CRDs
 
