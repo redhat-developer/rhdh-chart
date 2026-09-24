@@ -88,6 +88,16 @@ helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=
 helm install my-orchestrator-infra ./charts/orchestrator-infra --set olmVersion=v1
 ```
 
+### OLM v1 API CRDs (chart-testing only)
+
+With `olmVersion: v1`, this chart creates `ClusterExtension` resources (see the previous section). Before Kubernetes can accept those objects, the cluster must already expose the OLM v1 API types `ClusterExtension` and `ClusterCatalog`.
+
+On OpenShift, those APIs usually come from the platform (you do not install them as part of this chart). The `rhdh-operator` plugin-infra flow assumes they are already present when it applies its own `ClusterExtension` manifests.
+
+Pull request CI tests this chart on a KinD cluster using `ci/upstream-olm-v1-values.yaml`. KinD does not ship OLM v1, so the shared test workflow downloads a pinned [operator-controller](https://github.com/operator-framework/operator-controller) release, applies only the `CustomResourceDefinition` manifests from that bundle, and does **not** install the operator-controller controller. That is enough for `helm template`, `ct install`, and `helm test` to validate the v1 chart output.
+
+To change which operator-controller release CI uses, update `OPERATOR_CONTROLLER_VERSION` in the `Install OLM v1 API CRDs (orchestrator-infra chart-testing)` step in [`.github/actions/test-charts/action.yml`](../../.github/actions/test-charts/action.yml).
+
 ### Installing Knative Eventing and Knative Serving CRDs
 
 The orchestrator-infra chart requires several CRDs for Knative Eventing and Knative Serving. These CRDs will be applied prior to installing the chart, ensuring that Knative CRs can be created as part of the chart's deployment process. This approach eliminates the need to wait for the OpenShift Serverless Operator's subscription to install them beforehand.
@@ -103,9 +113,3 @@ podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1b
 
 podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > crds/knative-serving/knative-serving-crd.yaml
 ```
-
-### OLM v1 API CRDs (chart-testing CI)
-
-KinD chart-testing with `olmVersion: v1` (see `ci/upstream-olm-v1-values.yaml`) requires the OLM v1 API CRDs (`ClusterCatalog`, `ClusterExtension`) so the chart's `ClusterExtension` resources can be admitted. CI downloads the pinned `operator-framework/operator-controller` release, keeps `CustomResourceDefinition` objects only, and applies them (`operator-controller` is not installed).
-
-Bump the OLM v1 API version used in chart-testing by updating `OPERATOR_CONTROLLER_VERSION` in the `Install OLM v1 API CRDs` step of [`.github/actions/test-charts/action.yml`](../../.github/actions/test-charts/action.yml).
