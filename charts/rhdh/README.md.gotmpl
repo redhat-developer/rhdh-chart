@@ -398,6 +398,7 @@ The following traffic is allowed out of the box:
 |-----------|------|----------------------|---------|
 | Egress | 53, 5353 (UDP/TCP) | Any | DNS resolution |
 | Egress | 443 (TCP) | Any | HTTPS (Git forges, auth providers, external APIs) |
+| Egress | 80 (TCP) | In-cluster only (`namespaceSelector: {}`) | HTTP to in-cluster services (e.g., Keycloak without TLS termination) |
 | Egress | 5432 (TCP) | Built-in PostgreSQL pods (scoped) or any (external DB) | Database access |
 | Egress | 6379 (TCP) | Any | Redis (BYO — no pod/namespace selector) |
 | Egress | 80 (TCP) | Any destination | LCORE access to an HTTP OKP Ingress |
@@ -416,7 +417,7 @@ RHDH already permits HTTPS egress on port 443. When OKP uses HTTP instead, the c
 
 **Helm test NetworkPolicies** (`allow-test-connection` and `allow-test-connection-ingress`) are Helm test hooks: they are created just before `helm test` runs and cleaned up automatically on success.
 
-**Adding your own NetworkPolicies.** Kubernetes evaluates NetworkPolicies additively — if any policy allows a connection, the connection is permitted. You **cannot** tighten an existing allow rule by adding another NetworkPolicy; you can only broaden access. To add extra allow rules (for example, allowing HTTP egress to an internal auth provider), use [`extraDeploy`](#extra-deployed-resources-extradeploy) or apply your own NetworkPolicy resources externally:
+**Adding your own NetworkPolicies.** Kubernetes evaluates NetworkPolicies additively — if any policy allows a connection, the connection is permitted. You **cannot** tighten an existing allow rule by adding another NetworkPolicy; you can only broaden access. To add extra allow rules (for example, allowing LDAP egress to an internal directory server), use [`extraDeploy`](#extra-deployed-resources-extradeploy) or apply your own NetworkPolicy resources externally:
 
 ```yaml
 extraDeploy:
@@ -424,7 +425,7 @@ extraDeploy:
     apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
-      name: {{"{{" }} include "rhdh.fullname" . {{"}}"}}-allow-http-egress
+      name: {{"{{" }} include "rhdh.fullname" . {{"}}"}}-allow-ldap-egress
     spec:
       podSelector:
         matchLabels:
@@ -433,7 +434,9 @@ extraDeploy:
         - Egress
       egress:
         - ports:
-            - port: 80
+            - port: 389
+              protocol: TCP
+            - port: 636
               protocol: TCP
 ```
 
