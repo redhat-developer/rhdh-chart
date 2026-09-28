@@ -83,7 +83,10 @@ These capabilities are new in the `redhat-developer-hub` chart and have no
 mapping from the old chart, but are worth knowing about during migration:
 
 - **StatefulSet workload** — set `workload.kind: StatefulSet` for stable pod
-  identity and persistent volumes via `volumeClaimTemplates`.
+  identity and persistent volumes via `volumeClaimTemplates`. Pair with
+  `dynamicPlugins.volume.type: statefulSetPVC` and
+  `dynamicPlugins.volume.statefulSetPVC` to get per-pod stable caching for
+  dynamic plugins.
 - **External database** — `externalDatabase.*` for connecting to a database
   outside the cluster when `postgresql.enabled: false`.
 - **OKP (Offline Knowledge Portal)** — `intelligentAssistant.okp.*` for
