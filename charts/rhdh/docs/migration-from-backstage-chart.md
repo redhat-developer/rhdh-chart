@@ -75,7 +75,7 @@ values at install/upgrade time. Any unrecognized keys — including leftover
 `upstream.*` or `global.*` paths that were not migrated — will cause Helm to
 fail with a validation error. This makes it easy to catch stale values early,
 but it also means a partial migration will not install. Run
-`helm template -f new-values.yaml` to validate your file before upgrading.
+`helm template <release> redhat-developer/redhat-developer-hub -f new-values.yaml` to validate your file before upgrading.
 
 ### New features (no old-chart equivalent)
 
@@ -93,13 +93,13 @@ mapping from the old chart, but are worth knowing about during migration:
 
 ### Container image
 
-| Old path | New path |
-|----------|----------|
-| `upstream.backstage.image.registry` | `image.registry` |
-| `upstream.backstage.image.repository` | `image.repository` |
-| `upstream.backstage.image.tag` | `image.tag` |
-| `upstream.backstage.image.digest` | `image.digest` |
-| `upstream.backstage.image.pullPolicy` | `image.pullPolicy` |
+| Old path | New path | Notes |
+|----------|----------|-------|
+| `upstream.backstage.image.registry` | `image.registry` | |
+| `upstream.backstage.image.repository` | `image.repository` | |
+| `upstream.backstage.image.tag` | `image.tag` | |
+| `upstream.backstage.image.digest` | `image.digest` | |
+| `upstream.backstage.image.pullPolicy` | `image.pullPolicy` | |
 | `upstream.backstage.image.pullSecrets` | `imagePullSecrets` | Promoted to root |
 
 ### Chart-level overrides
@@ -200,7 +200,7 @@ mapping from the old chart, but are worth knowing about during migration:
 
 | Old path | New path | Notes |
 |----------|----------|-------|
-| `upstream.backstage.initContainers` | _(managed by chart)_ | System init containers no longer user-configurable |
+| `upstream.backstage.initContainers` | _(hardcoded)_ | System init containers no longer user-configurable |
 | _(none)_ | `preInitContainers` | Runs **before** system init containers |
 | _(none)_ | `extraInitContainers` | Runs **after** system init containers |
 | `upstream.backstage.extraContainers` | `extraContainers` | |
@@ -395,5 +395,5 @@ functionality is either hardcoded or no longer applicable:
 |----------|-------|
 | `upstream.backstage.installDir` | Hardcoded in the new chart |
 | `upstream.backstage.containerPorts.backend` | Hardcoded to `7007` |
-| `upstream.backstage.extraPorts` | Use `service.extraPorts` instead |
+| `upstream.backstage.extraPorts` | Moved to `service.extraPorts` |
 | `upstream.diagnosticMode.*` | Not supported |
