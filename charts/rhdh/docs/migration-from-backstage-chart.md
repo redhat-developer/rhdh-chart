@@ -119,6 +119,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | `global.clusterRouterBase` | `openshift.clusterRouterBase` | |
 | `global.host` | `host` | Promoted to root |
 | `global.imagePullSecrets` | `global.imagePullSecrets` | Unchanged (used by bitnami subcharts) |
+| _(none)_ | `global.imageRegistry` | New; overrides the registry for all container images — useful for disconnected / air-gapped environments |
 
 ### App config
 
@@ -347,12 +348,20 @@ mapping from the old chart, but are worth knowing about during migration:
 | `global.lightspeed.sidecar.command` | `intelligentAssistant.core.commandOverride` | |
 | `global.lightspeed.sidecar.args` | `intelligentAssistant.core.argsOverride` | |
 | `global.lightspeed.sidecar.env` | `intelligentAssistant.core.extraEnv` | |
+| `global.lightspeed.sidecar.imagePullPolicy` | `intelligentAssistant.core.imagePullPolicy` | |
 | `global.lightspeed.initContainer.*` | _(removed)_ | The RAG init container no longer exists in the new chart |
+| `global.lightspeed.ragVolume.*` | _(removed)_ | No longer needed without the RAG init container |
+| `global.lightspeed.sidecar.name` | _(hardcoded)_ | Chart manages the container name internally |
+| `global.lightspeed.sidecar.portName` | _(hardcoded)_ | Chart manages the port name internally |
+| `global.lightspeed.sidecar.containerPort` | _(hardcoded)_ | Chart manages the container port internally |
 | `global.lightspeed.runtimeVolume.type` | `intelligentAssistant.runtimeVolume.type` | |
 | `global.lightspeed.runtimeVolume.emptyDir` | `intelligentAssistant.runtimeVolume.emptyDir` | |
 | `global.lightspeed.runtimeVolume.persistentVolumeClaim` | `intelligentAssistant.runtimeVolume.persistentVolumeClaim` | |
+| `global.lightspeed.runtimeVolume.name` | _(hardcoded)_ | Chart manages volume names internally |
+| `global.lightspeed.runtimeVolume.mountPath` | _(hardcoded)_ | Chart manages mount paths internally |
 | `global.lightspeed.configMaps` | `intelligentAssistant.config.{stack,profile}.existingConfigMap` | Array of 3 configMaps replaced with 2 structured entries; the separate `config.yaml` is no longer needed because the llama-stack configuration is now inlined in `lightspeed-stack.yaml` |
 | `global.lightspeed.secret.create` / `.name` | `intelligentAssistant.existingSecret` | Simplified to a secret name string |
+| `global.lightspeed.secret.optional` | _(removed)_ | No longer needed; the secret is only mounted when `intelligentAssistant.existingSecret` is set |
 
 ### Orchestrator
 
@@ -366,6 +375,9 @@ mapping from the old chart, but are worth knowing about during migration:
 | `orchestrator.sonataflowPlatform.createDBJobImage` | `orchestrator.sonataflowPlatform.dbCreationJob.image.*` | Merged with `initContainerImage` |
 | `orchestrator.sonataflowPlatform.dataIndexImage` | `orchestrator.sonataflowPlatform.dataIndex.image.*` | Single string split into structured image fields |
 | `orchestrator.sonataflowPlatform.jobServiceImage` | `orchestrator.sonataflowPlatform.jobService.image.*` | Single string split into structured image fields |
+| `orchestrator.sonataflowPlatform.dbCreationJobBackoffLimit` | `orchestrator.sonataflowPlatform.dbCreationJob.backoffLimit` | Nested under `dbCreationJob` |
+| `orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished` | `orchestrator.sonataflowPlatform.dbCreationJob.ttlSecondsAfterFinished` | Nested under `dbCreationJob` |
+| `orchestrator.sonataflowPlatform.dbCreationJobActiveDeadlineSeconds` | `orchestrator.sonataflowPlatform.dbCreationJob.activeDeadlineSeconds` | Nested under `dbCreationJob` |
 
 ### Test pod
 
