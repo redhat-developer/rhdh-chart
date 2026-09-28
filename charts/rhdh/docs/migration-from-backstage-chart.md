@@ -50,7 +50,7 @@ running an older cluster, upgrade it before migrating.
 | Chart name | `backstage` | `redhat-developer-hub` (but `nameOverride` defaults to `developer-hub`, so resource names and Route URLs are preserved) |
 | Template ownership | Delegates to upstream Backstage subchart | Owns all templates directly |
 | System volumes/mounts/env | User had to list them in full under `upstream.backstage.extraVolumes`, `extraVolumeMounts`, `extraEnvVars` | Hardcoded in templates; `extra*` keys only add user values |
-| Init containers | User had to specify the full init container array | System init containers are managed; use `preInitContainers` / `extraInitContainers` to add custom ones |
+| Init containers | User had to specify the full init container array | System init containers are managed by the chart (e.g., `install-dynamic-plugins` is configurable via `dynamicPlugins.initContainer.*`); use `preInitContainers` / `extraInitContainers` to add custom ones |
 | Database env vars | `POSTGRESQL_ADMIN_PASSWORD` injected manually via `upstream.backstage.extraEnvVars` | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD` auto-injected |
 | Image digests | `upstream.backstage.image.digest` only | Every image (`image`, `catalogIndex.image`, `intelligentAssistant.core.image`, etc.) has a `digest` field for pinning by digest |
 | Global image registry | Not available | `global.imageRegistry` overrides the registry for all container images consistently — useful for disconnected / air-gapped environments |
@@ -200,7 +200,7 @@ mapping from the old chart, but are worth knowing about during migration:
 
 | Old path | New path | Notes |
 |----------|----------|-------|
-| `upstream.backstage.initContainers` | _(hardcoded)_ | System init containers no longer user-configurable |
+| `upstream.backstage.initContainers` | _(see below)_ | System init containers are no longer specified as raw arrays; configure the `install-dynamic-plugins` init container via `dynamicPlugins.initContainer.*` (resources, securityContext, command/args overrides, extra env, extra volume mounts) |
 | _(none)_ | `preInitContainers` | Runs **before** system init containers |
 | _(none)_ | `extraInitContainers` | Runs **after** system init containers |
 | `upstream.backstage.extraContainers` | `extraContainers` | |
