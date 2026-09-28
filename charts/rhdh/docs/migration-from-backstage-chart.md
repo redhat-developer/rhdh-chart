@@ -110,6 +110,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | `upstream.fullnameOverride` | `fullnameOverride` | |
 | `upstream.commonLabels` | `commonLabels` | |
 | `upstream.commonAnnotations` | `commonAnnotations` | |
+| `upstream.extraDeploy` | `extraDeploy` | |
 
 ### Global parameters
 
@@ -152,7 +153,7 @@ mapping from the old chart, but are worth knowing about during migration:
 
 | Old path | New path | Notes |
 |----------|----------|-------|
-| `upstream.backstage.replicaCount` | `replicaCount` | |
+| `upstream.backstage.replicas` | `replicaCount` | Renamed |
 | `upstream.backstage.revisionHistoryLimit` | `revisionHistoryLimit` | |
 | `upstream.backstage.strategy` | `strategy` | |
 | `upstream.backstage.annotations` | `deploymentAnnotations` | Renamed to clarify these are on the Deployment, not the pod |
@@ -163,6 +164,9 @@ mapping from the old chart, but are worth knowing about during migration:
 | `upstream.backstage.affinity` | `affinity` | |
 | `upstream.backstage.topologySpreadConstraints` | `topologySpreadConstraints` | |
 | `upstream.backstage.hostAliases` | `hostAliases` | |
+| `upstream.backstage.priorityClassName` | `priorityClassName` | |
+| `upstream.backstage.terminationGracePeriodSeconds` | `terminationGracePeriodSeconds` | |
+| `upstream.backstage.lifecycleHooks` | `lifecycleHooks` | |
 
 ### Service account
 
@@ -171,7 +175,8 @@ mapping from the old chart, but are worth knowing about during migration:
 | `upstream.serviceAccount.create` | `serviceAccount.create` | Defaults to `false` |
 | `upstream.serviceAccount.name` | `serviceAccount.name` | |
 | `upstream.serviceAccount.annotations` | `serviceAccount.annotations` | |
-| `upstream.serviceAccount.automount` | `serviceAccount.automount` | |
+| `upstream.serviceAccount.automountServiceAccountToken` | `serviceAccount.automount` | Renamed |
+| `upstream.serviceAccount.labels` | `serviceAccount.labels` | |
 
 ### Container command, args, and env
 
@@ -197,7 +202,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | `upstream.backstage.initContainers` | _(managed by chart)_ | System init containers no longer user-configurable |
 | _(none)_ | `preInitContainers` | Runs **before** system init containers |
 | _(none)_ | `extraInitContainers` | Runs **after** system init containers |
-| _(none)_ | `extraContainers` | Additional sidecars |
+| `upstream.backstage.extraContainers` | `extraContainers` | |
 
 ### Security contexts and resources
 
@@ -346,7 +351,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | `global.lightspeed.runtimeVolume.type` | `intelligentAssistant.runtimeVolume.type` | |
 | `global.lightspeed.runtimeVolume.emptyDir` | `intelligentAssistant.runtimeVolume.emptyDir` | |
 | `global.lightspeed.runtimeVolume.persistentVolumeClaim` | `intelligentAssistant.runtimeVolume.persistentVolumeClaim` | |
-| `global.lightspeed.configMaps` | `intelligentAssistant.config.{stack,profile}.existingConfigMap` | Array replaced with structured per-file config |
+| `global.lightspeed.configMaps` | `intelligentAssistant.config.{stack,profile}.existingConfigMap` | Array replaced with structured per-file config; the old `config` (config.yaml) entry was dropped |
 | `global.lightspeed.secret.create` / `.name` | `intelligentAssistant.existingSecret` | Simplified to a secret name string |
 
 ### Orchestrator
@@ -379,7 +384,4 @@ functionality is either hardcoded or no longer applicable:
 | `upstream.backstage.installDir` | Hardcoded in the new chart |
 | `upstream.backstage.containerPorts.backend` | Hardcoded to `7007` |
 | `upstream.backstage.extraPorts` | Use `service.extraPorts` instead |
-| `upstream.backstage.lifecycleHooks` | Not supported |
-| `upstream.backstage.priorityClassName` | Not supported |
-| `upstream.backstage.terminationGracePeriodSeconds` | Not supported |
 | `upstream.diagnosticMode.*` | Not supported |
