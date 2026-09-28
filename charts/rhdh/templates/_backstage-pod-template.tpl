@@ -45,6 +45,12 @@ spec:
   hostAliases:
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
+  {{- with .Values.priorityClassName }}
+  priorityClassName: {{ . | quote }}
+  {{- end }}
+  {{- if not (kindIs "invalid" .Values.terminationGracePeriodSeconds) }}
+  terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+  {{- end }}
   volumes:
     # --- System volumes (hardcoded, never replaced) ---
     - name: dynamic-plugins-root
@@ -247,6 +253,10 @@ spec:
       imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
       {{- with .Values.containerSecurityContext }}
       securityContext:
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+      {{- end }}
+      {{- with .Values.lifecycleHooks }}
+      lifecycle:
         {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.commandOverride }}
