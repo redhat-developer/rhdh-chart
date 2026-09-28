@@ -351,7 +351,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | `global.lightspeed.runtimeVolume.type` | `intelligentAssistant.runtimeVolume.type` | |
 | `global.lightspeed.runtimeVolume.emptyDir` | `intelligentAssistant.runtimeVolume.emptyDir` | |
 | `global.lightspeed.runtimeVolume.persistentVolumeClaim` | `intelligentAssistant.runtimeVolume.persistentVolumeClaim` | |
-| `global.lightspeed.configMaps` | `intelligentAssistant.config.{stack,profile}.existingConfigMap` | Array replaced with structured per-file config; the old `config` (config.yaml) entry was dropped |
+| `global.lightspeed.configMaps` | `intelligentAssistant.config.{stack,profile}.existingConfigMap` | Array of 3 configMaps replaced with 2 structured entries; the separate `config.yaml` is no longer needed because the llama-stack configuration is now inlined in `lightspeed-stack.yaml` |
 | `global.lightspeed.secret.create` / `.name` | `intelligentAssistant.existingSecret` | Simplified to a secret name string |
 
 ### Orchestrator
