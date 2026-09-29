@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.4.0](https://img.shields.io/badge/Version-3.4.0-informational?style=flat-square)
+![Version: 3.5.2](https://img.shields.io/badge/Version-3.5.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.0
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.5.2
 ```
 
 ## Introduction
@@ -159,9 +159,9 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Upgrading from the backstage chart (RHDH 1.y)
 
-> **Note:** This section is a work in progress. A detailed migration guide will be provided before the GA release of RHDH 2.y.
+If you are upgrading from the legacy `backstage` chart (used in RHDH 1.y), the new `redhat-developer-hub` chart is a clean break. The values structure has changed significantly — all `global.*` and `upstream.backstage.*` nesting has been flattened to root-level keys. You cannot pass your old values file directly to the new chart; you must migrate your values first, then `helm upgrade` the release in place.
 
-If you are upgrading from the legacy `backstage` chart (used in RHDH 1.y), the new `redhat-developer-hub` chart is a clean break. The values structure has changed significantly — all `global.*` and `upstream.backstage.*` nesting has been flattened to root-level keys. A `helm upgrade` from the old chart to this one is **not** supported; you will need to perform a fresh install with migrated values.
+See the [Migration guide](docs/migration-from-backstage-chart.md) for step-by-step instructions and a complete values mapping reference.
 
 ## Requirements
 
@@ -572,8 +572,8 @@ The following traffic is allowed out of the box:
 | Egress | 443 (TCP) | Any | HTTPS (Git forges, auth providers, external APIs) |
 | Egress | 5432 (TCP) | Built-in PostgreSQL pods (scoped) or any (external DB) | Database access |
 | Egress | 6379 (TCP) | Any | Redis (BYO — no pod/namespace selector) |
-| Egress | 80 (TCP) | Any destination | LCORE access to an HTTP OKP Ingress |
-| Egress | 8080 (TCP) | OKP pods | LCORE access to the internal OKP Service fallback |
+| Egress | 80 (TCP) | Any destination | LCORE access to an HTTP OKP Ingress (NP created only when OKP is enabled; disabled by default) |
+| Egress | 8080 (TCP) | OKP pods | LCORE access to the internal OKP Service fallback (NP created only when OKP is enabled; disabled by default) |
 | Ingress | 7007 (TCP) | OpenShift router namespace or any namespace (non-OCP) | User traffic via Route / Ingress |
 | Ingress | 8080 (TCP) | RHDH pods and the OpenShift router namespace or any namespace (non-OCP) | OKP queries and product-document citations via Route / Ingress |
 | Ingress | 9464 (TCP) | `openshift-monitoring`, `openshift-user-workload-monitoring`, `gmp-system`, `gke-gmp-system`, `monitoring` | Prometheus metrics scraping |
