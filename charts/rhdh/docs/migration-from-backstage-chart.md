@@ -52,7 +52,7 @@ The new chart requires **Kubernetes 1.31+** (OpenShift 4.18+). If you are runnin
 
 ### Network policies
 
-The new chart deploys **default-deny** NetworkPolicies for the RHDH pod and allows only the traffic it knows about (DNS, PostgreSQL, OpenShift ingress/monitoring). If your deployment relies on additional network connectivity (e.g., external APIs, custom sidecars, or cross-namespace services), you must add the corresponding NetworkPolicy rules or the connections will be silently blocked. See [Adding your own NetworkPolicies](../README.md#adding-your-own-networkpolicies) for details.
+The new chart deploys **default-deny** NetworkPolicies for the RHDH pod and allows only the traffic it knows about (DNS, PostgreSQL, OpenShift ingress/monitoring). If your deployment relies on additional network connectivity (e.g., external APIs, custom sidecars, or cross-namespace services), you must add the corresponding NetworkPolicy rules or the connections will be silently blocked. See the [NetworkPolicies](../README.md#networkpolicies) section in the README for details.
 
 ### Schema validation
 
