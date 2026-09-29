@@ -2,6 +2,7 @@
 {{- $root := . -}}
 {{- $installDir := "/opt/app-root/src" -}}
 {{- $intelligentAssistant := include "rhdh.intelligentAssistant" $root | fromYaml -}}
+{{- $orchestratorPlugins := ternary .Values.orchestrator.plugins (list) .Values.orchestrator.enabled -}}
 {{- $extraCatalogImages := include "rhdh.catalogIndex.extraImagesEnvValue" $root | trim -}}
 metadata:
   labels:
@@ -11,7 +12,7 @@ metadata:
     {{- end }}
   annotations:
     checksum/app-config: {{ include "common.tplvalues.render" (dict "value" .Values.appConfig "context" $) | sha256sum }}
-    checksum/dynamic-plugins: {{ include "common.tplvalues.render" (dict "value" (dict "dynamicPlugins" .Values.dynamicPlugins "intelligentAssistant" (dict "enabled" $intelligentAssistant.enabled "plugins" $intelligentAssistant.plugins) "orchestrator" (dict "enabled" .Values.orchestrator.enabled "plugins" .Values.orchestrator.plugins)) "context" $) | sha256sum }}
+    checksum/dynamic-plugins: {{ include "common.tplvalues.render" (dict "value" (dict "dynamicPlugins" .Values.dynamicPlugins "intelligentAssistant" (dict "enabled" $intelligentAssistant.enabled "plugins" $intelligentAssistant.plugins) "orchestrator" (dict "enabled" .Values.orchestrator.enabled "plugins" $orchestratorPlugins)) "context" $) | sha256sum }}
     {{- if $intelligentAssistant.enabled }}
     checksum/lightspeed-config: {{ toJson $intelligentAssistant.config | sha256sum }}
     {{- end }}
