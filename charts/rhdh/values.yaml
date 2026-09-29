@@ -191,7 +191,7 @@ catalogIndex:
   image:
     registry: "quay.io"
     repository: "rhdh/plugin-catalog-index"
-    tag: "next"
+    tag: "2.1"
     digest: ""
   # -- Extra catalog index images for additional plugin discovery in the Extensions UI.
   # Each item must include `registry`, `repository`, and `tag` fields; `name` and `digest` are optional.
