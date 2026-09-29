@@ -202,7 +202,7 @@
                             "type": "string"
                         },
                         "tag": {
-                            "default": "next",
+                            "default": "2.1",
                             "title": "Catalog index image tag.",
                             "type": "string"
                         }
@@ -723,7 +723,7 @@
                     "type": "string"
                 },
                 "tag": {
-                    "default": "next",
+                    "default": "next-2.1",
                     "title": "Image tag.",
                     "type": "string"
                 }
