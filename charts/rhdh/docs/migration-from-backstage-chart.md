@@ -19,7 +19,7 @@ This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` char
 2. Create a new values file using the mapping tables below to translate each setting to its new path.
 
 3. Before upgrading, watch for these default changes:
-   - **Intelligent Assistant** is now enabled by default. If Lightspeed was disabled in your old chart, set `intelligentAssistant.enabled: false`.
+   - **Intelligent Assistant** (formerly Lightspeed) remains enabled by default. If you had explicitly disabled it in your old chart, set `intelligentAssistant.enabled: false`.
    - **PostgreSQL image** defaults to version 18. If you have an existing data directory, keep the old image (`postgresql.image.tag`) until you plan a PostgreSQL major upgrade.
 
 4. Upgrade the existing release in place with the new chart and migrated values:
@@ -317,7 +317,7 @@ These capabilities are new in the `redhat-developer-hub` chart and have no mappi
 
 | Old path | New path | Notes |
 |----------|----------|-------|
-| `global.lightspeed.enabled` | `intelligentAssistant.enabled` | Default changed from `false` to `true` |
+| `global.lightspeed.enabled` | `intelligentAssistant.enabled` | Renamed |
 | `global.lightspeed.plugins` | `intelligentAssistant.plugins` | Plugin format changed from OCI to `ref://` |
 | `global.lightspeed.sidecar.image` | `intelligentAssistant.core.image.*` | Single string split into `registry`/`repository`/`tag` |
 | `global.lightspeed.sidecar.resources` | `intelligentAssistant.core.resources` | |
