@@ -11,7 +11,7 @@ metadata:
     {{- end }}
   annotations:
     checksum/app-config: {{ include "common.tplvalues.render" (dict "value" .Values.appConfig "context" $) | sha256sum }}
-    checksum/dynamic-plugins: {{ include "common.tplvalues.render" (dict "value" (dict "dynamicPlugins" .Values.dynamicPlugins "intelligentAssistant" (dict "enabled" $intelligentAssistant.enabled "plugins" $intelligentAssistant.plugins)) "context" $) | sha256sum }}
+    checksum/dynamic-plugins: {{ include "common.tplvalues.render" (dict "value" (dict "dynamicPlugins" .Values.dynamicPlugins "intelligentAssistant" (dict "enabled" $intelligentAssistant.enabled "plugins" $intelligentAssistant.plugins) "orchestrator" (dict "enabled" .Values.orchestrator.enabled "plugins" .Values.orchestrator.plugins)) "context" $) | sha256sum }}
     {{- if $intelligentAssistant.enabled }}
     checksum/lightspeed-config: {{ toJson $intelligentAssistant.config | sha256sum }}
     {{- end }}
