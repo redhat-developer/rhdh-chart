@@ -1,47 +1,38 @@
 # Migration guide: `backstage` chart (RHDH 1.y) to `redhat-developer-hub` chart (RHDH 2.y)
 
-This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` chart.
-The old chart delegated most Kubernetes resource creation to an embedded upstream
-[Backstage subchart](https://github.com/backstage/charts), so values lived under
-`upstream.backstage.*` and `global.*`. The new chart owns all templates directly and
-flattens configuration to root-level keys.
+This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` chart. The old chart delegated most Kubernetes resource creation to an embedded upstream [Backstage subchart](https://github.com/backstage/charts), so values lived under `upstream.backstage.*` and `global.*`. The new chart owns all templates directly and flattens configuration to root-level keys.
 
 > [!IMPORTANT]
-> Because the values structure has changed, you cannot pass your old values file
-> directly to the new chart. You must migrate your values first, then
-> `helm upgrade` the release in place. Tooling (a migration script or AI skill)
-> to automate the values conversion is planned in the near future.
+> Because the values structure has changed, you cannot pass your old values file directly to the new chart. You must migrate your values first, then `helm upgrade` the release in place. Tooling (a migration script or AI skill) to automate the values conversion is planned in the near future.
 
 > [!NOTE]
-> This guide focuses on values that **changed path, were removed, or changed
-> semantics**. Fields not explicitly listed here (e.g., `orchestrator.*`,
-> `test.*`) retain the same path and semantics — carry them over as-is.
+> Fields not listed in the tables below keep the same path. Where a table shows a new path, use that. If a field you use is not mentioned at all, carry it over as-is.
 
 ## Migration steps
 
-1. Locate your existing values file (typically stored in your Git repo or
-   locally). If you don't have it, you can export the user-supplied overrides
-   from a running release:
+1. Locate your existing values file (typically stored in your Git repo or locally). If you don't have it, you can export the user-supplied overrides from a running release:
 
    ```bash
-   helm get values <release> -o yaml > old-values.yaml
+   helm get values <release> -n <namespace> -o yaml > old-values.yaml
    ```
 
-2. Create a new values file using the mapping tables below to translate each
-   setting to its new path.
+2. Create a new values file using the mapping tables below to translate each setting to its new path.
 
-3. Upgrade the existing release in place with the new chart and migrated values:
+3. Before upgrading, watch for these default changes:
+   - **Intelligent Assistant** is now enabled by default. If Lightspeed was disabled in your old chart, set `intelligentAssistant.enabled: false`.
+   - **PostgreSQL image** defaults to version 18. If you have an existing data directory, keep the old image (`postgresql.image.tag`) until you plan a PostgreSQL major upgrade.
+
+4. Upgrade the existing release in place with the new chart and migrated values:
 
    ```bash
-   helm upgrade --install <release> redhat-developer/redhat-developer-hub -f new-values.yaml
+   helm upgrade --install <release> redhat-developer/redhat-developer-hub -n <namespace> -f new-values.yaml
    ```
 
-4. Verify the deployment is healthy.
+5. Verify the deployment is healthy.
 
 ## Prerequisites
 
-The new chart requires **Kubernetes 1.31+** (OpenShift 4.18+). If you are
-running an older cluster, upgrade it before migrating.
+The new chart requires **Kubernetes 1.31+** (OpenShift 4.18+). If you are running an older cluster, upgrade it before migrating.
 
 ## Key structural changes
 
@@ -53,7 +44,7 @@ running an older cluster, upgrade it before migrating.
 | Init containers | User had to specify the full init container array | System init containers are managed by the chart (e.g., `install-dynamic-plugins` is configurable via `dynamicPlugins.initContainer.*`); use `preInitContainers` / `extraInitContainers` to add custom ones |
 | Database env vars | `POSTGRESQL_ADMIN_PASSWORD` injected manually via `upstream.backstage.extraEnvVars` | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD` auto-injected |
 | Image digests | `upstream.backstage.image.digest` only | Every image (`image`, `catalogIndex.image`, `intelligentAssistant.core.image`, etc.) has a `digest` field for pinning by digest |
-| Global image registry | Not available | `global.imageRegistry` overrides the registry for all container images consistently — useful for disconnected / air-gapped environments |
+| Global image registry | Supported via embedded Bitnami common chart but undocumented and not applied consistently | `global.imageRegistry` is now documented and applied consistently to all container images — useful for disconnected / air-gapped environments |
 | Lightspeed | `global.lightspeed.*` | Rebranded to `intelligentAssistant.*` |
 | OpenShift Route | `route.*` | `openshift.route.*` |
 
@@ -61,36 +52,19 @@ running an older cluster, upgrade it before migrating.
 
 ### Network policies
 
-The new chart deploys **default-deny** NetworkPolicies for the RHDH pod and
-allows only the traffic it knows about (DNS, PostgreSQL, OpenShift
-ingress/monitoring). If your deployment relies on additional network
-connectivity (e.g., external APIs, custom sidecars, or cross-namespace
-services), you must add the corresponding NetworkPolicy rules or the
-connections will be silently blocked.
+The new chart deploys **default-deny** NetworkPolicies for the RHDH pod and allows only the traffic it knows about (DNS, PostgreSQL, OpenShift ingress/monitoring). If your deployment relies on additional network connectivity (e.g., external APIs, custom sidecars, or cross-namespace services), you must add the corresponding NetworkPolicy rules or the connections will be silently blocked. See [Adding your own NetworkPolicies](../README.md#adding-your-own-networkpolicies) for details.
 
 ### Schema validation
 
-The new chart ships a JSON Schema (`values.schema.json`) that validates your
-values at install/upgrade time. The schema catches type errors and invalid
-values for known keys, but leftover top-level keys (e.g., `upstream.*`) may
-pass silently. Make sure you remove or migrate **all** old paths — do not rely
-on schema validation alone to catch stale values. Run
-`helm template <release> redhat-developer/redhat-developer-hub -f new-values.yaml` to check for template rendering errors before upgrading.
+The new chart ships a JSON Schema (`values.schema.json`) that validates your values at install/upgrade time. The schema catches type errors and invalid values for known keys, but leftover top-level keys (e.g., `upstream.*`) may pass silently. Make sure you remove or migrate **all** old paths — do not rely on schema validation alone to catch stale values. Run `helm template <release> redhat-developer/redhat-developer-hub -f new-values.yaml` to check for template rendering errors before upgrading.
 
 ### New features (no old-chart equivalent)
 
-These capabilities are new in the `redhat-developer-hub` chart and have no
-mapping from the old chart, but are worth knowing about during migration:
+These capabilities are new in the `redhat-developer-hub` chart and have no mapping from the old chart, but are worth knowing about during migration:
 
-- **StatefulSet workload** — set `workload.kind: StatefulSet` for stable pod
-  identity and persistent volumes via `volumeClaimTemplates`. Pair with
-  `dynamicPlugins.volume.type: statefulSetPVC` and
-  `dynamicPlugins.volume.statefulSetPVC` to get per-pod stable caching for
-  dynamic plugins.
-- **External database** — `externalDatabase.*` for connecting to a database
-  outside the cluster when `postgresql.enabled: false`.
-- **OKP (Offline Knowledge Portal)** — `intelligentAssistant.okp.*` for
-  offline RHDH documentation retrieval.
+- **StatefulSet workload** — set `workload.kind: StatefulSet` for stable pod identity and persistent volumes via `volumeClaimTemplates`. Pair with `dynamicPlugins.volume.type: statefulSetPVC` and `dynamicPlugins.volume.statefulSetPVC` to get per-pod stable caching for dynamic plugins.
+- **External database** — the concept of using an external database is not new, but the new chart provides a dedicated `externalDatabase.*` block for configuring the connection when `postgresql.enabled: false`. See the [external database documentation](../../docs/external-db.md).
+- **OKP (Offline Knowledge Portal)** — `intelligentAssistant.okp.*` for offline RHDH documentation retrieval.
 
 ## Values mapping reference
 
@@ -122,7 +96,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | `global.clusterRouterBase` | `openshift.clusterRouterBase` | |
 | `global.host` | `host` | Promoted to root |
 | `global.imagePullSecrets` | `global.imagePullSecrets` | Unchanged (used by bitnami subcharts) |
-| _(none)_ | `global.imageRegistry` | New; overrides the registry for all container images — useful for disconnected / air-gapped environments |
+| `global.imageRegistry` | `global.imageRegistry` | Now documented and applied consistently to all container images — useful for disconnected / air-gapped environments |
 
 ### App config
 
@@ -311,14 +285,14 @@ mapping from the old chart, but are worth knowing about during migration:
 
 ### PostgreSQL (bitnami subchart)
 
-| Old path | New path |
-|----------|----------|
-| `upstream.postgresql.enabled` | `postgresql.enabled` |
-| `upstream.postgresql.postgresqlDataDir` | `postgresql.postgresqlDataDir` |
-| `upstream.postgresql.serviceBindings.enabled` | `postgresql.serviceBindings.enabled` |
-| `upstream.postgresql.image.*` | `postgresql.image.*` |
-| `upstream.postgresql.auth.*` | `postgresql.auth.*` |
-| `upstream.postgresql.primary.*` | `postgresql.primary.*` |
+| Old path | New path | Notes |
+|----------|----------|-------|
+| `upstream.postgresql.enabled` | `postgresql.enabled` | |
+| `upstream.postgresql.postgresqlDataDir` | `postgresql.postgresqlDataDir` | |
+| `upstream.postgresql.serviceBindings.enabled` | `postgresql.serviceBindings.enabled` | |
+| `upstream.postgresql.image.*` | `postgresql.image.*` | **Warning:** default image changed from PostgreSQL 15 to 18. If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade |
+| `upstream.postgresql.auth.*` | `postgresql.auth.*` | |
+| `upstream.postgresql.primary.*` | `postgresql.primary.*` | |
 
 ### Metrics / monitoring
 
@@ -391,12 +365,10 @@ mapping from the old chart, but are worth knowing about during migration:
 
 ### Removed values (no equivalent)
 
-The following old-chart values have no equivalent in the new chart because the
-functionality is either hardcoded or no longer applicable:
+The following old-chart values have no equivalent in the new chart because the functionality is either hardcoded or no longer applicable:
 
 | Old path | Notes |
 |----------|-------|
 | `upstream.backstage.installDir` | Hardcoded in the new chart |
 | `upstream.backstage.containerPorts.backend` | Hardcoded to `7007` |
-| `upstream.backstage.extraPorts` | Moved to `service.extraPorts` |
 | `upstream.diagnosticMode.*` | Not supported |
