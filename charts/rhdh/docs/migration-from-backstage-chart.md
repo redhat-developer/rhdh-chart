@@ -71,11 +71,11 @@ connections will be silently blocked.
 ### Schema validation
 
 The new chart ships a JSON Schema (`values.schema.json`) that validates your
-values at install/upgrade time. Any unrecognized keys — including leftover
-`upstream.*` or `global.*` paths that were not migrated — will cause Helm to
-fail with a validation error. This makes it easy to catch stale values early,
-but it also means a partial migration will not install. Run
-`helm template <release> redhat-developer/redhat-developer-hub -f new-values.yaml` to validate your file before upgrading.
+values at install/upgrade time. The schema catches type errors and invalid
+values for known keys, but leftover top-level keys (e.g., `upstream.*`) may
+pass silently. Make sure you remove or migrate **all** old paths — do not rely
+on schema validation alone to catch stale values. Run
+`helm template <release> redhat-developer/redhat-developer-hub -f new-values.yaml` to check for template rendering errors before upgrading.
 
 ### New features (no old-chart equivalent)
 
@@ -187,7 +187,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | Old path | New path | Notes |
 |----------|----------|-------|
 | `upstream.backstage.command` | `commandOverride` | |
-| `upstream.backstage.args` | `argsOverride` | System `--config` flags now auto-injected |
+| `upstream.backstage.args` | `extraArgs` or `argsOverride` | Prefer `extraArgs` — it appends after the system `--config` flags. `argsOverride` replaces **all** arguments, including system ones; only use it if you need full control |
 | `upstream.backstage.extraEnvVars` | `extraEnv` | System env vars auto-injected; only add custom ones |
 | `upstream.backstage.extraEnvVarsSecrets` | `extraEnvFrom` | Use `secretRef` entries instead of secret name strings |
 | `upstream.backstage.extraEnvVarsCM` | `extraEnvFrom` | Use `configMapRef` entries instead of ConfigMap name strings |
@@ -296,8 +296,8 @@ mapping from the old chart, but are worth knowing about during migration:
 | `upstream.ingress.annotations` | `ingress.annotations` | |
 | `upstream.ingress.host` | `ingress.hosts[].host` | Now an array of host objects |
 | `upstream.ingress.path` | `ingress.hosts[].paths[].path` | Nested under hosts array |
-| `upstream.ingress.extraHosts` | `ingress.hosts[]` | Merged into main hosts array |
-| `upstream.ingress.tls.enabled` / `tls.secretName` | `ingress.tls[]` | Now a list of TLS entries |
+| `upstream.ingress.extraHosts` | `ingress.hosts[]` | Merged into main hosts array; old `name` field becomes `host`, old `path` becomes an item in `paths[]` |
+| `upstream.ingress.tls.enabled` / `tls.secretName` | `ingress.tls[]` | Now a list of `{hosts: [...], secretName: "..."}` entries |
 | `upstream.ingress.extraTls` | `ingress.tls[]` | Merged into main tls array |
 
 ### Catalog index
@@ -363,7 +363,7 @@ mapping from the old chart, but are worth knowing about during migration:
 | `global.lightspeed.runtimeVolume.name` | _(hardcoded)_ | Chart manages volume names internally |
 | `global.lightspeed.runtimeVolume.mountPath` | _(hardcoded)_ | Chart manages mount paths internally |
 | `global.lightspeed.configMaps` | `intelligentAssistant.config.{stack,profile}.existingConfigMap` | Array of 3 configMaps replaced with 2 structured entries; the separate `config.yaml` is no longer needed because the llama-stack configuration is now inlined in `lightspeed-stack.yaml` |
-| `global.lightspeed.secret.create` / `.name` | `intelligentAssistant.existingSecret` | Simplified to a secret name string |
+| `global.lightspeed.secret.create` / `.name` | `intelligentAssistant.existingSecret` | The new chart does not create a placeholder secret — you must create it independently before upgrading, then set `intelligentAssistant.existingSecret` to its name. See [`files/intelligent-assistant/secret.example.yaml`](../files/intelligent-assistant/secret.example.yaml) for a reference template |
 | `global.lightspeed.secret.optional` | _(removed)_ | No longer needed; the secret is only mounted when `intelligentAssistant.existingSecret` is set |
 
 ### Orchestrator
