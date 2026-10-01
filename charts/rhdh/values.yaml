@@ -600,7 +600,7 @@ intelligentAssistant:
     image:
       registry: "quay.io"
       repository: "lightspeed-core/lightspeed-stack"
-      tag: "0.7.0rc3"
+      tag: "0.7.0"
       digest: ""
     imagePullPolicy: "IfNotPresent"
     # -- Override the container's default command. Leave empty to use the image entrypoint.

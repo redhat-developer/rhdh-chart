@@ -813,7 +813,7 @@
                         "digest": "",
                         "registry": "quay.io",
                         "repository": "lightspeed-core/lightspeed-stack",
-                        "tag": "0.7.0rc3"
+                        "tag": "0.7.0"
                     },
                     "imagePullPolicy": "IfNotPresent",
                     "resources": {
