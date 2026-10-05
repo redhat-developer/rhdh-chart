@@ -15,6 +15,7 @@ jobs:
       matrix:
         branch:
           - release-1.10
+          - release-2.1
 
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.branch }}
