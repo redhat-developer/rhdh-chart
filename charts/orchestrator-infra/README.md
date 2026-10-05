@@ -90,7 +90,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serverlessLogicOperator.subscription.spec.name | name of the operator package | string | `"logic-operator"` |
 | serverlessLogicOperator.subscription.spec.source | name of the catalog source | string | `"redhat-operators"` |
 | serverlessLogicOperator.subscription.spec.sourceNamespace |  | string | `"openshift-marketplace"` |
-| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.38.0"` |
+| serverlessLogicOperator.subscription.spec.startingCSV | The initial version of the operator, must match CRDs installed by the chart | string | `"logic-operator.v1.38.1"` |
 | serverlessOperator.enabled | whether the operator should be deployed by the chart | bool | `true` |
 | serverlessOperator.subscription.namespace | namespace where the operator should be deployed | string | `"openshift-serverless"` |
 | serverlessOperator.subscription.spec.channel | channel of an operator package to subscribe to | string | `"stable"` |
