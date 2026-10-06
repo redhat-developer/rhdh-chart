@@ -13,22 +13,10 @@
   "baseBranchPatterns": ["main", "/^release-.*/"],
   "packageRules": [
     {
-      "description": "Disable all updates on release branches by default",
+      "description": "Disable major updates on release branches",
       "matchBaseBranches": ["/^release-.*/"],
+      "matchUpdateTypes": ["major"],
       "enabled": false
-    },
-    {
-      "description": "Re-enable only patch updates on release branches",
-      "matchBaseBranches": ["/^release-.*/"],
-      "matchUpdateTypes": ["patch"],
-      "enabled": true
-    },
-    {
-      "description": "Re-enable digest updates for GitHub Actions on release branches",
-      "matchBaseBranches": ["/^release-.*/"],
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["digest"],
-      "enabled": true
     },
     {
       "description": "EOL: disable all updates on release-1.8",
