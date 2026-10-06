@@ -1,7 +1,7 @@
 
 # Orchestrator Infra Chart for OpenShift
 
-![Version: 0.5.6](https://img.shields.io/badge/Version-0.5.6-informational?style=flat-square)
+![Version: 0.5.7](https://img.shields.io/badge/Version-0.5.7-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 Helm chart to deploy the Orchestrator solution's required infrastructure suite on OpenShift, including OpenShift Serverless Operator and OpenShift Serverless Logic Operator, both required to configure Red Hat Developer Hub to use the Orchestrator.
@@ -25,7 +25,7 @@ Kubernetes: `>= 1.25.0-0`
 ```console
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.5.6
+helm install my-orchestrator-infra redhat-developer/redhat-developer-hub-orchestrator-infra --version 0.5.7
 ```
 
 > **Tip**: List all releases using `helm list`
@@ -111,7 +111,7 @@ After installing the openshift-serverless subscription, more Knative CRDs will b
 The versions of the CRDs present in the chart and the ones in the subscription must match. In order to verify the correct CRD, use this following command to extract the CRD:
 
 ```bash
-export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.38.0
+export osl_bundle=registry.redhat.io/openshift-serverless-1/serverless-operator-bundle:1.38.1
 podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeeventing_crd.yaml > crds/knative-eventing/knative-eventing-crd.yaml
 
 podman container run --rm --entrypoint cat "$osl_bundle" /manifests/operator_v1beta1_knativeserving_crd.yaml > crds/knative-serving/knative-serving-crd.yaml
