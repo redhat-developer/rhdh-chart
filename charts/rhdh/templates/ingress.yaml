@@ -42,7 +42,7 @@ spec:
               service:
                 name: {{ include "rhdh.fullname" $ }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ .port | default $.Values.service.port }}
           {{- end }}
     {{- end }}
 {{- end }}
