@@ -86,6 +86,22 @@ The following entries are conditionally managed by the chart — keep them only 
 > [!TIP]
 > Only include values you have customized. Omitting chart defaults makes maintenance easier and reduces merge conflicts on future chart upgrades.
 
+### Go template `.Values.*` references in string values
+
+Your values file may contain string values with Go template expressions that reference old paths — for example, `{{ .Values.global.host }}` or `{{ .Values.upstream.backstage.image.tag }}`. These references must be updated to their new paths along with the YAML keys themselves.
+
+Common examples:
+
+| Old reference | New reference |
+|---------------|---------------|
+| `.Values.global.host` | `.Values.host` |
+| `.Values.global.clusterRouterBase` | `.Values.openshift.clusterRouterBase` |
+| `.Values.global.auth.backend.existingSecret` | `.Values.auth.backend.existingSecretRef.name` |
+| `.Values.global.dynamic.plugins` | `.Values.dynamicPlugins.plugins` |
+| `.Values.route.host` | `.Values.openshift.route.host` |
+
+For fields that were decomposed from a single string into structured sub-fields (e.g., `global.lightspeed.sidecar.image` → `intelligentAssistant.core.image.{registry,repository,tag}`), a simple find-and-replace is not sufficient — you need to update the template expression to reference the specific sub-field you need.
+
 ### New features (no old-chart equivalent)
 
 These capabilities are new in the `redhat-developer-hub` chart and have no mapping from the old chart, but are worth knowing about during migration:
