@@ -6,6 +6,7 @@ This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` char
 > Because the values structure has changed, you cannot pass your old values file directly to the new chart. You must migrate your values first, then `helm upgrade` the release in place. Tooling (a migration script or AI skill) to automate the values conversion is planned in the near future.
 
 > [!NOTE]
+> The mapping tables below reflect the `redhat-developer-hub` chart version **2.1**. Future chart versions may introduce additional changes.
 > Fields not listed in the tables below keep the same path. Where a table shows a new path, use that. If a field you use is not mentioned at all, carry it over as-is.
 
 ## Migration steps
@@ -20,7 +21,7 @@ This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` char
 
 3. Before upgrading, watch for these default changes:
    - **Intelligent Assistant** (formerly Lightspeed) remains enabled by default. If you had explicitly disabled it in your old chart, set `intelligentAssistant.enabled: false`.
-   - **PostgreSQL image** defaults to version 18. If you have an existing data directory, keep the old image (`postgresql.image.tag`) until you plan a PostgreSQL major upgrade.
+   - **PostgreSQL image** defaults to version 18, but PostgreSQL 15 remains supported. If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade.
 
 4. Upgrade the existing release in place with the new chart and migrated values:
 
@@ -57,6 +58,50 @@ The new chart deploys **default-deny** NetworkPolicies for the RHDH pod and allo
 ### Schema validation
 
 The new chart ships a JSON Schema (`values.schema.json`) that validates your values at install/upgrade time. The schema catches type errors and invalid values for known keys, but leftover top-level keys (e.g., `upstream.*`) may pass silently. Make sure you remove or migrate **all** old paths — do not rely on schema validation alone to catch stale values. Run `helm template <release> redhat-developer/redhat-developer-hub -f new-values.yaml` to check for template rendering errors before upgrading.
+
+### Image digest/tag interaction
+
+The downstream chart ships all container images with explicit digests by default (not tags). When both `tag` and `digest` are set, the chart renders the image reference as `tag@digest` (e.g., `registry.redhat.io/rhdh/rhdh-hub-rhel9:1.10@sha256:abc...`). This can fail to resolve at pull time if you set a custom `tag` while the chart's default `digest` still points to the original image (Helm merges the default digest into your values). When overriding with a custom tag, either set `digest: ""` to clear the default, or set `digest` to the correct digest for your tag. This applies to every `image.*` block: `image`, `catalogIndex.image`, `intelligentAssistant.core.image`, `postgresql.image`, etc.
+
+### Air-gapped / disconnected environments
+
+`global.imageRegistry` and `global.imagePullSecrets` apply to all container images managed by the chart (RHDH, PostgreSQL, catalog index, Intelligent Assistant, etc.), making them useful for mirroring to an internal registry. However, they do **not** apply to dynamic plugin references (`oci://` or `ref://` in `dynamicPlugins.plugins[].package`). Plugin OCI images must be mirrored separately and their references updated individually in the dynamic plugins configuration.
+
+### Chart-managed defaults in `extra*` fields
+
+The old chart required users to list system volumes, mounts, env vars, and init containers in full under `extraVolumes`, `extraVolumeMounts`, `extraEnvVars`, and `initContainers`. The new chart hardcodes these in its templates — your `extra*` keys now only need to contain **your custom additions**, not the system resources.
+
+When migrating, you can safely remove these entries from your values file:
+
+- **Volumes** (by name): `dynamic-plugins-root`, `dynamic-plugins`, `dynamic-plugins-npmrc`, `dynamic-plugins-registry-auth`, `npmcacache`, `extensions-catalog`, `temp`
+- **Volume mounts** (by mountPath): `/opt/app-root/src/dynamic-plugins-root`, `/dynamic-plugins-root`, `/opt/app-root/src/dynamic-plugins.yaml`, `/opt/app-root/src/.npmrc.dynamic-plugins`, `/opt/app-root/src/.npmrc.d`, `/opt/app-root/src/.config/containers`, `/opt/app-root/src/.npm/_cacache`, `/extensions`, `/tmp`
+- **Env vars** (by name): `APP_CONFIG_backend_listen_port`, `NPM_CONFIG_USERCONFIG`
+- **Init containers** (by name): `install-dynamic-plugins`
+
+The following entries are conditionally managed by the chart — keep them only if you have customized their values beyond the chart defaults:
+
+- **Volumes**: `backstage-app-config`, `lightspeed-data`, `lightspeed-config-stack`, `lightspeed-config-profile`
+- **Env vars**: `BACKEND_SECRET`, `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `APP_CONFIG_app_baseUrl`, `APP_CONFIG_backend_baseUrl`, `APP_CONFIG_backend_cors_origin`
+- **Init containers**: `wait-for-db`
+
+> [!TIP]
+> Only include values you have customized. Omitting chart defaults makes maintenance easier and reduces merge conflicts on future chart upgrades.
+
+### Go template `.Values.*` references in string values
+
+Your values file may contain string values with Go template expressions that reference old paths — for example, `{{ .Values.global.host }}` or `{{ .Values.upstream.backstage.image.tag }}`. These references must be updated to their new paths along with the YAML keys themselves.
+
+Common examples:
+
+| Old reference | New reference |
+|---------------|---------------|
+| `.Values.global.host` | `.Values.host` |
+| `.Values.global.clusterRouterBase` | `.Values.openshift.clusterRouterBase` |
+| `.Values.global.auth.backend.existingSecret` | `.Values.auth.backend.existingSecretRef.name` |
+| `.Values.global.dynamic.plugins` | `.Values.dynamicPlugins.plugins` |
+| `.Values.route.host` | `.Values.openshift.route.host` |
+
+For fields that were decomposed from a single string into structured sub-fields (e.g., `global.lightspeed.sidecar.image` → `intelligentAssistant.core.image.{registry,repository,tag}`), a simple find-and-replace is not sufficient — you need to update the template expression to reference the specific sub-field you need.
 
 ### New features (no old-chart equivalent)
 
@@ -166,6 +211,31 @@ These capabilities are new in the `redhat-developer-hub` chart and have no mappi
 | `upstream.backstage.extraEnvVarsSecrets` | `extraEnvFrom` | Use `secretRef` entries instead of secret name strings |
 | `upstream.backstage.extraEnvVarsCM` | `extraEnvFrom` | Use `configMapRef` entries instead of ConfigMap name strings |
 
+<details>
+<summary>Example: extraEnvVarsSecrets / extraEnvVarsCM → extraEnvFrom</summary>
+
+```yaml
+# Old (1.y):
+upstream:
+  backstage:
+    extraEnvVarsSecrets:
+      - my-secret
+      - another-secret
+    extraEnvVarsCM:
+      - my-configmap
+
+# New (2.y):
+extraEnvFrom:
+  - secretRef:
+      name: my-secret
+  - secretRef:
+      name: another-secret
+  - configMapRef:
+      name: my-configmap
+```
+
+</details>
+
 ### Volumes and mounts
 
 | Old path | New path | Notes |
@@ -274,6 +344,47 @@ These capabilities are new in the `redhat-developer-hub` chart and have no mappi
 | `upstream.ingress.tls.enabled` / `tls.secretName` | `ingress.tls[]` | Now a list of `{hosts: [...], secretName: "..."}` entries |
 | `upstream.ingress.extraTls` | `ingress.tls[]` | Merged into main tls array |
 
+<details>
+<summary>Example: Ingress with extra hosts and TLS</summary>
+
+```yaml
+# Old (1.y):
+upstream:
+  ingress:
+    enabled: true
+    className: nginx
+    host: my-rhdh.example.com
+    path: /
+    extraHosts:
+      - name: alt.example.com
+        path: /rhdh
+    tls:
+      enabled: true
+      secretName: rhdh-tls
+    extraTls:
+      - hosts: [alt.example.com]
+        secretName: alt-tls
+
+# New (2.y):
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: my-rhdh.example.com
+      paths:
+        - path: /
+    - host: alt.example.com
+      paths:
+        - path: /rhdh
+  tls:
+    - hosts: [my-rhdh.example.com]
+      secretName: rhdh-tls
+    - hosts: [alt.example.com]
+      secretName: alt-tls
+```
+
+</details>
+
 ### Catalog index
 
 | Old path | New path |
@@ -290,7 +401,7 @@ These capabilities are new in the `redhat-developer-hub` chart and have no mappi
 | `upstream.postgresql.enabled` | `postgresql.enabled` | |
 | `upstream.postgresql.postgresqlDataDir` | `postgresql.postgresqlDataDir` | |
 | `upstream.postgresql.serviceBindings.enabled` | `postgresql.serviceBindings.enabled` | |
-| `upstream.postgresql.image.*` | `postgresql.image.*` | **Warning:** default image changed from PostgreSQL 15 to 18. If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade |
+| `upstream.postgresql.image.*` | `postgresql.image.*` | **Warning:** default image changed from PostgreSQL 15 to 18 (PostgreSQL 15 is still supported). If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade |
 | `upstream.postgresql.auth.*` | `postgresql.auth.*` | |
 | `upstream.postgresql.primary.*` | `postgresql.primary.*` | |
 
@@ -355,6 +466,50 @@ These capabilities are new in the `redhat-developer-hub` chart and have no mappi
 | `orchestrator.sonataflowPlatform.dbCreationJobBackoffLimit` | `orchestrator.sonataflowPlatform.dbCreationJob.backoffLimit` | Nested under `dbCreationJob` |
 | `orchestrator.sonataflowPlatform.dbCreationJobTTLSecondsAfterFinished` | `orchestrator.sonataflowPlatform.dbCreationJob.ttlSecondsAfterFinished` | Nested under `dbCreationJob` |
 | `orchestrator.sonataflowPlatform.dbCreationJobActiveDeadlineSeconds` | `orchestrator.sonataflowPlatform.dbCreationJob.activeDeadlineSeconds` | Nested under `dbCreationJob` |
+
+<details>
+<summary>Example: Orchestrator structural changes</summary>
+
+```yaml
+# Old (1.y):
+orchestrator:
+  sonataflowPlatform:
+    externalDBsecretRef: my-db-secret
+    externalDBName: sonataflow
+    externalDBHost: postgres.example.com
+    externalDBPort: "5432"
+    initContainerImage: "registry.redhat.io/rhdh/init:1.0"
+    dataIndexImage: "registry.redhat.io/rhdh/data-index:1.0"
+    jobServiceImage: "registry.redhat.io/rhdh/job-service:1.0"
+    dbCreationJobBackoffLimit: 6
+
+# New (2.y):
+orchestrator:
+  sonataflowPlatform:
+    externalDB:
+      existingSecret: my-db-secret
+      name: sonataflow
+      host: postgres.example.com
+      port: "5432"
+    dbCreationJob:
+      image:
+        registry: registry.redhat.io
+        repository: rhdh/init
+        tag: "1.0"
+      backoffLimit: 6
+    dataIndex:
+      image:
+        registry: registry.redhat.io
+        repository: rhdh/data-index
+        tag: "1.0"
+    jobService:
+      image:
+        registry: registry.redhat.io
+        repository: rhdh/job-service
+        tag: "1.0"
+```
+
+</details>
 
 ### Test pod
 
