@@ -6,6 +6,7 @@ This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` char
 > Because the values structure has changed, you cannot pass your old values file directly to the new chart. You must migrate your values first, then `helm upgrade` the release in place. Tooling (a migration script or AI skill) to automate the values conversion is planned in the near future.
 
 > [!NOTE]
+> The mapping tables below reflect the `redhat-developer-hub` chart version **2.1**. Future chart versions may introduce additional changes.
 > Fields not listed in the tables below keep the same path. Where a table shows a new path, use that. If a field you use is not mentioned at all, carry it over as-is.
 
 ## Migration steps
@@ -20,7 +21,7 @@ This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` char
 
 3. Before upgrading, watch for these default changes:
    - **Intelligent Assistant** (formerly Lightspeed) remains enabled by default. If you had explicitly disabled it in your old chart, set `intelligentAssistant.enabled: false`.
-   - **PostgreSQL image** defaults to version 18. If you have an existing data directory, keep the old image (`postgresql.image.tag`) until you plan a PostgreSQL major upgrade.
+   - **PostgreSQL image** defaults to version 18, but PostgreSQL 15 remains supported. If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade.
 
 4. Upgrade the existing release in place with the new chart and migrated values:
 
@@ -400,7 +401,7 @@ ingress:
 | `upstream.postgresql.enabled` | `postgresql.enabled` | |
 | `upstream.postgresql.postgresqlDataDir` | `postgresql.postgresqlDataDir` | |
 | `upstream.postgresql.serviceBindings.enabled` | `postgresql.serviceBindings.enabled` | |
-| `upstream.postgresql.image.*` | `postgresql.image.*` | **Warning:** default image changed from PostgreSQL 15 to 18. If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade |
+| `upstream.postgresql.image.*` | `postgresql.image.*` | **Warning:** default image changed from PostgreSQL 15 to 18 (PostgreSQL 15 is still supported). If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade |
 | `upstream.postgresql.auth.*` | `postgresql.auth.*` | |
 | `upstream.postgresql.primary.*` | `postgresql.primary.*` | |
 
