@@ -103,6 +103,12 @@ spec:
 {{- end }}
   activeDeadlineSeconds: {{ .Values.orchestrator.sonataflowPlatform.dbCreationJob.activeDeadlineSeconds }}
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rhdh.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: orchestrator-db-job
+        rhdh.redhat.com/orchestrator-db-job: "true"
     spec:
       initContainers:
         - name: wait-for-db

@@ -1,15 +1,8 @@
-# TODO: these Orchestrator policies use podSelector: {} (namespace-wide) and conflict with
-# the ADR's "default deny with selective allow" and "label-scoped policies" principles.
-# They weaken per-component ingress isolation for RHDH backend and DB pods in the same namespace.
-# Even though only one Orchestrator-flavoured RHDH instance is supported per namespace (the
-# SonataFlow Operator enforces one SonataFlowPlatform per namespace), a non-Orchestrator RHDH
-# instance could coexist in the same namespace; these namespace-wide policies would affect it too.
-# Review and make stricter by scoping to SonataFlow-specific labels where possible.
 {{- if .Values.orchestrator.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "rhdh.fullname" . }}-allow-infra-ns-to-workflow-ns
+  name: {{ include "rhdh.fullname" . }}-allow-infra-ns-to-sonataflow
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
   {{- with .Values.commonAnnotations }}
@@ -17,26 +10,28 @@ metadata:
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: sonataflow-operator
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            # Allow knative events to be delivered to workflows.
-            kubernetes.io/metadata.name: knative-eventing
-      - namespaceSelector:
-          matchLabels:
-            # Allow auxiliary knative function for workflow (such as m2k-save-transformation)
-            kubernetes.io/metadata.name: knative-serving
-      - namespaceSelector:
-          matchLabels:
-            # Allow openshift serverless logic operator controller pod to access all pods in sonataflow
-            kubernetes.io/metadata.name: openshift-serverless-logic
+        - namespaceSelector:
+            matchLabels:
+              # Allow knative events to be delivered to workflows.
+              kubernetes.io/metadata.name: knative-eventing
+        - namespaceSelector:
+            matchLabels:
+              # Allow auxiliary knative function for workflow (such as m2k-save-transformation)
+              kubernetes.io/metadata.name: knative-serving
+        - namespaceSelector:
+            matchLabels:
+              # Allow openshift serverless logic operator controller pod to access SonataFlow pods
+              kubernetes.io/metadata.name: openshift-serverless-logic
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "rhdh.fullname" . }}-allow-external-communication
+  name: {{ include "rhdh.fullname" . }}-allow-router-ingress-to-sonataflow
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
   {{- with .Values.commonAnnotations }}
@@ -44,20 +39,25 @@ metadata:
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: sonataflow-operator
   policyTypes:
     - Ingress
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            # Allow knative events to be delivered to workflows.
-            policy-group.network.openshift.io/ingress: ""
+        - namespaceSelector:
+            matchLabels:
+              # Allow OpenShift Router / ingress controller to reach SonataFlow pods.
+              policy-group.network.openshift.io/ingress: ""
+      ports:
+        - port: 80
+          protocol: TCP
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "rhdh.fullname" . }}-allow-intra-network
+  name: {{ include "rhdh.fullname" . }}-allow-backstage-to-sonataflow
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
   {{- with .Values.commonAnnotations }}
@@ -65,22 +65,24 @@ metadata:
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: sonataflow-operator
   policyTypes:
     - Ingress
   ingress:
     - from:
-      - podSelector: {}
-{{- end }}
-{{- if .Values.orchestrator.enabled }}
-# Allow all egress from all pods in the namespace.
-# The Orchestrator backend plugin needs HTTP egress to reach SonataFlow and Data Index services;
-# SonataFlow workflows may also need arbitrary outbound access.
+        - podSelector:
+            matchLabels:
+              {{- include "rhdh.selectorLabels" . | nindent 14 }}
+      ports:
+        - port: 80
+          protocol: TCP
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "rhdh.fullname" . }}-allow-all-egress
+  name: {{ include "rhdh.fullname" . }}-allow-sonataflow-intra
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
   {{- with .Values.commonAnnotations }}
@@ -88,18 +90,74 @@ metadata:
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      # Allow SonataFlow pods to communicate with each other
+      app.kubernetes.io/managed-by: sonataflow-operator
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: sonataflow-operator
+      ports:
+        - port: 80
+          protocol: TCP
+---
+# Allow all egress from SonataFlow-managed pods.
+# SonataFlow workflows may need arbitrary outbound access.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rhdh.fullname" . }}-allow-sonataflow-all-egress
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: sonataflow-operator
   policyTypes:
     - Egress
   egress:
     - {}
+---
+# Allow the Orchestrator backend plugin to reach SonataFlow / Data Index services.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rhdh.fullname" . }}-allow-backstage-to-sonataflow-egress
+  labels:
+    {{- include "rhdh.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "rhdh.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: sonataflow-operator
+      ports:
+        - port: 80
+          protocol: TCP
 {{- end }}
 ---
 {{- if and .Values.orchestrator.enabled .Values.orchestrator.sonataflowPlatform.monitoring.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "rhdh.fullname" . }}-allow-monitoring-to-sonataflow-and-workflows
+  name: {{ include "rhdh.fullname" . }}-allow-monitoring-to-sonataflow
   labels:
     {{- include "rhdh.labels" . | nindent 4 }}
   {{- with .Values.commonAnnotations }}
@@ -107,13 +165,15 @@ metadata:
     {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
   {{- end }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: sonataflow-operator
   policyTypes:
     - Ingress
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            # Allow openshift-user-workload-monitoring pods to access the workflow.
-            kubernetes.io/metadata.name: openshift-user-workload-monitoring
+        - namespaceSelector:
+            matchLabels:
+              # Allow openshift-user-workload-monitoring pods to access SonataFlow pods
+              kubernetes.io/metadata.name: openshift-user-workload-monitoring
 {{- end }}
