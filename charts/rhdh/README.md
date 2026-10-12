@@ -1,11 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-<<<<<<< HEAD
-![Version: 3.4.6](https://img.shields.io/badge/Version-3.4.6-informational?style=flat-square)
-=======
-![Version: 3.5.5](https://img.shields.io/badge/Version-3.5.5-informational?style=flat-square)
->>>>>>> 3ca205e (chore: Updating hardcoded backend service port for Ingress & HTTPRoute templates (#620))
+![Version: 3.4.7](https://img.shields.io/badge/Version-3.4.7-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -40,11 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-<<<<<<< HEAD
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.6
-=======
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.5.5
->>>>>>> 3ca205e (chore: Updating hardcoded backend service port for Ingress & HTTPRoute templates (#620))
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.7
 ```
 
 ## Introduction
@@ -252,12 +244,8 @@ Kubernetes: `>= 1.31.0-0`
 | hostAliases | Host aliases for /etc/hosts entries. | list | `[]` |
 | httpRoute | Gateway API HTTPRoute configuration. | object | `{"annotations":{},"enabled":false,"hostnames":[],"labels":{},"parentRefs":[],"rules":[]}` |
 | httpRoute.labels | Additional labels for the HTTPRoute resource. | object | `{}` |
-<<<<<<< HEAD
-| image | Container image configuration. | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"rhdh-community/rhdh","tag":"next-2.1"}` |
-=======
 | httpRoute.rules | HTTPRoute rules. Each rule may set option `port` (backend service port). Defaults to `service.port` when omitted. | list | `[]` |
-| image | Container image configuration. | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"rhdh-community/rhdh","tag":"next"}` |
->>>>>>> 3ca205e (chore: Updating hardcoded backend service port for Ingress & HTTPRoute templates (#620))
+| image | Container image configuration. | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"rhdh-community/rhdh","tag":"next-2.1"}` |
 | image.digest | Overrides the image tag with an image digest. | string | `""` |
 | imagePullSecrets | Secrets for pulling images from private registries (merged with global.imagePullSecrets). | list | `[]` |
 | ingress | Kubernetes Ingress configuration. | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"{{ .Values.host }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` |
