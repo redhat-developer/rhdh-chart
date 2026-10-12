@@ -420,11 +420,14 @@ ingress:
   enabled: false
   className: ""
   annotations: {}
+  # -- Ingress hosts. Each path may set option `port` (backend service port).
+  # Defaults to `service.port` when omitted (e.g. use `4180` for an oauth2-proxy sidecar).
   hosts:
     - host: "{{ .Values.host }}"
       paths:
         - path: "/"
           pathType: "ImplementationSpecific"
+          # port: 4180
   tls: []
 
 # -- Gateway API HTTPRoute configuration.
@@ -435,6 +438,8 @@ httpRoute:
   annotations: {}
   parentRefs: []
   hostnames: []
+  # -- HTTPRoute rules. Each rule may set option `port` (backend service port).
+  # Defaults to `service.port` when omitted.
   rules: []
 
 # ── OpenShift ───────────────────────────────────────────────
