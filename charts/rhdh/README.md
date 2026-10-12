@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.5.4](https://img.shields.io/badge/Version-3.5.4-informational?style=flat-square)
+![Version: 3.5.5](https://img.shields.io/badge/Version-3.5.5-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.5.4
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.5.5
 ```
 
 ## Introduction
@@ -244,10 +244,12 @@ Kubernetes: `>= 1.31.0-0`
 | hostAliases | Host aliases for /etc/hosts entries. | list | `[]` |
 | httpRoute | Gateway API HTTPRoute configuration. | object | `{"annotations":{},"enabled":false,"hostnames":[],"labels":{},"parentRefs":[],"rules":[]}` |
 | httpRoute.labels | Additional labels for the HTTPRoute resource. | object | `{}` |
+| httpRoute.rules | HTTPRoute rules. Each rule may set option `port` (backend service port). Defaults to `service.port` when omitted. | list | `[]` |
 | image | Container image configuration. | object | `{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"rhdh-community/rhdh","tag":"next"}` |
 | image.digest | Overrides the image tag with an image digest. | string | `""` |
 | imagePullSecrets | Secrets for pulling images from private registries (merged with global.imagePullSecrets). | list | `[]` |
 | ingress | Kubernetes Ingress configuration. | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"{{ .Values.host }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` |
+| ingress.hosts | Ingress hosts. Each path may set option `port` (backend service port). Defaults to `service.port` when omitted (e.g. use `4180` for an oauth2-proxy sidecar). | list | `[{"host":"{{ .Values.host }}","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` |
 | intelligentAssistant | Built-in Intelligent Assistant feature configuration. | object | `{"config":{"profile":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}},"core":{"argsOverride":[],"commandOverride":[],"extraArgs":[],"extraEnv":[],"extraVolumeMounts":[],"image":{"digest":"","registry":"quay.io","repository":"lightspeed-core/lightspeed-stack","tag":"0.7.0"},"imagePullPolicy":"IfNotPresent","resources":{"limits":{"cpu":"1000m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}},"enabled":true,"existingSecret":"","okp":{"affinity":{},"enabled":false,"httpd":{"compressed":"true","encrypt":"false","serverName":"localhost"},"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"registry.redhat.io","repository":"offline-knowledge-portal/rhokp-rhel9","tag":"1.2.12-1788274041"},"imagePullSecrets":[],"ingress":{"annotations":{},"className":"","enabled":true,"host":"","tls":{"enabled":false,"secretName":""}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":30},"nodeSelector":{},"readinessProbe":{"initialDelaySeconds":10,"periodSeconds":10},"replicaCount":1,"resources":{"limits":{"cpu":"2","memory":"4Gi"},"requests":{"cpu":"200m","memory":"2Gi"}},"route":{"enabled":true,"tls":{"insecureEdgeTerminationPolicy":"Redirect","termination":"edge"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"service":{"type":"ClusterIP"},"solr":{"hostBind":"0.0.0.0","memory":"1g"},"tolerations":[],"topologySpreadConstraints":[]},"plugins":[{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant"},{"enabled":true,"package":"ref://red-hat-developer-hub-backstage-plugin-intelligent-assistant-backend"}],"runtimeVolume":{"emptyDir":{},"persistentVolumeClaim":{},"type":"emptyDir"}}` |
 | intelligentAssistant.config | Configuration files mounted into the sidecar. By default, the chart creates ConfigMaps from bundled source files. Set existingConfigMap to use a pre-existing ConfigMap instead. | object | `{"profile":{"existingConfigMap":{"key":"","name":""}},"stack":{"existingConfigMap":{"key":"","name":""}}}` |
 | intelligentAssistant.config.profile | Python profile with prompt templates (rhdh-profile.py). | object | `{"existingConfigMap":{"key":"","name":""}}` |
