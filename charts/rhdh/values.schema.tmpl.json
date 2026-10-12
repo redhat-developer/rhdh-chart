@@ -258,7 +258,33 @@
                 "hosts": {
                     "title": "Ingress hosts.",
                     "type": "array",
-                    "default": []
+                    "default": [],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        },
+                                        "port": {
+                                            "title": "Optional backend service port override for this path.",
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
                 "tls": {
                     "title": "Ingress TLS configuration.",
@@ -300,7 +326,16 @@
                 "rules": {
                     "title": "HTTPRoute rules.",
                     "type": "array",
-                    "default": []
+                    "default": [],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "port": {
+                                "title": "Optional backend service port override for this rule.",
+                                "type": "integer"
+                            }
+                        }
+                    }
                 }
             }
         },

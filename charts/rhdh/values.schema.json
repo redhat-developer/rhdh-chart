@@ -687,6 +687,15 @@
                 },
                 "rules": {
                     "default": [],
+                    "items": {
+                        "properties": {
+                            "port": {
+                                "title": "Optional backend service port override for this rule.",
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    },
                     "title": "HTTPRoute rules.",
                     "type": "array"
                 }
@@ -774,6 +783,32 @@
                             ]
                         }
                     ],
+                    "items": {
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "items": {
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        },
+                                        "port": {
+                                            "title": "Optional backend service port override for this path.",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            }
+                        },
+                        "type": "object"
+                    },
                     "title": "Ingress hosts.",
                     "type": "array"
                 },
