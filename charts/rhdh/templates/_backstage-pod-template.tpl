@@ -334,7 +334,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ include "rhdh.postgresql.secretName" . }}
-              key: {{ include "rhdh.postgresql.adminPasswordKey" . }}
+              key: {{ include "rhdh.postgresql.passwordKey" . }}
         {{- else if .Values.externalDatabase.host }}
         - name: POSTGRES_HOST
           value: {{ .Values.externalDatabase.host | quote }}

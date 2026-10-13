@@ -173,6 +173,18 @@ Returns the PostgreSQL admin password key.
 {{- end -}}
 
 {{/*
+Returns the PostgreSQL user password key.
+Uses the admin key when username is "postgres" (default).
+*/}}
+{{- define "rhdh.postgresql.passwordKey" -}}
+    {{- if eq (.Values.postgresql.auth.username | default "postgres") "postgres" -}}
+        {{- include "rhdh.postgresql.adminPasswordKey" . -}}
+    {{- else -}}
+        {{- (((((.Values).postgresql).auth).secretKeys).userPasswordKey) | default "password" -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
 Returns the PostgreSQL hostname.
 When postgresql.enabled is false, returns externalDatabase.host.
 When enabled, appends -primary when postgresql.architecture is "replication".
