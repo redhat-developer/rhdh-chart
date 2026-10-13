@@ -1,7 +1,7 @@
 apiVersion: v2
 name: redhat-developer-hub
 type: application
-version: 3.5.7
+version: 3.5.8
 appVersion: 2.2.0
 annotations:
   artifacthub.io/category: integration-delivery
