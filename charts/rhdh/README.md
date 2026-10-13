@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.4.7](https://img.shields.io/badge/Version-3.4.7-informational?style=flat-square)
+![Version: 3.4.8](https://img.shields.io/badge/Version-3.4.8-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.7
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.8
 ```
 
 ## Introduction
@@ -572,6 +572,7 @@ The following traffic is allowed out of the box:
 |-----------|------|----------------------|---------|
 | Egress | 53, 5353 (UDP/TCP) | Any | DNS resolution |
 | Egress | 443 (TCP) | Any | HTTPS (Git forges, auth providers, external APIs) |
+| Egress | 6443 (TCP) | Any | Kubernetes API server — used by plugins that query cluster resources (Tekton, ArgoCD/GitOps, Topology, KServe model catalog, etc.). On some managed platforms the API server listens on 443 instead. |
 | Egress | 5432 (TCP) | Built-in PostgreSQL pods (scoped) or any (external DB) | Database access |
 | Egress | 6379 (TCP) | Any | Redis (BYO — no pod/namespace selector) |
 | Egress | 80 (TCP) | Any destination | LCORE access to an HTTP OKP Ingress (NP created only when OKP is enabled; disabled by default) |
