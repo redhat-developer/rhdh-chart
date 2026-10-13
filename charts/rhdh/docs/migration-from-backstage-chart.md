@@ -3,7 +3,7 @@
 This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` chart. The old chart delegated most Kubernetes resource creation to an embedded upstream [Backstage subchart](https://github.com/backstage/charts), so values lived under `upstream.backstage.*` and `global.*`. The new chart owns all templates directly and flattens configuration to root-level keys.
 
 > [!IMPORTANT]
-> Because the values structure has changed, you cannot pass your old values file directly to the new chart. You must migrate your values first, then `helm upgrade` the release in place. Tooling (a migration script or AI skill) to automate the values conversion is planned in the near future.
+> Because the values structure has changed, you cannot pass your old values file directly to the new chart. You must migrate your values first, then `helm upgrade` the release in place. See the [`rhdh-upgrade-helper`](https://github.com/redhat-developer/rhdh-users-agent-plugin/blob/main/README.md#rhdh-upgrade-helper) AI skill, which can help automate the values conversion by combining a deterministic mapping for known fields with an AI-assisted pass for ambiguous areas.
 
 > [!NOTE]
 > The mapping tables below reflect the `redhat-developer-hub` chart version **2.1**. Future chart versions may introduce additional changes.
