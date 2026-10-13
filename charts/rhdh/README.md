@@ -566,7 +566,7 @@ extraDeploy:
 
 This chart deploys a **default-deny** NetworkPolicy for the RHDH backend pod, blocking all ingress and egress traffic that is not explicitly allowed. When the built-in PostgreSQL is enabled (`postgresql.enabled=true`), the database pods also get their own default-deny policy with selective allow rules. When OKP is active, its pods receive a separate default-deny ingress and egress policy with rules allowing only the required HTTP ingress.
 
-When `orchestrator.enabled=true`, the chart also creates NetworkPolicies for SonataFlow-managed pods (`app.kubernetes.io/managed-by: sonataflow-operator`) and for RHDH-to-SonataFlow access on port 80; when the built-in PostgreSQL is also enabled, it adds a PostgreSQL ingress allow for those SonataFlow pods and the Orchestrator create-db Job. These policies are label-scoped and do not use namespace-wide `podSelector: {}`.
+When `orchestrator.enabled=true`, the chart also creates NetworkPolicies for SonataFlow Data Index and Jobs Service pods (default-deny, then selective allow) and for other pods labeled `app.kubernetes.io/managed-by: sonataflow-operator`. These include RHDH ↔ SonataFlow access, scoped SonataFlow egress (DNS, HTTPS, Kubernetes API, PostgreSQL, and RHDH on port 7007), and (when built-in PostgreSQL is enabled) PostgreSQL ingress from SonataFlow-managed pods. The Orchestrator create-db Job uses `rhdh.selectorLabels`, so it is covered by the existing RHDH → PostgreSQL allow. These policies are label-scoped and do not use namespace-wide `podSelector: {}`.
 
 The following traffic is allowed out of the box:
 
@@ -581,20 +581,24 @@ The following traffic is allowed out of the box:
 | Ingress | 7007 (TCP) | OpenShift router namespace or any namespace (non-OCP) | User traffic via Route / Ingress |
 | Ingress | 8080 (TCP) | RHDH pods and the OpenShift router namespace or any namespace (non-OCP) | OKP queries and product-document citations via Route / Ingress |
 | Ingress | 9464 (TCP) | `openshift-monitoring`, `openshift-user-workload-monitoring`, `gmp-system`, `gke-gmp-system`, `monitoring` | Prometheus metrics scraping |
-| Ingress | 80 (TCP) | OpenShift router namespace → SonataFlow pods | Orchestrator / SonataFlow Routes (NP created only when `orchestrator.enabled=true`) |
+| Ingress | any | OpenShift router namespace → SonataFlow pods | Orchestrator / SonataFlow Routes (NP created only when `orchestrator.enabled=true`) |
 | Ingress | 80 (TCP) | RHDH pods → SonataFlow pods | Orchestrator backend to Data Index / workflows (NP created only when `orchestrator.enabled=true`) |
-| Ingress | 80 (TCP) | SonataFlow pods → SonataFlow pods | SonataFlow inter-pod traffic (NP created only when `orchestrator.enabled=true`) |
+| Ingress | any | SonataFlow pods → SonataFlow pods (same or other namespaces) | SonataFlow inter-pod traffic (NP created only when `orchestrator.enabled=true`) |
 | Ingress | any | `knative-eventing`, `knative-serving`, `openshift-serverless-logic` → SonataFlow pods | Orchestrator infra namespaces (NP created only when `orchestrator.enabled=true`) |
-| Ingress | any | `openshift-user-workload-monitoring` → SonataFlow pods | SonataFlow metrics scrape (NP created only when `orchestrator.enabled=true` and `orchestrator.sonataflowPlatform.monitoring.enabled=true`) |
+| Ingress | any | `openshift-monitoring`, `openshift-user-workload-monitoring`, `gmp-system`, `gke-gmp-system`, `monitoring` → SonataFlow pods | SonataFlow metrics scrape (NP created only when `orchestrator.enabled=true` and `orchestrator.sonataflowPlatform.monitoring.enabled=true`) |
+| Ingress | 7007 (TCP) | SonataFlow pods → RHDH pods | Workflows calling RHDH APIs (NP created only when `orchestrator.enabled=true`) |
 | Egress | 80 (TCP) | RHDH pods → SonataFlow pods | Orchestrator backend HTTP to SonataFlow / Data Index (NP created only when `orchestrator.enabled=true`) |
-| Egress | any | SonataFlow pods → any | SonataFlow / workflow outbound access (NP created only when `orchestrator.enabled=true`) |
-| Ingress | 5432 (TCP) | SonataFlow pods and Orchestrator create-db Job → built-in PostgreSQL primary | Orchestrator / SonataFlow database access (NP created only when `orchestrator.enabled=true` and `postgresql.enabled=true`) |
+| Egress | 53, 5353 (UDP/TCP) | SonataFlow pods → any | SonataFlow DNS (NP created only when `orchestrator.enabled=true`) |
+| Egress | 443, 6443 (TCP) | SonataFlow pods → any | SonataFlow HTTPS and Kubernetes API (NP created only when `orchestrator.enabled=true`) |
+| Egress | 5432 (TCP) | SonataFlow pods → built-in PostgreSQL (scoped) or any (external DB) | SonataFlow database access (NP created only when `orchestrator.enabled=true`) |
+| Egress | 7007 (TCP) | SonataFlow pods → RHDH pods | Workflows calling RHDH APIs (NP created only when `orchestrator.enabled=true`) |
+| Ingress | 5432 (TCP) | SonataFlow pods → built-in PostgreSQL primary | Orchestrator / SonataFlow database access (NP created only when `orchestrator.enabled=true` and `postgresql.enabled=true`) |
 
 OKP initiates no outbound connections: its HTTP server and Solr process run in the same pod and serve the documentation embedded in the image. Its default-deny policy therefore blocks all new egress connections. NetworkPolicy is stateful, so response traffic for allowed ingress connections remains permitted.
 
 RHDH already permits HTTPS egress on port 443. When OKP uses HTTP instead, the chart permits RHDH egress on port 80 for a Kubernetes Ingress or restricts port 8080 egress to OKP pods for the internal Service fallback. No additional RHDH egress policy is created when `OKP_SERVICE_URL` uses HTTPS.
 
-When Orchestrator is enabled (`orchestrator.enabled=true`), the chart creates additional NetworkPolicies scoped to pods labeled `app.kubernetes.io/managed-by: sonataflow-operator` (Data Index, Jobs Service, and workflow pods managed by the SonataFlow Operator). These allow ingress from the Knative Eventing/Serving and OpenShift Serverless Logic namespaces, from the OpenShift router on port 80, from other SonataFlow pods on port 80, and (when `orchestrator.sonataflowPlatform.monitoring.enabled=true`) from `openshift-user-workload-monitoring`. SonataFlow pods also receive unrestricted egress. Separately, the RHDH backend pod (selected via `rhdh.selectorLabels`) is allowed to reach SonataFlow pods on port 80 (RHDH egress and matching SonataFlow ingress) so the Orchestrator plugins can reach Data Index and workflow services. When the built-in PostgreSQL is enabled (`postgresql.enabled=true`), Postgres also admits TCP/5432 from SonataFlow-managed pods and from the Orchestrator create-db Job (labeled `rhdh.redhat.com/orchestrator-db-job: "true"`), in addition to the existing RHDH backend allow. The chart does not create a default-deny NetworkPolicy for SonataFlow pods.
+When Orchestrator is enabled (`orchestrator.enabled=true`), the chart first creates default-deny NetworkPolicies for the SonataFlow Data Index and Jobs Service pods, then selective allow policies for pods labeled `app.kubernetes.io/managed-by: sonataflow-operator`. These allow ingress from the Knative Eventing/Serving and OpenShift Serverless Logic namespaces, from the OpenShift router (any port), from other SonataFlow pods in the same or other namespaces, from RHDH on port 80, and (when `orchestrator.sonataflowPlatform.monitoring.enabled=true`) from known monitoring namespaces. SonataFlow egress is scoped to DNS, HTTPS (443), the Kubernetes API (6443), PostgreSQL (5432), and RHDH on port 7007; additional destinations must be allowed explicitly. Separately, the RHDH backend pod (selected via `rhdh.selectorLabels`) is allowed to reach SonataFlow pods on port 80, and SonataFlow pods are allowed to reach RHDH on port 7007. When the built-in PostgreSQL is enabled (`postgresql.enabled=true`), Postgres admits TCP/5432 from SonataFlow-managed pods; the Orchestrator create-db Job uses `rhdh.selectorLabels` and is covered by the existing RHDH backend PostgreSQL allow.
 
 **Redis egress is intentionally unscoped.** RHDH does not deploy Redis; users bring their own instance, which may live in the same namespace, a different namespace, or an external managed service. The rule therefore allows egress on port 6379 to any destination.
 
@@ -686,7 +690,7 @@ helm install <release_name> redhat-developer/redhat-developer-hub-orchestrator-i
 ```
 helm install <release_name> redhat-developer/redhat-developer-hub --set orchestrator.enabled=true
 ```
-Enabling Orchestrator also creates label-scoped NetworkPolicies for SonataFlow-managed pods, for RHDH access to SonataFlow on port 80, and (when built-in PostgreSQL is enabled) for SonataFlow and create-db Job access to Postgres on TCP/5432; they are not namespace-wide. See [NetworkPolicies](#networkpolicies) for details.
+Enabling Orchestrator also creates label-scoped NetworkPolicies for SonataFlow-managed pods (default-deny for Data Index and Jobs Service, then selective allows), for RHDH ↔ SonataFlow access, and (when built-in PostgreSQL is enabled) for SonataFlow access to Postgres on TCP/5432; they are not namespace-wide. See [NetworkPolicies](#networkpolicies) for details.
 Note that serverlessLogicOperator, and serverlessOperator are enabled by default. They can be disabled together or seperately by passing the following flags:
 `--set orchestrator.serverlessLogicOperator.enabled=false --set orchestrator.serverlessOperator.enabled=false`
 

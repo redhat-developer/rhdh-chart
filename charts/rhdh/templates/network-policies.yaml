@@ -362,7 +362,7 @@ spec:
           protocol: TCP
 {{- if .Values.orchestrator.enabled }}
 ---
-# Allow SonataFlow-managed pods and the Orchestrator create-db job to reach the built-in PostgreSQL.
+# Allow SonataFlow-managed pods to reach the built-in PostgreSQL.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -386,9 +386,6 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: sonataflow-operator
-        - podSelector:
-            matchLabels:
-              rhdh.redhat.com/orchestrator-db-job: "true"
       ports:
         - port: 5432
           protocol: TCP
