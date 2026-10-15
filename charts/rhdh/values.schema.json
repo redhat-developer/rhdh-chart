@@ -848,7 +848,7 @@
                         "digest": "",
                         "registry": "quay.io",
                         "repository": "lightspeed-core/lightspeed-stack",
-                        "tag": "0.7.0"
+                        "tag": "0.7.1"
                     },
                     "imagePullPolicy": "IfNotPresent",
                     "resources": {
