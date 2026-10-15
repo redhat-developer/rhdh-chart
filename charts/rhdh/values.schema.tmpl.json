@@ -1110,10 +1110,15 @@
                             "properties": {
                                 "registry": { "type": "string", "default": "registry.redhat.io" },
                                 "repository": { "type": "string", "default": "offline-knowledge-portal/rhokp-rhel9" },
-                                "tag": { "type": "string", "default": "1.2.12-1788274041" },
+                                "tag": { "type": "string", "default": "1.3.0-1792010339" },
                                 "digest": { "type": "string", "default": "" },
                                 "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["Always", "IfNotPresent", "Never"] }
                             }
+                        },
+                        "embeddingModel": {
+                            "title": "Sentence Transformers model ID used by Lightspeed Core for query embeddings. Must match the model used to index OKP content.",
+                            "type": "string",
+                            "default": "ibm-granite/granite-embedding-small-english-r2"
                         },
                         "replicaCount": { "type": "integer", "minimum": 0, "default": 1 },
                         "solr": {

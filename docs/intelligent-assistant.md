@@ -249,7 +249,8 @@ OKP values are under `intelligentAssistant.okp.*`:
 | `okp.enabled` | `false` | Enable OKP-backed RHDH documentation retrieval. Enabling it downloads and runs the large OKP image. |
 | `okp.image.registry` | `registry.redhat.io` | OKP container image registry |
 | `okp.image.repository` | `offline-knowledge-portal/rhokp-rhel9` | OKP image repository |
-| `okp.image.tag` | `1.2.12-1788274041` | Pinned OKP image tag |
+| `okp.image.tag` | `1.3.0-1792010339` | Pinned OKP image tag |
+| `okp.embeddingModel` | `ibm-granite/granite-embedding-small-english-r2` | Query embedding model used by LCORE; must match the model used to index OKP content |
 | `okp.replicaCount` | `1` | Number of OKP replicas |
 | `okp.solr.memory` | `1g` | Solr JVM heap size |
 | `okp.resources.requests.memory` | `2Gi` | Memory request |
