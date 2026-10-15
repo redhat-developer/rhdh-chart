@@ -879,6 +879,7 @@
                 "existingSecret": "",
                 "okp": {
                     "affinity": {},
+                    "embeddingModel": "ibm-granite/granite-embedding-small-english-r2",
                     "enabled": false,
                     "httpd": {
                         "compressed": "true",
@@ -890,7 +891,7 @@
                         "pullPolicy": "IfNotPresent",
                         "registry": "registry.redhat.io",
                         "repository": "offline-knowledge-portal/rhokp-rhel9",
-                        "tag": "1.2.12-1788274041"
+                        "tag": "1.3.0-1792010339"
                     },
                     "imagePullSecrets": [],
                     "ingress": {
@@ -1328,6 +1329,11 @@
                             "default": {},
                             "type": "object"
                         },
+                        "embeddingModel": {
+                            "default": "ibm-granite/granite-embedding-small-english-r2",
+                            "title": "Sentence Transformers model ID used by Lightspeed Core for query embeddings. Must match the model used to index OKP content.",
+                            "type": "string"
+                        },
                         "enabled": {
                             "default": false,
                             "title": "Enable OKP-backed RHDH documentation retrieval. The large OKP image can significantly increase initial installation time.",
@@ -1376,7 +1382,7 @@
                                     "type": "string"
                                 },
                                 "tag": {
-                                    "default": "1.2.12-1788274041",
+                                    "default": "1.3.0-1792010339",
                                     "type": "string"
                                 }
                             },
