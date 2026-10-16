@@ -103,6 +103,9 @@ spec:
 {{- end }}
   activeDeadlineSeconds: {{ .Values.orchestrator.sonataflowPlatform.dbCreationJob.activeDeadlineSeconds }}
   template:
+    metadata:
+      labels:
+        {{- include "rhdh.selectorLabels" . | nindent 8 }}
     spec:
       initContainers:
         - name: wait-for-db
