@@ -393,6 +393,10 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: sonataflow-operator
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: sonataflow-operator
       ports:
         - port: 5432
           protocol: TCP

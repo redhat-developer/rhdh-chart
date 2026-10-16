@@ -53,6 +53,8 @@ spec:
   podSelector:
     matchLabels:
       app.kubernetes.io/managed-by: sonataflow-operator
+  policyTypes:
+    - Ingress
   ingress:
     - from:
         - namespaceSelector:
@@ -112,9 +114,6 @@ spec:
         - podSelector:
             matchLabels:
               {{- include "rhdh.selectorLabels" . | nindent 14 }}
-      ports:
-        - port: 80
-          protocol: TCP
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -133,8 +132,18 @@ spec:
       app.kubernetes.io/managed-by: sonataflow-operator
   policyTypes:
     - Ingress
+    - Egress
   ingress:
     - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: sonataflow-operator
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: sonataflow-operator
+  egress:
+    - to:
         - podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: sonataflow-operator
@@ -306,12 +315,9 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: sonataflow-operator
-      ports:
-        - port: 80
-          protocol: TCP
 {{- end }}
----
 {{- if and .Values.orchestrator.enabled .Values.orchestrator.sonataflowPlatform.monitoring.enabled }}
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -345,4 +351,7 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 8080
+          protocol: TCP
 {{- end }}
