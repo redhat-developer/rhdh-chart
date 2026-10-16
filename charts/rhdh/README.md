@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.5.12](https://img.shields.io/badge/Version-3.5.12-informational?style=flat-square)
+![Version: 3.5.13](https://img.shields.io/badge/Version-3.5.13-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.5.12
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.5.13
 ```
 
 ## Introduction
@@ -321,7 +321,7 @@ Kubernetes: `>= 1.31.0-0`
 | startupProbe | Startup probe configuration. Gives the application time to start before liveness/readiness probes kick in. | object | `{"failureThreshold":3,"httpGet":{"path":"/.backstage/health/v1/liveness","port":"backend","scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":20,"successThreshold":1,"timeoutSeconds":4}` |
 | strategy | Deployment update strategy. | object | `{}` |
 | terminationGracePeriodSeconds | Duration in seconds the pod needs to terminate gracefully before being force killed. Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination | string | `nil` |
-| test | Test pod configuration for `helm test`. | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"curl/curl","tag":"8.22.0"},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}}` |
+| test | Test pod configuration for `helm test`. | object | `{"enabled":true,"image":{"digest":"","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"curl/curl","tag":"8.23.0"},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true}}` |
 | tolerations | Tolerations for pod assignment. | list | `[]` |
 | topologySpreadConstraints | Topology spread constraints for pod scheduling. | list | `[]` |
 | workload | Kubernetes workload controller for Backstage pod. | object | `{"kind":"Deployment","statefulSet":{"annotations":{},"extraVolumeClaimTemplates":[],"persistentVolumeClaimRetentionPolicy":{},"podManagementPolicy":"","serviceName":"","updateStrategy":{}}}` |
