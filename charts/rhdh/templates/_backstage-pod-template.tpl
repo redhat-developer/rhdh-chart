@@ -426,6 +426,8 @@ spec:
         {{- if include "rhdh.intelligentAssistant.okp.active" $ }}
         - name: OKP_SERVICE_URL
           value: {{ include "rhdh.intelligentAssistant.okp.serviceUrl" $ | quote }}
+        - name: SOLR_EMBEDDING_MODEL
+          value: {{ $intelligentAssistant.okp.embeddingModel | quote }}
         {{- end }}
         - name: KV_STORE_PATH
           value: "/tmp/kvstore.db"
