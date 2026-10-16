@@ -426,7 +426,7 @@ ingress:
     - host: "{{ .Values.host }}"
       paths:
         - path: "/"
-          pathType: "ImplementationSpecific"
+          pathType: "Prefix"
           # port: 4180
   tls: []
 
