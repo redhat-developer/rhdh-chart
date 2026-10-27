@@ -21,7 +21,7 @@
               "additionalProperties": false,
               "properties": {
                 "channel": {
-                  "default": "stable",
+                  "default": "stable-1.37",
                   "title": "Channel of an operator package to subscribe to",
                   "type": "string"
                 },
@@ -46,7 +46,7 @@
                   "type": "string"
                 },
                 "startingCSV": {
-                  "default": "logic-operator.v1.37.2",
+                  "default": "logic-operator.v1.37.4",
                   "title": "The initial version of the operator",
                   "type": "string"
                 }
