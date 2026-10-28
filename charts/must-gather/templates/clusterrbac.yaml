@@ -32,6 +32,9 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses", "networkpolicies", "ingressclasses"]
     verbs: ["get", "list"]
+  - apiGroups: ["policy.networking.k8s.io"]
+    resources: ["adminnetworkpolicies", "clusternetworkpolicies"]
+    verbs: ["get", "list"]
   {{- end }}
   - apiGroups: ["autoscaling"]
     resources: ["horizontalpodautoscalers"]
