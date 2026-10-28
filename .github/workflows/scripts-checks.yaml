@@ -34,6 +34,7 @@ jobs:
         uses: redhat-plumbers-in-action/differential-shellcheck@f51c7c0d32777d00de777131d25918617a246415 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          exclude-path: hack/helm-coverage.sh
 
       - if: always()
         name: Upload artifact with ShellCheck defects in SARIF format
