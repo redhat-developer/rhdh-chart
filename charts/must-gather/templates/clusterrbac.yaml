@@ -34,7 +34,7 @@ rules:
     verbs: ["get", "list"]
   - apiGroups: ["policy.networking.k8s.io"]
     resources: ["adminnetworkpolicies", "clusternetworkpolicies"]
-    verbs: ["list"]
+    verbs: ["get", "list"]
   {{- end }}
   - apiGroups: ["autoscaling"]
     resources: ["horizontalpodautoscalers"]
