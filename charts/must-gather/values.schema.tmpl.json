@@ -137,7 +137,7 @@
                             "default": true
                         },
                         "ingresses": {
-                            "title": "networking.k8s.io — Ingresses, NetworkPolicies.",
+                            "title": "networking.k8s.io — Ingresses, IngressClasses.",
                             "type": "boolean",
                             "default": true
                         },

@@ -1346,7 +1346,7 @@
                         },
                         "ingresses": {
                             "default": true,
-                            "title": "networking.k8s.io \u2014 Ingresses, NetworkPolicies.",
+                            "title": "networking.k8s.io \u2014 Ingresses, IngressClasses.",
                             "type": "boolean"
                         },
                         "knative": {

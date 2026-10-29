@@ -145,7 +145,7 @@ The command removes all the Kubernetes resources associated with the chart and d
 | rbac.create | Create RBAC resources (Role/ClusterRole and bindings) | bool | `true` |
 | rbac.rules | a rule here does not require disabling the corresponding gather.with* flag. | object | `{"backstages":true,"ingresses":true,"knative":true,"monitoring":true,"olm":true,"platform":true,"routes":true,"sonataflow":true}` |
 | rbac.rules.backstages | rhdh.redhat.com — Backstage custom resources | bool | `true` |
-| rbac.rules.ingresses | networking.k8s.io — Ingresses, NetworkPolicies | bool | `true` |
+| rbac.rules.ingresses | networking.k8s.io — Ingresses, IngressClasses | bool | `true` |
 | rbac.rules.knative | operator.knative.dev, operator.serverless.openshift.io — Knative/Serverless | bool | `true` |
 | rbac.rules.monitoring | monitoring.coreos.com — ServiceMonitors (Prometheus Operator) | bool | `true` |
 | rbac.rules.olm | operators.coreos.com — OLM resources (subscriptions, CSVs, etc.) | bool | `true` |
