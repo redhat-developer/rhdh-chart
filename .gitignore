@@ -16,3 +16,4 @@ output
 
 # Temporary patch file from sync-upstream-backstage.sh conflict resolution
 rhdh-vendored.patch
+coverage-out/

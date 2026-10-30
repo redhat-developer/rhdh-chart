@@ -1,0 +1,69 @@
+name: Chart Coverage
+
+on:
+  pull_request:
+    branches:
+      - main
+      - release-[0-9]+.[0-9]+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Helm template coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v4.3.1
+
+      - name: Run coverage
+        run: |
+          set -euo pipefail
+          chmod +x hack/helm-coverage.sh
+          mkdir -p coverage-out
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+
+          for chart in rhdh must-gather orchestrator-infra; do
+            chart_dir="charts/${chart}"
+            if [[ "$chart" == "rhdh" ]]; then
+              helm dependency build "$chart_dir"
+            fi
+            xml="coverage-out/coverage-${chart}.xml"
+            ./hack/helm-coverage.sh --cobertura "$xml" "$chart_dir" "${chart_dir}/ci"
+            sed -i \
+              -e "s|filename=\"templates/|filename=\"${chart_dir}/templates/|g" \
+              -e "s|<source>templates</source>|<source>${chart_dir}</source>|" \
+              "$xml"
+          done
+
+      - name: Upload XML artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: helm-coverage-xml
+          path: coverage-out/*.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-out/coverage-rhdh.xml,coverage-out/coverage-must-gather.xml,coverage-out/coverage-orchestrator-infra.xml
+          flags: helm-charts
+          fail_ci_if_error: false
+          override_commit: ${{ github.event.pull_request.head.sha || github.sha }}
+          override_pr: ${{ github.event.number }}
