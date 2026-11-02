@@ -21,7 +21,7 @@ This `redhat-developer-hub` chart is a clean break from the 1.y `backstage` char
 
 3. Before upgrading, watch for these default changes:
    - **Intelligent Assistant** (formerly Lightspeed) remains enabled by default. If you had explicitly disabled it in your old chart, set `intelligentAssistant.enabled: false`.
-   - **PostgreSQL image** defaults to version 18, but PostgreSQL 15 remains supported. If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade.
+   - **PostgreSQL image** defaults to `fedora/postgresql-18`, but PostgreSQL 15 remains supported. For an existing PostgreSQL 15 data directory, either [upgrade the database](../../../docs/db-migration.md) during this migration or set `postgresql.image.repository: fedora/postgresql-15` to keep PostgreSQL 15.
 
 4. Upgrade the existing release in place with the new chart and migrated values:
 
@@ -108,7 +108,7 @@ For fields that were decomposed from a single string into structured sub-fields 
 These capabilities are new in the `redhat-developer-hub` chart and have no mapping from the old chart, but are worth knowing about during migration:
 
 - **StatefulSet workload** — set `workload.kind: StatefulSet` for stable pod identity and persistent volumes via `volumeClaimTemplates`. Pair with `dynamicPlugins.volume.type: statefulSetPVC` and `dynamicPlugins.volume.statefulSetPVC` to get per-pod stable caching for dynamic plugins.
-- **External database** — the concept of using an external database is not new, but the new chart provides a dedicated `externalDatabase.*` block for configuring the connection when `postgresql.enabled: false`. See the [external database documentation](../../docs/external-db.md).
+- **External database** — the concept of using an external database is not new, but the new chart provides a dedicated `externalDatabase.*` block for configuring the connection when `postgresql.enabled: false`. See the [external database documentation](../../../docs/external-db.md).
 - **OKP (Offline Knowledge Portal)** — `intelligentAssistant.okp.*` for offline RHDH documentation retrieval.
 
 ## Values mapping reference
@@ -401,7 +401,7 @@ ingress:
 | `upstream.postgresql.enabled` | `postgresql.enabled` | |
 | `upstream.postgresql.postgresqlDataDir` | `postgresql.postgresqlDataDir` | |
 | `upstream.postgresql.serviceBindings.enabled` | `postgresql.serviceBindings.enabled` | |
-| `upstream.postgresql.image.*` | `postgresql.image.*` | **Warning:** default image changed from PostgreSQL 15 to 18 (PostgreSQL 15 is still supported). If you have an existing data directory created by PostgreSQL 15, explicitly set `postgresql.image.tag` to your current version until you plan a PostgreSQL major upgrade |
+| `upstream.postgresql.image.*` | `postgresql.image.*` | **Warning:** default image changed from `fedora/postgresql-15` to `fedora/postgresql-18` (PostgreSQL 15 is still supported). For an existing PostgreSQL 15 data directory, [upgrade the database](../../../docs/db-migration.md) or set `postgresql.image.repository: fedora/postgresql-15` |
 | `upstream.postgresql.auth.*` | `postgresql.auth.*` | |
 | `upstream.postgresql.primary.*` | `postgresql.primary.*` | |
 
