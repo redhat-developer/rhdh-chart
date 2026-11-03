@@ -183,9 +183,10 @@ jobs:
           chmod +x /tmp/helm-coverage.sh
           mkdir -p coverage-out
           helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add backstage https://backstage.github.io/charts
           helm repo update
           chart_dir="charts/${CHART}"
-            helm dependency build "$chart_dir"
+          helm dependency build "$chart_dir"
           xml="coverage-out/coverage-${CHART}.xml"
           /tmp/helm-coverage.sh --cobertura "$xml" "$chart_dir" "${chart_dir}/ci"
           sed -i \
