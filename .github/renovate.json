@@ -31,6 +31,11 @@
   "osvVulnerabilityAlerts": true,
   "packageRules": [
     {
+      "description": "Ignore Helm-templated Docker image references that Renovate cannot resolve",
+      "matchDepPatterns": ["\\{\\{"],
+      "enabled": false
+    },
+    {
       "description": "Disable major updates on release branches",
       "matchBaseBranches": [
         "/^release-1\\.(9|\\d{2,}).*/",
