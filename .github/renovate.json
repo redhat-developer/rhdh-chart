@@ -32,8 +32,8 @@
   "packageRules": [
     {
       "description": "Ignore Helm-templated Docker image references that Renovate cannot resolve",
-      "matchDepPatterns": ["\\{\\{"],
-      "enabled": false
+      "enabled": false,
+      "matchDepNames": ["/\\{\\{/"]
     },
     {
       "description": "Disable major updates on release branches",
