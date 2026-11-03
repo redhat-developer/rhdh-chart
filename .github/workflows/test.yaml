@@ -115,7 +115,7 @@ jobs:
           CHART: ${{ matrix.chart }}
         run: |
           set -euo pipefail
-          curl -fsSL -o /tmp/helm-coverage.sh \
+          curl -fsSL -proto '=https' --tlsv1.2 -o /tmp/helm-coverage.sh \
             "https://raw.githubusercontent.com/jCOTINEAU/chart-coverage/${CHART_COVERAGE_SHA}/helm-coverage.sh"
           chmod +x /tmp/helm-coverage.sh
           mkdir -p coverage-out
