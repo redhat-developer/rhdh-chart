@@ -38,4 +38,4 @@ tests:
   # -- Whether to create the test pod used for testing the Release using `helm test`.
   enabled: true
   # -- Test pod image
-  image: bitnami/kubectl:latest
+  image: bitnami/kubectl:latest@sha256:bedd34c910e2a5ce9836813d16444af449d7fe07a29136d59f34e861e8e660c5
