@@ -1,8 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
+    "config:best-practices",
+    ":gitSignOff",
+    ":rebaseStalePrs",
+    "docker:disableMajor",
+    "default:pinDigestsDisabled",
     "helpers:pinGitHubActionDigests"
+  ],
+  "labels": [
+    "kind/dependency upgrade"
   ],
   "ignorePaths": [
     "charts/**/vendor/**",
@@ -10,32 +17,26 @@
     "charts/orchestrator-software-templates/**",
     "charts/orchestrator-software-templates-infra/**"
   ],
-  "baseBranchPatterns": ["main", "/^release-.*/"],
+  "baseBranchPatterns": [
+    "main",
+    "/^release-1\\.(9|\\d{2,}).*/",
+    "/^release-([2-9]|\\d{2,})\\..*/"
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": [
+      "kind/security"
+    ]
+  },
+  "osvVulnerabilityAlerts": true,
   "packageRules": [
     {
       "description": "Disable major updates on release branches",
-      "matchBaseBranches": ["/^release-.*/"],
+      "matchBaseBranches": [
+        "/^release-1\\.(9|\\d{2,}).*/",
+        "/^release-([2-9]|\\d{2,})\\..*/"
+      ],
       "matchUpdateTypes": ["major"],
-      "enabled": false
-    },
-    {
-      "description": "EOL: disable all updates on release-1.8",
-      "matchBaseBranches": ["release-1.8"],
-      "enabled": false
-    },
-    {
-      "description": "EOL: disable all updates on release-1.7",
-      "matchBaseBranches": ["release-1.7"],
-      "enabled": false
-    },
-    {
-      "description": "EOL: disable all updates on release-1.6",
-      "matchBaseBranches": ["release-1.6"],
-      "enabled": false
-    },
-    {
-      "description": "EOL: disable all updates on release-1.5",
-      "matchBaseBranches": ["release-1.5"],
       "enabled": false
     }
   ]
