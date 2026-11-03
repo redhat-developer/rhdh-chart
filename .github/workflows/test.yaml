@@ -122,9 +122,7 @@ jobs:
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
           chart_dir="charts/${CHART}"
-          if [[ "$CHART" == "rhdh" ]]; then
             helm dependency build "$chart_dir"
-          fi
           xml="coverage-out/coverage-${CHART}.xml"
           /tmp/helm-coverage.sh --cobertura "$xml" "$chart_dir" "${chart_dir}/ci"
           sed -i \
