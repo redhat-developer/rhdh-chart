@@ -31,6 +31,11 @@
   "osvVulnerabilityAlerts": true,
   "packageRules": [
     {
+      "description": "Disable digest pinning for container images",
+      "matchDatasources": ["docker"],
+      "pinDigests": false
+    },
+    {
       "description": "Ignore Helm-templated Docker image references that Renovate cannot resolve",
       "enabled": false,
       "matchDepNames": ["/\\{\\{/"]
