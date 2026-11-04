@@ -31,7 +31,7 @@ extraDeploy: []
 image:
   registry: "quay.io"
   repository: "rhdh-community/rhdh"
-  tag: "next"
+  tag: "next@sha256:4145e8178d111cf38533526719b5267b57d9f7833553ff6540bdf014ec97b1ac"
   pullPolicy: "IfNotPresent"
   # -- Overrides the image tag with an image digest.
   digest: ""
@@ -191,7 +191,7 @@ catalogIndex:
   image:
     registry: "quay.io"
     repository: "rhdh/plugin-catalog-index"
-    tag: "next"
+    tag: "next@sha256:ea4f0a2284fbbf247c2583084f2ff6d4a8411f210c90d17a064c6f122014bd34"
     digest: ""
   # -- Extra catalog index images for additional plugin discovery in the Extensions UI.
   # Each item must include `registry`, `repository`, and `tag` fields; `name` and `digest` are optional.
@@ -476,7 +476,7 @@ postgresql:
   image:
     registry: "quay.io"
     repository: "fedora/postgresql-18"
-    tag: "latest"
+    tag: "latest@sha256:cbe6ee1a5eca275f8a59394bf4918e08d64027f1b0e6b94bf2b752801d1b611e"
     digest: ""
   auth:
     secretKeys:
@@ -605,7 +605,7 @@ intelligentAssistant:
     image:
       registry: "quay.io"
       repository: "lightspeed-core/lightspeed-stack"
-      tag: "0.7.3"
+      tag: "0.7.3@sha256:7cc9d0398ce762ca961c0f938ac6b473a3c50dd7ab9a431d33657c75d28cfcec"
       digest: ""
     imagePullPolicy: "IfNotPresent"
     # -- Override the container's default command. Leave empty to use the image entrypoint.
@@ -786,7 +786,7 @@ test:
   image:
     registry: "quay.io"
     repository: "curl/curl"
-    tag: "8.23.0"
+    tag: "8.23.0@sha256:3fb7e13e5d179a845c97d78204f3f1064d1907037f26a3ebf91710571151fd93"
     digest: ""
     pullPolicy: "IfNotPresent"
   securityContext:

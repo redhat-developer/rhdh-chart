@@ -8,7 +8,7 @@ image:
   repository: rhdh-community/rhdh-must-gather
   pullPolicy: ""
   # -- Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "latest@sha256:c76f565bd5dca768531b7624c44debfda6c0e52dc335512bba7889914c4e13b8"
   # -- Image digest (e.g., sha256:abc123...). Can be used with or without tag.
   digest: ""
 
@@ -158,7 +158,7 @@ test:
   image:
     registry: docker.io
     repository: bitnami/kubectl
-    tag: "latest"
+    tag: "latest@sha256:bedd34c910e2a5ce9836813d16444af449d7fe07a29136d59f34e861e8e660c5"
     digest: ""
     pullPolicy: ""
 
