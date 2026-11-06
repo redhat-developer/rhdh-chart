@@ -138,3 +138,74 @@ jobs:
           extra_helm_args: ${{ matrix.chart == 'rhdh' && format('--set image.repository={0} --set image.tag={1} --set image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}
           # helm_extra_args: general helm flags (e.g. --values), passed to ct install via --helm-extra-args
           helm_extra_args: ${{ matrix.chart == 'rhdh' && '--values /tmp/rhdh-nightly-values.yaml' || matrix.chart == 'backstage' && '--values /tmp/backstage-nightly-values.yaml' || '' }}
+  coverage:
+    needs: discover-charts
+    name: Coverage (${{ matrix.branch }} / ${{ matrix.chart }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.discover-charts.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+
+      - name: Check chart exists on branch
+        id: check
+        env:
+          CHART: charts/${{ matrix.chart }}
+        run: |
+          if [[ -d "$CHART" ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Chart $CHART does not exist on branch ${{ matrix.branch }}, skipping"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Helm
+        if: steps.check.outputs.exists == 'true'
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v4.3.1
+
+      - name: Run coverage
+        if: steps.check.outputs.exists == 'true'
+        env:
+          CHART_COVERAGE_SHA: 18c41243aca54231d36905185f2f65c231b06a84
+          CHART: ${{ matrix.chart }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --proto '=https' --tlsv1.2 -o /tmp/helm-coverage.sh \
+            "https://raw.githubusercontent.com/jCOTINEAU/chart-coverage/${CHART_COVERAGE_SHA}/helm-coverage.sh"
+          chmod +x /tmp/helm-coverage.sh
+          mkdir -p coverage-out
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add backstage https://backstage.github.io/charts
+          helm repo update
+          chart_dir="charts/${CHART}"
+          helm dependency build "$chart_dir"
+          xml="coverage-out/coverage-${CHART}.xml"
+          /tmp/helm-coverage.sh --cobertura "$xml" "$chart_dir" "${chart_dir}/ci"
+          sed -i \
+            -e "s|filename=\"templates/|filename=\"${chart_dir}/templates/|g" \
+            -e "s|<source>templates</source>|<source>${chart_dir}</source>|" \
+            "$xml"
+
+      - name: Upload XML artifacts
+        if: steps.check.outputs.exists == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: helm-coverage-xml-${{ matrix.branch }}-${{ matrix.chart }}
+          path: coverage-out/*.xml
+
+      - name: Upload coverage to Codecov
+        if: steps.check.outputs.exists == 'true'
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-out/coverage-${{ matrix.chart }}.xml
+          flags: helm-charts
+          fail_ci_if_error: false
