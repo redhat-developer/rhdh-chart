@@ -30,9 +30,15 @@ rules:
   {{- end }}
   {{- if .Values.rbac.rules.ingresses }}
   - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses", "networkpolicies", "ingressclasses"]
+    resources: ["ingresses", "ingressclasses"]
     verbs: ["get", "list"]
   {{- end }}
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list"]
+  - apiGroups: ["policy.networking.k8s.io"]
+    resources: ["adminnetworkpolicies", "baselineadminnetworkpolicies", "clusternetworkpolicies"]
+    verbs: ["get", "list"]
   - apiGroups: ["autoscaling"]
     resources: ["horizontalpodautoscalers"]
     verbs: ["get", "list"]

@@ -54,7 +54,7 @@ rbac:
     sonataflow: true
     # -- operator.knative.dev, operator.serverless.openshift.io — Knative/Serverless
     knative: true
-    # -- networking.k8s.io — Ingresses, NetworkPolicies
+    # -- networking.k8s.io — Ingresses, IngressClasses
     ingresses: true
     # -- monitoring.coreos.com — ServiceMonitors (Prometheus Operator)
     monitoring: true
