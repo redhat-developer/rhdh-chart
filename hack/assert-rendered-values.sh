@@ -42,7 +42,7 @@ list_images() {
     (.. | select(tag == "!!map" and has("name") and has("value"))
         | select(.name | test("_IMAGES?$")) | .value | select(tag == "!!str")
         | split(",") | .[] | sub("^[^=/]+=", ""))
-  ' | grep -v '^$' | sort -u
+  ' | { grep -v '^$' || true; } | sort -u
 }
 
 assert_images_mirrored() {
@@ -109,8 +109,9 @@ test_image=$(render \
 assert_equals "test pod image" "registry.example.test/ci/curl:9.9.9" "${test_image}"
 
 echo "==> dynamic plugins volume StorageClass"
-sc=$(render | plugins_root_volume | yq -N '.ephemeral.volumeClaimTemplate.spec | has("storageClassName")')
-assert_equals "ephemeral, nothing set: no storageClassName (cluster default)" "false" "${sc}"
+# Default is an ephemeral claim with no storageClassName, so the cluster default applies.
+spec_keys=$(render | plugins_root_volume | yq -N '.ephemeral.volumeClaimTemplate.spec // {} | keys | sort | join(",")')
+assert_equals "ephemeral, nothing set: no storageClassName (cluster default)" "accessModes,resources" "${spec_keys}"
 
 sc=$(render --set dynamicPlugins.volume.ephemeral.storageClassName=custom-sc |
   plugins_root_volume | yq -N '.ephemeral.volumeClaimTemplate.spec.storageClassName')
@@ -119,6 +120,11 @@ assert_equals "ephemeral.storageClassName" "custom-sc" "${sc}"
 sc=$(render --set global.defaultStorageClass=global-sc |
   plugins_root_volume | yq -N '.ephemeral.volumeClaimTemplate.spec.storageClassName')
 assert_equals "global.defaultStorageClass" "global-sc" "${sc}"
+
+sc=$(render --set global.defaultStorageClass=global-sc \
+  --set dynamicPlugins.volume.ephemeral.storageClassName=custom-sc |
+  plugins_root_volume | yq -N '.ephemeral.volumeClaimTemplate.spec.storageClassName')
+assert_equals "ephemeral.storageClassName overrides global.defaultStorageClass" "custom-sc" "${sc}"
 
 sc=$(render \
   --set workload.kind=StatefulSet \
