@@ -55,7 +55,7 @@ assert_images_mirrored() {
     return
   fi
   local bad
-  bad=$(grep -v "^${MIRROR}/" <<<"${images}" || true)
+  bad=$(grep -v "^${MIRROR//./\\.}/" <<<"${images}" || true)
   if [[ -n "${bad}" ]]; then
     fail "${label}: images not under ${MIRROR}/: $(tr '\n' ' ' <<<"${bad}")"
   else
@@ -131,8 +131,8 @@ assert_equals "statefulSetPVC.storageClassName" "custom-sc" "${sc}"
 # emptyDir must not create any claim, even when a StorageClass is configured.
 out=$(render --set dynamicPlugins.volume.type=emptyDir \
   --set dynamicPlugins.volume.ephemeral.storageClassName=custom-sc)
-vol=$(plugins_root_volume <<<"${out}" | yq -N -o=json -I=0 'keys')
-assert_equals "type=emptyDir: plugins volume is an emptyDir" '["name","emptyDir"]' "${vol}"
+vol=$(plugins_root_volume <<<"${out}" | yq -N -o=json -I=0 'keys | sort')
+assert_equals "type=emptyDir: plugins volume is an emptyDir" '["emptyDir","name"]' "${vol}"
 claims=$(yq ea -N '[select(.kind == "PersistentVolumeClaim"),
   (.. | select(tag == "!!map" and has("volumeClaimTemplate")))]
   | length' <<<"${out}")
