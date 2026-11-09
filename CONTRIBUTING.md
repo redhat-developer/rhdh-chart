@@ -6,6 +6,7 @@ Before making a contribution to the charts in this repository, you will need to 
 
 - Run `helm template` on the changes you're making to ensure they are correctly rendered into Kubernetes manifests.
 - Lint tests have been run for the Chart using the [Chart Testing](https://github.com/helm/chart-testing) tool and the `ct lint` command.
+- For the [rhdh](./charts/rhdh) chart, run `./hack/assert-rendered-values.sh` (after `helm dependency build charts/rhdh`) to check that every rendered image honours `global.imageRegistry` and that the dynamic plugins volume honours the StorageClass settings. CI runs it too.
 - For each Chart updated, version bumped in the corresponding `Chart.yaml` according to [Semantic Versioning](http://semver.org/).
 - For each Chart updated, ensure variables are documented in the corresponding `values.yaml` file and the [pre-commit](https://pre-commit.com/) hook has been run with `pre-commit run --all-files` to generate the corresponding `README.md` documentation. The [pre-commit Workflow](./.github/workflows/pre-commit.yaml) will enforce this and warn you if needed.
 - JSON Schema template updated and re-generated the raw schema via the `pre-commit` hook.
