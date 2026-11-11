@@ -121,6 +121,16 @@ runs:
             --values "$VALUES_FILE" 2>&1) || { echo "$output"; exit 1; }
         done
 
+    # Mirrored-registry and StorageClass assertions on the rendered manifests (no cluster needed).
+    - name: Rendered values assertions
+      if: steps.list-changed.outputs.changed == 'true' && inputs.chart == 'charts/rhdh'
+      shell: bash
+      env:
+        INPUT_CHART: ${{ inputs.chart }}
+      run: |
+        helm dependency build "$INPUT_CHART"
+        ./hack/assert-rendered-values.sh "$INPUT_CHART"
+
     - name: Generate KinD Config
       if: steps.list-changed.outputs.changed == 'true'
       shell: bash

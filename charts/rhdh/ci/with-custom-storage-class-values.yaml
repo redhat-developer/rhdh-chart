@@ -1,0 +1,17 @@
+# CI: provision the dynamic plugins ephemeral volume through an explicit StorageClass
+# instead of the cluster default. The test action creates `custom-sc` before `ct install`.
+dynamicPlugins:
+  includes: []
+  volume:
+    type: ephemeral
+    ephemeral:
+      storageClassName: custom-sc
+intelligentAssistant:
+  plugins: []
+  okp:
+    route:
+      enabled: false
+    ingress:
+      enabled: false
+orchestrator:
+  plugins: []
