@@ -55,7 +55,7 @@ jobs:
           version: v4.3.1
 
       - name: Set up yq
-        uses: mikefarah/yq@504fc38780cc46be8444ea1b72fb55919fc0bfb0 # v4.54.1
+        uses: mikefarah/yq@f2944b823f84906a127dbd29e4c2a3e60c4e550e # v4.54.3
         with:
           cmd: yq --version
 
@@ -99,7 +99,7 @@ jobs:
       - name: Get current chart version
         if: steps.changes.outputs.has_changes == 'true'
         id: get_version
-        uses: mikefarah/yq@504fc38780cc46be8444ea1b72fb55919fc0bfb0 # v4.54.1
+        uses: mikefarah/yq@f2944b823f84906a127dbd29e4c2a3e60c4e550e # v4.54.3
         with:
           cmd: yq '.version' "${{ steps.paths.outputs.chart_yaml }}"
 
@@ -113,7 +113,7 @@ jobs:
 
       - name: Bump chart version
         if: steps.changes.outputs.has_changes == 'true'
-        uses: mikefarah/yq@504fc38780cc46be8444ea1b72fb55919fc0bfb0 # v4.54.1
+        uses: mikefarah/yq@f2944b823f84906a127dbd29e4c2a3e60c4e550e # v4.54.3
         with:
           cmd: yq -i '.version = "${{ steps.semver.outputs.new_version }}"' "${{ steps.paths.outputs.chart_yaml }}"
 
