@@ -1,7 +1,7 @@
 
 # RHDH Helm Chart for OpenShift and Kubernetes
 
-![Version: 3.4.17](https://img.shields.io/badge/Version-3.4.17-informational?style=flat-square)
+![Version: 3.4.18](https://img.shields.io/badge/Version-3.4.18-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for deploying Red Hat Developer Hub, which is a Red Hat supported version of Backstage.
@@ -36,7 +36,7 @@ For the **Generally Available** version of this chart, see:
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redhat-developer https://redhat-developer.github.io/rhdh-chart
 
-helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.17
+helm install my-rhdh redhat-developer/redhat-developer-hub --version 3.4.18
 ```
 
 ## Introduction
