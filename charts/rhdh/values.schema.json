@@ -812,6 +812,14 @@
                     "title": "Ingress hosts.",
                     "type": "array"
                 },
+                "labels": {
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "default": {},
+                    "title": "Additional labels for the Ingress resource.",
+                    "type": "object"
+                },
                 "tls": {
                     "default": [],
                     "title": "Ingress TLS configuration.",

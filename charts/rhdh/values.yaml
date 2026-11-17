@@ -419,6 +419,8 @@ service:
 ingress:
   enabled: false
   className: ""
+  # -- Additional labels for the Ingress resource.
+  labels: {}
   annotations: {}
   # -- Ingress hosts. Each path may set option `port` (backend service port).
   # Defaults to `service.port` when omitted (e.g. use `4180` for an oauth2-proxy sidecar).
