@@ -120,7 +120,7 @@ jobs:
 
       - name: Setup Gitsign
         if: steps.command.outputs.command-name == 'bump'
-        uses: chainguard-dev/actions/setup-gitsign@b614a08d80d162188190d21883e18049fc3e982a # main
+        uses: chainguard-dev/actions/setup-gitsign@4fb9e6514fed54e2402bea9f10b5bdc544889fcc # main
 
       - name: Commit pre-commit changes
         if: steps.command.outputs.command-name == 'bump'
