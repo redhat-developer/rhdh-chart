@@ -284,7 +284,7 @@
                     },
                     "properties": {
                         "enabled": {
-                            "default": false,
+                            "default": true,
                             "title": "Enable or disable the built-in Lightspeed feature.",
                             "type": "boolean"
                         },
