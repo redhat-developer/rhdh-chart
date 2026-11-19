@@ -127,7 +127,6 @@ jobs:
           xml="coverage-out/coverage-${CHART}.xml"
           /tmp/helm-coverage.sh --cobertura "$xml" "$chart_dir" "${chart_dir}/ci"
           sed -i \
-            -e "s|filename=\"templates/|filename=\"${chart_dir}/templates/|g" \
             -e "s|<source>templates</source>|<source>${chart_dir}</source>|" \
             "$xml"
 
