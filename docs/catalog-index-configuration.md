@@ -25,8 +25,8 @@ catalogIndex:
   extraImages:
     - name: community
       registry: ghcr.io
-      repository: redhat-developer/rhdh-plugin-community-index
-      tag: "1.10"
+      repository: redhat-developer/rhdh-plugin-export-overlays/plugin-catalog-index
+      tag: "2.1"
     - registry: my-registry.example.com
       repository: my-org/my-rhdh-internal-plugin-catalog
       tag: "1.2.3"
