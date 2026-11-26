@@ -89,6 +89,24 @@ jobs:
           monitoring_heartbeat: ${{ vars.TEST_MONITORING_HEARTBEAT_ENABLED || 'false' }}
           helm_template_values_file: ${{ matrix.chart == 'rhdh' && '/tmp/rhdh-full-plugins-values.yaml' || '' }}
 
+  coverage:
+    needs: discover-charts
+    if: needs.discover-charts.outputs.charts != '[]'
+    name: Coverage (${{ matrix.chart }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Run chart coverage
+        uses: ./.github/actions/chart-coverage
+        with:
+          chart: ${{ matrix.chart }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
   # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
   status:
     name: Test Latest Release
