@@ -136,8 +136,8 @@
                                 "digest": "",
                                 "name": "community",
                                 "registry": "ghcr.io",
-                                "repository": "redhat-developer/rhdh-plugin-community-index",
-                                "tag": "1.10.2"
+                                "repository": "redhat-developer/rhdh-plugin-export-overlays/plugin-catalog-index",
+                                "tag": "2.1"
                             },
                             {
                                 "digest": "",
@@ -848,7 +848,7 @@
                         "digest": "",
                         "registry": "quay.io",
                         "repository": "lightspeed-core/lightspeed-stack",
-                        "tag": "0.7.3"
+                        "tag": "0.7.4"
                     },
                     "imagePullPolicy": "IfNotPresent",
                     "resources": {
