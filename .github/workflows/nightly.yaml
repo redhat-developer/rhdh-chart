@@ -154,8 +154,8 @@ jobs:
           ref: ${{ matrix.branch }}
 
       - name: Run chart coverage
+        if: hashFiles('.github/actions/chart-coverage/action.yml') != ''
         uses: ./.github/actions/chart-coverage
         with:
           chart: ${{ matrix.chart }}
-          artifact_name: helm-coverage-xml-${{ matrix.branch }}-${{ matrix.chart }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}

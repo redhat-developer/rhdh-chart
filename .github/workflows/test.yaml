@@ -106,10 +106,7 @@ jobs:
         uses: ./.github/actions/chart-coverage
         with:
           chart: ${{ matrix.chart }}
-          artifact_name: helm-coverage-xml-${{ matrix.chart }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
-          override_commit: ${{ github.event.pull_request.head.sha }}
-          override_pr: ${{ github.event.number }}
   # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
   status:
     name: Test Latest Release

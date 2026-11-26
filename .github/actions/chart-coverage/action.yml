@@ -1,28 +1,13 @@
 name: Chart Coverage
-description: Generate Helm chart coverage XML and upload it as an artifact and to Codecov
+description: Generate Helm chart coverage XML and upload it to Codecov
 
 inputs:
   chart:
     description: Chart name without the charts/ prefix
     required: true
-  artifact_name:
-    description: Name of the coverage XML artifact
-    required: true
   codecov_token:
     description: Codecov upload token
     required: true
-  override_commit:
-    description: Optional commit SHA override for Codecov
-    required: false
-    default: ''
-  override_pr:
-    description: Optional pull request number override for Codecov
-    required: false
-    default: ''
-  chart_coverage_sha:
-    description: Pinned chart-coverage script commit
-    required: false
-    default: '18c41243aca54231d36905185f2f65c231b06a84'
 
 runs:
   using: composite
@@ -50,7 +35,7 @@ runs:
       if: steps.check.outputs.exists == 'true'
       shell: bash
       env:
-        CHART_COVERAGE_SHA: ${{ inputs.chart_coverage_sha }}
+        CHART_COVERAGE_SHA: 18c41243aca54231d36905185f2f65c231b06a84
         CHART: ${{ inputs.chart }}
       run: |
         set -euo pipefail
@@ -77,5 +62,3 @@ runs:
         files: coverage-out/coverage-${{ inputs.chart }}.xml
         flags: helm-charts
         fail_ci_if_error: false
-        override_commit: ${{ inputs.override_commit }}
-        override_pr: ${{ inputs.override_pr }}
