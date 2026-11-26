@@ -69,13 +69,6 @@ runs:
           -e "s|<source>templates</source>|<source>${chart_dir}</source>|" \
           "$xml"
 
-    - name: Upload XML artifacts
-      if: steps.check.outputs.exists == 'true'
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-      with:
-        name: ${{ inputs.artifact_name }}
-        path: coverage-out/*.xml
-
     - name: Upload coverage to Codecov
       if: steps.check.outputs.exists == 'true'
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
