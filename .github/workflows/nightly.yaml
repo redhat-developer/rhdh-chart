@@ -138,3 +138,24 @@ jobs:
           extra_helm_args: ${{ matrix.chart == 'rhdh' && format('--set image.repository={0} --set image.tag={1} --set image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || matrix.chart == 'backstage' && format('--set upstream.backstage.image.repository={0} --set upstream.backstage.image.tag={1} --set upstream.backstage.image.pullPolicy=Always', steps.image.outputs.repo, steps.image.outputs.tag) || '' }}
           # helm_extra_args: general helm flags (e.g. --values), passed to ct install via --helm-extra-args
           helm_extra_args: ${{ matrix.chart == 'rhdh' && '--values /tmp/rhdh-nightly-values.yaml' || matrix.chart == 'backstage' && '--values /tmp/backstage-nightly-values.yaml' || '' }}
+
+  coverage:
+    needs: discover-charts
+    name: Coverage (${{ matrix.branch }} / ${{ matrix.chart }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.discover-charts.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Run chart coverage
+        if: hashFiles('.github/actions/chart-coverage/action.yml') != ''
+        uses: ./.github/actions/chart-coverage
+        with:
+          chart: ${{ matrix.chart }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}

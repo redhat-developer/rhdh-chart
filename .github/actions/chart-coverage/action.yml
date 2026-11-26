@@ -1,0 +1,64 @@
+name: Chart Coverage
+description: Generate Helm chart coverage XML and upload it to Codecov
+
+inputs:
+  chart:
+    description: Chart name without the charts/ prefix
+    required: true
+  codecov_token:
+    description: Codecov upload token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Check chart exists
+      id: check
+      shell: bash
+      env:
+        CHART: charts/${{ inputs.chart }}
+      run: |
+        if [[ -d "$CHART" ]]; then
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "::notice::Chart $CHART does not exist, skipping coverage"
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Set up Helm
+      if: steps.check.outputs.exists == 'true'
+      uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+      with:
+        version: v4.3.1
+
+    - name: Run coverage
+      if: steps.check.outputs.exists == 'true'
+      shell: bash
+      env:
+        CHART_COVERAGE_SHA: 18c41243aca54231d36905185f2f65c231b06a84
+        CHART: ${{ inputs.chart }}
+      run: |
+        set -euo pipefail
+        curl -fsSL --proto '=https' --tlsv1.2 -o /tmp/helm-coverage.sh \
+          "https://raw.githubusercontent.com/jCOTINEAU/chart-coverage/${CHART_COVERAGE_SHA}/helm-coverage.sh"
+        chmod +x /tmp/helm-coverage.sh
+        mkdir -p coverage-out
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm repo add backstage https://backstage.github.io/charts
+        helm repo update
+        chart_dir="charts/${CHART}"
+        helm dependency build "$chart_dir"
+        xml="coverage-out/coverage-${CHART}.xml"
+        /tmp/helm-coverage.sh --cobertura "$xml" "$chart_dir" "${chart_dir}/ci"
+        sed -i \
+          -e "s|<source>templates</source>|<source>${chart_dir}</source>|" \
+          "$xml"
+
+    - name: Upload coverage to Codecov
+      if: steps.check.outputs.exists == 'true'
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+      with:
+        token: ${{ inputs.codecov_token }}
+        files: coverage-out/coverage-${{ inputs.chart }}.xml
+        flags: helm-charts
+        fail_ci_if_error: false
