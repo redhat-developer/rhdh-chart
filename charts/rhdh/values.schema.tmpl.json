@@ -250,6 +250,14 @@
                     "type": "string",
                     "default": ""
                 },
+                "labels": {
+                    "title": "Additional labels for the Ingress resource.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "default": {}
+                },
                 "annotations": {
                     "title": "Ingress annotations.",
                     "type": "object",
