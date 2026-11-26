@@ -6,3 +6,15 @@ coverage:
     patch:
       default:
         informational: true
+
+# Flags are created on first upload, named after the chart (see the
+# `flags: ${{ inputs.chart }}` input in the chart-coverage action), so a new
+# chart needs no change here. carryforward keeps the charts a PR did not
+# render in the report, instead of dropping the project percentage.
+#
+# Carryforward needs one full upload of every flag to seed it: the nightly does
+# that for all charts. `paths` is deliberately omitted because each report
+# contains only one chart's templates, so the flag scope follows the report.
+flag_management:
+  default_rules:
+    carryforward: true
