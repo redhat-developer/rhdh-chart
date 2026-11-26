@@ -8,6 +8,14 @@ inputs:
   codecov_token:
     description: Codecov upload token
     required: true
+  override_branch:
+    description: Branch to attribute the upload to (needed when the checkout ref differs from the workflow ref)
+    required: false
+    default: ''
+  override_commit:
+    description: Commit SHA to attribute the upload to (needed when the checkout ref differs from the workflow ref)
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -53,6 +61,10 @@ runs:
         sed -i \
           -e "s|<source>templates</source>|<source>${chart_dir}</source>|" \
           "$xml"
+        grep -qF "<source>${chart_dir}</source>" "$xml" || {
+          echo "::error::Expected <source>${chart_dir}</source> in $xml; the pinned helm-coverage.sh output format changed"
+          exit 1
+        }
 
     - name: Upload coverage to Codecov
       if: steps.check.outputs.exists == 'true'
@@ -60,5 +72,7 @@ runs:
       with:
         token: ${{ inputs.codecov_token }}
         files: coverage-out/coverage-${{ inputs.chart }}.xml
-        flags: helm-charts
+        flags: ${{ inputs.chart }}
+        override_branch: ${{ inputs.override_branch }}
+        override_commit: ${{ inputs.override_commit }}
         fail_ci_if_error: false

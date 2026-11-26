@@ -5,6 +5,9 @@ on:
     - cron: '38 21 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -25,7 +28,7 @@ jobs:
       - name: Build per-branch chart matrix
         id: list
         run: |
-          branches=(main release-1.10 release-1.9 release-1.8)
+          branches=(main release-2.1 release-1.10 release-1.8)
           matrix='[]'
           for branch in "${branches[@]}"; do
             ref="origin/$branch"
@@ -42,7 +45,7 @@ jobs:
               if ! echo "$excluded" | grep -qx "$chart_name"; then
                 matrix=$(echo "$matrix" | jq -c --arg b "$branch" --arg c "$chart_name" '. + [{"branch": $b, "chart": $c}]')
               fi
-            done < <(git ls-tree --name-only "$ref" charts/)
+            done < <(git ls-tree -d --name-only "$ref" charts/)
           done
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
@@ -143,6 +146,7 @@ jobs:
     needs: discover-charts
     name: Coverage (${{ matrix.branch }} / ${{ matrix.chart }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -152,6 +156,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ matrix.branch }}
+          persist-credentials: false
+
+      - name: Resolve checked-out commit
+        id: head
+        if: hashFiles('.github/actions/chart-coverage/action.yml') != ''
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Run chart coverage
         if: hashFiles('.github/actions/chart-coverage/action.yml') != ''
@@ -159,3 +169,5 @@ jobs:
         with:
           chart: ${{ matrix.chart }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          override_branch: ${{ matrix.branch }}
+          override_commit: ${{ steps.head.outputs.sha }}
