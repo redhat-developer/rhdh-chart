@@ -138,6 +138,11 @@ runs:
         cat <<EOF > /tmp/kind-config.yaml
         apiVersion: kind.x-k8s.io/v1alpha4
         kind: Cluster
+        networking:
+          # kindnet does not enforce NetworkPolicies. Disable it and install Calico
+          # so the NetworkPolicies shipped by the chart are actually exercised.
+          disableDefaultCNI: true
+          podSubnet: "192.168.0.0/16"
         nodes:
           - role: control-plane
             extraPortMappings:
@@ -154,6 +159,13 @@ runs:
       uses: helm/kind-action@ea822c7bf1874f08e5a491df991c228edffc3376 # v1.15.2
       with:
         config: /tmp/kind-config.yaml
+        # Nodes stay NotReady until a CNI is installed, so don't wait here.
+        wait: "0"
+
+    - name: Install Calico CNI (NetworkPolicy enforcement)
+      if: steps.list-changed.outputs.changed == 'true'
+      shell: bash
+      run: ./hack/install-calico.sh
 
     - name: Create custom storage class
       if: steps.list-changed.outputs.changed == 'true'
